@@ -432,6 +432,7 @@ PromptsBrowser.db.updateMixedList = () => {
 
 	for(const collectionId in res) {
 		const collection = res[collectionId];
+		if(!Array.isArray(collection)) return;
 
 		for(const collectionPrompt of collection) {
 			const {id, isExternalNetwork} = collectionPrompt;

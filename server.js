@@ -52,7 +52,7 @@ function init() {
 		const pathToDefaultCatalogue = promptsCataloguePath + path.sep + DEFAULT_CATALOGUE;
 		fs.mkdirSync(pathToDefaultCatalogue);
 		fs.mkdirSync(pathToDefaultCatalogue + path.sep + "preview");
-		fs.writeFileSync(pathToDefaultCatalogue + path.sep + "data.json", "{}");
+		fs.writeFileSync(pathToDefaultCatalogue + path.sep + "data.json", "[]");
 	}
 
 	//checks if at least one style catalogue collection exists
