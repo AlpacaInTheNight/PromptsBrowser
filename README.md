@@ -18,7 +18,7 @@ The collections server runs on node. In the future I plan to rewrite the server 
 
 Enter text in the text box - the text will be divided by the presence of a comma in the prompts in the text box. If you click on the icon of a prompt, it will become the selected one. Now you can generate an image and if any of the currently active prompts is selected there will be a button `Save preview` above the generated image. By saving the preview, it will be added to the collection, and the preview image for that sample will be added to the collection's `preview` folder.
 
-### Known Prompt Browser
+### Known Prompts Browser
 
 1. The known prompts browser will display all known prompts from all the collections added to the `prompts_catalogue` folder.
 
