@@ -29,3 +29,29 @@ Known Prompt Browser:
 4. ctrl (meta) + click: opens the dialog of removing the sample from the collection (it will be lost).
 
 5. Prompts in the collection can be moved by drag and drop.
+
+Active Prompts:
+
+1. Prompts can be added either manually via the text box or via the Prompt Browser.
+
+2. The order of the Prompts can be changed by dragging them with the mouse.
+
+3. shift + mouse wheel: will change the weight of the Prompt depending on the direction of the mouse wheel.
+
+4. ctrl + click: deletes prompt from the active prompts.
+
+5. double click: opens the Prompt Tools.
+
+
+Prompt tools.
+
+1. If you double-click on the active prompt, the Prompt Tools window will open.
+
+2. A list of active prompts will be displayed at the top, where you can change the selected prompt.
+
+3. Based on categories, tags and name of the prompt, similar prompts will be displayed.
+
+4. Clicking on a promt from the list of similar promts will replace the selected promt with the target one.
+
+5. shift + click on a promt from the list will add the target promt to the active promts (keeping the selected promt).
+
