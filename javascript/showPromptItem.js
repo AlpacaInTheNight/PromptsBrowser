@@ -54,6 +54,7 @@ PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
 	
 			const position = e.currentTarget.getBoundingClientRect();
 			splash.style.top = position.top + "px";
+			splash.style.left = position.left + "px";
 		});
 	}
 
