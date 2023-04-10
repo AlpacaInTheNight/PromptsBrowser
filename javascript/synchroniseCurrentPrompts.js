@@ -24,6 +24,12 @@ PromptsBrowser.synchroniseCurrentPrompts = () => {
 		let promptItem = prompts[i].trim();
 		if(!promptItem) continue;
 
+		//normalization. Replacing "_" to spaces and changing prompt to the lower case.
+		//TODO: probably should make this configurable by the user
+		promptItem = promptItem.toLowerCase();
+		promptItem = promptItem.replaceAll("_", " ");
+
+		//getting single prompt weight if it is using parenthesis syntax (currently not working with multiple prompts grouped by weight)
 		if( promptItem.startsWith("(") && promptItem.endsWith(")") ) {
 			let weightLvlStart = 1;
 			let weightLvlEnd = 1;
@@ -47,12 +53,14 @@ PromptsBrowser.synchroniseCurrentPrompts = () => {
 			
 		}
 
+		//detecting external network prompt
 		if( promptItem.startsWith("<") && promptItem.endsWith(">") ) {
 			isExternalNetwork = true;
 			promptItem = promptItem.substring(1);
 			promptItem = promptItem.substring(0, promptItem.length - 1);
 		}
 
+		//detecting weight marker
 		if(promptItem.includes(":")) {
 			const promptArr = promptItem.split(":");
 			const weightDataItem = Number(promptArr.pop());
