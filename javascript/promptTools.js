@@ -143,9 +143,14 @@ PromptsBrowser.promptTools.showPossiblePromptswrapper = (wrapper) => {
 	const prompt = state.promptToolsId;
 	const activePrompts = PromptsBrowser.getCurrentPrompts();
 	if(!prompt) return;
+	let targetTags = [];
+	let targetCategories = [];
 
 	const targetPromptItem = united.find(item => item.id === prompt);
-	if(!targetPromptItem) return;
+	if(targetPromptItem) {
+		targetTags = targetPromptItem.tags || [];
+		targetCategories = targetPromptItem.category || [];
+	}
 
 	const nameArr = prompt.split(" ");
 
@@ -160,8 +165,8 @@ PromptsBrowser.promptTools.showPossiblePromptswrapper = (wrapper) => {
 
 		if(id === prompt) return;
 
-		if(state.toggledButtons.includes("tools_tags") && targetPromptItem.tags) {
-			targetPromptItem.tags.some(targetTag => {
+		if(state.toggledButtons.includes("tools_tags") && targetTags.length) {
+			targetTags.some(targetTag => {
 				if(tags.includes(targetTag)) {
 					sameTags.push(item);
 
@@ -170,8 +175,8 @@ PromptsBrowser.promptTools.showPossiblePromptswrapper = (wrapper) => {
 			});
 		}
 
-		if(state.toggledButtons.includes("tools_category") && targetPromptItem.category) {
-			targetPromptItem.category.some(targetCategory => {
+		if(state.toggledButtons.includes("tools_category") && targetCategories.length) {
+			targetCategories.some(targetCategory => {
 				if(category.includes(targetCategory)) {
 					sameCategory.push(item);
 
