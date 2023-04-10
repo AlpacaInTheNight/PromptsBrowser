@@ -3,12 +3,12 @@ if(!window.PromptsBrowser) window.PromptsBrowser = {};
 
 PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
 	const {DEFAULT_PROMPT_WEIGHT} = PromptsBrowser.params;
-	const {index = 0, isShadowed = false} = options;
+	const {index = 0, isShadowed = false, noSplash = false} = options;
 	const {id = "", weight = DEFAULT_PROMPT_WEIGHT, isExternalNetwork = false} = promptItem;
 
 	const promptElement = document.createElement("div");
 	promptElement.className = "PBE_promptElement PBE_currentElement";
-	promptElement.style.backgroundImage = PromptsBrowser.utils.getPromptPreviewURL(id);
+	promptElement.style.backgroundImage = PromptsBrowser.utils.getPromptPreviewURL(id, undefined);
 	promptElement.dataset.prompt = id;
 	promptElement.dataset.index = index;
 	promptElement.draggable = "true";
@@ -39,22 +39,25 @@ PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
 		promptElement.style.zIndex = 5;
 	}
 
-	const splashElement = document.createElement("div");
-	splashElement.className = "PBE_promptElementSplash PBE_currentElement";
-	splashElement.style.backgroundImage = PromptsBrowser.utils.getPromptPreviewURL(id);
-	splashElement.innerText = id;
-	if(weight !== DEFAULT_PROMPT_WEIGHT) splashElement.innerText += " " + weight;
+	if(!noSplash) {
+		const splashElement = document.createElement("div");
+		splashElement.className = "PBE_promptElementSplash PBE_currentElement";
+		splashElement.style.backgroundImage = PromptsBrowser.utils.getPromptPreviewURL(id);
+		splashElement.innerText = id;
+		if(weight !== DEFAULT_PROMPT_WEIGHT) splashElement.innerText += " " + weight;
 
-	promptElement.appendChild(splashElement);
+		promptElement.appendChild(splashElement);
+
+		promptElement.addEventListener("mouseover", (e) => {
+			const splash = e.currentTarget.querySelector(".PBE_promptElementSplash");
+			if(!splash) return;
+	
+			const position = e.currentTarget.getBoundingClientRect();
+			splash.style.top = position.top + "px";
+		});
+	}
+
 	promptElement.innerHTML += id;
-
-	promptElement.addEventListener("mouseover", (e) => {
-		const splash = e.currentTarget.querySelector(".PBE_promptElementSplash");
-		const position = e.currentTarget.getBoundingClientRect();
-
-		splash.style.top = position.top + "px";
-	});
-
 	return promptElement;
 }
 

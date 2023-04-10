@@ -315,6 +315,24 @@
 	outline: 5px solid cornflowerblue;
 }
 
+.PBE_newElement {
+	opacity: 0.5;
+	transform: scale(0.9);
+	transform-origin: center;
+}
+
+.PBE_newElement:hover {
+	opacity: 1;
+	transform: scale(1);
+}
+
+.PBE_selectedNewElement {
+	opacity: 1;
+	transform: scale(1);
+	outline: 2px solid white;
+	box-shadow: 6px 6px 3px black;
+}
+
 .PBE_promptElement.PBE_currentElement {
 	transform-origin: bottom center;
 }
@@ -376,6 +394,11 @@
 	margin-left: 25px;
 }
 
+.PBE_addUnknownButton {
+	position: absolute;
+	margin-left: 155px;
+}
+
 .PBE_savePromptPreview {
 	position: absolute;
 	width: 100px;
@@ -384,11 +407,7 @@
 	z-index: 500;
 }
 
-.PBE_savePromptSelect {
-	position: absolute;
-	top: -14px;
-	left: 120px;
-	z-index: 500;
+.PBE_select {
 	width: 150px;
 	height: 20px;
 	line-height: 20px;
@@ -397,6 +416,13 @@
 	border-radius: 10px;
 	padding: 0 36px 0 10px;
 	color: black;
+}
+
+.PBE_savePromptSelect {
+	position: absolute;
+	top: -14px;
+	left: 120px;
+	z-index: 500;
 }
 
 .PBE_toolsBackImage {
@@ -491,3 +517,16 @@
 	margin: 0 2px;
 	width: 100px;
 }
+
+
+/* Prompts Scriber */
+
+.PBE_newPromptsHeader {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: center;
+	padding: 10px;
+}
+
+/* Prompts Scriber end*/

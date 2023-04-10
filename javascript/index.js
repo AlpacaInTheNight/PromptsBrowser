@@ -26,12 +26,15 @@ PromptsBrowser.state = {
 	editTargetCollection: undefined,
 	editItem: undefined,
 	showStylesWindow: undefined,
-	toggledButtons: ["tools_tags", "tools_category", "tools_name"],
+	showScriberWindow: undefined,
+	toggledButtons: ["tools_tags", "tools_category", "tools_name", "new_in_all_collections"],
+	selectedNewPrompts: [],
 }
 
 PromptsBrowser.params = {};
 PromptsBrowser.params.DEFAULT_PROMPT_WEIGHT = 1.1;
 PromptsBrowser.params.EMPTY_CARD_GRADIENT = "linear-gradient(135deg, rgba(179,220,237,1) 0%,rgba(41,184,229,1) 50%,rgba(188,224,238,1) 100%)";
+PromptsBrowser.params.NEW_CARD_GRADIENT = "linear-gradient(135deg, rgba(180,221,180,1) 0%,rgba(131,199,131,1) 17%,rgba(82,177,82,1) 33%,rgba(0,138,0,1) 67%,rgba(0,87,0,1) 83%,rgba(0,36,0,1) 100%)";
 
 PromptsBrowser.data.categories = [
 	"character",
@@ -141,10 +144,10 @@ PromptsBrowser.gradioApp = () => {
 
 PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionDir) => {
 	const {united} = PromptsBrowser.data;
-	const {EMPTY_CARD_GRADIENT} = PromptsBrowser.params;
+	const {EMPTY_CARD_GRADIENT, NEW_CARD_GRADIENT} = PromptsBrowser.params;
 	const {state} = PromptsBrowser;
 	const targetPrompt = united.find(item => item.id === prompt);
-	if(!targetPrompt) return EMPTY_CARD_GRADIENT;
+	if(!targetPrompt) return NEW_CARD_GRADIENT;
 
 	if(!collectionDir) {
 		if(state.filterCollection && targetPrompt.collections.includes(state.filterCollection)) {
@@ -395,6 +398,7 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
 			PromptsBrowser.knownPrompts.init(promptContainer, positivePrompts, containerId);
 			PromptsBrowser.currentPrompts.init(promptContainer, containerId);
 			PromptsBrowser.styles.initButton(positivePrompts);
+			PromptsBrowser.promptScribe.initButton(positivePrompts);
 
 			if(domContainer.promptBrowser && !state.showViews.includes("known")) {
 				domContainer.promptBrowser.style.display = "none";
@@ -418,6 +422,7 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
 	PromptsBrowser.promptEdit.init(mainContainer);
 	PromptsBrowser.promptTools.init(mainContainer);
 	PromptsBrowser.styles.init(mainContainer);
+	PromptsBrowser.promptScribe.init(mainContainer);
 
 	PromptsBrowser.controlPanel.update();
 	PromptsBrowser.previewSave.update();

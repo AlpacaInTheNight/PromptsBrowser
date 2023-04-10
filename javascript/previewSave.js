@@ -5,7 +5,6 @@ PromptsBrowser.previewSave = {};
 
 PromptsBrowser.previewSave.init = (wrapper, containerId) => {
 	const savePromptWrapper = document.createElement("div");
-	savePromptWrapper.innerHTML = "Hurr Durr Derp";
 	wrapper.appendChild(savePromptWrapper);
 
 	PromptsBrowser.DOMCache.containers[containerId].savePromptWrapper = savePromptWrapper;
@@ -24,7 +23,7 @@ PromptsBrowser.previewSave.update = () => {
 	savePromptPreviewButton.innerText = "save preview";
 
 	const collectionSelect = document.createElement("select");
-	collectionSelect.className = "PBE_savePromptSelect";
+	collectionSelect.className = "PBE_select PBE_savePromptSelect";
 
 	let options = "";
 	for(const collectionId in PromptsBrowser.data.original) {
