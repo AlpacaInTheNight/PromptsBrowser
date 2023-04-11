@@ -394,6 +394,7 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
 				textArea.addEventListener("input", PromptsBrowser.synchroniseCurrentPrompts);
 			}
 
+			PromptsBrowser.promptWordTooltip.init(positivePrompts, containerId);
 			PromptsBrowser.controlPanel.init(promptContainer, containerId);
 			PromptsBrowser.knownPrompts.init(promptContainer, positivePrompts, containerId);
 			PromptsBrowser.currentPrompts.init(promptContainer, containerId);

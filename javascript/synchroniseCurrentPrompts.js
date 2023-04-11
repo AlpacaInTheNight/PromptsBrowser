@@ -1,6 +1,9 @@
 
 if(!window.PromptsBrowser) window.PromptsBrowser = {};
 
+/**
+ * Synchronises text content of the textarea with the array of active prompts used by the extension.
+ */
 PromptsBrowser.synchroniseCurrentPrompts = () => {
 	const {DEFAULT_PROMPT_WEIGHT} = PromptsBrowser.params;
 	const {state} = PromptsBrowser;

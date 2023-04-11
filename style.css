@@ -529,4 +529,28 @@
 	padding: 10px;
 }
 
+.PBE_autocompliteBox {
+	position: absolute;
+	z-index: 501;
+	box-shadow: 3px 3px 5px cornflowerblue;
+	background: linear-gradient(to right, rgba(207,231,250,1) 0%,rgba(99,147,193,1) 100%);
+}
+
+.PBE_hintItem {
+	font-family: sans-serif;
+	text-transform: capitalize;
+	color: aliceblue;
+	text-shadow: 1px 1px 1px black;
+	padding: 0 10px;
+	overflow: hidden;
+	font-size: 16px;
+	cursor: pointer;
+}
+
+.PBE_hintItem:hover,
+.PBE_hintItemSelected {
+	background-color: cornflowerblue;
+	transform: scale(1.05);
+}
+
 /* Prompts Scriber end*/
