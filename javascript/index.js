@@ -148,6 +148,8 @@ PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionDir) => {
 	const {state} = PromptsBrowser;
 	const targetPrompt = united.find(item => item.id === prompt);
 	if(!targetPrompt) return NEW_CARD_GRADIENT;
+	if(!targetPrompt.previewImage) return EMPTY_CARD_GRADIENT;
+	const fileExtension = targetPrompt.previewImage;
 
 	if(!collectionDir) {
 		if(state.filterCollection && targetPrompt.collections.includes(state.filterCollection)) {
@@ -155,8 +157,9 @@ PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionDir) => {
 		} else collectionDir = targetPrompt.collections[0];
 	}
 
-	//replace is needed to support NTFS
-	const url = `url('./file=prompts_catalogue/${collectionDir}/preview/${prompt.replace(":", "_")}.png?${state.filesIteration}'), ${EMPTY_CARD_GRADIENT}`;
+	const safeFileName = PromptsBrowser.makeFileNameSafe(prompt);
+
+	const url = `url('./file=prompts_catalogue/${collectionDir}/preview/${safeFileName}.${fileExtension}?${state.filesIteration}'), ${EMPTY_CARD_GRADIENT}`;
 
 	return url;
 }
@@ -222,6 +225,8 @@ PromptsBrowser.db.savePromptPreview = () => {
 	if(fileMarkIndex === -1) return;
 	src = src.slice(fileMarkIndex + 5);
 
+	const imageExtension = src.split('.').pop();
+
 	if(!PromptsBrowser.data.original[state.savePreviewCollection]) return;
 
 	const targetCurrentPrompt = activePrompts.find(item => item.id === state.selectedPrompt);
@@ -260,7 +265,11 @@ PromptsBrowser.db.savePromptPreview = () => {
 			PromptsBrowser.data.original[state.savePreviewCollection].push(originalItem);
 		}
 
+		originalItem.previewImage = imageExtension;
+
+		state.selectedPrompt = undefined;
 		state.filesIteration++;
+		PromptsBrowser.db.updateMixedList();
 		PromptsBrowser.knownPrompts.update();
 		PromptsBrowser.currentPrompts.update(true);
 	})();
@@ -441,9 +450,10 @@ PromptsBrowser.db.updateMixedList = () => {
 		if(!Array.isArray(collection)) return;
 
 		for(const collectionPrompt of collection) {
-			const {id, isExternalNetwork} = collectionPrompt;
+			const {id, isExternalNetwork, previewImage} = collectionPrompt;
 			let newItem = {id, tags: [], category: [], collections: []};
 			if(isExternalNetwork) newItem.isExternalNetwork = true;
+			if(previewImage) newItem.previewImage = previewImage;
 
 			if(addedIds[id]) {
 				newItem = unitedList.find(item => item.id === id);

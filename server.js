@@ -1,3 +1,8 @@
+//import { saveCollectionShort } from './saveCollectionShort';
+const saveCollectionShort = require('./saveCollectionShort').saveCollectionShort;
+const saveCollectionExpanded = require('./saveCollectionExpanded').saveCollectionExpanded;
+const utils = require('./utils');
+
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -99,26 +104,58 @@ const server = http.createServer((req, res) => {
 			const fileName = urlArr[urlArr.length - 1];
 			const fileExtension = fileName.slice((Math.max(0, fileName.lastIndexOf(".")) || Infinity) + 1);
 
-			//replacing additional networks marker. Otherwise on NTFS it will create undesired ADS.
-			//Using ADS will actually works for WebUI and preview will be visible,
-			//but for windows users all this previews will be shown in file browser as a single empty file.
-			const newFileName = `${prompt.replace(":", "_")}.${fileExtension}`;
+			const safeFileName = utils.makeFileNameSafe(prompt);
+			const newFileName = `${safeFileName}.${fileExtension}`;
 			savePath += newFileName;
 
 			fs.copyFile(src, savePath, (err) => {
 				if (err) throw err;
 			});
 
-			const pathToData = promptsCataloguePath + path.sep + collection + path.sep + "data.json";
+			const pathToMetaFile = promptsCataloguePath + path.sep + collection + path.sep + "meta.json";
+			const pathToDataFile = promptsCataloguePath + path.sep + collection + path.sep + "data.json";
+			const pathToOrderFile = promptsCataloguePath + path.sep + collection + path.sep + "order.json";
 
-			let rawdata = fs.readFileSync(pathToData);
-			let jsonData = JSON.parse(rawdata);
+			const newPromptDefault = {id: prompt, tags: [], category: []};
+			if(isExternalNetwork) newPromptDefault.isExternalNetwork = true;
 
-			if(jsonData && !jsonData.some(item => item.id === prompt)) {
-				const promptItem = {id: prompt, tags: [], category: []};
-				if(isExternalNetwork) promptItem.isExternalNetwork = true;
-				jsonData.push(promptItem);
-				fs.writeFileSync(pathToData, JSON.stringify(jsonData, null, "\t"));
+			//"short" | "expanded"
+			let format = "short";
+
+			if(fs.existsSync(pathToMetaFile)) {
+				const rawMeta = fs.readFileSync(pathToMetaFile);
+				const metaJSON = JSON.parse(rawMeta);
+
+				if(metaJSON.format) format = metaJSON.format;
+			}
+
+			if(format === "short") {
+				let rawdata = fs.readFileSync(pathToDataFile);
+				let jsonData = JSON.parse(rawdata);
+	
+				if(jsonData && !jsonData.some(item => item.id === prompt)) {
+					jsonData.push(newPromptDefault);
+					fs.writeFileSync(pathToDataFile, JSON.stringify(jsonData, null, "\t"));
+				}
+
+			} else if(format === "expanded") {
+				const safeFileName = utils.makeFileNameSafe(prompt);
+				const promptsFolder = promptsCataloguePath + path.sep + collection + path.sep + "prompts";
+				const filePath = promptsFolder + path.sep + safeFileName + ".json";
+
+				if(!fs.existsSync(promptsFolder)) fs.mkdirSync(promptsFolder);
+
+				if(!fs.existsSync(filePath) && fs.existsSync(pathToOrderFile)) {
+					const rawOrderFile = fs.readFileSync(pathToOrderFile);
+					const JSONOrder = JSON.parse(rawOrderFile);
+
+					fs.writeFileSync(filePath, JSON.stringify(newPromptDefault, null, "\t"));
+
+					if(!JSONOrder.includes(prompt)) {
+						JSONOrder.push(prompt);
+						fs.writeFileSync(pathToOrderFile, JSON.stringify(JSONOrder, null, "\t"));
+					}
+				}
 			}
 
 			const d = new Date();
@@ -146,9 +183,10 @@ const server = http.createServer((req, res) => {
 
 			let sourcePath = promptsCataloguePath + path.sep + from + path.sep + "preview" + path.sep;
 			let savePath = promptsCataloguePath + path.sep + to + path.sep + "preview" + path.sep;
+			const safeFileName = utils.makeFileNameSafe(item);
 
-			sourcePath += item.replace(":", "_") + ".png";
-			savePath += item.replace(":", "_") + ".png";
+			sourcePath += safeFileName + ".png";
+			savePath += safeFileName + ".png";
 
 			if(!fs.existsSync(sourcePath)) return "failed";
 
@@ -182,12 +220,104 @@ const server = http.createServer((req, res) => {
 		for(const dirItem of promptsDirectoryContent) {
 			if(dirItem.isDirectory()) {
 				const pathToDataFile = promptsCataloguePath + path.sep + dirItem.name + path.sep + "data.json";
-				if(!fs.existsSync(pathToDataFile)) continue;
+				const pathToOrderFile = promptsCataloguePath + path.sep + dirItem.name + path.sep + "order.json";
+				const pathToMetaFile = promptsCataloguePath + path.sep + dirItem.name + path.sep + "meta.json";
+				const pathToPromptsFolder = promptsCataloguePath + path.sep + dirItem.name + path.sep + "prompts";
+				const pathToPreviewFolder = promptsCataloguePath + path.sep + dirItem.name + path.sep + "preview";
+				let JSONDataFinal = [];
 
-				const rawdata = fs.readFileSync(pathToDataFile);
-				const JSONData = JSON.parse(rawdata);
+				//"short" | "expanded"
+				let format = "short";
 
-				dataList.prompts[dirItem.name] = JSONData;
+				if(!fs.existsSync(pathToMetaFile)) {
+					const defaultMeta = {
+						format: "short"
+					}
+
+					fs.writeFileSync(pathToMetaFile, JSON.stringify(defaultMeta, null, "\t"));
+				} else {
+					const rawMeta = fs.readFileSync(pathToMetaFile);
+					const metaJSON = JSON.parse(rawMeta);
+
+					if(metaJSON.format) format = metaJSON.format;
+				}
+
+				if(format === "short") {
+					if(!fs.existsSync(pathToDataFile)) continue;
+
+					const rawdata = fs.readFileSync(pathToDataFile);
+					JSONDataFinal = JSON.parse(rawdata);
+
+				} else if(format === "expanded") {
+					if(!fs.existsSync(pathToOrderFile)) continue;
+					const rawOrderFile = fs.readFileSync(pathToOrderFile);
+					const JSONOrder = JSON.parse(rawOrderFile);
+					
+					const newPromptsFromFolder = [];
+					const promptsObject = {};
+
+					if(fs.existsSync(pathToPromptsFolder)) {
+						const promptsInFolder = fs.readdirSync(pathToPromptsFolder).filter(file => path.extname(file) === '.json');
+
+						for(const fileItem of promptsInFolder) {
+							const fileName = path.parse(fileItem).name;
+					
+							const pathToPromptFile = pathToPromptsFolder + path.sep + fileName + ".json";
+							const rawFileData = fs.readFileSync(pathToPromptFile);
+							const JSONFileData = JSON.parse(rawFileData);
+
+							if(JSONFileData.id) promptsObject[JSONFileData.id] = JSONFileData;
+						}
+					}
+
+					for(const promptInOrder of JSONOrder) {
+						if(promptsObject[promptInOrder]) JSONDataFinal.push(promptsObject[promptInOrder]);
+						else newPromptsFromFolder.push(promptsObject[promptInOrder]);
+					}
+
+					/**
+					 * Adding new prompts that was found in prompts folder, but that was not pressent in the order.json file.
+					 * This allows to add prompts to the collection by simply copying their .json files into collections prompts folder.
+					 */
+					if(newPromptsFromFolder.length) {
+						JSONDataFinal = JSONDataFinal.concat(newPromptsFromFolder);
+					}
+				}
+
+				/**
+				 * Getting preview images to mark prompt if it have one or not.
+				 * 
+				 * Gradio seems to generate a lot of errors when requesting images that does not exists
+				 * rather than just sending 404.
+				 * So it's better to check if images are present or not to keep console clean.
+				 */
+				const previewImages = fs.readdirSync(pathToPreviewFolder).filter(
+					file => (path.extname(file) === '.png' || path.extname(file) === '.jpg')
+				);
+
+				for(const promptItem of JSONDataFinal) {
+					let imageStatus = "";
+					const safeFileName = utils.makeFileNameSafe(promptItem.id);
+					
+					for(const imageFile of previewImages) {
+						if(imageFile === safeFileName + ".png") {
+							imageStatus = "png";
+							break;
+
+						} else if(imageFile === safeFileName + ".jpg") {
+							imageStatus = "jpg";
+							break;
+
+						}
+					}
+
+					if(imageStatus) promptItem.previewImage = imageStatus;
+				}
+
+				/**
+				 * Adding collection to the JSON answer message.
+				 */
+				dataList.prompts[dirItem.name] = JSONDataFinal;
 			}
 		}
 
@@ -241,44 +371,23 @@ const server = http.createServer((req, res) => {
 			const data = postMessage.data;
 			const collection = postMessage.collection;
 			if(!data || !collection) return "failed";
-			const prevIndex = {};
-			const newIndex = {};
 
-			const pathToDataFile = promptsCataloguePath + path.sep + collection + path.sep + "data.json";
+			//"short" | "expanded"
+			let format = "short";
+
+			const pathToCollection = promptsCataloguePath + path.sep + collection + path.sep;
+			const pathToDataFile = pathToCollection + "data.json";
+			const pathToMetaFile = pathToCollection + "meta.json";
 			
-			//TODO: remove me
-			const rawdata = fs.readFileSync(pathToDataFile);
-			const prevJSON = JSON.parse(rawdata);
+			if(fs.existsSync(pathToMetaFile)) {
+				const rawMeta = fs.readFileSync(pathToMetaFile);
+				const metaJSON = JSON.parse(rawMeta);
 
-			const jsonData = JSON.parse(data);
-
-			fs.writeFileSync(pathToDataFile, JSON.stringify(jsonData, null, "\t"));
-			const d = new Date();
-			console.log(d.toLocaleTimeString() + "-> updated data for: " + collection);
-
-			for(let i = 0; i < jsonData.length; i++) {
-				const newField = jsonData[i];
-				newIndex[newField.id] = i;
+				if(metaJSON.format) format = metaJSON.format;
 			}
 
-			for(let i = 0; i < prevJSON.length; i++) {
-				const prevField = prevJSON[i];
-				prevIndex[prevField.id] = i;
-			}
-
-			for(const id in prevIndex) {
-				if(newIndex[id] === undefined) console.log(d.toLocaleTimeString() + "---> removed prompt: " + id);
-				const prevField = prevJSON[prevIndex[id]];
-				const newField = jsonData[newIndex[id]];
-
-				if(JSON.stringify(prevField) !== JSON.stringify(newField)) {
-					console.log(d.toLocaleTimeString() + "---> updated prompt: " + id);
-				}
-			}
-
-			for(const id in newIndex) {
-				if(prevIndex[id] === undefined) console.log(d.toLocaleTimeString() + "---> new prompt: " + id);
-			}
+			if(format === "short") saveCollectionShort(pathToDataFile, data, collection);
+			else if(format === "expanded") saveCollectionExpanded(pathToCollection, data, collection);
 
 			return "ok";
 		});
