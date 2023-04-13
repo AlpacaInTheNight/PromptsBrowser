@@ -228,6 +228,7 @@
 	flex-wrap: wrap;
 	max-height: 300px;
 	overflow: auto;
+	overflow-x: hidden;
 	padding: 10px;
 	z-index: 501;
 }
