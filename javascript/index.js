@@ -60,7 +60,9 @@ PromptsBrowser.data.categories = [
 	"condition",
 	"quality",
 	"franchise",
-	"effect"
+	"effect",
+	"meta",
+	"creature"
 ].sort();
 
 PromptsBrowser.supportedContainers = {
@@ -270,6 +272,8 @@ PromptsBrowser.db.savePromptPreview = () => {
 		state.selectedPrompt = undefined;
 		state.filesIteration++;
 		PromptsBrowser.db.updateMixedList();
+		
+		PromptsBrowser.previewSave.update();
 		PromptsBrowser.knownPrompts.update();
 		PromptsBrowser.currentPrompts.update(true);
 	})();
