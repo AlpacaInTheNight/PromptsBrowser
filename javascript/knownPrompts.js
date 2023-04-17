@@ -27,6 +27,9 @@ PromptsBrowser.knownPrompts.showHeader = (wrapper) => {
 	const sortingSelector = document.createElement("select");
 	const tagsInput = document.createElement("input");
 	tagsInput.placeholder = "tag1, tag2, tag3...";
+	const collectionToolsButton = document.createElement("button");
+	collectionToolsButton.className = "PBE_button";
+	collectionToolsButton.innerText = "Edit collection";
 
 	headerContainer.className = "PBE_promptsCatalogueHeader";
 
@@ -105,6 +108,11 @@ PromptsBrowser.knownPrompts.showHeader = (wrapper) => {
 		PromptsBrowser.knownPrompts.update();
 	});
 
+	collectionToolsButton.addEventListener("click", (e) => {
+		PromptsBrowser.collectionTools.update();
+	});
+
+	headerContainer.appendChild(collectionToolsButton);
 	headerContainer.appendChild(collectionSelector);
 	headerContainer.appendChild(categorySelector);
 	headerContainer.appendChild(tagsInput);

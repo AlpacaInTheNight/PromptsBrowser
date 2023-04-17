@@ -296,22 +296,22 @@ const server = http.createServer((req, res) => {
 				);
 
 				for(const promptItem of JSONDataFinal) {
-					let imageStatus = "";
+					let previewImage = "";
 					const safeFileName = utils.makeFileNameSafe(promptItem.id);
 					
 					for(const imageFile of previewImages) {
 						if(imageFile === safeFileName + ".png") {
-							imageStatus = "png";
+							previewImage = "png";
 							break;
 
 						} else if(imageFile === safeFileName + ".jpg") {
-							imageStatus = "jpg";
+							previewImage = "jpg";
 							break;
 
 						}
 					}
 
-					if(imageStatus) promptItem.previewImage = imageStatus;
+					if(previewImage) promptItem.previewImage = previewImage;
 				}
 
 				/**

@@ -32,6 +32,16 @@
 	outline: 2px solid white;
 }
 
+.PBE_row {
+	display: flex;
+	flex-direction: row;
+}
+
+.PBE_column {
+	display: flex;
+	flex-direction: column;
+}
+
 .PBE_rowBlock {
 	display: flex;
 	flex-direction: row;
@@ -408,6 +418,17 @@
 	z-index: 500;
 }
 
+.PBE_input {
+	width: 150px;
+	height: 20px;
+	line-height: 20px;
+	font-size: 16px;
+	border: none;
+	border-radius: 10px;
+	padding: 0 36px 0 10px;
+	color: black;	
+}
+
 .PBE_select {
 	width: 150px;
 	height: 20px;
@@ -555,3 +576,160 @@
 }
 
 /* Prompts Scriber end*/
+
+
+/* Collection tools */
+
+.PBE_collectionToolsWindow {
+	width: 90vw;
+	height: 90vh;
+	top: 5vh;
+	left: 5vw;
+}
+
+.PBE_collectionToolsHeader {
+	padding: 10px;
+}
+
+.PBE_detailedItemContainer {
+	flex-direction: column;
+	flex-wrap: nowrap;
+}
+
+.PBE_detailedItem {
+	font-family: sans-serif;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	flex-grow: 1;
+	background-color: cornflowerblue;
+	margin: 5px 0;
+	color: white;
+	text-shadow: 1px 1px 1px black;
+	padding: 10px;
+}
+
+.PBE_detailedItemTop {
+	flex-grow: 1;
+	display: flex;
+	flex-direction: row;
+}
+
+.PBE_detailedItemBottom {
+	flex-grow: 1;
+	display: flex;
+	flex-direction: row;
+}
+
+.PBE_detailedItemName {
+	font-size: 18px;
+	color: cornflowerblue;
+	text-transform: capitalize;
+	background-color: white;
+	padding: 0 10px;
+}
+
+.PBE_detailedItemComment {
+	padding: 0 10px;
+}
+
+.PBE_detailedItemTags,
+.PBE_detailedItemCategories {
+	width: 50%;
+	background-color: brown;
+	margin: 0 5px;
+}
+
+/* Collection tools end*/
+
+
+/* Prompts filter */
+
+.PBE_filtersWrapper {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	margin: 5px;
+	padding: 2px 2px 0 2px;
+	background-color: white;
+	border-radius: 10px;
+	flex-grow: 1;
+	/* box-shadow: 2px 2px 4px black inset; */
+}
+
+.PBE_filtersAddNew {
+	height: 20px;
+	width: 20px;
+	border-radius: 10px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: lime;
+	color: white;
+	font-family: monospace;
+	font-size: 14px;
+	font-weight: bold;
+	cursor: pointer;
+	margin: 0 0px 2px 2px;
+}
+
+.PBE_filtersRemoveNew {
+	background-color: brown;
+}
+
+.PBE_newFilterContainer {
+	background-color: lightseagreen;
+	align-items: center;
+	padding: 0 10px;
+	border-radius: 10px;
+	flex-wrap: nowrap;
+	height: 20px;
+}
+
+.PBE_filterAction {
+	height: 20px;
+	line-height: 20px;
+	font-size: 16px;
+	border: none;
+	border-radius: 10px;
+	padding: 0 10px;
+	color: white;
+	background-color: blueviolet;
+	cursor: pointer;
+}
+
+.PBE_filterItem {
+	display: flex;
+	flex-wrap: nowrap;
+	height: 20px;
+	background-color: aqua;
+	border-radius: 10px;
+	padding-left: 5px;
+	margin-right: 5px;
+	font-family: sans-serif;
+	font-weight: bold;
+	font-size: 15px;
+	align-items: center;
+	color: black;
+	margin-bottom: 2px;
+}
+
+.PBE_filterItemNegative {
+	background-color: coral;
+}
+
+.PBE_filterItemRemove {
+	background-color: crimson;
+	width: 20px;
+	height: 20px;
+	color: white;
+	font-size: 12px;
+	cursor: pointer;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 10px;
+	margin-left: 5px;
+}
+
+/* Prompts filter end*/
