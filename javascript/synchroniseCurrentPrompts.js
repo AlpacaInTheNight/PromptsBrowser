@@ -29,8 +29,8 @@ PromptsBrowser.synchroniseCurrentPrompts = () => {
 
 		//normalization. Replacing "_" to spaces and changing prompt to the lower case.
 		//TODO: probably should make this configurable by the user
-		promptItem = promptItem.toLowerCase();
-		promptItem = promptItem.replaceAll("_", " ");
+		//promptItem = promptItem.toLowerCase();
+		//promptItem = promptItem.replaceAll("_", " ");
 
 		//getting single prompt weight if it is using parenthesis syntax (currently not working with multiple prompts grouped by weight)
 		if( promptItem.startsWith("(") && promptItem.endsWith(")") ) {
