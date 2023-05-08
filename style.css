@@ -66,6 +66,30 @@
 	width: 200px;
 }
 
+.PBE_fieldset {
+	display: flex;
+	flex-direction: row;
+	border: 1px solid cornflowerblue;
+	padding: 4px;
+	justify-content: center;
+	align-items: center;
+	margin: 5px;
+}
+
+.PBE_fieldset legend {
+	font-family: sans-serif;
+	font-size: 17px;
+	color: cornflowerblue;
+	text-shadow: 1px 1px 1px black;
+}
+
+.PBE_fieldset > div,
+.PBE_fieldset > input,
+.PBE_fieldset > select {
+	margin: 0 5px;
+	height: 30px;
+}
+
 .PBE_dataBlock {
 	display: flex;
 	flex-direction: row;
@@ -244,6 +268,7 @@
 }
 
 .PBE_promptEdit {
+	z-index: 700;
 	padding: 10px;
 	align-items: center;
 	background-size: cover;
@@ -592,20 +617,57 @@
 }
 
 .PBE_detailedItemContainer {
-	flex-direction: column;
-	flex-wrap: nowrap;
+	flex-direction: row;
+	flex-wrap: wrap;
 }
 
 .PBE_detailedItem {
+	width: 40%;
+	min-height: 60px;
 	font-family: sans-serif;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	flex-grow: 1;
+	background-color: white;
+	border: 4px solid white;
+	margin: 2px;
+	color: black;
+	text-shadow: 1px 1px 1px black;
+	content-visibility: auto;
+	contain-intrinsic-size: 1px 5000px;
+}
+
+.PBE_detailedItem.selected {
+	border: 4px solid cornflowerblue;
+	background-color: lightskyblue;
+}
+
+.PBE_detailedItem.selected .PBE_detailedItemName {
+	color: coral;
+}
+
+.PBE_detailedItem:hover .PBE_detailedItemSelector,
+.PBE_detailedItem.selected .PBE_detailedItemSelector {
+	opacity: 1;
+}
+
+.PBE_detailedItemSelector {
+	cursor: pointer;
+	width: 60px;
+	background-color: cornflowerblue;
+	margin-right: 10px;
+	flex-shrink: 0;
+	background-size: cover;
+	opacity: 0.5;
+	user-select: none;
+}
+
+.PBE_detailedItemContent {
 	display: flex;
 	flex-direction: column;
 	flex-wrap: nowrap;
 	flex-grow: 1;
-	background-color: cornflowerblue;
-	margin: 5px 0;
-	color: white;
-	text-shadow: 1px 1px 1px black;
 	padding: 10px;
 }
 
@@ -625,19 +687,24 @@
 	font-size: 18px;
 	color: cornflowerblue;
 	text-transform: capitalize;
-	background-color: white;
-	padding: 0 10px;
 }
 
 .PBE_detailedItemComment {
 	padding: 0 10px;
+	color: cornflowerblue;
 }
 
 .PBE_detailedItemTags,
 .PBE_detailedItemCategories {
 	width: 50%;
-	background-color: brown;
-	margin: 0 5px;
+	background-color: cornflowerblue;
+	color: white;
+	padding: 4px;
+}
+
+.PBE_collectionToolsActions {
+	flex-wrap: wrap;
+	padding: 5px;
 }
 
 /* Collection tools end*/
@@ -664,7 +731,7 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	background-color: lime;
+	background-color: limegreen;
 	color: white;
 	font-family: monospace;
 	font-size: 14px;
@@ -678,7 +745,7 @@
 }
 
 .PBE_newFilterContainer {
-	background-color: lightseagreen;
+	background-color: cornflowerblue;
 	align-items: center;
 	padding: 0 10px;
 	border-radius: 10px;
@@ -687,6 +754,7 @@
 }
 
 .PBE_filterAction {
+	font-family: sans-serif;
 	height: 20px;
 	line-height: 20px;
 	font-size: 16px;
@@ -694,8 +762,10 @@
 	border-radius: 10px;
 	padding: 0 10px;
 	color: white;
-	background-color: blueviolet;
+	background-color: lightskyblue;
 	cursor: pointer;
+	width: 80px;
+	text-align: center;
 }
 
 .PBE_filterItem {

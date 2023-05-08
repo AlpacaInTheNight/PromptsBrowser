@@ -30,6 +30,7 @@ PromptsBrowser.state = {
 	showScriberWindow: undefined,
 	toggledButtons: ["tools_tags", "tools_category", "tools_name", "new_in_all_collections"],
 	selectedNewPrompts: [],
+	selectedCollectionPrompts: [],
 	promptsFilter: {},
 }
 

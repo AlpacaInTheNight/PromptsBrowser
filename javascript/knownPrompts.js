@@ -30,6 +30,7 @@ PromptsBrowser.knownPrompts.showHeader = (wrapper) => {
 	const collectionToolsButton = document.createElement("button");
 	collectionToolsButton.className = "PBE_button";
 	collectionToolsButton.innerText = "Edit collection";
+	collectionToolsButton.style.marginRight = "10px";
 
 	headerContainer.className = "PBE_promptsCatalogueHeader";
 
@@ -109,6 +110,7 @@ PromptsBrowser.knownPrompts.showHeader = (wrapper) => {
 	});
 
 	collectionToolsButton.addEventListener("click", (e) => {
+		if(state.filterCollection) state.collectionToolsId = state.filterCollection;
 		PromptsBrowser.collectionTools.update();
 	});
 

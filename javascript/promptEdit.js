@@ -177,6 +177,7 @@ PromptsBrowser.promptEdit.saveEdit = () => {
 	state.editingPrompt = undefined;
 
 	PromptsBrowser.knownPrompts.update();
+	PromptsBrowser.collectionTools.update(true);
 }
 
 PromptsBrowser.promptEdit.getTargetItem = () => {
