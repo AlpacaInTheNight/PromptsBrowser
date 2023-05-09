@@ -312,6 +312,7 @@ const server = http.createServer((req, res) => {
 					}
 
 					if(previewImage) promptItem.previewImage = previewImage;
+					else delete promptItem.previewImage;
 				}
 
 				/**
