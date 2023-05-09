@@ -105,9 +105,17 @@ PromptsBrowser.controlPanel.update = () => {
 	iconPositiveTextArea.addEventListener("click", PromptsBrowser.controlPanel.onToggleVisibility);
 	iconNegativeTextArea.addEventListener("click", PromptsBrowser.controlPanel.onToggleVisibility);
 
+	const setupButton = document.createElement("button");
+	setupButton.className = "PBE_button";
+	setupButton.innerText = "Setup";
+
+	setupButton.addEventListener("click", PromptsBrowser.setupWindow.update);
+
 	controlPanel.appendChild(iconKnownPrompts);
 	controlPanel.appendChild(iconCurrentPrompts);
 	controlPanel.appendChild(iconPositiveTextArea);
 	controlPanel.appendChild(iconNegativeTextArea);
+
+	controlPanel.appendChild(setupButton);
 }
 

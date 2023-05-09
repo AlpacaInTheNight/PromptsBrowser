@@ -30,13 +30,17 @@ PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
 
 	}
 
-	if(weight > 1.1 && weight <= 1.3) {
+	if(weight > 1 && weight <= 1.2) {
 		promptElement.style.transform = "scale(1.1)";
 		promptElement.style.zIndex = 4;
 
-	} else if(weight > 1.3) {
+	} else if(weight > 1.2 && weight <= 1.3) {
 		promptElement.style.transform = "scale(1.2)";
 		promptElement.style.zIndex = 5;
+
+	} else if(weight > 1.3) {
+		promptElement.style.transform = "scale(1.3)";
+		promptElement.style.zIndex = 6;
 	}
 
 	if(!noSplash) {

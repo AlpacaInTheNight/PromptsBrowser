@@ -30,3 +30,23 @@ window.PromptsBrowser.makeFileNameSafe = function(fileName) {
 
 	return fileName;
 }
+
+window.PromptsBrowser.normalizePrompt = function(prompt) {
+	const {state} = PromptsBrowser;
+	const {config} = state;
+
+	if(!prompt) return prompt;
+
+	prompt = prompt.trim();
+	if(!prompt) return prompt;
+
+	//Skip external networks prompts.
+	if(prompt.startsWith("<") && prompt.endsWith(">")) return prompt;
+
+	if(config.toLowerCase) prompt = prompt.toLowerCase();
+	
+	if(config.spaceMode === "space") prompt = prompt.replaceAll("_", " ");
+	else if(config.spaceMode === "underscore") prompt = prompt.replaceAll(" ", "_");
+
+	return prompt;
+}

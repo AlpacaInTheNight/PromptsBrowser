@@ -50,7 +50,7 @@
 	width: 100%;
 	max-width: 500px;
 	margin: 5px 0;
-	background-color: rgba(100, 100, 100, 0.6);
+	background-color: rgba(200, 200, 200, 0.6);
 	padding: 5px 10px;
 }
 
@@ -64,6 +64,17 @@
 	height: 100%;
     max-width: 200px;
 	width: 200px;
+}
+
+.PBE_rowBlock input[type=checkbox] {
+	height: 1rem;
+	width: 1rem;
+	max-width: none;
+	cursor: pointer;
+}
+
+.PBE_rowBlock label {
+	cursor: pointer;
 }
 
 .PBE_fieldset {
@@ -435,6 +446,11 @@
 	margin-left: 155px;
 }
 
+.PBE_normalizeButton {
+	position: absolute;
+	margin-left: 285px;
+}
+
 .PBE_savePromptPreview {
 	position: absolute;
 	width: 100px;
@@ -452,6 +468,18 @@
 	border-radius: 10px;
 	padding: 0 36px 0 10px;
 	color: black;	
+}
+
+.PBE_numberInput {
+	width: 150px;
+	height: 20px;
+	line-height: 20px;
+	font-size: 16px;
+	border: none;
+	border-radius: 10px;
+	padding: 0 10px;
+	color: black;
+	font-family: math;
 }
 
 .PBE_select {
@@ -803,3 +831,27 @@
 }
 
 /* Prompts filter end*/
+
+
+/* Setup window */
+
+.PBE_setupWindow {
+	z-index: 600;
+	padding: 10px;
+	align-items: center;
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+
+	color: white;
+	text-shadow: 1px 1px 1px black;
+	font-weight: bold;
+	font-size: 18px;
+
+	width: 600px;
+	height: 500px;
+	top: calc(50% - 250px);
+	left: calc(50% - 300px);
+}
+
+/* Setup window end */

@@ -7,6 +7,14 @@ PromptsBrowser.data = {};
 PromptsBrowser.db = {};
 
 PromptsBrowser.state = {
+	config: {
+		belowOneWeight: 0.05,
+		aboveOneWeight: 0.02,
+
+		toLowerCase: true,
+		spaceMode: "space",
+	},
+
 	showControlPanel: true,
 	showViews: ["known", "current", "positive", "negative"],
 	currentContainer: "text2Img",
@@ -35,7 +43,8 @@ PromptsBrowser.state = {
 }
 
 PromptsBrowser.params = {};
-PromptsBrowser.params.DEFAULT_PROMPT_WEIGHT = 1.1;
+PromptsBrowser.params.DEFAULT_PROMPT_WEIGHT = 1;
+PromptsBrowser.params.PROMPT_WEIGHT_FACTOR = 1.1;
 PromptsBrowser.params.EMPTY_CARD_GRADIENT = "linear-gradient(135deg, rgba(179,220,237,1) 0%,rgba(41,184,229,1) 50%,rgba(188,224,238,1) 100%)";
 PromptsBrowser.params.NEW_CARD_GRADIENT = "linear-gradient(135deg, rgba(180,221,180,1) 0%,rgba(131,199,131,1) 17%,rgba(82,177,82,1) 33%,rgba(0,138,0,1) 67%,rgba(0,87,0,1) 83%,rgba(0,36,0,1) 100%)";
 
@@ -416,6 +425,7 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
 			PromptsBrowser.currentPrompts.init(promptContainer, containerId);
 			PromptsBrowser.styles.initButton(positivePrompts);
 			PromptsBrowser.promptScribe.initButton(positivePrompts);
+			PromptsBrowser.currentPrompts.initButton(positivePrompts);
 
 			if(domContainer.promptBrowser && !state.showViews.includes("known")) {
 				domContainer.promptBrowser.style.display = "none";
@@ -436,6 +446,7 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
 		}
 	}
 
+	PromptsBrowser.setupWindow.init(mainContainer);
 	PromptsBrowser.promptEdit.init(mainContainer);
 	PromptsBrowser.promptTools.init(mainContainer);
 	PromptsBrowser.collectionTools.init(mainContainer);
