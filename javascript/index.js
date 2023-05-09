@@ -80,11 +80,15 @@ PromptsBrowser.data.categories = [
 PromptsBrowser.supportedContainers = {
 	text2Img: {
 		prompt: "txt2img_prompt_container",
-		gallery: "txt2img_gallery_container"
+		results: "txt2img_results",
+		gallery: "txt2img_gallery_container",
+		buttons: "txt2img_generate_box",
 	},
 	img2Img: {
 		prompt: "img2img_prompt_container",
-		gallery: "img2img_gallery_container"
+		results: "img2img_results",
+		gallery: "img2img_gallery_container",
+		buttons: "img2img_generate_box",
 	}
 }
 
@@ -156,25 +160,68 @@ PromptsBrowser.gradioApp = () => {
 	return !!gradioShadowRoot ? gradioShadowRoot : document;
 }
 
-PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionDir) => {
-	const {united} = PromptsBrowser.data;
+/**
+ * Checks if the target collection have preview image for the target prompt.
+ * Returns true if have preview and false if not.
+ * 
+ * @param {*} prompt prompt id
+ * @param {*} collectionId collection id
+ * @returns boolean
+ */
+PromptsBrowser.utils.collectionHavePreview = (prompt, collectionId) => {
+	const {original} = PromptsBrowser.data;
+	if(!prompt || !collectionId || !original) return false;
+
+	const targetCollection = original[collectionId];
+	if(!targetCollection) return false;
+
+	const targetPrompt = targetCollection.find(item => item.id === prompt);
+	if(!targetPrompt) return false;
+
+	return targetPrompt.previewImage ? true : false;
+}
+
+PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionId) => {
+	const {united, original} = PromptsBrowser.data;
 	const {EMPTY_CARD_GRADIENT, NEW_CARD_GRADIENT} = PromptsBrowser.params;
 	const {state} = PromptsBrowser;
-	const targetPrompt = united.find(item => item.id === prompt);
+	let targetPrompt = {};
+
+	if(collectionId) {
+		const targetCollection = original[collectionId];
+		if(!targetCollection) return NEW_CARD_GRADIENT;
+		targetPrompt = targetCollection.find(item => item.id === prompt);
+
+	} else targetPrompt = united.find(item => item.id === prompt);
+
 	if(!targetPrompt) return NEW_CARD_GRADIENT;
 	if(!targetPrompt.previewImage) return EMPTY_CARD_GRADIENT;
 	const fileExtension = targetPrompt.previewImage;
 
-	if(!collectionDir) {
-		if(state.filterCollection && targetPrompt.collections.includes(state.filterCollection)) {
-			collectionDir = state.filterCollection;
-		} else collectionDir = targetPrompt.collections[0];
+	if(
+		!collectionId &&
+		state.filterCollection &&
+		targetPrompt.collections &&
+		targetPrompt.collections.includes(state.filterCollection) &&
+		PromptsBrowser.utils.collectionHavePreview(prompt, state.filterCollection)
+	) {
+		collectionId = state.filterCollection;
 	}
+
+	if(!collectionId) {
+		targetPrompt.collections.some(collectionItem => {
+			if(PromptsBrowser.utils.collectionHavePreview(prompt, collectionItem)) {
+				collectionId = collectionItem;
+				return true;
+			}
+		});
+	}
+
+	if(!collectionId) return NEW_CARD_GRADIENT;
 
 	const safeFileName = PromptsBrowser.makeFileNameSafe(prompt);
 
-	const url = `url('./file=prompts_catalogue/${collectionDir}/preview/${safeFileName}.${fileExtension}?${state.filesIteration}'), ${EMPTY_CARD_GRADIENT}`;
-
+	const url = `url('./file=prompts_catalogue/${collectionId}/preview/${safeFileName}.${fileExtension}?${state.filesIteration}'), ${EMPTY_CARD_GRADIENT}`;
 	return url;
 }
 
@@ -220,7 +267,7 @@ PromptsBrowser.db.saveJSONData = (collectionId) => {
 	})();
 }
 
-PromptsBrowser.db.savePromptPreview = () => {
+PromptsBrowser.db.savePromptPreview = (callUpdate = true) => {
 	const {state} = PromptsBrowser;
 	const {united} = PromptsBrowser.data;
 
@@ -281,13 +328,15 @@ PromptsBrowser.db.savePromptPreview = () => {
 
 		originalItem.previewImage = imageExtension;
 
-		state.selectedPrompt = undefined;
-		state.filesIteration++;
-		PromptsBrowser.db.updateMixedList();
-		
-		PromptsBrowser.previewSave.update();
-		PromptsBrowser.knownPrompts.update();
-		PromptsBrowser.currentPrompts.update(true);
+		if(callUpdate) {
+			state.selectedPrompt = undefined;
+			state.filesIteration++;
+			PromptsBrowser.db.updateMixedList();
+			
+			PromptsBrowser.previewSave.update();
+			PromptsBrowser.knownPrompts.update();
+			PromptsBrowser.currentPrompts.update(true);
+		}
 	})();
 }
 
@@ -409,6 +458,23 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
 			domContainer.positivePrompts = positivePrompts;
 			domContainer.negativePrompts = negativePrompts;
 
+			if(container.buttons) {
+				const buttonsContainer = PromptsBrowser.gradioApp().getElementById(container.buttons);
+				if(buttonsContainer) {
+					domContainer.buttonsContainer = buttonsContainer;
+
+					const generateButton = buttonsContainer.querySelector(".gr-button-primary");
+					if(generateButton) domContainer.generateButton = generateButton;
+				}
+			}
+
+			if(container.results) {
+				const resultsContainer = PromptsBrowser.gradioApp().getElementById(container.results);
+				if(resultsContainer) {
+					domContainer.resultsContainer = resultsContainer;
+				}
+			}
+
 			domContainer.textArea = positivePrompts.querySelector("textarea");
 			const textArea = domContainer.textArea;
 
@@ -471,12 +537,10 @@ PromptsBrowser.db.updateMixedList = () => {
 		for(const collectionPrompt of collection) {
 			const {id, isExternalNetwork, previewImage} = collectionPrompt;
 			let newItem = {id, tags: [], category: [], collections: []};
+			if(addedIds[id]) newItem = unitedList.find(item => item.id === id);
+
 			if(isExternalNetwork) newItem.isExternalNetwork = true;
 			if(previewImage) newItem.previewImage = previewImage;
-
-			if(addedIds[id]) {
-				newItem = unitedList.find(item => item.id === id);
-			}
 
 			if(!newItem.collections.includes(collectionId)) {
 				newItem.collections.push(collectionId);

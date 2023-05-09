@@ -3,6 +3,13 @@ if(!window.PromptsBrowser) window.PromptsBrowser = {};
 
 PromptsBrowser.collectionTools = {};
 
+/**
+ * Auto generate previews timer.
+ */
+PromptsBrowser.collectionTools.generateNextTimer = 0;
+
+PromptsBrowser.collectionTools.generateQueue = [];
+
 PromptsBrowser.collectionTools.init = (wrapper) => {
 	const collectionTools = document.createElement("div");
 	collectionTools.className = "PBE_generalWindow PBE_collectionToolsWindow";
@@ -10,6 +17,8 @@ PromptsBrowser.collectionTools.init = (wrapper) => {
 
 	PromptsBrowser.DOMCache.collectionTools = collectionTools;
 
+	PromptsBrowser.collectionTools.generateQueue = [];
+	clearTimeout(PromptsBrowser.collectionTools.generateNextTimer);
 	wrapper.appendChild(collectionTools);
 }
 
@@ -30,6 +39,89 @@ PromptsBrowser.collectionTools.updateCurrentCollection = () => {
 	PromptsBrowser.db.saveJSONData(collectionToolsId);
 	PromptsBrowser.db.updateMixedList();
 	PromptsBrowser.collectionTools.updateViews();
+}
+
+PromptsBrowser.collectionTools.generateNextPreview = () => {
+	const {state} = PromptsBrowser;
+	const {collectionToolsId} = state;
+	const {generateQueue} = PromptsBrowser.collectionTools;
+	const textArea = PromptsBrowser.DOMCache.containers[state.currentContainer].textArea;
+	const generateButton = PromptsBrowser.DOMCache.containers[state.currentContainer].generateButton;
+	if(!textArea || !generateButton) return;
+
+	const nextItem = generateQueue.shift();
+	if(!nextItem) {
+		PromptsBrowser.utils.log("Finished generating prompt previews.");
+
+		state.selectedPrompt = undefined;
+		state.filesIteration++;
+		PromptsBrowser.db.updateMixedList();
+		
+		PromptsBrowser.previewSave.update();
+		PromptsBrowser.knownPrompts.update();
+		PromptsBrowser.currentPrompts.update(true);
+		PromptsBrowser.collectionTools.update(true);
+		return;
+	}
+
+	PromptsBrowser.utils.log(`Generating preview for ${nextItem.id}. ${generateQueue.length} items in queue left`);
+
+	state.selectedPrompt = nextItem.id;
+	state.savePreviewCollection = collectionToolsId;
+
+	textArea.value = nextItem.id;
+	textArea.dispatchEvent(new Event('focus'));
+	textArea.dispatchEvent(new Event('input'));
+	textArea.dispatchEvent(new KeyboardEvent('keyup'));
+	textArea.dispatchEvent(new KeyboardEvent('keypress'));
+	textArea.dispatchEvent(new Event('blur'));
+
+	generateButton.dispatchEvent(new Event('click'));
+
+	clearTimeout(PromptsBrowser.collectionTools.generateNextTimer);
+	PromptsBrowser.collectionTools.generateNextTimer = setTimeout(PromptsBrowser.collectionTools.checkProgressState, 100);
+}
+
+PromptsBrowser.collectionTools.checkProgressState = () => {
+	const {state} = PromptsBrowser;
+	const resultsContainer = PromptsBrowser.DOMCache.containers[state.currentContainer].resultsContainer;
+	if(!resultsContainer) return;
+
+	//progress bar is being added during generation and is removed from the DOM after generation finished.
+	const progressBar = resultsContainer.querySelector(".progressDiv");
+
+	if(!progressBar) {
+		PromptsBrowser.db.savePromptPreview(false);
+		PromptsBrowser.collectionTools.generateNextPreview();
+
+		return;
+	}
+
+	clearTimeout(PromptsBrowser.collectionTools.generateNextTimer);
+	PromptsBrowser.collectionTools.generateNextTimer = setTimeout(PromptsBrowser.collectionTools.checkProgressState, 500);
+}
+
+PromptsBrowser.collectionTools.onGeneratePreviews = (e) => {
+	const {state, data} = PromptsBrowser;
+	const {selectedCollectionPrompts, collectionToolsId} = state;
+	const targetCollection = data.original[collectionToolsId];
+
+	if(!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection) return;
+
+	PromptsBrowser.collectionTools.generateQueue = [];
+
+	for(const promptId of selectedCollectionPrompts) {
+		const prompt = targetCollection.find(item => item.id === promptId);
+		if(!prompt) continue;
+
+		const generateItem = {
+			id: promptId,
+		};
+
+		PromptsBrowser.collectionTools.generateQueue.push(generateItem);
+	}
+
+	PromptsBrowser.collectionTools.generateNextPreview();
 }
 
 PromptsBrowser.collectionTools.onAddCategory = (e) => {
@@ -452,6 +544,25 @@ PromptsBrowser.collectionTools.showTagsAction = (wrapper) => {
 	wrapper.appendChild(container);
 }
 
+PromptsBrowser.collectionTools.showAutogenerate = (wrapper) => {
+
+	const generateButton = document.createElement("div");
+	generateButton.className = "PBE_button";
+	generateButton.innerText = "Generate";
+
+	generateButton.addEventListener("click", PromptsBrowser.collectionTools.onGeneratePreviews);
+
+	const container = document.createElement("fieldset");
+	container.className = "PBE_fieldset";
+	const legend = document.createElement("legend");
+	legend.innerText = "Generate preview";
+
+	container.appendChild(legend);
+	container.appendChild(generateButton);
+
+	wrapper.appendChild(container);
+}
+
 PromptsBrowser.collectionTools.showActions = (wrapper) => {
 
 	const toggleAllButton = document.createElement("div");
@@ -480,11 +591,13 @@ PromptsBrowser.collectionTools.showActions = (wrapper) => {
 	if(Object.keys(PromptsBrowser.data.original).length > 1) PromptsBrowser.collectionTools.showCopyOrMove(wrapper);
 	PromptsBrowser.collectionTools.showCategoryAction(wrapper);
 	PromptsBrowser.collectionTools.showTagsAction(wrapper);
+	PromptsBrowser.collectionTools.showAutogenerate(wrapper);
 }
 
 PromptsBrowser.collectionTools.update = (ifShown = false) => {
 	const {state, data} = PromptsBrowser;
 	const wrapper = PromptsBrowser.DOMCache.collectionTools;
+	clearTimeout(PromptsBrowser.collectionTools.generateNextTimer);
 
 	if(!wrapper || !data) return;
 	if(ifShown && wrapper.style.display !== "flex") return;
@@ -508,6 +621,7 @@ PromptsBrowser.collectionTools.update = (ifShown = false) => {
 	closeButton.className = "PBE_button";
 
 	closeButton.addEventListener("click", (e) => {
+		clearTimeout(PromptsBrowser.collectionTools.generateNextTimer);
 		wrapper.style.display = "none";
 	});
 
