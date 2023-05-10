@@ -2,6 +2,8 @@
 if(!window.PromptsBrowser) window.PromptsBrowser = {};
 
 window.PromptsBrowser.replaceAllRegex = function(str, oldStr, newStr) {
+	if(!str || !oldStr) return str;
+
 	return str.replace(new RegExp(oldStr, 'g'), newStr);
 };
 
