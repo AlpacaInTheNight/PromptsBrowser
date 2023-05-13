@@ -546,6 +546,7 @@ PromptsBrowser.styles.showActions = (wrapper) => {
 PromptsBrowser.styles.showStyles = (wrapper) => {
 	const {data} = PromptsBrowser;
 	const {state} = PromptsBrowser;
+	const {filterStyleCollection, filterStyleName} = state;
 	const activePrompts = PromptsBrowser.getCurrentPrompts();
 
 	let styles = [];
@@ -568,6 +569,9 @@ PromptsBrowser.styles.showStyles = (wrapper) => {
 
 	for(const style of styles) {
 		const {name, positive, id, index, previewImage} = style;
+
+		if(filterStyleCollection && filterStyleCollection !== id) continue;
+		if(filterStyleName && !name.toLowerCase().includes(filterStyleName)) continue;
 
 		const stylesItem = document.createElement("div");
 		const styleHeader = document.createElement("div");
