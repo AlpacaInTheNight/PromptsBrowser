@@ -25,6 +25,9 @@ PromptsBrowser.state = {
 	filterCategory: undefined,
 	filterCollection: undefined,
 	filterTags: undefined,
+	filterStyleCollection: undefined,
+	filterStyleName: undefined,
+	newStyleCollection: undefined,
 	sortKnownPrompts: undefined,
 	copyOrMoveTo: undefined,
 	dragItemId: undefined,
@@ -36,7 +39,7 @@ PromptsBrowser.state = {
 	editItem: undefined,
 	showStylesWindow: undefined,
 	showScriberWindow: undefined,
-	toggledButtons: ["tools_tags", "tools_category", "tools_name", "new_in_all_collections"],
+	toggledButtons: ["tools_tags", "tools_category", "tools_name", "new_in_all_collections", "styles_simplified_view"],
 	selectedNewPrompts: [],
 	selectedCollectionPrompts: [],
 	promptsFilter: {},
@@ -182,6 +185,8 @@ PromptsBrowser.utils.collectionHavePreview = (prompt, collectionId) => {
 }
 
 PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionId) => {
+	if(!prompt) return NEW_CARD_GRADIENT;
+	
 	const {united, original} = PromptsBrowser.data;
 	const {EMPTY_CARD_GRADIENT, NEW_CARD_GRADIENT} = PromptsBrowser.params;
 	const {state} = PromptsBrowser;
@@ -272,10 +277,10 @@ PromptsBrowser.db.savePromptPreview = (callUpdate = true) => {
 	const {united} = PromptsBrowser.data;
 
 	const imageArea = PromptsBrowser.DOMCache.containers[state.currentContainer].imageArea;
-
 	if(!imageArea) return;
 	if(!state.selectedPrompt) return;
 	if(!state.savePreviewCollection) return;
+	
 	const activePrompts = PromptsBrowser.getCurrentPrompts();
 	const imageContainer = imageArea.querySelector("img");
 	if(!imageContainer) return;

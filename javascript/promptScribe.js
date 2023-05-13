@@ -218,7 +218,7 @@ PromptsBrowser.promptScribe.update = (initial) => {
 
 	const footerBlock = document.createElement("div");
 	const closeButton = document.createElement("button");
-	footerBlock.className = "PBE_rowBlock PBE_rowBlock_wide PBE_stylesFooter";
+	footerBlock.className = "PBE_rowBlock PBE_rowBlock_wide";
 	closeButton.innerText = "Close";
 	closeButton.className = "PBE_button";
 

@@ -11,6 +11,7 @@ window.PromptsBrowser.replaceAllRegex = function(str, oldStr, newStr) {
  * Make sure to update server-side makeFileNameSafe method as well
  */
 window.PromptsBrowser.makeFileNameSafe = function(fileName) {
+	if(!fileName) return;
 	const {replaceAllRegex} = window.PromptsBrowser;
 
 	fileName = replaceAllRegex(fileName, "_", " ");

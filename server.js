@@ -15,6 +15,7 @@ const MARKER_FILE = "webui.py";
 const PROMPTS_FOLDER = "prompts_catalogue";
 const STYLES_FOLDER = "styles_catalogue";
 const DEFAULT_CATALOGUE = "myprompts";
+const DEFAULT_STYLES = "mystyles";
 
 const currentPath = path.dirname(filename);
 let pathArr = currentPath.split(path.sep);
@@ -60,10 +61,36 @@ function init() {
 		fs.writeFileSync(pathToDefaultCatalogue + path.sep + "data.json", "[]");
 	}
 
+	//converting old styles collection to new one
+	//TODO: remove me later
+	const oldBaseStylePath = stylesCataloguePath + path.sep + "base.json";
+	if(fs.existsSync(oldBaseStylePath) && !fs.existsSync(stylesCataloguePath + path.sep + "base")) {
+		const oldPreviewPath = stylesCataloguePath + path.sep + "preview";
+
+		fs.mkdirSync(stylesCataloguePath + path.sep + "base");
+		fs.renameSync(oldBaseStylePath, stylesCataloguePath + path.sep + "base" + path.sep + "data.json");
+
+		if(fs.existsSync(oldPreviewPath)) {
+			const newPreviewPath = stylesCataloguePath + path.sep + "base" + path.sep + "preview";
+			fs.renameSync(oldPreviewPath, newPreviewPath);
+		}
+	}
+
 	//checks if at least one style catalogue collection exists
-	const stylesFiles = fs.readdirSync(stylesCataloguePath).filter(file => path.extname(file) === '.json');
-	if(!stylesFiles.length) {
-		fs.writeFileSync(stylesCataloguePath + path.sep + "base.json", "[]");
+	noFolders = true;
+	const stylesDirectory = fs.readdirSync(stylesCataloguePath, {withFileTypes: true});
+	for(const dirItem of stylesDirectory) {
+		if(dirItem.isDirectory()) {
+			noFolders = false;
+			break;
+		}
+	}
+
+	if(noFolders) {
+		const pathToDefaultStyle = stylesCataloguePath + path.sep + DEFAULT_STYLES;
+		fs.mkdirSync(pathToDefaultStyle);
+		fs.mkdirSync(pathToDefaultStyle + path.sep + "preview");
+		fs.writeFileSync(pathToDefaultStyle + path.sep + "data.json", "[]");
 	}
 }
 
@@ -210,7 +237,8 @@ const server = http.createServer((req, res) => {
 
 	if(req.method === "GET" && req.url === "/getPrompts") {
 		const promptsDirectoryContent = fs.readdirSync(promptsCataloguePath, {withFileTypes: true});
-		const stylesDirectoryContent = fs.readdirSync(stylesCataloguePath).filter(file => path.extname(file) === '.json');
+		const stylesDirectoryContent = fs.readdirSync(stylesCataloguePath, {withFileTypes: true});
+		//const stylesDirectoryContent = fs.readdirSync(stylesCataloguePath).filter(file => path.extname(file) === '.json');
 		
 		const dataList = {
 			prompts: {},
@@ -322,13 +350,27 @@ const server = http.createServer((req, res) => {
 			}
 		}
 
-		for(const fileItem of stylesDirectoryContent) {
-			const fileName = path.parse(fileItem).name;
+		for(const dirItem of stylesDirectoryContent) {
+
+			if(dirItem.isDirectory()) {
+				const pathToDataFile = stylesCataloguePath + path.sep + dirItem.name + path.sep + "data.json";
+				//const pathToPreviewFolder = promptsCataloguePath + path.sep + dirItem.name + path.sep + "preview";
+
+				if(!fs.existsSync(pathToDataFile)) continue;
+
+				const rawdata = fs.readFileSync(pathToDataFile);
+				const JSONDataFinal = JSON.parse(rawdata);
+
+
+				dataList.styles[dirItem.name] = JSONDataFinal;
+			}
+
+			/* const fileName = path.parse(fileItem).name;
 
 			const rawdata = fs.readFileSync(stylesCataloguePath + path.sep + fileItem);
 			const JSONData = JSON.parse(rawdata);
 
-			dataList.styles[fileName] = JSONData;
+			dataList.styles[fileName] = JSONData; */
 		}
 
 		res.end(JSON.stringify(dataList));
@@ -348,7 +390,8 @@ const server = http.createServer((req, res) => {
 			const collection = postMessage.collection;
 			if(!data || !collection) return "failed";
 
-			const pathToDataFile = stylesCataloguePath + path.sep + collection + ".json";
+			const pathToCollection = stylesCataloguePath + path.sep + collection + path.sep;
+			const pathToDataFile = pathToCollection + "data.json";
 
 			const jsonData = JSON.parse(data);
 
@@ -393,6 +436,56 @@ const server = http.createServer((req, res) => {
 			return "ok";
 		});
 		
+	}
+
+	if(req.method === "POST" && req.url === "/saveStylePreview") {
+		let body = "";
+
+		req.on("data", chunk => {
+			body += chunk.toString();
+		});
+
+		req.on("end", () => {
+			const postMessage = JSON.parse(body);
+			const src = postMessage.src;
+			const style = postMessage.style;
+			const collection = postMessage.collection;
+			if(!src || !style || !collection) return "failed";
+
+			const urlArr = src.split("/");
+
+			const pathToCollection = stylesCataloguePath + path.sep + collection + path.sep;
+			let savePath = pathToCollection + "preview" + path.sep;
+
+			if(!fs.existsSync(pathToCollection)) fs.mkdirSync(pathToCollection);
+			if(!fs.existsSync(savePath)) fs.mkdirSync(savePath);
+
+			const fileName = urlArr[urlArr.length - 1];
+			const fileExtension = fileName.slice((Math.max(0, fileName.lastIndexOf(".")) || Infinity) + 1);
+
+			const safeFileName = utils.makeFileNameSafe(style);
+			const newFileName = `${safeFileName}.${fileExtension}`;
+			savePath += newFileName;
+
+			fs.copyFile(src, savePath, (err) => {
+				if (err) throw err;
+			});
+
+			const pathToDataFile = pathToCollection + "data.json";
+			const rawdata = fs.readFileSync(pathToDataFile);
+			const stylesJSON = JSON.parse(rawdata);
+
+			const targetStyle = stylesJSON.find(item => item.name === style);
+			if(targetStyle) {
+				targetStyle.previewImage = fileExtension;
+				fs.writeFileSync(pathToDataFile, JSON.stringify(stylesJSON, null, "\t"));
+			}
+
+			const d = new Date();
+			console.log(d.toLocaleTimeString() + "-> updated style preview for: " + style);
+			
+			return "ok";
+		});
 	}
 	
 	res.end("failed");
