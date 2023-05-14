@@ -4,6 +4,8 @@ PromptsBrowser.promptWordTooltip = {};
 
 PromptsBrowser.promptWordTooltip.selectedIndex = 0;
 
+PromptsBrowser.promptWordTooltip.unfocusTimeout = 0;
+
 PromptsBrowser.promptWordTooltip.init = (positivePrompts, containerId) => {
 	if(!positivePrompts) return;
 	const textArea = positivePrompts.querySelector("textarea");
@@ -17,7 +19,7 @@ PromptsBrowser.promptWordTooltip.init = (positivePrompts, containerId) => {
 	PromptsBrowser.DOMCache.containers[containerId].autocompliteWindow = autocompliteWindow;
 
 	textArea.addEventListener("keydown", PromptsBrowser.promptWordTooltip.onKeyDown);
-
+	textArea.addEventListener("blur", PromptsBrowser.promptWordTooltip.onUnfocus);
 	textArea.addEventListener("keyup", PromptsBrowser.promptWordTooltip.processCarretPosition);
 	textArea.addEventListener("click", PromptsBrowser.promptWordTooltip.processCarretPosition);
 }
@@ -33,6 +35,19 @@ PromptsBrowser.promptWordTooltip.onKeyDown = (e) => {
 
 	e.stopPropagation();
 	e.preventDefault();
+}
+
+PromptsBrowser.promptWordTooltip.onUnfocus = (e) => {
+	const {state} = PromptsBrowser;
+	const autoCompleteBox = PromptsBrowser.DOMCache.containers[state.currentContainer].autocompliteWindow;
+	if(!autoCompleteBox) return;
+	if(autoCompleteBox.style.display === "none") return;
+	
+	clearTimeout(PromptsBrowser.promptWordTooltip.unfocusTimeout);
+	PromptsBrowser.promptWordTooltip.unfocusTimeout = setTimeout(() => {
+		autoCompleteBox.style.display = "none";
+		autoCompleteBox.style.innerHTML = "";
+	}, 400);
 }
 
 PromptsBrowser.promptWordTooltip.onHintWindowKey = (e) => {
@@ -85,8 +100,6 @@ PromptsBrowser.promptWordTooltip.onClickHint = (e) => {
 	const target = e.currentTarget;
 	if(!target) return;
 
-	//autoCompleteBox.style.display = "none";
-
 	const start = Number(target.dataset.start);
 	const end = Number(target.dataset.end);
 	const newPrompt = target.innerText;
@@ -120,6 +133,12 @@ PromptsBrowser.promptWordTooltip.onApplyHint = (start, end, newPrompt) => {
 }
 
 PromptsBrowser.promptWordTooltip.processCarretPosition = (e) => {
+	const doc = PromptsBrowser.gradioApp();
+	const textArea = e.currentTarget;
+	const isFocused = doc.activeElement === textArea;
+	if(!isFocused) return;
+	clearTimeout(PromptsBrowser.promptWordTooltip.unfocusTimeout);
+
 	if(e.keyCode === 38 || e.keyCode === 40 || e.keyCode === 13) {
 		const block = PromptsBrowser.promptWordTooltip.onHintWindowKey(e);
 
@@ -141,7 +160,6 @@ PromptsBrowser.promptWordTooltip.processCarretPosition = (e) => {
 	const MAX_HINTS = 20;
 	let currHints = 0;
 	const promptsList = PromptsBrowser.data.united;
-	const textArea = e.currentTarget;
 	const value = textArea.value;
 	const caret = textArea.selectionStart;
 	const stopSymbols = [",", "(", ")", "<", ">", ":"];

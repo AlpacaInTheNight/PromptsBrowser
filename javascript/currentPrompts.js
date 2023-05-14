@@ -11,8 +11,20 @@ PromptsBrowser.currentPrompts.init = (wrapper, containerId) => {
 	wrapper.appendChild(currentPrompts);
 }
 
+PromptsBrowser.currentPrompts.initButton = (positiveWrapper) => {
+	const normalizeButton = document.createElement("button");
+
+	normalizeButton.className = "PBE_actionButton PBE_normalizeButton";
+	normalizeButton.innerText = "Normalize";
+
+	normalizeButton.addEventListener("click", PromptsBrowser.currentPrompts.onNormalizePrompts);
+
+	positiveWrapper.appendChild(normalizeButton);
+}
+
 PromptsBrowser.currentPrompts.scrollWeight = (e) => {
 	const {state} = PromptsBrowser;
+	const {belowOneWeight = 0.05, aboveOneWeight = 0.01} = state.config;
 	if(!e.shiftKey) return;
 	const currentId = e.currentTarget.dataset.prompt;
 	const activePrompts = PromptsBrowser.getCurrentPrompts();
@@ -24,15 +36,38 @@ PromptsBrowser.currentPrompts.scrollWeight = (e) => {
 
 	if(!targetItem.weight) targetItem.weight = 0;
 
-	if(e.deltaY < 0) {
-		targetItem.weight += 0.05;
-	} else {
-		targetItem.weight -= 0.05;
+	if(e.deltaY < 0) { //rising weight
+
+		if(targetItem.weight < 1 && (targetItem.weight + belowOneWeight) > 1 ) {
+			targetItem.weight = 1;
+
+		} else {
+			if(targetItem.weight >= 1) targetItem.weight += aboveOneWeight;
+			else targetItem.weight += belowOneWeight;
+
+		}
+		
+	} else { //lowering weight
+
+		if(targetItem.weight > 1 && (targetItem.weight - aboveOneWeight) < 1 ) {
+			targetItem.weight = 1;
+
+		} else {
+			if(targetItem.weight <= 1) targetItem.weight -= belowOneWeight;
+			else targetItem.weight -= aboveOneWeight;
+
+		}
+
 	}
 
 	if(targetItem.weight < 0) targetItem.weight = 0;
 	targetItem.weight = Number(targetItem.weight.toFixed(2));
 	PromptsBrowser.currentPrompts.update();
+}
+
+PromptsBrowser.currentPrompts.onNormalizePrompts = () => {
+	PromptsBrowser.currentPrompts.update();
+	PromptsBrowser.synchroniseCurrentPrompts();
 }
 
 PromptsBrowser.currentPrompts.update = (noTextAreaUpdate = false) => {

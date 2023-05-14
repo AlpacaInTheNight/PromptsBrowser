@@ -31,7 +31,7 @@ PromptsBrowser.promptScribe.onOpenScriber = () => {
 	PromptsBrowser.promptScribe.update(true);
 }
 
-PromptsBrowser.currentPrompts.onAddUnknownPrompts = () => {
+PromptsBrowser.promptScribe.onAddUnknownPrompts = () => {
 	const {state} = PromptsBrowser;
 	let {selectedNewPrompts = []} = state;
 	const activePrompts = PromptsBrowser.getCurrentPrompts();
@@ -63,7 +63,7 @@ PromptsBrowser.currentPrompts.onAddUnknownPrompts = () => {
 	PromptsBrowser.promptScribe.update();
 }
 
-PromptsBrowser.promptScribe.onToggleButton = (e) => {
+PromptsBrowser.promptScribe.onToggleOnlyNew = (e) => {
 	const {state} = PromptsBrowser;
 	const id = "new_in_all_collections";
 
@@ -72,6 +72,20 @@ PromptsBrowser.promptScribe.onToggleButton = (e) => {
 	} else {
 		state.toggledButtons.push(id);
 	}
+	
+	PromptsBrowser.promptScribe.update();
+}
+
+PromptsBrowser.promptScribe.onToggleAll = (e) => {
+	const {state} = PromptsBrowser;
+	let {selectedNewPrompts = []} = state;
+
+	if(!selectedNewPrompts.length) {
+		PromptsBrowser.promptScribe.update(true);
+		return;
+	}
+
+	state.selectedNewPrompts = [];
 	
 	PromptsBrowser.promptScribe.update();
 }
@@ -89,13 +103,20 @@ PromptsBrowser.promptScribe.showHeader = (wrapper) => {
 	if(state.toggledButtons.includes("new_in_all_collections")) toggleOnlyNew.classList.add("PBE_toggledButton");
 	toggleOnlyNew.style.height = "24px";
 
-	toggleOnlyNew.addEventListener("click", PromptsBrowser.promptScribe.onToggleButton);
+	toggleOnlyNew.addEventListener("click", PromptsBrowser.promptScribe.onToggleOnlyNew);
 
 	const saveButton = document.createElement("button");
 	saveButton.innerText = "Add new prompts";
 	saveButton.className = "PBE_button";
 
-	saveButton.addEventListener("click", PromptsBrowser.currentPrompts.onAddUnknownPrompts);
+	saveButton.addEventListener("click", PromptsBrowser.promptScribe.onAddUnknownPrompts);
+
+	const toggleAll = document.createElement("button");
+	toggleAll.innerText = "Toggle all";
+	toggleAll.className = "PBE_button";
+	toggleAll.style.marginRight = "10px";
+
+	toggleAll.addEventListener("click", PromptsBrowser.promptScribe.onToggleAll);
 
 	const collectionSelect = document.createElement("select");
 	collectionSelect.className = "PBE_select";
@@ -118,6 +139,7 @@ PromptsBrowser.promptScribe.showHeader = (wrapper) => {
 		PromptsBrowser.promptScribe.update();
 	});
 
+	newPromptsHeader.appendChild(toggleAll);
 	newPromptsHeader.appendChild(toggleOnlyNew);
 	newPromptsHeader.appendChild(collectionSelect);
 	newPromptsHeader.appendChild(saveButton);
@@ -196,7 +218,7 @@ PromptsBrowser.promptScribe.update = (initial) => {
 
 	const footerBlock = document.createElement("div");
 	const closeButton = document.createElement("button");
-	footerBlock.className = "PBE_rowBlock PBE_rowBlock_wide PBE_stylesFooter";
+	footerBlock.className = "PBE_rowBlock PBE_rowBlock_wide";
 	closeButton.innerText = "Close";
 	closeButton.className = "PBE_button";
 

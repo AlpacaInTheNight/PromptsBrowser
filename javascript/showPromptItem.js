@@ -3,12 +3,13 @@ if(!window.PromptsBrowser) window.PromptsBrowser = {};
 
 PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
 	const {DEFAULT_PROMPT_WEIGHT} = PromptsBrowser.params;
-	const {index = 0, isShadowed = false, noSplash = false} = options;
+	const {index = 0, isShadowed = false, noSplash = false, url} = options;
 	const {id = "", weight = DEFAULT_PROMPT_WEIGHT, isExternalNetwork = false} = promptItem;
+	const imageSrc = url || PromptsBrowser.utils.getPromptPreviewURL(id, undefined);
 
 	const promptElement = document.createElement("div");
 	promptElement.className = "PBE_promptElement PBE_currentElement";
-	promptElement.style.backgroundImage = PromptsBrowser.utils.getPromptPreviewURL(id, undefined);
+	promptElement.style.backgroundImage = imageSrc;
 	promptElement.dataset.prompt = id;
 	promptElement.dataset.index = index;
 	promptElement.draggable = "true";
@@ -30,19 +31,23 @@ PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
 
 	}
 
-	if(weight > 1.1 && weight <= 1.3) {
+	if(weight > 1 && weight <= 1.2) {
 		promptElement.style.transform = "scale(1.1)";
 		promptElement.style.zIndex = 4;
 
-	} else if(weight > 1.3) {
+	} else if(weight > 1.2 && weight <= 1.3) {
 		promptElement.style.transform = "scale(1.2)";
 		promptElement.style.zIndex = 5;
+
+	} else if(weight > 1.3) {
+		promptElement.style.transform = "scale(1.3)";
+		promptElement.style.zIndex = 6;
 	}
 
 	if(!noSplash) {
 		const splashElement = document.createElement("div");
 		splashElement.className = "PBE_promptElementSplash PBE_currentElement";
-		splashElement.style.backgroundImage = PromptsBrowser.utils.getPromptPreviewURL(id);
+		splashElement.style.backgroundImage = imageSrc;
 		splashElement.innerText = id;
 		if(weight !== DEFAULT_PROMPT_WEIGHT) splashElement.innerText += " " + weight;
 

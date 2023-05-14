@@ -5,7 +5,8 @@ if(!window.PromptsBrowser) window.PromptsBrowser = {};
  * Synchronises text content of the textarea with the array of active prompts used by the extension.
  */
 PromptsBrowser.synchroniseCurrentPrompts = () => {
-	const {DEFAULT_PROMPT_WEIGHT} = PromptsBrowser.params;
+	const {normalizePrompt} = window.PromptsBrowser;
+	const {DEFAULT_PROMPT_WEIGHT, PROMPT_WEIGHT_FACTOR} = PromptsBrowser.params;
 	const {state} = PromptsBrowser;
 	const textArea = PromptsBrowser.DOMCache.containers[state.currentContainer].textArea
 	if(!textArea) return;
@@ -27,11 +28,6 @@ PromptsBrowser.synchroniseCurrentPrompts = () => {
 		let promptItem = prompts[i].trim();
 		if(!promptItem) continue;
 
-		//normalization. Replacing "_" to spaces and changing prompt to the lower case.
-		//TODO: probably should make this configurable by the user
-		promptItem = promptItem.toLowerCase();
-		promptItem = promptItem.replaceAll("_", " ");
-
 		//getting single prompt weight if it is using parenthesis syntax (currently not working with multiple prompts grouped by weight)
 		if( promptItem.startsWith("(") && promptItem.endsWith(")") ) {
 			let weightLvlStart = 1;
@@ -51,7 +47,7 @@ PromptsBrowser.synchroniseCurrentPrompts = () => {
 				promptItem = promptItem.replace(/^\(+/, '');
 				promptItem = promptItem.replace(/\)+$/, '');
 
-				inTextAreaWeight = Number( (DEFAULT_PROMPT_WEIGHT * weightLvlStart).toFixed(2));
+				inTextAreaWeight = Number( Math.pow(PROMPT_WEIGHT_FACTOR, weightLvlStart).toFixed(2) );
 			}
 			
 		}
@@ -76,10 +72,13 @@ PromptsBrowser.synchroniseCurrentPrompts = () => {
 			}
 		}
 
+		promptItem = normalizePrompt(promptItem);
+
 		let targetItem = activePrompts.find(item => item.id === promptItem);
 		
 		if(targetItem) {
 			if(targetItem.weight !== inTextAreaWeight) targetItem.weight = inTextAreaWeight;
+			
 		} else {
 			targetItem = {
 				id: promptItem,
