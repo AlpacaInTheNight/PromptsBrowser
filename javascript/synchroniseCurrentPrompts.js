@@ -72,7 +72,7 @@ PromptsBrowser.synchroniseCurrentPrompts = () => {
 			}
 		}
 
-		promptItem = normalizePrompt(promptItem);
+		if(!isExternalNetwork) promptItem = normalizePrompt(promptItem);
 
 		let targetItem = activePrompts.find(item => item.id === promptItem);
 		

@@ -580,9 +580,14 @@ PromptsBrowser.db.updateMixedList = () => {
 		if(!Array.isArray(collection)) return;
 
 		for(const collectionPrompt of collection) {
-			const {id, isExternalNetwork, previewImage} = collectionPrompt;
+			const {id, isExternalNetwork, previewImage, addAtStart, addAfter, addStart, addEnd} = collectionPrompt;
 			let newItem = {id, tags: [], category: [], collections: []};
 			if(addedIds[id]) newItem = unitedList.find(item => item.id === id);
+
+			if(addAtStart) newItem.addAtStart = addAtStart;
+			if(addAfter) newItem.addAfter = addAfter;
+			if(addStart) newItem.addStart = addStart;
+			if(addEnd) newItem.addEnd = addEnd;
 
 			if(isExternalNetwork) newItem.isExternalNetwork = true;
 			if(previewImage) newItem.previewImage = previewImage;

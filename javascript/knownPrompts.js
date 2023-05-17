@@ -18,6 +18,129 @@ PromptsBrowser.knownPrompts.init = (wrapper, positivePrompts, containerId) => {
 	wrapper.insertBefore(promptBrowser, positivePrompts);
 }
 
+PromptsBrowser.knownPrompts.onDragStart = (e) => {
+	const {state} = PromptsBrowser;
+	const splash = e.currentTarget.querySelector(".PBE_promptElementSplash");
+	splash.style.display = "none";
+
+	const promptItem = e.currentTarget.dataset.prompt;
+
+	state.dragItemId = promptItem;
+	e.dataTransfer.setData("text", promptItem);
+}
+
+PromptsBrowser.knownPrompts.onDragOver = (e) => {
+	e.preventDefault();
+}
+
+PromptsBrowser.knownPrompts.onDragEnter = (e) => {
+	const {state} = PromptsBrowser;
+	e.preventDefault();
+	const dragItem = e.currentTarget.dataset.prompt;
+	const dropItem = state.dragItemId;
+
+	if(!dragItem || !dropItem) return;
+	if(dragItem === dropItem) return;
+	
+	if(PromptsBrowser.utils.isInSameCollection(dragItem, dropItem)) e.currentTarget.classList.add("PBE_swap");
+}
+
+PromptsBrowser.knownPrompts.onDragLeave = (e) => {
+	e.currentTarget.classList.remove("PBE_swap");
+}
+
+PromptsBrowser.knownPrompts.onDrop = (e) => {
+	const {state} = PromptsBrowser;
+	const dragItem = e.currentTarget.dataset.prompt;
+	const dropItem = e.dataTransfer.getData("text");
+	e.currentTarget.classList.remove("PBE_swap");
+
+	state.dragItemId = undefined;
+	e.preventDefault();
+	e.stopPropagation();
+
+	if(PromptsBrowser.utils.isInSameCollection(dragItem, dropItem)) {
+		PromptsBrowser.db.movePrompt(dragItem, dropItem);
+	}
+}
+
+PromptsBrowser.knownPrompts.onHover = (e) => {
+	const splash = e.currentTarget.querySelector(".PBE_promptElementSplash");
+	const position = e.currentTarget.getBoundingClientRect();
+	splash.style.display = "";
+
+	splash.style.top = position.top + "px";
+}
+
+PromptsBrowser.knownPrompts.onPromptClick = (e) => {
+	const {united} = PromptsBrowser.data;
+	const {DEFAULT_PROMPT_WEIGHT} = PromptsBrowser.params;
+	const {state} = PromptsBrowser;
+	const activePrompts = PromptsBrowser.getCurrentPrompts();
+
+	const promptItem = e.currentTarget.dataset.prompt;
+	const targetItem = united.find(item => item.id === promptItem);
+	if(!targetItem) return;
+	const {addAtStart, addAfter, addStart, addEnd} = targetItem;
+
+	if(e.shiftKey) {
+		state.editingPrompt = promptItem;
+		PromptsBrowser.promptEdit.update();
+
+		return;
+	}
+
+	if(e.metaKey || e.ctrlKey) {
+		let targetCollection = state.filterCollection;
+		if(!targetCollection) {
+			
+			if(!targetItem.collections) return;
+			const firstCollection = targetItem.collections[0];
+			if(!firstCollection) return;
+			targetCollection = targetItem.collections[0];
+		}
+
+		if( confirm(`Remove prompt "${promptItem}" from catalogue "${targetCollection}"?`) ) {
+			if(!PromptsBrowser.data.original[targetCollection]) return;
+
+			PromptsBrowser.data.original[targetCollection] = PromptsBrowser.data.original[targetCollection].filter(item => item.id !== promptItem);
+
+			PromptsBrowser.db.saveJSONData(targetCollection);
+			PromptsBrowser.db.movePreviewImage(promptItem, targetCollection, targetCollection, "delete");
+			PromptsBrowser.db.updateMixedList();
+			PromptsBrowser.promptEdit.update();
+			PromptsBrowser.currentPrompts.update();
+		}
+
+		return;
+	}
+	
+	if(activePrompts.some(item => item.id === promptItem)) return;
+
+	const newPrompt = {id: promptItem, weight: DEFAULT_PROMPT_WEIGHT, isExternalNetwork: targetItem.isExternalNetwork};
+
+	if(addStart) window.PromptsBrowser.addStrToActive(addStart, true);
+
+	if(addAfter) {
+		if(addAtStart) {
+			window.PromptsBrowser.addStrToActive(addAfter, true);
+			activePrompts.unshift(newPrompt);
+
+		} else {
+			activePrompts.push(newPrompt);
+			window.PromptsBrowser.addStrToActive(addAfter, false);
+		}
+
+	} else {
+		if(addAtStart) activePrompts.unshift(newPrompt);
+		else activePrompts.push(newPrompt);
+	}
+
+	if(addEnd) window.PromptsBrowser.addStrToActive(addEnd, false);
+
+	PromptsBrowser.currentPrompts.update();
+}
+
 PromptsBrowser.knownPrompts.showHeader = (wrapper) => {
 	const {state} = PromptsBrowser;
 
@@ -226,102 +349,19 @@ PromptsBrowser.knownPrompts.update = () => {
 		promptElement.appendChild(splashElement);
 		promptElement.innerHTML += id;
 
-		promptElement.addEventListener("dragstart", (e) => {
-			const splash = e.currentTarget.querySelector(".PBE_promptElementSplash");
-			splash.style.display = "none";
+		promptElement.addEventListener("dragstart", PromptsBrowser.knownPrompts.onDragStart);
 
-			const promptItem = e.currentTarget.dataset.prompt;
+		promptElement.addEventListener("dragover", PromptsBrowser.knownPrompts.onDragOver);
 
-			state.dragItemId = promptItem;
-			e.dataTransfer.setData("text", promptItem);
-		});
+		promptElement.addEventListener("dragenter", PromptsBrowser.knownPrompts.onDragEnter);
 
-		promptElement.addEventListener("dragover", (e) => {
-			e.preventDefault();
-		});
+		promptElement.addEventListener("dragleave", PromptsBrowser.knownPrompts.onDragLeave);
 
-		promptElement.addEventListener("dragenter", (e) => {
-			e.preventDefault();
-			const dragItem = e.currentTarget.dataset.prompt;
-			const dropItem = state.dragItemId;
-
-			if(!dragItem || !dropItem) return;
-			if(dragItem === dropItem) return;
-			
-			if(PromptsBrowser.utils.isInSameCollection(dragItem, dropItem)) e.currentTarget.classList.add("PBE_swap");
-		});
-
-		promptElement.addEventListener("dragleave", (e) => {
-			e.currentTarget.classList.remove("PBE_swap");
-		});
-
-		promptElement.addEventListener("drop", (e) => {
-			const dragItem = e.currentTarget.dataset.prompt;
-			const dropItem = e.dataTransfer.getData("text");
-			e.currentTarget.classList.remove("PBE_swap");
-
-			state.dragItemId = undefined;
-			e.preventDefault();
-			e.stopPropagation();
-
-			if(PromptsBrowser.utils.isInSameCollection(dragItem, dropItem)) {
-				PromptsBrowser.db.movePrompt(dragItem, dropItem);
-			}
-		});
+		promptElement.addEventListener("drop", PromptsBrowser.knownPrompts.onDrop);
 	
-		promptElement.addEventListener("click", (e) => {
-			const activePrompts = PromptsBrowser.getCurrentPrompts();
+		promptElement.addEventListener("click", PromptsBrowser.knownPrompts.onPromptClick);
 
-			const promptItem = e.currentTarget.dataset.prompt;
-			const targetItem = united.find(item => item.id === promptItem);
-			if(!targetItem) return;
-
-			if(e.shiftKey) {
-				state.editingPrompt = promptItem;
-				PromptsBrowser.promptEdit.update();
-
-				return;
-			}
-
-			if(e.metaKey || e.ctrlKey) {
-				let targetCollection = state.filterCollection;
-				if(!targetCollection) {
-					
-					if(!targetItem.collections) return;
-					const firstCollection = targetItem.collections[0];
-					if(!firstCollection) return;
-					targetCollection = targetItem.collections[0];
-				}
-
-				if( confirm(`Remove prompt "${promptItem}" from catalogue "${targetCollection}"?`) ) {
-					if(!PromptsBrowser.data.original[targetCollection]) return;
-
-					PromptsBrowser.data.original[targetCollection] = PromptsBrowser.data.original[targetCollection].filter(item => item.id !== promptItem);
-
-					PromptsBrowser.db.saveJSONData(targetCollection);
-					PromptsBrowser.db.movePreviewImage(promptItem, targetCollection, targetCollection, "delete");
-					PromptsBrowser.db.updateMixedList();
-					PromptsBrowser.promptEdit.update();
-					PromptsBrowser.currentPrompts.update();
-				}
-
-				return;
-			}
-			
-			if(activePrompts.some(item => item.id === promptItem)) return;
-
-			activePrompts.push({id: promptItem, weight: DEFAULT_PROMPT_WEIGHT, isExternalNetwork: targetItem.isExternalNetwork});
-
-			PromptsBrowser.currentPrompts.update();
-		});
-
-		promptElement.addEventListener("mouseover", (e) => {
-			const splash = e.currentTarget.querySelector(".PBE_promptElementSplash");
-			const position = e.currentTarget.getBoundingClientRect();
-			splash.style.display = "";
-
-			splash.style.top = position.top + "px";
-		});
+		promptElement.addEventListener("mouseover", PromptsBrowser.knownPrompts.onHover);
 
 		proptsContainer.appendChild(promptElement);
 		shownItems++;

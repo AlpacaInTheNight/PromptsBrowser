@@ -24,7 +24,7 @@ PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
 		promptElement.appendChild(weightContainer);
 	}
 
-	if(weight <= 1 && weight > 0.6) {
+	if(weight < 1 && weight > 0.6) {
 		promptElement.style.transform = "scale(0.9)";
 		promptElement.style.zIndex = 3;
 		weightContainer.style.color = "green";

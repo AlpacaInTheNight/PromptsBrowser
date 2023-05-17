@@ -53,3 +53,30 @@ window.PromptsBrowser.normalizePrompt = function(prompt) {
 
 	return prompt;
 }
+
+window.PromptsBrowser.stringToPromptsArray = function(str) {
+	const {DEFAULT_PROMPT_WEIGHT} = PromptsBrowser.params;
+	if(!str) return false;
+	const promptsArray = [];
+
+	const arr = str.split(",");
+	for(let promptItem of arr) {
+		promptItem = promptItem.trim();
+		if(!promptItem) continue;
+
+		const isExternal = promptItem[0] === "<";
+		promptsArray.push({id: promptItem, weight: DEFAULT_PROMPT_WEIGHT, isExternalNetwork: isExternal});
+	}
+
+	return promptsArray;
+}
+
+window.PromptsBrowser.addStrToActive = function(str, atStart = false) {
+	const arr = window.PromptsBrowser.stringToPromptsArray(str);
+	if(!arr || !arr.length) return;
+	const activePrompts = PromptsBrowser.getCurrentPrompts();
+
+	for(let prompt of arr) {
+		atStart ? activePrompts.unshift(prompt) : activePrompts.push(prompt);
+	}
+}

@@ -110,21 +110,48 @@ PromptsBrowser.promptWordTooltip.onClickHint = (e) => {
 }
 
 PromptsBrowser.promptWordTooltip.onApplyHint = (start, end, newPrompt) => {
+	const {united} = PromptsBrowser.data;
 	const {state} = PromptsBrowser;
 	const autoCompleteBox = PromptsBrowser.DOMCache.containers[state.currentContainer].autocompliteWindow;
 	const textArea = PromptsBrowser.DOMCache.containers[state.currentContainer].textArea;
 	if(!textArea || !autoCompleteBox) return;
+	const targetItem = united.find(item => item.id === newPrompt);
 	autoCompleteBox.style.display = "none";
-
-	const prefix = textArea.value.substring(0, start);
-	const postfix = textArea.value.substring(end);
-
 	let newValue = "";
-	if(prefix) newValue += prefix + " ";
-	newValue += newPrompt.toLowerCase();
 
-	if(postfix) newValue += postfix;
-	else newValue += ", ";
+	if(targetItem && targetItem.addAtStart) {
+		const oldValue = textArea.value.substring(0, start) + textArea.value.substring(end);
+		if(targetItem.isExternalNetwork) newPrompt = `<${newPrompt}>`;
+		if(targetItem.addAfter) newPrompt += ", " + targetItem.addAfter + ", ";
+
+		newValue += newPrompt;
+
+		if(targetItem.addStart) newValue += targetItem.addStart + ", ";
+		newValue += oldValue;
+
+		if(targetItem.addEnd) newValue += targetItem.addEnd;
+
+	} else {
+		const prefix = textArea.value.substring(0, start);
+		const postfix = textArea.value.substring(end);
+
+		if(targetItem && targetItem.addStart) newValue += targetItem.addStart + ", ";
+		
+		if(prefix) newValue += prefix + " ";
+	
+		if(targetItem) {
+			if(targetItem.isExternalNetwork) newPrompt = `<${newPrompt}>`;
+			if(targetItem.addAfter) newPrompt += ", " + targetItem.addAfter;
+	
+			newValue += newPrompt;
+	
+		} else newValue += newPrompt;
+	
+		if(postfix) newValue += postfix;
+		else newValue += ", ";
+
+		if(targetItem && targetItem.addEnd) newValue += targetItem.addEnd;
+	}
 
 	textArea.value = newValue;
 

@@ -292,8 +292,8 @@
 	font-size: 18px;
 
 	width: 600px;
-	height: 500px;
-	top: calc(50% - 250px);
+	height: 700px;
+	top: calc(50% - 350px);
 	left: calc(50% - 300px);
 }
 
@@ -558,7 +558,7 @@
 
 .PBE_hintItem {
 	font-family: sans-serif;
-	text-transform: capitalize;
+	/* text-transform: capitalize; */
 	color: aliceblue;
 	text-shadow: 1px 1px 1px black;
 	padding: 0 10px;
