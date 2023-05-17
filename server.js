@@ -487,6 +487,86 @@ const server = http.createServer((req, res) => {
 			return "ok";
 		});
 	}
+
+	if(req.method === "POST" && req.url === "/newCollection") {
+		let body = "";
+
+		req.on("data", chunk => {
+			body += chunk.toString();
+		});
+
+		req.on("end", () => {
+			const postMessage = JSON.parse(body);
+			const id = postMessage.id;
+			const mode = postMessage.mode;
+			if(!id || !mode) return "failed";
+			const d = new Date();
+
+			const pathToCollection = promptsCataloguePath + path.sep + id + path.sep;
+
+			if(fs.existsSync(pathToCollection)) {
+				console.log(d.toLocaleTimeString() + `-> failed to create new collection: id ${id} already exists.`);
+
+				return "false";
+			}
+
+			fs.mkdirSync(pathToCollection);
+			fs.mkdirSync(pathToCollection + path.sep + "preview");
+
+			const metaJSON = {
+				format: mode
+			};
+
+			fs.writeFileSync(pathToCollection + path.sep + "meta.json", JSON.stringify(metaJSON, null, "\t"));
+
+			if(mode === "expanded") {
+				fs.mkdirSync(pathToCollection + path.sep + "prompts");
+				const orderJSON = [];
+				fs.writeFileSync(pathToCollection + path.sep + "order.json", JSON.stringify(orderJSON, null, "\t"));
+
+			} else {
+				const dataJSON = [];
+				fs.writeFileSync(pathToCollection + path.sep + "data.json", JSON.stringify(dataJSON, null, "\t"));
+			}
+
+			console.log(d.toLocaleTimeString() + `-> created new prompts collection: ${id}.`);
+
+			return "ok";
+		});
+	}
+
+	if(req.method === "POST" && req.url === "/newStylesCollection") {
+		let body = "";
+
+		req.on("data", chunk => {
+			body += chunk.toString();
+		});
+
+		req.on("end", () => {
+			const postMessage = JSON.parse(body);
+			const id = postMessage.id;
+			if(!id) return "failed";
+			const d = new Date();
+
+			const pathToCollection = stylesCataloguePath + path.sep + id + path.sep;
+
+			if(fs.existsSync(pathToCollection)) {
+				console.log(d.toLocaleTimeString() + `-> failed to create new styles collection: id ${id} already exists.`);
+
+				return "false";
+			}
+
+			fs.mkdirSync(pathToCollection);
+			fs.mkdirSync(pathToCollection + path.sep + "preview");
+
+			const dataJSON = [];
+			fs.writeFileSync(pathToCollection + path.sep + "data.json", JSON.stringify(dataJSON, null, "\t"));
+
+			console.log(d.toLocaleTimeString() + `-> created new styles collection: ${id}.`);
+
+			return "ok";
+		});
+	}
 	
 	res.end("failed");
 	

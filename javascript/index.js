@@ -230,6 +230,46 @@ PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionId) => {
 	return url;
 }
 
+PromptsBrowser.db.createNewCollection = (id, mode = "short") => {
+	if(!id) return;
+
+	(async () => {
+		const rawResponse = await fetch('http://127.0.0.1:3000/newCollection', {
+			method: 'POST',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({id, mode})
+		});
+		//const answer = await rawResponse.json();
+
+		PromptsBrowser.db.loadDatabase();
+		PromptsBrowser.knownPrompts.update();
+		PromptsBrowser.currentPrompts.update();
+	})();
+}
+
+PromptsBrowser.db.createNewStylesCollection = (id) => {
+	if(!id) return;
+
+	(async () => {
+		const rawResponse = await fetch('http://127.0.0.1:3000/newStylesCollection', {
+			method: 'POST',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({id})
+		});
+		//const answer = await rawResponse.json();
+
+		PromptsBrowser.db.loadDatabase();
+		PromptsBrowser.knownPrompts.update();
+		PromptsBrowser.currentPrompts.update();
+	})();
+}
+
 PromptsBrowser.db.movePreviewImage = (item, from, to, type) => {
 	const {state} = PromptsBrowser;
 
@@ -571,9 +611,7 @@ PromptsBrowser.db.updateMixedList = () => {
 	PromptsBrowser.data.united = unitedList;
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-	PromptsBrowser.loadConfig();
-
+PromptsBrowser.db.loadDatabase = () => {
 	fetch("http://127.0.0.1:3000/getPrompts", {
 		method: 'GET',
 	}).then(data => data.json()).then(res => {
@@ -584,6 +622,12 @@ document.addEventListener('DOMContentLoaded', function() {
 		PromptsBrowser.data.original = prompts;
 		PromptsBrowser.db.updateMixedList();
 	});
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+	PromptsBrowser.loadConfig();
+
+	PromptsBrowser.db.loadDatabase();
 	
 	PromptsBrowser.initPromptBrowser();
 });
