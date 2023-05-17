@@ -319,6 +319,9 @@
 }
 
 .PBE_promptElement {
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
 	position: relative;
 	width: 50px;
 	height: 100px;
@@ -335,6 +338,12 @@
 	text-transform: capitalize;
 	cursor: pointer;
 	user-select: none;
+}
+
+.PBE_promptElementWeight {
+	position: absolute;
+	bottom: 0;
+	font-size: 20px;
 }
 
 .PBE_externalNetwork {
@@ -412,6 +421,11 @@
 	top: auto;
 	left: auto;
 	margin-top: 100px;
+}
+
+.PBE_promptElementSplash .PBE_promptElementWeight {
+	bottom: auto;
+	top: 0;
 }
 
 .PBE_promptElement:hover {
