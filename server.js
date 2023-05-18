@@ -123,6 +123,7 @@ const server = http.createServer((req, res) => {
 			const collection = postMessage.collection;
 			const isExternalNetwork = postMessage.isExternalNetwork;
 			if(!src || !prompt || !collection) return "failed";
+			const d = new Date();
 
 			const urlArr = src.split("/");
 
@@ -134,6 +135,12 @@ const server = http.createServer((req, res) => {
 			const safeFileName = utils.makeFileNameSafe(prompt);
 			const newFileName = `${safeFileName}.${fileExtension}`;
 			savePath += newFileName;
+
+			if(!fs.existsSync(src)) {
+				console.log(d.toLocaleTimeString() + `-> failed to save preview: file "${src}" not found`);
+
+				return;
+			}
 
 			fs.copyFile(src, savePath, (err) => {
 				if (err) throw err;
@@ -185,7 +192,6 @@ const server = http.createServer((req, res) => {
 				}
 			}
 
-			const d = new Date();
 			console.log(d.toLocaleTimeString() + "-> updated preview and data for: " + collection);
 			
 			return "ok";

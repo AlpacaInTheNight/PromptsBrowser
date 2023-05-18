@@ -161,8 +161,9 @@ PromptsBrowser.promptWordTooltip.onApplyHint = (start, end, newPrompt) => {
 
 PromptsBrowser.promptWordTooltip.processCarretPosition = (e) => {
 	const doc = PromptsBrowser.gradioApp();
+	const activeElement = doc.activeElement || document.activeElement;
 	const textArea = e.currentTarget;
-	const isFocused = doc.activeElement === textArea;
+	const isFocused = activeElement === textArea;
 	if(!isFocused) return;
 	clearTimeout(PromptsBrowser.promptWordTooltip.unfocusTimeout);
 

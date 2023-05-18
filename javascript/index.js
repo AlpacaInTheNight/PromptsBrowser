@@ -160,7 +160,7 @@ PromptsBrowser.db.movePrompt = (promptA, promptB, collectionId) => {
 PromptsBrowser.gradioApp = () => {
 	const elems = document.getElementsByTagName('gradio-app')
 	const gradioShadowRoot = elems.length == 0 ? null : elems[0].shadowRoot
-	return !!gradioShadowRoot ? gradioShadowRoot : document;
+	return !!gradioShadowRoot ? gradioShadowRoot : document.body;
 }
 
 /**
@@ -331,6 +331,9 @@ PromptsBrowser.db.savePromptPreview = (callUpdate = true) => {
 	if(fileMarkIndex === -1) return;
 	src = src.slice(fileMarkIndex + 5);
 
+	const cacheMarkIndex = src.indexOf("?");
+	if(cacheMarkIndex) src = src.substring(0, cacheMarkIndex);
+
 	const imageExtension = src.split('.').pop();
 
 	if(!PromptsBrowser.data.original[state.savePreviewCollection]) return;
@@ -462,19 +465,19 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
 	const {DOMCache} = PromptsBrowser;
 	const {united} = PromptsBrowser.data;
 	if(!DOMCache.containers) DOMCache.containers = {};
+	const mainContainer = PromptsBrowser.gradioApp();
 
 	if(tries > 10) {
 		PromptsBrowser.utils.log("No prompt wrapper container found or server did not returned prompts data.");
 		return;
 	}
 
-	const checkContainer = PromptsBrowser.gradioApp().getElementById("txt2img_prompt_container");
+	const checkContainer = mainContainer.querySelector("#txt2img_prompt_container");
 	if(!checkContainer || !united) {
 		window.__timeoutPBUpdatePrompt = setTimeout( () => PromptsBrowser.initPromptBrowser(tries + 1), 1000 );
 		return;
 	}
-
-	const mainContainer = PromptsBrowser.gradioApp();
+	
 	DOMCache.mainContainer = mainContainer;
 
 	const tabsContainer = mainContainer.querySelector("#tabs > div:first-child");
@@ -488,12 +491,12 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
 		const domContainer = DOMCache.containers[containerId];
 
 		if(container.prompt) {
-			const promptContainer = PromptsBrowser.gradioApp().getElementById(container.prompt);
+			const promptContainer = mainContainer.querySelector(`#${container.prompt}`);
 			if(promptContainer.dataset.loadedpbextension) continue;
 			promptContainer.dataset.loadedpbextension = "true";
 
-			const positivePrompts = PromptsBrowser.gradioApp().querySelector(`#${container.prompt} > div`);
-			const negativePrompts = PromptsBrowser.gradioApp().querySelector(`#${container.prompt} > div:nth-child(2)`);
+			const positivePrompts = mainContainer.querySelector(`#${container.prompt} > div`);
+			const negativePrompts = mainContainer.querySelector(`#${container.prompt} > div:nth-child(2)`);
 			if(!positivePrompts || !negativePrompts) {
 				PromptsBrowser.utils.log(`No prompt containers found for ${containerId}`);
 				continue;
@@ -504,17 +507,17 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
 			domContainer.negativePrompts = negativePrompts;
 
 			if(container.buttons) {
-				const buttonsContainer = PromptsBrowser.gradioApp().getElementById(container.buttons);
+				const buttonsContainer = mainContainer.querySelector(`#${container.buttons}`);
 				if(buttonsContainer) {
 					domContainer.buttonsContainer = buttonsContainer;
 
-					const generateButton = buttonsContainer.querySelector(".gr-button-primary");
+					const generateButton = buttonsContainer.querySelector(".primary");
 					if(generateButton) domContainer.generateButton = generateButton;
 				}
 			}
 
 			if(container.results) {
-				const resultsContainer = PromptsBrowser.gradioApp().getElementById(container.results);
+				const resultsContainer = mainContainer.querySelector(`#${container.results}`);
 				if(resultsContainer) {
 					domContainer.resultsContainer = resultsContainer;
 				}
