@@ -1,4 +1,8 @@
 
+.interrogate-col > button {
+	flex: 0 !important;
+}
+
 .PBE_Scrollbar::-webkit-scrollbar {
 	width: 4px;
 	height: 6px;
