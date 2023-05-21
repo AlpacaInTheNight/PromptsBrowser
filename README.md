@@ -121,3 +121,32 @@ The collections server runs on Node.js at the moment.
 1. In the `Tags` block you can write tags and add or remove them from all selected prompts.
 
 1. By pressing `Generate` button you will start generating preview for all selected prompts.
+
+### Prompt editor
+
+![](editPrompt.jpg)
+
+1. By clicking on prompt in the `Known prompts list` holding `shift` key you will open target Prompt Editor window.
+
+1. If you have same prompt in different collections you can switch between them with collection selector near prompt name.
+
+1. If you have more than one collection installed, you can select another collection and `copy` or `move` target prompt there.
+
+1. `Tags` and `Categories` lists shows prompt tags and collections. You can hold `ctrl/meta` and click on them to `remove` them.
+
+1. You can enter new tags and click `Add tag` button to add them to the target prompt.
+
+1. You can select new category and click `Add category` to add new category to the target prompt.
+
+1. `Add at the beginning` - if checked will always add prompt to the start of other prompts. By default will add new prompt at the end of active prompts list.
+
+1. `Subsequent prompts` - prompts to add right after target prompt.
+
+1. `Add prompts at the start` - prompts to add at the start of the active prompts.
+
+1. `Add prompts at the end` - prompts to add at the end of the active prompts.
+
+1. You can add comment for the prompt in the comment text area.
+
+1. Press `Save` to save your changes and close window or `cancel` to close window without saving.
+
