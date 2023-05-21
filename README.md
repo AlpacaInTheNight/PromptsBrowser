@@ -172,3 +172,7 @@ The collections server runs on Node.js at the moment.
 1. `Transform prompts to lower case` - will change prompts in the prompts textarea to be lower case.
 
 1. `Spaces in prompts transform` - changes the handling of spaces in multiword prompts. Can be `Do nothing`, `To space` and `To underscore`.
+
+### Autocomplite
+
+1. When you manually type prompts, a menu with similar prompts from the database of known prompts will be displayed. You can finish a prompt from the autocomplite menu by clicking on it or by selecting it with the up and down arrows and pressing Enter.
