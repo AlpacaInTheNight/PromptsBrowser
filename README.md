@@ -1,6 +1,18 @@
 # Prompts Browser Extension 0.8
 Prompts Browser Extension for the AUTOMATIC1111/stable-diffusion-webui client
 
+1. [Installation](#installation)
+1. [Known Prompts Browser](#known-prompts-browser)
+1. [Active Prompts](#active-prompts)
+1. [Adding new prompts to the collection](#adding-new-prompts-to-the-collection)
+1. [Generating previews for prompts](#generating-previews-for-prompts)
+1. [Prompt tools](#prompt-tools)
+1. [Styles](#styles)
+1. [Collection editor](#collection-editor)
+1. [Prompt editor](#prompt-editor)
+1. [Setup window](#setup-window)
+1. [Autocomplite](#autocomplite)
+
 ![](preview.jpg)
 
 ## Installation:
