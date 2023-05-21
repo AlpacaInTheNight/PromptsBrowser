@@ -150,3 +150,25 @@ The collections server runs on Node.js at the moment.
 
 1. Press `Save` to save your changes and close window or `cancel` to close window without saving.
 
+
+### Setup window
+
+![](setup.jpg)
+
+1. Click on `Setup` button at the top menu to open Setup window.
+
+1. `New prompts collections` - will open creation of the new prompts collection.
+
+1. `Collection name` - name of the collection. A folder with the same name will be created.
+
+1. `Store format` - the way prompts are stored. In the `short` format all prompts data will be saved in the file `data.json`. In the `expanded` format a folder `prompts` will be added to the collection folder and every prompt will be stored as a separate file. The expanded format makes it easier to work with the collection when using version control systems like Git.
+
+1. `New styles collections` - will open creation of the new styles collection.
+
+1. `Below 1 scroll weight` - how much weight one mouse wheel movement will change when below weight 1.
+
+1. `Above 1 scroll weight` - how much weight one mouse wheel movement will change when above weight 1.
+
+1. `Transform prompts to lower case` - will change prompts in the prompts textarea to be lower case.
+
+1. `Spaces in prompts transform` - changes the handling of spaces in multiword prompts. Can be `Do nothing`, `To space` and `To underscore`.
