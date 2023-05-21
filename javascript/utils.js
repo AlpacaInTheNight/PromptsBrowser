@@ -54,8 +54,68 @@ window.PromptsBrowser.normalizePrompt = function(prompt) {
 	return prompt;
 }
 
+/**
+ * Converts prompt string to prompt object (including meta data like weight and external network).
+ * @param {*} promptItem 
+ */
+window.PromptsBrowser.promptStringToObject = function(promptItem) {
+	const {DEFAULT_PROMPT_WEIGHT, PROMPT_WEIGHT_FACTOR} = PromptsBrowser.params;
+
+	//prompt weight
+	let weight = DEFAULT_PROMPT_WEIGHT;
+
+	//prompt is a marker for usage of LORA/Hypernetwork
+	let isExternalNetwork = false;
+
+	//getting single prompt weight if it is using parenthesis syntax (currently not working with multiple prompts grouped by weight)
+	if( promptItem.startsWith("(") && promptItem.endsWith(")") ) {
+		let weightLvlStart = 1;
+		let weightLvlEnd = 1;
+
+		if( promptItem.startsWith("((") ) {
+			weightLvlStart = 2;
+			if(promptItem.startsWith("(((")) weightLvlStart = 3;
+		}
+
+		if( promptItem.endsWith("))") ) {
+			weightLvlEnd = 2;
+			if( promptItem.endsWith(")))") ) weightLvlEnd = 3;
+		}
+
+		if(weightLvlStart === weightLvlEnd) {
+			promptItem = promptItem.replace(/^\(+/, '');
+			promptItem = promptItem.replace(/\)+$/, '');
+
+			weight = Number( Math.pow(PROMPT_WEIGHT_FACTOR, weightLvlStart).toFixed(2) );
+		}
+		
+	}
+
+	//detecting external network prompt
+	if( promptItem.startsWith("<") && promptItem.endsWith(">") ) {
+		isExternalNetwork = true;
+		promptItem = promptItem.substring(1);
+		promptItem = promptItem.substring(0, promptItem.length - 1);
+	}
+
+	//detecting weight marker
+	if(promptItem.includes(":")) {
+		const promptArr = promptItem.split(":");
+		const weightDataItem = Number(promptArr.pop());
+
+		if(!Number.isNaN(weightDataItem)) {
+			const base = promptArr.join(":").trim();
+			promptItem = base;
+			weight = weightDataItem;
+		}
+	}
+
+	promptObject = {id: promptItem, weight, isExternalNetwork};
+
+	return promptObject;
+}
+
 window.PromptsBrowser.stringToPromptsArray = function(str) {
-	const {DEFAULT_PROMPT_WEIGHT} = PromptsBrowser.params;
 	if(!str) return false;
 	const promptsArray = [];
 
@@ -64,8 +124,8 @@ window.PromptsBrowser.stringToPromptsArray = function(str) {
 		promptItem = promptItem.trim();
 		if(!promptItem) continue;
 
-		const isExternal = promptItem[0] === "<";
-		promptsArray.push({id: promptItem, weight: DEFAULT_PROMPT_WEIGHT, isExternalNetwork: isExternal});
+		const newPrompt = window.PromptsBrowser.promptStringToObject(promptItem);
+		promptsArray.push(newPrompt);
 	}
 
 	return promptsArray;
@@ -77,6 +137,8 @@ window.PromptsBrowser.addStrToActive = function(str, atStart = false) {
 	const activePrompts = PromptsBrowser.getCurrentPrompts();
 
 	for(let prompt of arr) {
+		if(activePrompts.some(item => item.id === prompt.id)) continue;
+		
 		atStart ? activePrompts.unshift(prompt) : activePrompts.push(prompt);
 	}
 }

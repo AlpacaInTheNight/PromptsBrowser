@@ -139,7 +139,7 @@ const server = http.createServer((req, res) => {
 			if(!fs.existsSync(src)) {
 				console.log(d.toLocaleTimeString() + `-> failed to save preview: file "${src}" not found`);
 
-				return;
+				return "failed";
 			}
 
 			fs.copyFile(src, savePath, (err) => {
@@ -457,6 +457,7 @@ const server = http.createServer((req, res) => {
 			const style = postMessage.style;
 			const collection = postMessage.collection;
 			if(!src || !style || !collection) return "failed";
+			const d = new Date();
 
 			const urlArr = src.split("/");
 
@@ -473,6 +474,12 @@ const server = http.createServer((req, res) => {
 			const newFileName = `${safeFileName}.${fileExtension}`;
 			savePath += newFileName;
 
+			if(!fs.existsSync(src)) {
+				console.log(d.toLocaleTimeString() + `-> failed to save preview: file "${src}" not found`);
+
+				return "failed";
+			}
+
 			fs.copyFile(src, savePath, (err) => {
 				if (err) throw err;
 			});
@@ -487,7 +494,6 @@ const server = http.createServer((req, res) => {
 				fs.writeFileSync(pathToDataFile, JSON.stringify(stylesJSON, null, "\t"));
 			}
 
-			const d = new Date();
 			console.log(d.toLocaleTimeString() + "-> updated style preview for: " + style);
 			
 			return "ok";

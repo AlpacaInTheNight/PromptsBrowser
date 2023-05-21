@@ -87,7 +87,10 @@ PromptsBrowser.collectionTools.checkProgressState = () => {
 	const resultsContainer = PromptsBrowser.DOMCache.containers[state.currentContainer].resultsContainer;
 	if(!resultsContainer) return;
 
-	//progress bar is being added during generation and is removed from the DOM after generation finished.
+	/**
+	 * Progress bar is being added during generation and is removed from the DOM after generation finished.
+	 * Its presence serves as a marker when checking the state of generation.
+	 */
 	const progressBar = resultsContainer.querySelector(".progressDiv");
 
 	if(!progressBar) {

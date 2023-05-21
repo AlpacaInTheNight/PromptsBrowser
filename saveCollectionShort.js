@@ -7,7 +7,8 @@ function saveCollectionShort(pathToDataFile, data, collection) {
 	const rawdata = fs.readFileSync(pathToDataFile);
 	const prevJSON = JSON.parse(rawdata);
 
-	const jsonData = JSON.parse(data);
+	let jsonData = JSON.parse(data);
+	jsonData = jsonData.filter(item => item.id !== undefined);
 
 	fs.writeFileSync(pathToDataFile, JSON.stringify(jsonData, null, "\t"));
 	const d = new Date();

@@ -185,10 +185,10 @@ PromptsBrowser.utils.collectionHavePreview = (prompt, collectionId) => {
 }
 
 PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionId) => {
+	const {EMPTY_CARD_GRADIENT, NEW_CARD_GRADIENT} = PromptsBrowser.params;
 	if(!prompt) return NEW_CARD_GRADIENT;
 	
 	const {united, original} = PromptsBrowser.data;
-	const {EMPTY_CARD_GRADIENT, NEW_CARD_GRADIENT} = PromptsBrowser.params;
 	const {state} = PromptsBrowser;
 	let targetPrompt = {};
 
@@ -315,11 +315,12 @@ PromptsBrowser.db.saveJSONData = (collectionId) => {
 PromptsBrowser.db.savePromptPreview = (callUpdate = true) => {
 	const {state} = PromptsBrowser;
 	const {united} = PromptsBrowser.data;
+	const {selectedPrompt, savePreviewCollection, currentContainer} = state;
 
-	const imageArea = PromptsBrowser.DOMCache.containers[state.currentContainer].imageArea;
+	const imageArea = PromptsBrowser.DOMCache.containers[currentContainer].imageArea;
 	if(!imageArea) return;
-	if(!state.selectedPrompt) return;
-	if(!state.savePreviewCollection) return;
+	if(!selectedPrompt) return;
+	if(!savePreviewCollection) return;
 	
 	const activePrompts = PromptsBrowser.getCurrentPrompts();
 	const imageContainer = imageArea.querySelector("img");
@@ -336,14 +337,46 @@ PromptsBrowser.db.savePromptPreview = (callUpdate = true) => {
 
 	const imageExtension = src.split('.').pop();
 
-	if(!PromptsBrowser.data.original[state.savePreviewCollection]) return;
+	if(!PromptsBrowser.data.original[savePreviewCollection]) return;
 
 	const targetCurrentPrompt = activePrompts.find(item => item.id === state.selectedPrompt);
 	if(targetCurrentPrompt && targetCurrentPrompt.isExternalNetwork) isExternalNetwork = true;
 
+	const saveData = {src, prompt: selectedPrompt, collection: savePreviewCollection};
+	if(isExternalNetwork) saveData.isExternalNetwork = true;
+
+	let targetItem = united.find(item => item.id === selectedPrompt);
+	if(!targetItem) {
+		targetItem = {id: selectedPrompt, tags: [], category: [], collections: []};
+		if(isExternalNetwork) targetItem.isExternalNetwork = true;
+		united.push(targetItem);
+	}
+
+	if(!targetItem.collections) targetItem.collections = [];
+	if(!targetItem.collections.includes(savePreviewCollection)) {
+		targetItem.collections.push(savePreviewCollection);
+	}
+
+	let originalItem = PromptsBrowser.data.original[savePreviewCollection].find(item => item.id === selectedPrompt);
+	if(!originalItem) {
+		originalItem = {id: selectedPrompt, tags: [], category: []};
+		if(isExternalNetwork) originalItem.isExternalNetwork = true;
+		PromptsBrowser.data.original[savePreviewCollection].push(originalItem);
+	}
+
+	originalItem.previewImage = imageExtension;
+
+	if(callUpdate) {
+		state.selectedPrompt = undefined;
+		state.filesIteration++;
+		PromptsBrowser.db.updateMixedList();
+		
+		PromptsBrowser.previewSave.update();
+		PromptsBrowser.knownPrompts.update();
+		PromptsBrowser.currentPrompts.update(true);
+	}
+
 	(async () => {
-		const saveData = {src, prompt: state.selectedPrompt, collection: state.savePreviewCollection};
-		if(isExternalNetwork) saveData.isExternalNetwork = true;
 
 		const rawResponse = await fetch('http://127.0.0.1:3000/savePreview', {
 			method: 'POST',
@@ -355,36 +388,6 @@ PromptsBrowser.db.savePromptPreview = (callUpdate = true) => {
 		});
 		//const content = await rawResponse.json();
 
-		let targetItem = united.find(item => item.id === state.selectedPrompt);
-		if(!targetItem) {
-			targetItem = {id: state.selectedPrompt, tags: [], category: [], collections: []};
-			if(isExternalNetwork) targetItem.isExternalNetwork = true;
-			united.push(targetItem);
-		}
-
-		if(!targetItem.collections) targetItem.collections = [];
-		if(!targetItem.collections.includes(state.savePreviewCollection)) {
-			targetItem.collections.push(state.savePreviewCollection);
-		}
-
-		let originalItem = PromptsBrowser.data.original[state.savePreviewCollection].find(item => item.id === state.selectedPrompt);
-		if(!originalItem) {
-			originalItem = {id: state.selectedPrompt, tags: [], category: []};
-			if(isExternalNetwork) originalItem.isExternalNetwork = true;
-			PromptsBrowser.data.original[state.savePreviewCollection].push(originalItem);
-		}
-
-		originalItem.previewImage = imageExtension;
-
-		if(callUpdate) {
-			state.selectedPrompt = undefined;
-			state.filesIteration++;
-			PromptsBrowser.db.updateMixedList();
-			
-			PromptsBrowser.previewSave.update();
-			PromptsBrowser.knownPrompts.update();
-			PromptsBrowser.currentPrompts.update(true);
-		}
 	})();
 }
 
