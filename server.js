@@ -590,6 +590,12 @@ const server = http.createServer((req, res) => {
 	
 });
 
+server.on('error', (err) => {
+	console.log("Prompts Browser Extension: Server already running or an error occured");
+
+	return;
+});
+
 server.listen(port, hostname, () => {
 	console.log(`===== Prompts Browser Extension server running at http://${hostname}:${port}/ =====`);
 });

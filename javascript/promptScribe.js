@@ -26,6 +26,7 @@ PromptsBrowser.promptScribe.initButton = (positiveWrapper) => {
 
 PromptsBrowser.promptScribe.onOpenScriber = () => {
 	const {state} = PromptsBrowser;
+	PromptsBrowser.synchroniseCurrentPrompts();
 
 	state.showScriberWindow = true;
 	PromptsBrowser.promptScribe.update(true);
