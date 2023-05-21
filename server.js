@@ -101,10 +101,16 @@ if(result === false) {
 }
 
 const server = http.createServer((req, res) => {
+	
+	const source = req.headers.origin.split(':');
+	if(source[1] !== "//127.0.0.1") {
+		res.end("failed");
+		return;
+	}
 
 	res.statusCode = 200;
 	res.setHeader('Content-Type', 'text/plain');
-	res.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1:7860');
+	res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
 	res.setHeader('Access-Control-Request-Method', '*');
 	res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
 	res.setHeader('Access-Control-Allow-Headers', '*');
