@@ -26,6 +26,7 @@ function saveCollectionExpanded(pathToCollection, data, collection) {
 	for(let i = 0; i < jsonData.length; i++) {
 		d = new Date();
 		const promptItem = jsonData[i];
+		if(!promptItem.id) continue;
 		const safeFileName = utils.makeFileNameSafe(promptItem.id);
 		expectedFiles.push(safeFileName);
 		promptOrder.push(promptItem.id);

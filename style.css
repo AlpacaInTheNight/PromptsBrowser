@@ -15,17 +15,21 @@
 }
 
 .PBE_button {
-	background-color: cornflowerblue;
-	padding: 5px;
-	font-weight: bold;
-	font-size: 16px;
-	cursor: pointer;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: cornflowerblue !important;
+	padding: 0 5px !important;
+	font-weight: bold !important;
+	font-size: 16px !important;
+	cursor: pointer !important;
 	border-radius: 10px;
 	height: 30px;
 	align-self: auto !important;
-	font-family: sans-serif;
-	color: white;
+	font-family: sans-serif !important;
+	color: white !important;
 	text-shadow: 1px 0px 1px black;
+	border: none !important;
 }
 
 .PBE_button:hover {
@@ -52,6 +56,7 @@
 	margin: 5px 0;
 	background-color: rgba(200, 200, 200, 0.6);
 	padding: 5px 10px;
+	box-sizing: border-box;
 }
 
 .PBE_rowBlock_wide {
@@ -190,11 +195,12 @@
 	display: flex;
 	flex-direction: row;
 	z-index: 2;
+	width: auto !important;
 }
 
 .PBE_controlPanelHidden {
 	position: absolute;
-	width: 20px;
+	width: 20px !important;
 }
 
 .PBE_toggleControlPanel {
@@ -292,8 +298,8 @@
 	font-size: 18px;
 
 	width: 600px;
-	height: 500px;
-	top: calc(50% - 250px);
+	height: 700px;
+	top: calc(50% - 350px);
 	left: calc(50% - 300px);
 }
 
@@ -319,6 +325,9 @@
 }
 
 .PBE_promptElement {
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
 	position: relative;
 	width: 50px;
 	height: 100px;
@@ -335,6 +344,12 @@
 	text-transform: capitalize;
 	cursor: pointer;
 	user-select: none;
+}
+
+.PBE_promptElementWeight {
+	position: absolute;
+	bottom: 0;
+	font-size: 20px;
 }
 
 .PBE_externalNetwork {
@@ -414,6 +429,11 @@
 	margin-top: 100px;
 }
 
+.PBE_promptElementSplash .PBE_promptElementWeight {
+	bottom: auto;
+	top: 0;
+}
+
 .PBE_promptElement:hover {
 	z-index: 500 !important;
 	transform: none !important;
@@ -425,30 +445,32 @@
 }
 
 .PBE_actionButton {
-	width: 100px;
+	width: 120px;
 	height: 20px;
-	background-color: goldenrod;
+	min-width: auto !important;
+	top: -0.75em;
+	background-color: goldenrod !important;
 	border-radius: 10px !important;
 	text-align: center;
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	cursor: pointer;
+	cursor: pointer !important;
 }
 
 .PBE_stylesButton {
 	position: absolute;
-	margin-left: 25px;
+	margin-left: 25px !important
 }
 
 .PBE_addUnknownButton {
 	position: absolute;
-	margin-left: 155px;
+	margin-left: 155px !important
 }
 
 .PBE_normalizeButton {
 	position: absolute;
-	margin-left: 285px;
+	margin-left: 285px !important
 }
 
 .PBE_savePromptPreview {
@@ -485,12 +507,12 @@
 .PBE_select {
 	width: 150px;
 	height: 20px;
-	line-height: 20px;
-	font-size: 16px;
-	border: none;
-	border-radius: 10px;
-	padding: 0 36px 0 10px;
-	color: black;
+	line-height: 20px !important;
+	font-size: 16px !important;
+	border: none !important;
+	border-radius: 10px !important;
+	padding: 0 36px 0 10px !important;
+	color: black !important;
 }
 
 .PBE_savePromptSelect {
@@ -544,7 +566,7 @@
 
 .PBE_hintItem {
 	font-family: sans-serif;
-	text-transform: capitalize;
+	/* text-transform: capitalize; */
 	color: aliceblue;
 	text-shadow: 1px 1px 1px black;
 	padding: 0 10px;
@@ -809,8 +831,9 @@
 	padding: 0 5px;
 	border-radius: 10px;
 	height: 30px;
-	width: 265px;
+	width: 256px;
 	margin-bottom: 5px;
+	border: none;
 }
 
 .PBE_styleItem {

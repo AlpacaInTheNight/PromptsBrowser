@@ -160,7 +160,7 @@ PromptsBrowser.db.movePrompt = (promptA, promptB, collectionId) => {
 PromptsBrowser.gradioApp = () => {
 	const elems = document.getElementsByTagName('gradio-app')
 	const gradioShadowRoot = elems.length == 0 ? null : elems[0].shadowRoot
-	return !!gradioShadowRoot ? gradioShadowRoot : document;
+	return !!gradioShadowRoot ? gradioShadowRoot : document.body;
 }
 
 /**
@@ -185,10 +185,10 @@ PromptsBrowser.utils.collectionHavePreview = (prompt, collectionId) => {
 }
 
 PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionId) => {
+	const {EMPTY_CARD_GRADIENT, NEW_CARD_GRADIENT} = PromptsBrowser.params;
 	if(!prompt) return NEW_CARD_GRADIENT;
 	
 	const {united, original} = PromptsBrowser.data;
-	const {EMPTY_CARD_GRADIENT, NEW_CARD_GRADIENT} = PromptsBrowser.params;
 	const {state} = PromptsBrowser;
 	let targetPrompt = {};
 
@@ -228,6 +228,46 @@ PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionId) => {
 
 	const url = `url('./file=prompts_catalogue/${collectionId}/preview/${safeFileName}.${fileExtension}?${state.filesIteration}'), ${EMPTY_CARD_GRADIENT}`;
 	return url;
+}
+
+PromptsBrowser.db.createNewCollection = (id, mode = "short") => {
+	if(!id) return;
+
+	(async () => {
+		const rawResponse = await fetch('http://127.0.0.1:3000/newCollection', {
+			method: 'POST',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({id, mode})
+		});
+		//const answer = await rawResponse.json();
+
+		PromptsBrowser.db.loadDatabase();
+		PromptsBrowser.knownPrompts.update();
+		PromptsBrowser.currentPrompts.update();
+	})();
+}
+
+PromptsBrowser.db.createNewStylesCollection = (id) => {
+	if(!id) return;
+
+	(async () => {
+		const rawResponse = await fetch('http://127.0.0.1:3000/newStylesCollection', {
+			method: 'POST',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({id})
+		});
+		//const answer = await rawResponse.json();
+
+		PromptsBrowser.db.loadDatabase();
+		PromptsBrowser.knownPrompts.update();
+		PromptsBrowser.currentPrompts.update();
+	})();
 }
 
 PromptsBrowser.db.movePreviewImage = (item, from, to, type) => {
@@ -275,11 +315,12 @@ PromptsBrowser.db.saveJSONData = (collectionId) => {
 PromptsBrowser.db.savePromptPreview = (callUpdate = true) => {
 	const {state} = PromptsBrowser;
 	const {united} = PromptsBrowser.data;
+	const {selectedPrompt, savePreviewCollection, currentContainer} = state;
 
-	const imageArea = PromptsBrowser.DOMCache.containers[state.currentContainer].imageArea;
+	const imageArea = PromptsBrowser.DOMCache.containers[currentContainer].imageArea;
 	if(!imageArea) return;
-	if(!state.selectedPrompt) return;
-	if(!state.savePreviewCollection) return;
+	if(!selectedPrompt) return;
+	if(!savePreviewCollection) return;
 	
 	const activePrompts = PromptsBrowser.getCurrentPrompts();
 	const imageContainer = imageArea.querySelector("img");
@@ -291,16 +332,51 @@ PromptsBrowser.db.savePromptPreview = (callUpdate = true) => {
 	if(fileMarkIndex === -1) return;
 	src = src.slice(fileMarkIndex + 5);
 
+	const cacheMarkIndex = src.indexOf("?");
+	if(cacheMarkIndex) src = src.substring(0, cacheMarkIndex);
+
 	const imageExtension = src.split('.').pop();
 
-	if(!PromptsBrowser.data.original[state.savePreviewCollection]) return;
+	if(!PromptsBrowser.data.original[savePreviewCollection]) return;
 
 	const targetCurrentPrompt = activePrompts.find(item => item.id === state.selectedPrompt);
 	if(targetCurrentPrompt && targetCurrentPrompt.isExternalNetwork) isExternalNetwork = true;
 
+	const saveData = {src, prompt: selectedPrompt, collection: savePreviewCollection};
+	if(isExternalNetwork) saveData.isExternalNetwork = true;
+
+	let targetItem = united.find(item => item.id === selectedPrompt);
+	if(!targetItem) {
+		targetItem = {id: selectedPrompt, tags: [], category: [], collections: []};
+		if(isExternalNetwork) targetItem.isExternalNetwork = true;
+		united.push(targetItem);
+	}
+
+	if(!targetItem.collections) targetItem.collections = [];
+	if(!targetItem.collections.includes(savePreviewCollection)) {
+		targetItem.collections.push(savePreviewCollection);
+	}
+
+	let originalItem = PromptsBrowser.data.original[savePreviewCollection].find(item => item.id === selectedPrompt);
+	if(!originalItem) {
+		originalItem = {id: selectedPrompt, tags: [], category: []};
+		if(isExternalNetwork) originalItem.isExternalNetwork = true;
+		PromptsBrowser.data.original[savePreviewCollection].push(originalItem);
+	}
+
+	originalItem.previewImage = imageExtension;
+
+	if(callUpdate) {
+		state.selectedPrompt = undefined;
+		state.filesIteration++;
+		PromptsBrowser.db.updateMixedList();
+		
+		PromptsBrowser.previewSave.update();
+		PromptsBrowser.knownPrompts.update();
+		PromptsBrowser.currentPrompts.update(true);
+	}
+
 	(async () => {
-		const saveData = {src, prompt: state.selectedPrompt, collection: state.savePreviewCollection};
-		if(isExternalNetwork) saveData.isExternalNetwork = true;
 
 		const rawResponse = await fetch('http://127.0.0.1:3000/savePreview', {
 			method: 'POST',
@@ -312,36 +388,6 @@ PromptsBrowser.db.savePromptPreview = (callUpdate = true) => {
 		});
 		//const content = await rawResponse.json();
 
-		let targetItem = united.find(item => item.id === state.selectedPrompt);
-		if(!targetItem) {
-			targetItem = {id: state.selectedPrompt, tags: [], category: [], collections: []};
-			if(isExternalNetwork) targetItem.isExternalNetwork = true;
-			united.push(targetItem);
-		}
-
-		if(!targetItem.collections) targetItem.collections = [];
-		if(!targetItem.collections.includes(state.savePreviewCollection)) {
-			targetItem.collections.push(state.savePreviewCollection);
-		}
-
-		let originalItem = PromptsBrowser.data.original[state.savePreviewCollection].find(item => item.id === state.selectedPrompt);
-		if(!originalItem) {
-			originalItem = {id: state.selectedPrompt, tags: [], category: []};
-			if(isExternalNetwork) originalItem.isExternalNetwork = true;
-			PromptsBrowser.data.original[state.savePreviewCollection].push(originalItem);
-		}
-
-		originalItem.previewImage = imageExtension;
-
-		if(callUpdate) {
-			state.selectedPrompt = undefined;
-			state.filesIteration++;
-			PromptsBrowser.db.updateMixedList();
-			
-			PromptsBrowser.previewSave.update();
-			PromptsBrowser.knownPrompts.update();
-			PromptsBrowser.currentPrompts.update(true);
-		}
 	})();
 }
 
@@ -422,19 +468,19 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
 	const {DOMCache} = PromptsBrowser;
 	const {united} = PromptsBrowser.data;
 	if(!DOMCache.containers) DOMCache.containers = {};
+	const mainContainer = PromptsBrowser.gradioApp();
 
 	if(tries > 10) {
 		PromptsBrowser.utils.log("No prompt wrapper container found or server did not returned prompts data.");
 		return;
 	}
 
-	const checkContainer = PromptsBrowser.gradioApp().getElementById("txt2img_prompt_container");
+	const checkContainer = mainContainer.querySelector("#txt2img_prompt_container");
 	if(!checkContainer || !united) {
 		window.__timeoutPBUpdatePrompt = setTimeout( () => PromptsBrowser.initPromptBrowser(tries + 1), 1000 );
 		return;
 	}
-
-	const mainContainer = PromptsBrowser.gradioApp();
+	
 	DOMCache.mainContainer = mainContainer;
 
 	const tabsContainer = mainContainer.querySelector("#tabs > div:first-child");
@@ -448,12 +494,12 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
 		const domContainer = DOMCache.containers[containerId];
 
 		if(container.prompt) {
-			const promptContainer = PromptsBrowser.gradioApp().getElementById(container.prompt);
+			const promptContainer = mainContainer.querySelector(`#${container.prompt}`);
 			if(promptContainer.dataset.loadedpbextension) continue;
 			promptContainer.dataset.loadedpbextension = "true";
 
-			const positivePrompts = PromptsBrowser.gradioApp().querySelector(`#${container.prompt} > div`);
-			const negativePrompts = PromptsBrowser.gradioApp().querySelector(`#${container.prompt} > div:nth-child(2)`);
+			const positivePrompts = mainContainer.querySelector(`#${container.prompt} > div`);
+			const negativePrompts = mainContainer.querySelector(`#${container.prompt} > div:nth-child(2)`);
 			if(!positivePrompts || !negativePrompts) {
 				PromptsBrowser.utils.log(`No prompt containers found for ${containerId}`);
 				continue;
@@ -464,17 +510,17 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
 			domContainer.negativePrompts = negativePrompts;
 
 			if(container.buttons) {
-				const buttonsContainer = PromptsBrowser.gradioApp().getElementById(container.buttons);
+				const buttonsContainer = mainContainer.querySelector(`#${container.buttons}`);
 				if(buttonsContainer) {
 					domContainer.buttonsContainer = buttonsContainer;
 
-					const generateButton = buttonsContainer.querySelector(".gr-button-primary");
+					const generateButton = buttonsContainer.querySelector(".primary");
 					if(generateButton) domContainer.generateButton = generateButton;
 				}
 			}
 
 			if(container.results) {
-				const resultsContainer = PromptsBrowser.gradioApp().getElementById(container.results);
+				const resultsContainer = mainContainer.querySelector(`#${container.results}`);
 				if(resultsContainer) {
 					domContainer.resultsContainer = resultsContainer;
 				}
@@ -540,9 +586,14 @@ PromptsBrowser.db.updateMixedList = () => {
 		if(!Array.isArray(collection)) return;
 
 		for(const collectionPrompt of collection) {
-			const {id, isExternalNetwork, previewImage} = collectionPrompt;
+			const {id, isExternalNetwork, previewImage, addAtStart, addAfter, addStart, addEnd} = collectionPrompt;
 			let newItem = {id, tags: [], category: [], collections: []};
 			if(addedIds[id]) newItem = unitedList.find(item => item.id === id);
+
+			if(addAtStart) newItem.addAtStart = addAtStart;
+			if(addAfter) newItem.addAfter = addAfter;
+			if(addStart) newItem.addStart = addStart;
+			if(addEnd) newItem.addEnd = addEnd;
 
 			if(isExternalNetwork) newItem.isExternalNetwork = true;
 			if(previewImage) newItem.previewImage = previewImage;
@@ -571,9 +622,7 @@ PromptsBrowser.db.updateMixedList = () => {
 	PromptsBrowser.data.united = unitedList;
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-	PromptsBrowser.loadConfig();
-
+PromptsBrowser.db.loadDatabase = () => {
 	fetch("http://127.0.0.1:3000/getPrompts", {
 		method: 'GET',
 	}).then(data => data.json()).then(res => {
@@ -584,6 +633,12 @@ document.addEventListener('DOMContentLoaded', function() {
 		PromptsBrowser.data.original = prompts;
 		PromptsBrowser.db.updateMixedList();
 	});
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+	PromptsBrowser.loadConfig();
+
+	PromptsBrowser.db.loadDatabase();
 	
 	PromptsBrowser.initPromptBrowser();
 });

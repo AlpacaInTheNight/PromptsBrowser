@@ -3,6 +3,8 @@ if(!window.PromptsBrowser) window.PromptsBrowser = {};
 
 PromptsBrowser.setupWindow = {};
 
+PromptsBrowser.setupWindow.viewMode = "normal";
+
 PromptsBrowser.setupWindow.init = (wrapper) => {
 	const {state} = PromptsBrowser;
 
@@ -48,6 +50,75 @@ PromptsBrowser.setupWindow.onChangeScrollWeight = (e) => {
 	else state.config.aboveOneWeight = value;
 
 	localStorage.setItem("PBE_config", JSON.stringify(state.config));
+}
+
+PromptsBrowser.setupWindow.onUpdateDirName = (e) => {
+	let value = e.currentTarget.value;
+	if(!value) return;
+
+	value = window.PromptsBrowser.makeFileNameSafe(value);
+	e.currentTarget.value = value;
+}
+
+PromptsBrowser.setupWindow.onCreate = (e) => {
+	const target = e.currentTarget;
+	const {viewMode} = PromptsBrowser.setupWindow;
+	if(!target.parentNode) return;
+	const setupWindow = target.parentNode.parentNode;
+	if(!setupWindow) return;
+
+	if(viewMode === "newCollection") {
+		const newNameInput = setupWindow.querySelector(".PBE_newCollectionName");
+		const formatSelect = setupWindow.querySelector(".PBE_newCollectionFormat");
+		if(!newNameInput || !formatSelect) return;
+		const newName = window.PromptsBrowser.makeFileNameSafe(newNameInput.value);
+		const format = formatSelect.value;
+		if(!newName || !format) return;
+
+		PromptsBrowser.db.createNewCollection(newName, format);
+		
+	} else if(viewMode === "newStylesCollection") {
+		const newNameInput = setupWindow.querySelector(".PBE_newCollectionName");
+		if(!newNameInput) return;
+		const newName = window.PromptsBrowser.makeFileNameSafe(newNameInput.value);
+		if(!newName) return;
+		
+		PromptsBrowser.db.createNewStylesCollection(newName);
+
+	}
+
+	PromptsBrowser.setupWindow.viewMode = "normal";
+	PromptsBrowser.setupWindow.update();
+}
+
+PromptsBrowser.setupWindow.showCreateNew = (wrapper) => {
+	const buttonsBlock = document.createElement("div");
+	const newCollection = document.createElement("button");
+	const newStylesCollection = document.createElement("button");
+
+	newCollection.innerText = "New prompts collection";
+	newStylesCollection.innerText = "New styles collection";
+
+	buttonsBlock.className = "PBE_row";
+	buttonsBlock.style.justifyContent = "space-around";
+	buttonsBlock.style.marginBottom = "20px";
+	buttonsBlock.style.marginTop = "5px";
+	newCollection.className = "PBE_button";
+	newStylesCollection.className = "PBE_button";
+
+	newCollection.addEventListener("click", () => {
+		PromptsBrowser.setupWindow.viewMode = "newCollection";
+		PromptsBrowser.setupWindow.update();
+	});
+
+	newStylesCollection.addEventListener("click", () => {
+		PromptsBrowser.setupWindow.viewMode = "newStylesCollection";
+		PromptsBrowser.setupWindow.update();
+	});
+
+	buttonsBlock.appendChild(newCollection);
+	buttonsBlock.appendChild(newStylesCollection);
+	wrapper.appendChild(buttonsBlock);
 }
 
 PromptsBrowser.setupWindow.showWeightSetup = (wrapper) => {
@@ -148,12 +219,71 @@ PromptsBrowser.setupWindow.showNormalizeSetup = (wrapper) => {
 	wrapper.appendChild(spaceBlock);
 }
 
+PromptsBrowser.setupWindow.showNewCollection = (wrapper) => {
+	const newName = document.createElement("div");
+	const newNameLabel = document.createElement("div");
+	const newNameInput = document.createElement("input");
+	newName.className = "PBE_rowBlock";
+	newName.style.maxWidth = "none";
+	newNameInput.className = "PBE_input PBE_newCollectionName";
+
+	newNameLabel.innerText = "New prompts collection name";
+
+	newNameInput.addEventListener("change", PromptsBrowser.setupWindow.onUpdateDirName);
+
+	newName.appendChild(newNameLabel);
+	newName.appendChild(newNameInput);
+
+	const format = document.createElement("div");
+	const formatLabel = document.createElement("div");
+	const formatSelect = document.createElement("select");
+	format.className = "PBE_rowBlock";
+	format.style.maxWidth = "none";
+	formatSelect.value = "short";
+	formatSelect.className = "PBE_select PBE_newCollectionFormat";
+
+	formatSelect.innerHTML = `
+		<option value="short">Short</option>
+		<option value="expanded">Expanded</option>
+	`;
+
+	formatLabel.innerText = "Store format";
+
+	format.appendChild(formatLabel);
+	format.appendChild(formatSelect);
+
+	wrapper.appendChild(newName);
+	wrapper.appendChild(format);
+}
+
+PromptsBrowser.setupWindow.showNewStylesCollection = (wrapper) => {
+	const newName = document.createElement("div");
+	const newNameLabel = document.createElement("div");
+	const newNameInput = document.createElement("input");
+	newName.className = "PBE_rowBlock";
+	newName.style.maxWidth = "none";
+	newNameInput.className = "PBE_input PBE_newCollectionName";
+
+	newNameInput.addEventListener("change", PromptsBrowser.setupWindow.onUpdateDirName);
+	newNameLabel.innerText = "New styles collection name";
+
+	newName.appendChild(newNameLabel);
+	newName.appendChild(newNameInput);
+
+	wrapper.appendChild(newName);
+}
+
 PromptsBrowser.setupWindow.update = () => {
+	const {viewMode} = PromptsBrowser.setupWindow;
 	const {state} = PromptsBrowser;
 	const wrapper = PromptsBrowser.DOMCache.setupWindow;
 	if(!wrapper) return;
-	wrapper.innerHTML = "Setup window";
+	
 	wrapper.style.display = "flex";
+
+	if(viewMode === "newCollection") wrapper.innerHTML = "New prompts collection";
+	else if(viewMode === "newStylesCollection") wrapper.innerHTML = "New styles collections";
+	else wrapper.innerHTML = "Setup window";
 
 	const contentBlock = document.createElement("div");
 	const footerBlock = document.createElement("div");
@@ -162,16 +292,40 @@ PromptsBrowser.setupWindow.update = () => {
 	contentBlock.className = "PBE_windowContent";
 	contentBlock.style.width = "100%";
 
-	PromptsBrowser.setupWindow.showWeightSetup(contentBlock);
-	PromptsBrowser.setupWindow.showNormalizeSetup(contentBlock);
+	if(viewMode === "newCollection") {
+		PromptsBrowser.setupWindow.showNewCollection(contentBlock);
+
+	} else if(viewMode === "newStylesCollection") {
+		PromptsBrowser.setupWindow.showNewStylesCollection(contentBlock);
+
+	} else {
+		PromptsBrowser.setupWindow.showCreateNew(contentBlock);
+		PromptsBrowser.setupWindow.showWeightSetup(contentBlock);
+		PromptsBrowser.setupWindow.showNormalizeSetup(contentBlock);
+	}
 
 	footerBlock.className = "PBE_rowBlock PBE_rowBlock_wide";
-	closeButton.innerText = "Close";
+	footerBlock.style.justifyContent = "space-evenly";
+	closeButton.innerText = viewMode === "normal" ? "Close" : "Cancel";
 	closeButton.className = "PBE_button";
 
 	closeButton.addEventListener("click", (e) => {
-		wrapper.style.display = "none";
+		if(viewMode === "newCollection" || viewMode === "newStylesCollection") {
+			PromptsBrowser.setupWindow.viewMode = "normal";
+			PromptsBrowser.setupWindow.update();
+
+		} else wrapper.style.display = "none";
 	});
+
+	if(viewMode === "newCollection" || viewMode === "newStylesCollection") {
+		const createButton = document.createElement("button");
+		createButton.innerText = "Create";
+		createButton.className = "PBE_button";
+
+		createButton.addEventListener("click", PromptsBrowser.setupWindow.onCreate);
+
+		footerBlock.appendChild(createButton);
+	}
 
 	footerBlock.appendChild(closeButton);
 

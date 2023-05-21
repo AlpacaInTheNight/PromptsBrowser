@@ -58,6 +58,10 @@ PromptsBrowser.styles.onUpdatePreview = (e) => {
 	const fileMarkIndex = src.indexOf("file=");
 	if(fileMarkIndex === -1) return;
 	src = src.slice(fileMarkIndex + 5);
+
+	const cacheMarkIndex = src.indexOf("?");
+	if(cacheMarkIndex) src = src.substring(0, cacheMarkIndex);
+
 	const imageExtension = src.split('.').pop();
 
 	(async () => {

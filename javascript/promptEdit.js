@@ -135,8 +135,17 @@ PromptsBrowser.promptEdit.saveEdit = () => {
 
 	wrapper.style.display = "none";
 	if(!state.editItem || !collection) return;
-	const commentBlock = PromptsBrowser.DOMCache.promptEdit.querySelector("#PBE_commentArea");
+	const commentBlock = wrapper.querySelector("#PBE_commentArea");
+	const addAtStartInput = wrapper.querySelector(".PBE_promptEdit_addAtStart");
+	const addAfterInput = wrapper.querySelector(".PBE_promptEdit_addAfter");
+	const addStartInput = wrapper.querySelector(".PBE_promptEdit_addStart");
+	const addEndInput = wrapper.querySelector(".PBE_promptEdit_addEnd");
+
 	const comment = commentBlock ? commentBlock.value : "";
+	const addAtStart = addAtStartInput.checked;
+	const addAfter = addAfterInput.value;
+	const addStart = addStartInput.value;
+	const addEnd = addEndInput.value;
 
 	state.editItem.comment = comment;
 	if(!state.editItem.comment) delete state.editItem.comment;
@@ -168,6 +177,18 @@ PromptsBrowser.promptEdit.saveEdit = () => {
 					if(!targetItem.category.includes(item)) targetItem.category.push(item);
 				});
 			}
+
+			if(!addAtStart) delete collectionPrompt.addAtStart;
+			else collectionPrompt.addAtStart = addAtStart;
+
+			if(!addAfter) delete collectionPrompt.addAfter;
+			else collectionPrompt.addAfter = addAfter;
+
+			if(!addStart) delete collectionPrompt.addStart;
+			else collectionPrompt.addStart = addStart;
+
+			if(!addEnd) delete collectionPrompt.addEnd;
+			else collectionPrompt.addEnd = addEnd;
 		}
 	}
 
@@ -202,6 +223,77 @@ PromptsBrowser.promptEdit.getTargetItem = () => {
 
 	state.editItem = JSON.parse(JSON.stringify(originalItem));
 	return state.editItem;
+}
+
+PromptsBrowser.promptEdit.showAddSetup = (wrapper) => {
+	const targetItem = PromptsBrowser.promptEdit.getTargetItem();
+	if(!targetItem) return;
+	const {addAtStart = false, addAfter = "", addStart = "", addEnd = ""} = targetItem;
+
+	const addAtStartBlock = document.createElement("div");
+	const addAtStartTitle = document.createElement("label");
+	const addAtStartCheckbox = document.createElement("input");
+
+	addAtStartBlock.className = "PBE_rowBlock";
+	addAtStartTitle.htmlFor = "PBE_promptEdit_addAtStart";
+	addAtStartTitle.textContent = "Add at the beginning:";
+	addAtStartCheckbox.type = "checkbox";
+	addAtStartCheckbox.id = "PBE_promptEdit_addAtStart";
+	addAtStartCheckbox.className = "PBE_promptEdit_addAtStart";
+	addAtStartCheckbox.name = "PBE_promptEdit_addAtStart";
+	addAtStartCheckbox.checked = addAtStart;
+
+	addAtStartBlock.appendChild(addAtStartTitle);
+	addAtStartBlock.appendChild(addAtStartCheckbox);
+
+
+	const sisterTagsAfter = document.createElement("div");
+	const sisterTagsAfterTitle = document.createElement("label");
+	const sisterTagsAfterInput = document.createElement("input");
+
+	sisterTagsAfter.className = "PBE_rowBlock";
+	sisterTagsAfterTitle.textContent = "Subsequent prompts:";
+	sisterTagsAfterInput.className = "PBE_promptEdit_addAfter";
+	sisterTagsAfterInput.type = "text";
+	sisterTagsAfterInput.value = addAfter;
+
+	sisterTagsAfter.appendChild(sisterTagsAfterTitle);
+	sisterTagsAfter.appendChild(sisterTagsAfterInput);
+
+
+	const sisterTagsStart = document.createElement("div");
+	const sisterTagsStartTitle = document.createElement("label");
+	const sisterTagsStartInput = document.createElement("input");
+
+	sisterTagsStart.className = "PBE_rowBlock";
+	sisterTagsStartTitle.textContent = "Add prompts at the start:";
+	sisterTagsStartInput.className = "PBE_promptEdit_addStart";
+	sisterTagsStartInput.type = "text";
+	sisterTagsStartInput.value = addStart;
+
+	sisterTagsStart.appendChild(sisterTagsStartTitle);
+	sisterTagsStart.appendChild(sisterTagsStartInput);
+
+
+	const sisterTagsEnd = document.createElement("div");
+	const sisterTagsEndTitle = document.createElement("label");
+	const sisterTagsEndInput = document.createElement("input");
+
+	sisterTagsEnd.className = "PBE_rowBlock";
+	sisterTagsEndTitle.textContent = "Add prompts at the end:";
+	sisterTagsEndInput.className = "PBE_promptEdit_addEnd";
+	sisterTagsEndInput.type = "text";
+	sisterTagsEndInput.value = addEnd;
+
+	sisterTagsEnd.appendChild(sisterTagsEndTitle);
+	sisterTagsEnd.appendChild(sisterTagsEndInput);
+
+
+
+	wrapper.appendChild(addAtStartBlock);
+	wrapper.appendChild(sisterTagsAfter);
+	wrapper.appendChild(sisterTagsStart);
+	wrapper.appendChild(sisterTagsEnd);
 }
 
 PromptsBrowser.promptEdit.update = (targetItem) => {
@@ -370,6 +462,8 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
 
 	wrapper.appendChild(addTagBlock);
 	wrapper.appendChild(addCategoryBlock);
+
+	PromptsBrowser.promptEdit.showAddSetup(wrapper);
 
 	wrapper.appendChild(commentArea);
 

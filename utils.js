@@ -7,6 +7,7 @@ String.prototype.replaceAllRegex = function(oldStr, newStr) {
  * Make sure to update client-side makeFileNameSafe method as well
  */
 function makeFileNameSafe(fileName) {
+	if(!fileName) return;
 	fileName = fileName.replaceAllRegex("_", " ");
 
 	//unix/win
