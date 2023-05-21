@@ -1,7 +1,7 @@
-# Prompts Browser Extension 0.1
+# Prompts Browser Extension 0.8
 Prompts Browser Extension for the AUTOMATIC1111/stable-diffusion-webui client
 
-![](preview.png)
+![](preview.jpg)
 
 ## Installation:
 
@@ -16,7 +16,11 @@ The collections server runs on node. In the future I plan to rewrite the server 
 
 ### Adding new prompts to the collection
 
-Enter text in the text box - the text will be divided by the presence of a comma in the prompts in the text box. If you click on the icon of a prompt, it will become the selected one. Now you can generate an image and if any of the currently active prompts is selected there will be a button `Save preview` above the generated image. By saving the preview, it will be added to the collection, and the preview image for that sample will be added to the collection's `preview` folder.
+![](savePreview.jpg)
+1. Enter text in the text box - the text will be divided by the presence of a comma in the prompts in the text box. If you click on the icon of a prompt, it will become the selected one. Now you can generate an image and if any of the currently active prompts is selected there will be a button `Save preview` above the generated image. By saving the preview, it will be added to the collection, and the preview image for that sample will be added to the collection's `preview` folder.
+
+![](addNew.jpg)
+2. The "Add unknown" button above the Prompts entry field opens a window for adding new prompts. In this window you can select new prompts and a collection of prompts, where you can add them with the "Add new prompts" button. The "Toggle all" button selects or deselects all new proppts. The "All collections" toggle switches on or off the check for all possible collections (by default, it is on and only those prompts that are not in any of the possible collections will be displayed).
 
 ### Known Prompts Browser
 
