@@ -5,34 +5,31 @@ Prompts Browser Extension for the AUTOMATIC1111/stable-diffusion-webui client
 
 ## Installation:
 
-1. Install node.js <https://nodejs.org/en/download>
-The collections server runs on node. In the future I plan to rewrite the server in python and get rid of the dependency on node. but since I don't know python, this will take time.
+1. Make sure you have the latest AUTOMATIC1111/stable-diffusion-webui version instaled. Prompt Browser 0.8 was tested and adapted for Webui version 1.2.1.
 
-2. Unzip/clone the plugin into the `extensions/PromptsBrowser` folder.
+2. Install Node.js <https://nodejs.org/en/download>
+The collections server runs on Node.js at the moment.
 
-3. In the stable-diffusion folder will be created folder `prompts_catalogue` with subfolder `myprompts` - this will be the first collection of prompts. As well as the folder `styles_catalogue` where new styles will be stored.
+3. Unzip/clone the plugin into the `extensions/PromptsBrowser` folder.
+
+4. In the stable-diffusion folder will be created folder `prompts_catalogue` with subfolder `myprompts` - this will be the first collection of prompts. As well as the folder `styles_catalogue` where new styles will be stored.
+
 
 ## Usage:
 
-### Adding new prompts to the collection
-
-![](savePreview.jpg)
-1. Enter text in the text box - the text will be divided by the presence of a comma in the prompts in the text box. If you click on the icon of a prompt, it will become the selected one. Now you can generate an image and if any of the currently active prompts is selected there will be a button `Save preview` above the generated image. By saving the preview, it will be added to the collection, and the preview image for that sample will be added to the collection's `preview` folder.
-
-![](addNew.jpg)
-2. The "Add unknown" button above the Prompts entry field opens a window for adding new prompts. In this window you can select new prompts and a collection of prompts, where you can add them with the "Add new prompts" button. The "Toggle all" button selects or deselects all new proppts. The "All collections" toggle switches on or off the check for all possible collections (by default, it is on and only those prompts that are not in any of the possible collections will be displayed).
 
 ### Known Prompts Browser
 
 1. The known prompts browser will display all known prompts from all the collections added to the `prompts_catalogue` folder.
 
-2. click on a prompt to add it to the active prompts.
+2. Click on a prompt to add it to the active prompts.
 
-3. shift + click: opens prompt edition window.
+3. Shift + click: opens prompt edition window.
 
-4. ctrl (meta) + click: opens the dialog of removing the sample from the collection (it will be lost).
+4. Ctrl (meta) + click: opens the dialog of removing the sample from the collection (it will be lost).
 
 5. Prompts in the collection can be moved by drag and drop.
+
 
 ### Active Prompts
 
@@ -40,14 +37,32 @@ The collections server runs on node. In the future I plan to rewrite the server 
 
 2. The order of the Prompts can be changed by dragging them with the mouse.
 
-3. shift + mouse wheel: will change the weight of the Prompt depending on the direction of the mouse wheel.
+3. Shift + mouse wheel: will change the weight of the Prompt depending on the direction of the mouse wheel.
 
-4. ctrl + click: deletes prompt from the active prompts.
+4. Ctrl + click: deletes prompt from the active prompts.
 
-5. double click: opens the Prompt Tools.
+5. Double click: opens the Prompt Tools.
+
+
+### Adding new prompts to the collection
+
+1. Enter text in the text box - the text will be divided by the presence of a comma in the prompts in the text box. If you click on the icon of a prompt, it will become the selected one. Now you can generate an image and if any of the currently active prompts is selected there will be a button `Save preview` above the generated image. By saving the preview, it will be added to the collection, and the preview image for that sample will be added to the collection's `preview` folder.
+![](savePreview.jpg)
+
+2. The "Add unknown" button above the Prompts entry field opens a window for adding new prompts. In this window you can select new prompts and a collection of prompts, where you can add them with the "Add new prompts" button. The "Toggle all" button selects or deselects all new proppts. The "All collections" toggle switches on or off the check for all possible collections (by default, it is on and only those prompts that are not in any of the possible collections will be displayed).
+![](addNew.jpg)
+
+
+### Generating previews for prompts
+
+1. You can select a prompt, generate an image and click the "Save preview" button above the generated image to create or replace the preview for that prompt.
+
+2. You can use the Collection editor to generate previews for multiple prompts at once. You can open the Collection editor by clicking the "Edit collection" button above the list of known prompts. In the Collection editor window, you can click on the preview square of the prompt to mark it. You can also click on the "Toggle all" button to select all the prompts in the collection. You can also filter the prompts so that only prompts without previews are displayed. To do this, set the filter "exclude - meta - have preview". After that, you can click "Generate" and previews will be generated for all selected prompts one by one.
 
 
 ### Prompt tools
+
+![](promptTool.jpg)
 
 1. If you double-click on the active prompt, the Prompt Tools window will open.
 
@@ -57,18 +72,29 @@ The collections server runs on node. In the future I plan to rewrite the server 
 
 4. Clicking on a promt from the list of similar promts will replace the selected promt with the target one.
 
-5. shift + click on a promt from the list will add the target promt to the active promts (keeping the selected promt).
+5. Shift + click on a promt from the list will add the target promt to the active promts (keeping the selected promt).
+
 
 ### Styles
 
+![](styles.jpg)
+
 1. Above the text box there is now a `styles` button which opens the Styles window.
 
-2. A list of active prompts will be displayed at the top.
+1. A list of active prompts will be displayed at the top.
 
-3. the current prompts can be saved as a style by typing in the text box above the name of the style and clicking the `save` button next to it.
+1. The current prompts can be saved as a style by typing in the text box above the name of the style and clicking the `save` button next to it.
 
-4. Prompts from saved styles can be added to active prompts at the beginning of their list or at the end.
+1. "Simple mode" switch changes styles view mode from the simple to the detailed mode.
 
-5. The `remove` button will delete the style from the database (it will be lost).
+1. In simple mode you need to select a prompt and then press a needed button at the bottom of the window.
 
-6. The `update` button will replace the style's prompts with the current active prompts.
+1. Prompts from saved styles can be added to active prompts at the beginning of their list or at the end.
+
+1. The `remove` button will delete the style from the database (it will be lost).
+
+1. The `update` button will replace the style's prompts with the current active prompts.
+
+1. The `Update preview` button will add/replace preview for the style using the currently generated and selected image.
+
+1. In simple mode you can also click with `shift` key to add style. You can click and hold `ctrl/meta` key to delete style.
