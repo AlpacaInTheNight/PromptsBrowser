@@ -1,5 +1,5 @@
 # Prompts Browser Extension 0.8
-Prompts Browser Extension for the AUTOMATIC1111/stable-diffusion-webui client
+Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui).
 
 1. [Installation](#installation)
 1. [Known Prompts Browser](#known-prompts-browser)
