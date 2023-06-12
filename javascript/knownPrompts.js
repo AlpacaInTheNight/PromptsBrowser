@@ -76,6 +76,8 @@ PromptsBrowser.knownPrompts.onPromptClick = (e) => {
 	const {united} = PromptsBrowser.data;
 	const {DEFAULT_PROMPT_WEIGHT} = PromptsBrowser.params;
 	const {state} = PromptsBrowser;
+
+	PromptsBrowser.synchroniseCurrentPrompts();
 	const activePrompts = PromptsBrowser.getCurrentPrompts();
 
 	const promptItem = e.currentTarget.dataset.prompt;
