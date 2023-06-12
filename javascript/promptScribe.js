@@ -46,7 +46,9 @@ PromptsBrowser.promptScribe.onAddUnknownPrompts = () => {
 		const known = targetCollection.some(item => item.id === prompt.id);
 		if(!known) {
 			if(!newPrompts) newPrompts = true;
-			targetCollection.push({id: prompt.id, tags: [], category: []});
+			const targetItem = {id: prompt.id, tags: [], category: []};
+			if(prompt.isExternalNetwork) targetItem.isExternalNetwork = true;
+			targetCollection.push(targetItem);
 
 			//removing from the selected
 			selectedNewPrompts = selectedNewPrompts.filter(item => item !== prompt.id);
