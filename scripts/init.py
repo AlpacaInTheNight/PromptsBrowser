@@ -1,3 +1,3 @@
 import subprocess
 
-subprocess.Popen("node extensions/PromptsBrowser/server.js")
+subprocess.Popen("python extensions/PromptsBrowser/server.py")

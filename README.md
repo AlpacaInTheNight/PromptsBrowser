@@ -19,12 +19,9 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 
 1. Make sure you have the latest AUTOMATIC1111/stable-diffusion-webui version instaled. Prompt Browser 0.8 was tested and adapted for Webui version 1.2.1.
 
-2. Install Node.js <https://nodejs.org/en/download>
-The collections server runs on Node.js at the moment.
+2. Unzip/clone the plugin into the `extensions/PromptsBrowser` folder.
 
-3. Unzip/clone the plugin into the `extensions/PromptsBrowser` folder.
-
-4. In the stable-diffusion folder will be created folder `prompts_catalogue` with subfolder `myprompts` - this will be the first collection of prompts. As well as the folder `styles_catalogue` where new styles will be stored.
+3. In the stable-diffusion folder will be created folder `prompts_catalogue` with subfolder `myprompts` - this will be the first collection of prompts. As well as the folder `styles_catalogue` where new styles will be stored.
 
 
 ## Usage:
