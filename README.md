@@ -13,7 +13,7 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 1. [Setup window](#setup-window)
 1. [Autocomplite](#autocomplite)
 
-![](preview.jpg)
+![](img/preview.jpg)
 
 ## Installation:
 
@@ -56,10 +56,10 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 ### Adding new prompts to the collection
 
 1. Enter text in the text box - the text will be divided by the presence of a comma in the prompts in the text box. If you click on the icon of a prompt, it will become the selected one. Now you can generate an image and if any of the currently active prompts is selected there will be a button `Save preview` above the generated image. By saving the preview, it will be added to the collection, and the preview image for that sample will be added to the collection's `preview` folder.
-![](savePreview.jpg)
+![](img/savePreview.jpg)
 
 2. The `Add unknown` button above the Prompts entry field opens a window for adding new prompts. In this window you can select new prompts and a collection of prompts, where you can add them with the `Add new prompts` button. The `Toggle all` button selects or deselects all new proppts. The `All collections` toggle switches on or off the check for all possible collections (by default, it is on and only those prompts that are not in any of the possible collections will be displayed).
-![](addNew.jpg)
+![](img/addNew.jpg)
 
 
 ### Generating previews for prompts
@@ -71,7 +71,7 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 
 ### Prompt tools
 
-![](promptTool.jpg)
+![](img/promptTool.jpg)
 
 1. If you `double-click` on the active prompt, the Prompt Tools window will open.
 
@@ -86,7 +86,7 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 
 ### Styles
 
-![](styles.jpg)
+![](img/styles.jpg)
 
 1. Above the text box there is now a `styles` button which opens the Styles window.
 
@@ -111,7 +111,7 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 
 ### Collection editor
 
-![](collectionEdit.jpg)
+![](img/collectionEdit.jpg)
 
 1. You can open the `Collection editor` by clicking the `Edit collection` button above the list of known prompts.
 
@@ -133,7 +133,7 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 
 ### Prompt editor
 
-![](editPrompt.jpg)
+![](img/editPrompt.jpg)
 
 1. By clicking on prompt in the `Known prompts list` holding `shift` key you will open target Prompt Editor window.
 
@@ -162,7 +162,7 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 
 ### Setup window
 
-![](setup.jpg)
+![](img/setup.jpg)
 
 1. Click on `Setup` button at the top menu to open Setup window.
 

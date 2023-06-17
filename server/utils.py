@@ -38,8 +38,8 @@ def getWebUIDirectory():
     #for running server separately
     urlArr = curr.split(os.sep)
 
-    #assuming webUI is located at ../../
-    urlArr = urlArr[0 : -2]
+    #assuming webUI is located at ../../../
+    urlArr = urlArr[0 : -3]
 
     rootPath = os.sep.join(urlArr) + os.sep
 
