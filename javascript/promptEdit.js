@@ -95,7 +95,7 @@ PromptsBrowser.promptEdit.addMoveBlock = (wrapper) => {
 		PromptsBrowser.data.original[to].push(JSON.parse(JSON.stringify(originalItem)));
 
         PromptsBrowser.db.movePreviewImage(state.editingPrompt, from, to, "copy");
-		PromptsBrowser.db.saveJSONData(to);
+		PromptsBrowser.db.saveJSONData(to, true);
 		PromptsBrowser.db.updateMixedList();
 		PromptsBrowser.promptEdit.update();
 	});
@@ -113,8 +113,8 @@ PromptsBrowser.promptEdit.addMoveBlock = (wrapper) => {
 		PromptsBrowser.data.original[from] = PromptsBrowser.data.original[from].filter(item => item.id !== state.editingPrompt);
 
         PromptsBrowser.db.movePreviewImage(state.editingPrompt, from, to, "move");
-		PromptsBrowser.db.saveJSONData(to);
-		PromptsBrowser.db.saveJSONData(from);
+		PromptsBrowser.db.saveJSONData(to, true);
+		PromptsBrowser.db.saveJSONData(from, true);
 		PromptsBrowser.db.updateMixedList();
 		PromptsBrowser.promptEdit.update();
 	});

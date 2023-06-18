@@ -40,14 +40,14 @@ def movePreview(postJSON):
 
     if itemType == "copy":
         shutil.copy(sourcePath, savePath)
-        emitMessage(f'copied prompt preview "${item}" from "${itemFrom}" to "${itemTo}"')
+        emitMessage(f'copied prompt preview "{item}" from "{itemFrom}" to "{itemTo}"')
 
     elif itemType == "move":
         shutil.move(sourcePath, savePath)
-        emitMessage(f'moved prompt preview "${item}" from "${itemFrom}" to "${itemTo}"')
+        emitMessage(f'moved prompt preview "{item}" from "{itemFrom}" to "{itemTo}"')
     
     elif itemType == "delete":
         os.remove(sourcePath)
-        emitMessage(f'deleted prompt preview "${item}" from "${itemFrom}"')
+        emitMessage(f'deleted prompt preview "{item}" from "{itemFrom}"')
     
     return "ok"

@@ -290,7 +290,7 @@ PromptsBrowser.db.movePreviewImage = (item, from, to, type) => {
 	})();
 }
 
-PromptsBrowser.db.saveJSONData = (collectionId) => {
+PromptsBrowser.db.saveJSONData = (collectionId, noClear = false) => {
 	if(!collectionId) return;
 
 	const targetData = PromptsBrowser.data.original[collectionId];
@@ -303,7 +303,7 @@ PromptsBrowser.db.saveJSONData = (collectionId) => {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({collection: collectionId, data: JSON.stringify(targetData)})
+			body: JSON.stringify({collection: collectionId, data: JSON.stringify(targetData), noClear})
 		});
 		//const content = await rawResponse.json();
 

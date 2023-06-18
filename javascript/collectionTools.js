@@ -319,7 +319,7 @@ PromptsBrowser.collectionTools.onMoveSelected = (e, isCopy = false) => {
 				PromptsBrowser.data.original[to].push(JSON.parse(JSON.stringify(originalItem)));
 
                 PromptsBrowser.db.movePreviewImage(promptId, from, to, "copy");
-				PromptsBrowser.db.saveJSONData(to);
+				PromptsBrowser.db.saveJSONData(to, true);
 				PromptsBrowser.db.updateMixedList();
 
 			} else {
@@ -327,8 +327,8 @@ PromptsBrowser.collectionTools.onMoveSelected = (e, isCopy = false) => {
 				PromptsBrowser.data.original[from] = PromptsBrowser.data.original[from].filter(item => item.id !== promptId);
 
                 PromptsBrowser.db.movePreviewImage(promptId, from, to, "move");
-				PromptsBrowser.db.saveJSONData(to);
-				PromptsBrowser.db.saveJSONData(from);
+				PromptsBrowser.db.saveJSONData(to, true);
+				PromptsBrowser.db.saveJSONData(from, true);
 				PromptsBrowser.db.updateMixedList();
 			}
 		}
