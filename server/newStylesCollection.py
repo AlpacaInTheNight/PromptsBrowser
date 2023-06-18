@@ -22,7 +22,7 @@ def newStylesCollection(postJSON):
     os.makedirs(pathToCollection + "preview")
 
     dataJSON = []
-    with open(pathToCollection + "data.json", 'w') as outfile: json.dump(dataJSON, outfile)
+    with open(pathToCollection + "data.json", 'w') as outfile: json.dump(dataJSON, outfile, indent="\t")
 
     emitMessage(f'created new styles collection: {id}')
     return "ok"

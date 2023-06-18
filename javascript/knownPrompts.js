@@ -107,8 +107,8 @@ PromptsBrowser.knownPrompts.onPromptClick = (e) => {
 
 			PromptsBrowser.data.original[targetCollection] = PromptsBrowser.data.original[targetCollection].filter(item => item.id !== promptItem);
 
+            PromptsBrowser.db.movePreviewImage(promptItem, targetCollection, targetCollection, "delete");
 			PromptsBrowser.db.saveJSONData(targetCollection);
-			PromptsBrowser.db.movePreviewImage(promptItem, targetCollection, targetCollection, "delete");
 			PromptsBrowser.db.updateMixedList();
 			PromptsBrowser.promptEdit.update();
 			PromptsBrowser.currentPrompts.update();

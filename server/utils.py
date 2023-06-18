@@ -15,13 +15,13 @@ def makeFileNameSafe(fileName: str):
 
     #win
     fileName = fileName.replace(":", "_col_")
-    fileName = fileName.replace("\\\\", "_bsl_")
+    fileName = fileName.replace("\\", "_bsl_")
     fileName = fileName.replace("<", "_lt_")
     fileName = fileName.replace(">", "_gt_")
     fileName = fileName.replace("\"", "_dq_")
-    fileName = fileName.replace("\\|", "_pip_")
-    fileName = fileName.replace("\\?", "_qm_")
-    fileName = fileName.replace("\\*", "_ast_")
+    fileName = fileName.replace("|", "_pip_")
+    fileName = fileName.replace("?", "_qm_")
+    fileName = fileName.replace("*", "_ast_")
 
     fileName = fileName.strip()
 
@@ -56,7 +56,6 @@ def emitMessage(message: str):
 
 
 def removeUnusedPreviews(collection, prompts):
-
     webUIDir = getWebUIDirectory()
     promptsCataloguePath = webUIDir + constant.PROMPTS_FOLDER + os.sep
     pathToCollection = promptsCataloguePath + collection + os.sep
@@ -72,11 +71,11 @@ def removeUnusedPreviews(collection, prompts):
         for promptItem in prompts:
             safeFileName = makeFileNameSafe(promptItem["id"])
 
-            if not promptItem["previewImage"]:
+            if not "previewImage" in promptItem or not promptItem["previewImage"]:
                 if safeFileName + ".png" == fileName: promptItem["previewImage"] = "png"
                 elif safeFileName + ".jpg" == fileName: promptItem["previewImage"] = "jpg"
             
-            if not promptItem["previewImage"]: continue
+            if not "previewImage" in promptItem or not promptItem["previewImage"]: continue
 
             if safeFileName + "." + promptItem["previewImage"] == fileName:
                 used = True

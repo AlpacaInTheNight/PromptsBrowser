@@ -59,7 +59,7 @@ def saveCollectionExpanded(pathToCollection, data, collection):
     expectedFiles = []
 
     for promptItem in dataJSON:
-        if not promptItem["id"]: continue
+        if not "id" in promptItem or not promptItem["id"]: continue
         promptId = promptItem["id"]
 
         safeFileName = makeFileNameSafe(promptId)

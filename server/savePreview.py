@@ -65,7 +65,7 @@ def savePreview(postJSON):
 
         if not any(item['id'] == prompt for item in dataFile):
             dataFile.append(newPromptDefault)
-            with open(pathToDataFile, 'w') as outfile: json.dump(dataFile, outfile)
+            with open(pathToDataFile, 'w') as outfile: json.dump(dataFile, outfile, indent="\t")
     
     #saving data in case of the expanded format collection
     elif format == "expanded":

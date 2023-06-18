@@ -60,18 +60,23 @@ def getCollections():
                 for fileName in jsonFileNames:
                     with open(os.path.join(pathToPromptsFolder, fileName)) as jsonFile:
                         promptJSON = json.load(jsonFile)
+                        if not "id" in promptJSON or not promptJSON["id"]: continue
                         promptId = promptJSON["id"]
-                        if not promptId: continue
                         promptsObject[promptId] = promptJSON
                 
             for orderItem in JSONOrder:
-                if promptsObject[orderItem]: dataFile.append(promptsObject[orderItem])
-                else: newPromptsFromFolder.append(promptsObject[orderItem])
+                if orderItem in promptsObject and promptsObject[orderItem]: dataFile.append(promptsObject[orderItem])
             
             """
             Adding new prompts that was found in prompts folder, but that was not pressent in the order.json file.
             This allows to add prompts to the collection by simply copying their .json files into collections prompts folder.
             """
+            for promptId in promptsObject:
+                promptItem = promptsObject[promptId]
+                if not promptItem["id"] in JSONOrder:
+                    #emitMessage(f'new prompt found: "{promptItem["id"]}" in collection: "{dirName}"')
+                    newPromptsFromFolder.append(promptItem)
+            
             if newPromptsFromFolder: dataFile += newPromptsFromFolder
 
 

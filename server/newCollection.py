@@ -31,7 +31,7 @@ def newCollection(postJSON):
         with open(pathToCollection + "order.json", 'w') as outfile: json.dump(orderJSON, outfile, indent="\t")
     else:
         dataJSON = []
-        with open(pathToCollection + "data.json", 'w') as outfile: json.dump(dataJSON, outfile)
+        with open(pathToCollection + "data.json", 'w') as outfile: json.dump(dataJSON, outfile, indent="\t")
     
     emitMessage(f'created new prompts collection: {id}')
     return "ok"

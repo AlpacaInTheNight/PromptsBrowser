@@ -50,15 +50,15 @@ def initExtension():
     if not promptCollections:
         pathToDefaultCatalogue = promptsCataloguePath + os.sep + constant.DEFAULT_CATALOGUE + os.sep
         os.makedirs(pathToDefaultCatalogue + "preview")
-        with open(pathToDefaultCatalogue + "data.json", 'w') as outfile: json.dump([], outfile)
-        with open(pathToDefaultCatalogue + "meta.json", 'w') as outfile: json.dump({"format": "short"}, outfile)
+        with open(pathToDefaultCatalogue + "data.json", 'w') as outfile: json.dump([], outfile, indent="\t")
+        with open(pathToDefaultCatalogue + "meta.json", 'w') as outfile: json.dump({"format": "short"}, outfile, indent="\t")
     
     #checks if at least one style catalogue collection exists
     stylesCollections = [name for name in os.listdir(stylesCataloguePath) if os.path.isdir(os.path.join(stylesCataloguePath, name))]
     if not stylesCollections:
         pathToDefaultStyle = stylesCataloguePath + os.sep + constant.DEFAULT_STYLES + os.sep
         os.makedirs(pathToDefaultStyle + "preview")
-        with open(pathToDefaultStyle + "data.json", 'w') as outfile: json.dump([], outfile)
+        with open(pathToDefaultStyle + "data.json", 'w') as outfile: json.dump([], outfile, indent="\t")
 
 initExtension()
 

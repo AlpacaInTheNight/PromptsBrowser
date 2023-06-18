@@ -276,10 +276,10 @@ PromptsBrowser.collectionTools.onDeleteSelected = (e) => {
 	if( confirm(`Remove ${selectedCollectionPrompts.length} prompts from catalogue "${collectionToolsId}"?`) ) {
 		data.original[collectionToolsId] = targetCollection.filter(prompt => !selectedCollectionPrompts.includes(prompt.id));
 
-		PromptsBrowser.db.saveJSONData(collectionToolsId);
 		for(const deletedPromptId of selectedCollectionPrompts) {
 			PromptsBrowser.db.movePreviewImage(deletedPromptId, collectionToolsId, collectionToolsId, "delete");
 		}
+        PromptsBrowser.db.saveJSONData(collectionToolsId);
 		PromptsBrowser.db.updateMixedList();
 
 		state.selectedCollectionPrompts = [];
@@ -318,17 +318,17 @@ PromptsBrowser.collectionTools.onMoveSelected = (e, isCopy = false) => {
 				if(PromptsBrowser.data.original[to].some(item => item.id === promptId)) continue;
 				PromptsBrowser.data.original[to].push(JSON.parse(JSON.stringify(originalItem)));
 
+                PromptsBrowser.db.movePreviewImage(promptId, from, to, "copy");
 				PromptsBrowser.db.saveJSONData(to);
-				PromptsBrowser.db.movePreviewImage(promptId, from, to, "copy");
 				PromptsBrowser.db.updateMixedList();
 
 			} else {
 				PromptsBrowser.data.original[to].push(JSON.parse(JSON.stringify(originalItem)));
 				PromptsBrowser.data.original[from] = PromptsBrowser.data.original[from].filter(item => item.id !== promptId);
 
+                PromptsBrowser.db.movePreviewImage(promptId, from, to, "move");
 				PromptsBrowser.db.saveJSONData(to);
 				PromptsBrowser.db.saveJSONData(from);
-				PromptsBrowser.db.movePreviewImage(promptId, from, to, "move");
 				PromptsBrowser.db.updateMixedList();
 			}
 		}
