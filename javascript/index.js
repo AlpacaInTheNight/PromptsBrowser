@@ -292,7 +292,7 @@ PromptsBrowser.db.movePreviewImage = (item, from, to, type) => {
 
 PromptsBrowser.db.saveJSONData = (collectionId, noClear = false) => {
 	if(!collectionId) return;
-
+ 
 	const targetData = PromptsBrowser.data.original[collectionId];
 	if(!targetData) return;
 

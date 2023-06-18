@@ -77,18 +77,18 @@ def saveCollectionExpanded(pathToCollection, data, collection, noClear):
 
             if(promptItem != promptJSON):
                 with open(pathToPromptFile, 'w') as outfile: json.dump(promptItem, outfile, indent="\t")
-                emitMessage("changed prompt: " + promptItem["id"] + f' in collection "{collection}"')
+                emitMessage(f'update prompts: changed prompt: "{promptItem["id"]}" in collection "{collection}"')
 
         else:
             with open(pathToPromptFile, 'w') as outfile: json.dump(promptItem, outfile, indent="\t")
-            emitMessage("added prompt: " + promptId + f' to collection "{collection}"')
+            emitMessage(f'update prompts: added prompt: "{promptId}" to collection "{collection}"')
         
     jsonFileNames = [filename for filename in os.listdir(promptsFolder) if filename.endswith('.json')]
     for fileName in jsonFileNames:
         if fileName not in expectedFiles:
             pathToPromptFile = promptsFolder + os.sep + fileName
             os.remove(pathToPromptFile)
-            emitMessage("removed prompt file: " + fileName + f' from collection "{collection}"')
+            emitMessage(f'update prompts: removed prompt file: "{fileName}" from collection "{collection}"')
     
     with open(pathToCollection + "order.json", 'w') as outfile: json.dump(promptOrder, outfile, indent="\t")
     

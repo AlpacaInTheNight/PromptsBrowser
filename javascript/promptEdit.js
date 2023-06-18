@@ -109,7 +109,10 @@ PromptsBrowser.promptEdit.addMoveBlock = (wrapper) => {
 		const originalItem = PromptsBrowser.data.original[from].find(item => item.id === state.editingPrompt);
 		if(!originalItem) return;
 
-		PromptsBrowser.data.original[to].push(JSON.parse(JSON.stringify(originalItem)));
+        if(!PromptsBrowser.data.original[to].some(item => item.id === state.editingPrompt)) {
+            PromptsBrowser.data.original[to].push(JSON.parse(JSON.stringify(originalItem)));
+        }
+		
 		PromptsBrowser.data.original[from] = PromptsBrowser.data.original[from].filter(item => item.id !== state.editingPrompt);
 
         PromptsBrowser.db.movePreviewImage(state.editingPrompt, from, to, "move");

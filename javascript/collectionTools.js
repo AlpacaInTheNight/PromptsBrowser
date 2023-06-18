@@ -314,24 +314,32 @@ PromptsBrowser.collectionTools.onMoveSelected = (e, isCopy = false) => {
 			const originalItem = PromptsBrowser.data.original[from].find(item => item.id === promptId);
 			if(!originalItem) continue;
 
-			if(isCopy) {
-				if(PromptsBrowser.data.original[to].some(item => item.id === promptId)) continue;
-				PromptsBrowser.data.original[to].push(JSON.parse(JSON.stringify(originalItem)));
+            if(isCopy) {
+                if(PromptsBrowser.data.original[to].some(item => item.id === promptId)) continue;
+
+                PromptsBrowser.data.original[to].push(JSON.parse(JSON.stringify(originalItem)));
 
                 PromptsBrowser.db.movePreviewImage(promptId, from, to, "copy");
-				PromptsBrowser.db.saveJSONData(to, true);
-				PromptsBrowser.db.updateMixedList();
 
-			} else {
-				PromptsBrowser.data.original[to].push(JSON.parse(JSON.stringify(originalItem)));
-				PromptsBrowser.data.original[from] = PromptsBrowser.data.original[from].filter(item => item.id !== promptId);
+            } else {
+                if(!PromptsBrowser.data.original[to].some(item => item.id === promptId)) {
+                    PromptsBrowser.data.original[to].push(JSON.parse(JSON.stringify(originalItem)));
+                }
+                
+                PromptsBrowser.data.original[from] = PromptsBrowser.data.original[from].filter(item => item.id !== promptId);
 
                 PromptsBrowser.db.movePreviewImage(promptId, from, to, "move");
-				PromptsBrowser.db.saveJSONData(to, true);
-				PromptsBrowser.db.saveJSONData(from, true);
-				PromptsBrowser.db.updateMixedList();
-			}
+            }
 		}
+
+        if(isCopy) {
+            PromptsBrowser.db.saveJSONData(to, true);
+
+        } else {
+            PromptsBrowser.db.saveJSONData(to, true);
+            PromptsBrowser.db.saveJSONData(from, true);
+        }
+        PromptsBrowser.db.updateMixedList();
 
 		state.selectedCollectionPrompts = [];
 		PromptsBrowser.collectionTools.updateViews();
