@@ -143,12 +143,19 @@ PromptsBrowser.promptEdit.saveEdit = () => {
 	const addAfterInput = wrapper.querySelector(".PBE_promptEdit_addAfter");
 	const addStartInput = wrapper.querySelector(".PBE_promptEdit_addStart");
 	const addEndInput = wrapper.querySelector(".PBE_promptEdit_addEnd");
+	const tagsList = wrapper.querySelectorAll(".PBE_tagsList > div");
+	const categoriesList = wrapper.querySelectorAll(".PBE_categoryList > div");
 
 	const comment = commentBlock ? commentBlock.value : "";
 	const addAtStart = addAtStartInput.checked;
 	const addAfter = addAfterInput.value;
 	const addStart = addStartInput.value;
 	const addEnd = addEndInput.value;
+    const tags = [];
+    const category = [];
+
+    for(const divItem of tagsList) tags.push(divItem.innerText);
+    for(const divItem of categoriesList) category.push(divItem.innerText);
 
 	state.editItem.comment = comment;
 	if(!state.editItem.comment) delete state.editItem.comment;
@@ -157,43 +164,23 @@ PromptsBrowser.promptEdit.saveEdit = () => {
 	if(indexInOrigin !== -1) collection[indexInOrigin] = state.editItem;
 	else collection.push(state.editItem);
 
-	const targetItem = united.find(item => item.id === state.editingPrompt);
+    const collectionPrompt = collection.find(item => item.id === state.editingPrompt);
+    if(!collectionPrompt) return;
 
-	if(targetItem) {
-		targetItem.tags = [];
-		targetItem.category = [];
+    collectionPrompt.tags = tags;
+    collectionPrompt.category = category;
 
-		for(const originalId in PromptsBrowser.data.original) {
-			const originalCollection = PromptsBrowser.data.original[originalId];
+    if(!addAtStart) delete collectionPrompt.addAtStart;
+    else collectionPrompt.addAtStart = addAtStart;
 
-			const collectionPrompt = originalCollection.find(item => item.id === state.editingPrompt);
-			if(!collectionPrompt) continue;
+    if(!addAfter) delete collectionPrompt.addAfter;
+    else collectionPrompt.addAfter = addAfter;
 
-			if(collectionPrompt.tags) {
-				collectionPrompt.tags.forEach(item => {
-					if(!targetItem.tags.includes(item)) targetItem.tags.push(item);
-				});
-			}
+    if(!addStart) delete collectionPrompt.addStart;
+    else collectionPrompt.addStart = addStart;
 
-			if(collectionPrompt.category) {
-				collectionPrompt.category.forEach(item => {
-					if(!targetItem.category.includes(item)) targetItem.category.push(item);
-				});
-			}
-
-			if(!addAtStart) delete collectionPrompt.addAtStart;
-			else collectionPrompt.addAtStart = addAtStart;
-
-			if(!addAfter) delete collectionPrompt.addAfter;
-			else collectionPrompt.addAfter = addAfter;
-
-			if(!addStart) delete collectionPrompt.addStart;
-			else collectionPrompt.addStart = addStart;
-
-			if(!addEnd) delete collectionPrompt.addEnd;
-			else collectionPrompt.addEnd = addEnd;
-		}
-	}
+    if(!addEnd) delete collectionPrompt.addEnd;
+    else collectionPrompt.addEnd = addEnd;
 
 	PromptsBrowser.db.saveJSONData(state.editTargetCollection);
 
@@ -347,8 +334,8 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
 	addTagBlock.className = "PBE_rowBlock";
 	addCategoryBlock.className = "PBE_rowBlock";
 	footerBlock.className = "PBE_rowBlock";
-	tagsList.className = "PBE_List PBE_Scrollbar";
-	categoriesList.className = "PBE_List PBE_Scrollbar";
+	tagsList.className = "PBE_List PBE_Scrollbar PBE_tagsList";
+	categoriesList.className = "PBE_List PBE_Scrollbar PBE_categoryList";
 	commentArea.className = "PBE_Textarea PBE_Scrollbar";
 
 	tagInput.id = "PBE_addTagInput";
