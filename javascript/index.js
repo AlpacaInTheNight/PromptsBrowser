@@ -226,7 +226,7 @@ PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionId) => {
 
 	const safeFileName = PromptsBrowser.makeFileNameSafe(prompt);
 
-	const url = `url('./file=prompts_catalogue/${collectionId}/preview/${safeFileName}.${fileExtension}?${state.filesIteration}'), ${EMPTY_CARD_GRADIENT}`;
+	const url = `url("./file=prompts_catalogue/${collectionId}/preview/${safeFileName}.${fileExtension}?${state.filesIteration}"), ${EMPTY_CARD_GRADIENT}`;
 	return url;
 }
 
