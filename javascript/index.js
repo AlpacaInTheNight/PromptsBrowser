@@ -80,6 +80,8 @@ PromptsBrowser.data.categories = [
 	"creature"
 ].sort();
 
+PromptsBrowser.onCloseActiveWindow = undefined;
+
 PromptsBrowser.supportedContainers = {
 	text2Img: {
 		prompt: "txt2img_prompt_container",
@@ -453,6 +455,14 @@ PromptsBrowser.onChangeTab = (e) => {
 	}
 }
 
+PromptsBrowser.onDocumentKey = (e) => {
+    if(e.key !== "Escape") return;
+    let hold = false;
+
+    if(PromptsBrowser.onCloseActiveWindow) hold = PromptsBrowser.onCloseActiveWindow();
+    if(!hold) PromptsBrowser.onCloseActiveWindow = undefined;
+}
+
 PromptsBrowser.loadConfig = () => {
 	const {state} = PromptsBrowser;
 
@@ -487,6 +497,9 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
 
 	tabsContainer.removeEventListener("click", PromptsBrowser.onChangeTab);
 	tabsContainer.addEventListener("click", PromptsBrowser.onChangeTab);
+
+    document.removeEventListener('keyup', PromptsBrowser.onDocumentKey);
+    document.addEventListener('keyup', PromptsBrowser.onDocumentKey);
 
 	for(const containerId in PromptsBrowser.supportedContainers) {
 		DOMCache.containers[containerId] = {};

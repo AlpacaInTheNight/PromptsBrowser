@@ -17,6 +17,11 @@ PromptsBrowser.styles.init = (mainWrapper) => {
 
 	PromptsBrowser.DOMCache.stylesWindow = stylesWindow;
 	mainWrapper.appendChild(stylesWindow);
+    PromptsBrowser.onCloseActiveWindow = PromptsBrowser.styles.onCloseWindow;
+
+    stylesWindow.addEventListener("click", () => {
+        PromptsBrowser.onCloseActiveWindow = PromptsBrowser.styles.onCloseWindow;
+    });
 }
 
 PromptsBrowser.styles.initButton = (positiveWrapper) => {
@@ -90,6 +95,15 @@ PromptsBrowser.styles.onUpdatePreview = (e) => {
 
 		PromptsBrowser.styles.update();
 	})();
+}
+
+PromptsBrowser.styles.onCloseWindow = () => {
+    const {state} = PromptsBrowser;
+    const wrapper = PromptsBrowser.DOMCache.stylesWindow;
+    if(!wrapper || !state.showStylesWindow) return;
+
+    state.showStylesWindow = undefined;
+    wrapper.style.display = "none";
 }
 
 PromptsBrowser.styles.onCardClick = (e) => {
@@ -676,6 +690,7 @@ PromptsBrowser.styles.update = () => {
 	const {state} = PromptsBrowser;
 	const wrapper = PromptsBrowser.DOMCache.stylesWindow;
 	if(!wrapper || !state.showStylesWindow) return;
+    PromptsBrowser.onCloseActiveWindow = PromptsBrowser.styles.onCloseWindow;
 	wrapper.innerHTML = "";
 	wrapper.style.display = "flex";
 	const isShort = state.toggledButtons.includes("styles_simplified_view");
@@ -701,10 +716,7 @@ PromptsBrowser.styles.update = () => {
 		PromptsBrowser.styles.showStyles(possibleStylesBlock);
 	}
 
-	closeButton.addEventListener("click", (e) => {
-		state.showStylesWindow = undefined;
-		wrapper.style.display = "none";
-	});
+	closeButton.addEventListener("click", PromptsBrowser.styles.onCloseWindow);
 
 	footerBlock.appendChild(closeButton);
 

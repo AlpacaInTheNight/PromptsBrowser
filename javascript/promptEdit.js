@@ -9,6 +9,21 @@ PromptsBrowser.promptEdit.init = (wrapper) => {
 
 	PromptsBrowser.DOMCache.promptEdit = promptEdit;
 	wrapper.appendChild(promptEdit);
+
+    PromptsBrowser.onCloseActiveWindow = PromptsBrowser.promptEdit.onCloseWindow;
+
+    promptEdit.addEventListener("click", () => {
+        PromptsBrowser.onCloseActiveWindow = PromptsBrowser.promptEdit.onCloseWindow;
+    });
+}
+
+PromptsBrowser.promptEdit.onCloseWindow = () => {
+    const {state} = PromptsBrowser;
+    const wrapper = PromptsBrowser.DOMCache.promptEdit;
+    if(!wrapper || !state.editingPrompt) return;
+
+    state.editingPrompt = undefined;
+    wrapper.style.display = "none";
 }
 
 PromptsBrowser.promptEdit.onAddTags = (targetItem, inputElement) => {
@@ -309,6 +324,7 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
 	if(!wrapper || !state.editingPrompt) return;
 	if(!targetItem) targetItem = PromptsBrowser.promptEdit.getTargetItem();
 	if(!targetItem) return;
+    PromptsBrowser.onCloseActiveWindow = PromptsBrowser.promptEdit.onCloseWindow;
 	wrapper.innerHTML = "";
 
 	const headerBlock = document.createElement("div");
@@ -439,10 +455,7 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
 
 	commentArea.addEventListener("change", (e) => targetItem.comment = e.currentTarget.value);
 
-	cancelButton.addEventListener("click", (e) => {
-		state.editingPrompt = undefined;
-		wrapper.style.display = "none";
-	});
+	cancelButton.addEventListener("click", PromptsBrowser.promptEdit.onCloseWindow);
 
 	saveButton.addEventListener("click", PromptsBrowser.promptEdit.saveEdit);
 

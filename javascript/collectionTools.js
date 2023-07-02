@@ -20,6 +20,12 @@ PromptsBrowser.collectionTools.init = (wrapper) => {
 	PromptsBrowser.collectionTools.generateQueue = [];
 	clearTimeout(PromptsBrowser.collectionTools.generateNextTimer);
 	wrapper.appendChild(collectionTools);
+
+    PromptsBrowser.onCloseActiveWindow = PromptsBrowser.collectionTools.onCloseWindow;
+
+    collectionTools.addEventListener("click", () => {
+        PromptsBrowser.onCloseActiveWindow = PromptsBrowser.collectionTools.onCloseWindow;
+    });
 }
 
 /**
@@ -102,6 +108,14 @@ PromptsBrowser.collectionTools.checkProgressState = () => {
 
 	clearTimeout(PromptsBrowser.collectionTools.generateNextTimer);
 	PromptsBrowser.collectionTools.generateNextTimer = setTimeout(PromptsBrowser.collectionTools.checkProgressState, 500);
+}
+
+PromptsBrowser.collectionTools.onCloseWindow = () => {
+	const wrapper = PromptsBrowser.DOMCache.collectionTools;
+	if(!wrapper) return;
+
+    clearTimeout(PromptsBrowser.collectionTools.generateNextTimer);
+	wrapper.style.display = "none";
 }
 
 PromptsBrowser.collectionTools.onGeneratePreviews = (e) => {
@@ -622,6 +636,7 @@ PromptsBrowser.collectionTools.update = (ifShown = false) => {
 
 	if(!state.collectionToolsId) return;
 
+    PromptsBrowser.onCloseActiveWindow = PromptsBrowser.collectionTools.onCloseWindow;
 	wrapper.innerHTML = "";
 	wrapper.style.display = "flex";
 
@@ -631,10 +646,7 @@ PromptsBrowser.collectionTools.update = (ifShown = false) => {
 	closeButton.innerText = "Close";
 	closeButton.className = "PBE_button";
 
-	closeButton.addEventListener("click", (e) => {
-		clearTimeout(PromptsBrowser.collectionTools.generateNextTimer);
-		wrapper.style.display = "none";
-	});
+	closeButton.addEventListener("click", PromptsBrowser.collectionTools.onCloseWindow);
 
 	const headerBlock = document.createElement("div");
 	headerBlock.className = "PBE_collectionToolsHeader";

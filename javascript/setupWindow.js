@@ -19,6 +19,25 @@ PromptsBrowser.setupWindow.init = (wrapper) => {
 
 	PromptsBrowser.DOMCache.setupWindow = setupWindow;
 	wrapper.appendChild(setupWindow);
+
+    PromptsBrowser.onCloseActiveWindow = PromptsBrowser.setupWindow.onCloseWindow;
+
+    setupWindow.addEventListener("click", () => {
+        PromptsBrowser.onCloseActiveWindow = PromptsBrowser.setupWindow.onCloseWindow;
+    });
+}
+
+PromptsBrowser.setupWindow.onCloseWindow = () => {
+    const {viewMode} = PromptsBrowser.setupWindow;
+    const wrapper = PromptsBrowser.DOMCache.setupWindow;
+    if(!wrapper) return;
+
+    if(viewMode === "newCollection" || viewMode === "newStylesCollection") {
+        PromptsBrowser.setupWindow.viewMode = "normal";
+        PromptsBrowser.setupWindow.update();
+        return true;
+
+    } else wrapper.style.display = "none";
 }
 
 PromptsBrowser.setupWindow.onChangeLowerCase = (e) => {
@@ -279,6 +298,7 @@ PromptsBrowser.setupWindow.update = () => {
 	const wrapper = PromptsBrowser.DOMCache.setupWindow;
 	if(!wrapper) return;
 	
+    PromptsBrowser.onCloseActiveWindow = PromptsBrowser.setupWindow.onCloseWindow;
 	wrapper.style.display = "flex";
 
 	if(viewMode === "newCollection") wrapper.innerHTML = "New prompts collection";
@@ -309,13 +329,7 @@ PromptsBrowser.setupWindow.update = () => {
 	closeButton.innerText = viewMode === "normal" ? "Close" : "Cancel";
 	closeButton.className = "PBE_button";
 
-	closeButton.addEventListener("click", (e) => {
-		if(viewMode === "newCollection" || viewMode === "newStylesCollection") {
-			PromptsBrowser.setupWindow.viewMode = "normal";
-			PromptsBrowser.setupWindow.update();
-
-		} else wrapper.style.display = "none";
-	});
+	closeButton.addEventListener("click", PromptsBrowser.setupWindow.onCloseWindow);
 
 	if(viewMode === "newCollection" || viewMode === "newStylesCollection") {
 		const createButton = document.createElement("button");
