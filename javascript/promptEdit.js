@@ -11,6 +11,23 @@ PromptsBrowser.promptEdit.init = (wrapper) => {
 	wrapper.appendChild(promptEdit);
 }
 
+PromptsBrowser.promptEdit.onAddTags = (targetItem, inputElement) => {
+    if(!inputElement || !targetItem) return;
+    const value = inputElement.value;
+
+    let tags = value.split(",").map(item => item.trim());
+
+    //removing empty tags
+    tags = tags.filter(item => item);
+
+    for(const tag of tags) {
+        if(targetItem.tags.includes(tag)) continue;
+        targetItem.tags.push(tag);
+    }
+
+    PromptsBrowser.promptEdit.update(targetItem);
+}
+
 PromptsBrowser.promptEdit.addCollectionSelector = (wrapper) => {
 	const {united} = PromptsBrowser.data;
 	const {state} = PromptsBrowser;
@@ -395,15 +412,18 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
 	}
 	categorySelect.innerHTML = options;
 
+    tagInput.addEventListener("keyup", (e) => {
+        if(e.keyCode !== 13) return;
+        if(e.currentTarget.dataset.hint) return;
+
+        PromptsBrowser.promptEdit.onAddTags(targetItem, tagInput);
+    });
+
 	addTagButton.addEventListener("click", (e) => {
 		const inputElement = wrapper.querySelector("#PBE_addTagInput");
 		if(!inputElement) return;
-		const value = inputElement.value;
 
-		if(targetItem.tags.includes(value)) return;
-		targetItem.tags.push(value);
-
-		PromptsBrowser.promptEdit.update(targetItem);
+        PromptsBrowser.promptEdit.onAddTags(targetItem, inputElement);
 	});
 
 	addCategoryButton.addEventListener("click", (e) => {
@@ -434,7 +454,7 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
 
 	addTagBlock.appendChild(tagInput);
 	addTagBlock.appendChild(addTagButton);
-
+ 
 	addCategoryBlock.appendChild(categorySelect);
 	addCategoryBlock.appendChild(addCategoryButton);
 
@@ -458,4 +478,6 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
 	wrapper.appendChild(commentArea);
 
 	wrapper.appendChild(footerBlock);
+
+    PromptsBrowser.tagTooltip.add(tagInput);
 }

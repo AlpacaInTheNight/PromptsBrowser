@@ -143,7 +143,8 @@ PromptsBrowser.knownPrompts.onPromptClick = (e) => {
 	PromptsBrowser.currentPrompts.update();
 }
 
-PromptsBrowser.knownPrompts.showHeader = (wrapper) => {
+PromptsBrowser.knownPrompts.showHeader = (wrapper, params = {}) => {
+    const {holdTagsInput = false} = params;
 	const {state} = PromptsBrowser;
 
 	const headerContainer = document.createElement("div");
@@ -223,15 +224,20 @@ PromptsBrowser.knownPrompts.showHeader = (wrapper) => {
 
 	tagsInput.addEventListener("change", (e) => {
 		const value = e.currentTarget.value;
+        if(e.currentTarget.dataset.hint) return;
 
-		const tags = value.split(",").map(item => item.trim());
+		let tags = value.split(",").map(item => item.trim());
+        
+        //removing empty tags
+        tags = tags.filter(item => item);
+
 		if(!tags) state.filterTags = undefined;
 		else state.filterTags = tags;
 
 		if(state.filterTags && !state.filterTags.length) state.filterTags = undefined;
 		if(state.filterTags && state.filterTags.length === 1 && !state.filterTags[0]) state.filterTags = undefined;
-		
-		PromptsBrowser.knownPrompts.update();
+
+		PromptsBrowser.knownPrompts.update({holdTagsInput: true});
 	});
 
 	collectionToolsButton.addEventListener("click", (e) => {
@@ -246,9 +252,13 @@ PromptsBrowser.knownPrompts.showHeader = (wrapper) => {
 	headerContainer.appendChild(sortingSelector);
 
 	wrapper.appendChild(headerContainer);
+
+    PromptsBrowser.tagTooltip.add(tagsInput);
+
+    if(holdTagsInput) tagsInput.focus();
 }
 
-PromptsBrowser.knownPrompts.update = () => {
+PromptsBrowser.knownPrompts.update = (params) => {
 	const {united} = PromptsBrowser.data;
 	const {DEFAULT_PROMPT_WEIGHT} = PromptsBrowser.params;
 	const {state} = PromptsBrowser;
@@ -263,7 +273,7 @@ PromptsBrowser.knownPrompts.update = () => {
 		return;
 	}
 
-	PromptsBrowser.knownPrompts.showHeader(wrapper);
+	PromptsBrowser.knownPrompts.showHeader(wrapper, params);
 
 	const proptsContainer = document.createElement("div");
 	proptsContainer.className = "PBE_promptsCatalogueContent PBE_Scrollbar";
@@ -323,15 +333,37 @@ PromptsBrowser.knownPrompts.update = () => {
 		if(state.filterTags && Array.isArray(state.filterTags)) {
 			if(!prompt.tags) continue;
 			let out = true;
+            const TAG_MODE = "includeAll";
 
-			for(const filterTag of state.filterTags) {
-				for(const promptTag of prompt.tags) {
-					if(promptTag.includes(filterTag)) {
-						out = false;
-						break;
-					}
-				}
-			}
+            if(TAG_MODE === "includeAll") {
+                out = false;
+
+                for(const filterTag of state.filterTags) {
+                    let fulfil = false;
+
+                    for(const promptTag of prompt.tags) {
+                        if(promptTag === filterTag) {
+                            fulfil = true;
+                            break;
+                        }
+                    }
+
+                    if(!fulfil) {
+                        out = true;
+                        break;
+                    }
+                }
+
+            } else {
+                for(const filterTag of state.filterTags) {
+                    for(const promptTag of prompt.tags) {
+                        if(promptTag.includes(filterTag)) {
+                            out = false;
+                            break;
+                        }
+                    }
+                }
+            }
 			
 			if(out) continue;
 		}
