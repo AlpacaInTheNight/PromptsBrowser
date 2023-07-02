@@ -67,9 +67,6 @@ PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
 		splashElement.innerText = id;
 
 		if(weight !== DEFAULT_PROMPT_WEIGHT) {
-			/* weightContainer.className = "PBE_promptElementWeight";
-			weightContainer.innerText = weight; */
-	
 			splashElement.appendChild(weightContainer.cloneNode(true));
 		}
 
