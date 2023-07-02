@@ -23,6 +23,7 @@ PromptsBrowser.state = {
 	editingPrompt: undefined,
 	filesIteration: (new Date().valueOf()), //to avoid getting old image cache
 	filterCategory: undefined,
+	filterName: undefined,
 	filterCollection: undefined,
 	filterTags: undefined,
 	filterStyleCollection: undefined,

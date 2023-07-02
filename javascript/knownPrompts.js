@@ -152,7 +152,9 @@ PromptsBrowser.knownPrompts.showHeader = (wrapper, params = {}) => {
 	const collectionSelector = document.createElement("select");
 	const sortingSelector = document.createElement("select");
 	const tagsInput = document.createElement("input");
+	const nameInput = document.createElement("input");
 	tagsInput.placeholder = "tag1, tag2, tag3...";
+	nameInput.placeholder = "by name";
 	const collectionToolsButton = document.createElement("button");
 	collectionToolsButton.className = "PBE_button";
 	collectionToolsButton.innerText = "Edit collection";
@@ -163,7 +165,7 @@ PromptsBrowser.knownPrompts.showHeader = (wrapper, params = {}) => {
 	//categories selector
 	const categories = PromptsBrowser.data.categories;
 	let options = `
-		<option value="">All</option>
+		<option value="">All categories</option>
 		<option value="__none">Uncategorised</option>
 	`;
 
@@ -183,7 +185,7 @@ PromptsBrowser.knownPrompts.showHeader = (wrapper, params = {}) => {
 	});
 
 	//collection selector
-	options = `<option value="">All</option>`;
+	options = `<option value="">All collections</option>`;
 
 	for(const collectionId in PromptsBrowser.data.original) {
 		options += `<option value="${collectionId}">${collectionId}</option>`;
@@ -240,6 +242,23 @@ PromptsBrowser.knownPrompts.showHeader = (wrapper, params = {}) => {
 		PromptsBrowser.knownPrompts.update({holdTagsInput: true});
 	});
 
+    //search input
+    if(state.filterName) nameInput.value = state.filterName;
+
+    nameInput.addEventListener("change", (e) => {
+        let value = e.currentTarget.value || "";
+        value = value.trim();
+
+        if(value) {
+            value = value.toLowerCase();
+            state.filterName = value;
+        } else {
+            state.filterName = undefined;
+        }
+        
+        PromptsBrowser.knownPrompts.update();
+    });
+
 	collectionToolsButton.addEventListener("click", (e) => {
 		if(state.filterCollection) state.collectionToolsId = state.filterCollection;
 		PromptsBrowser.collectionTools.update();
@@ -249,7 +268,8 @@ PromptsBrowser.knownPrompts.showHeader = (wrapper, params = {}) => {
 	headerContainer.appendChild(collectionSelector);
 	headerContainer.appendChild(categorySelector);
 	headerContainer.appendChild(tagsInput);
-	headerContainer.appendChild(sortingSelector);
+	headerContainer.appendChild(nameInput);
+    headerContainer.appendChild(sortingSelector);
 
 	wrapper.appendChild(headerContainer);
 
@@ -292,7 +312,7 @@ PromptsBrowser.knownPrompts.update = (params) => {
 
 	} else {
 		for(const id in united) dataArr.push({...united[id]});
-	}	
+	}
 	
 	if(state.sortKnownPrompts === "alph" || state.sortKnownPrompts === "alphReversed") {
 		dataArr.sort( (A, B) => {
@@ -329,6 +349,10 @@ PromptsBrowser.knownPrompts.update = (params) => {
 			if(!prompt.collections) continue;
 			if(!prompt.collections.includes(state.filterCollection)) continue;
 		}
+
+        if(state.filterName) {
+            if(!prompt.id.toLowerCase().includes(state.filterName)) continue;
+        }
 
 		if(state.filterTags && Array.isArray(state.filterTags)) {
 			if(!prompt.tags) continue;

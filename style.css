@@ -260,7 +260,9 @@
 .PBE_promptsCatalogueHeader {
 	display: flex;
 	flex-direction: row;
-	flex-wrap: wrap;
+	flex-wrap: nowrap;
+    width: 100%;
+    overflow: hidden;
 	align-items: center;
 	padding: 0 10px;
 }
@@ -270,6 +272,10 @@
 	color: black;
 	margin-right: 5px;
 	height: 40px;
+    width: 1px;
+    flex-shrink: 1;
+    flex-grow: 1;
+    display: flex;
 }
 
 .PBE_promptsCatalogueHeader input {
