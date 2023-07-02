@@ -180,7 +180,7 @@ PromptsBrowser.utils.collectionHavePreview = (prompt, collectionId) => {
 	const targetCollection = original[collectionId];
 	if(!targetCollection) return false;
 
-	const targetPrompt = targetCollection.find(item => item.id === prompt);
+	const targetPrompt = targetCollection.find(item => item.id.toLowerCase() === prompt.toLowerCase());
 	if(!targetPrompt) return false;
 
 	return targetPrompt.previewImage ? true : false;
@@ -199,7 +199,7 @@ PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionId) => {
 		if(!targetCollection) return NEW_CARD_GRADIENT;
 		targetPrompt = targetCollection.find(item => item.id === prompt);
 
-	} else targetPrompt = united.find(item => item.id === prompt);
+	} else targetPrompt = united.find(item => item.id.toLowerCase() === prompt.toLowerCase());
 
 	if(!targetPrompt) return NEW_CARD_GRADIENT;
 	if(!targetPrompt.previewImage) return EMPTY_CARD_GRADIENT;
