@@ -215,6 +215,7 @@ PromptsBrowser.promptEdit.saveEdit = () => {
     else collectionPrompt.addEnd = addEnd;
 
 	PromptsBrowser.db.saveJSONData(state.editTargetCollection);
+    PromptsBrowser.db.updateMixedList();
 
 	state.editTargetCollection = undefined;
 	state.editingPrompt = undefined;
