@@ -335,6 +335,14 @@
 	color: black;
 }
 
+.PBE_promptEditInfoItem {
+    cursor: pointer;
+}
+
+.PBE_promptEditInfoItem:hover {
+    background-color: rgba(255, 0, 0, 0.2);
+}
+
 .PBE_currentPrompts {
 	display: flex;
 	flex-direction: row;

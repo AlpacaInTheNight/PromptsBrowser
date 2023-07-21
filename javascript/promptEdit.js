@@ -390,6 +390,7 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
 
 	for(const tagItem of targetItem.tags) {
 		const tagElement = document.createElement("div");
+        tagElement.className = "PBE_promptEditInfoItem";
 		tagElement.innerText = tagItem;
 
 		tagElement.addEventListener("click", (e) => {
@@ -405,6 +406,7 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
 
 	for(const categoryItem of targetItem.category) {
 		const categoryElement = document.createElement("div");
+        categoryElement.className = "PBE_promptEditInfoItem";
 		categoryElement.innerText = categoryItem;
 
 		categoryElement.addEventListener("click", (e) => {
