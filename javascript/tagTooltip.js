@@ -14,6 +14,13 @@ PromptsBrowser.tagTooltip.knownTags = [];
 PromptsBrowser.tagTooltip.add = (inputContainer) => {
     PromptsBrowser.tagTooltip.updateTagsList();
 
+    //removing old element from the page
+    if(PromptsBrowser.tagTooltip.container) {
+        const oldWindow = document.querySelector(".PBE_autocompliteTags");
+        if(oldWindow) oldWindow.remove();
+        PromptsBrowser.tagTooltip.container = undefined;
+    }
+
     const autocompliteWindow = document.createElement("div");
 	autocompliteWindow.className = "PBE_autocompliteBox PBE_autocompliteTags";
 
@@ -217,10 +224,11 @@ PromptsBrowser.tagTooltip.processCarretPosition = (e) => {
         return;
     }
 
+    word = word.toLowerCase();
 	const possibleTags = [];
 
 	for(const tag of knownTags) {
-		if(tag.includes(word)) possibleTags.push(tag);
+		if(tag.toLowerCase().includes(word)) possibleTags.push(tag);
 	}
 
 	if(!possibleTags.length || (possibleTags.length === 1 && word === possibleTags[0])) {

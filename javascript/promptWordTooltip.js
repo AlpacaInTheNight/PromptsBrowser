@@ -239,11 +239,12 @@ PromptsBrowser.promptWordTooltip.processCarretPosition = (e) => {
 	word = word.trim();
 	if(!word) return;
 
+    word = word.toLowerCase();
 	const possiblePrompts = [];
 
 	for(const prompt of promptsList) {
 		if(!prompt.id) continue;
-		if(prompt.id.includes(word)) possiblePrompts.push(prompt.id);
+		if(prompt.id.toLowerCase().includes(word)) possiblePrompts.push(prompt.id);
 	}
 
 	if(!possiblePrompts.length || (possiblePrompts.length === 1 && word === possiblePrompts[0])) {
