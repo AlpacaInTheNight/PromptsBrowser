@@ -185,7 +185,7 @@ PromptsBrowser.promptScribe.showUnknownPrompts = (wrapper, initial = false) => {
 		let isKnown = false;
 
 		for(const knownPrompt of database) {
-			if(knownPrompt.id === item.id) {
+			if(knownPrompt.id.toLowerCase() === item.id.toLowerCase()) {
 				isKnown = true;
 				break;
 			}
