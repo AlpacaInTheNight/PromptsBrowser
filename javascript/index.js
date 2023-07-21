@@ -55,6 +55,7 @@ PromptsBrowser.params.NEW_CARD_GRADIENT = "linear-gradient(135deg, rgba(180,221,
 
 PromptsBrowser.data.categories = [
 	"character",
+    "character description",
 	"portrait",
 	"body",
 	"composition",
