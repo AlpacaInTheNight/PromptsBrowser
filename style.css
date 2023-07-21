@@ -103,6 +103,14 @@
 	text-shadow: 1px 1px 1px black;
 }
 
+.PBE_fieldset label {
+    font-size: 17px;
+    font-family: sans-serif;
+    color: cornflowerblue;
+    text-shadow: 1px 1px 1px black;
+    cursor: pointer;
+}
+
 .PBE_fieldset > div,
 .PBE_fieldset > input,
 .PBE_fieldset > select {

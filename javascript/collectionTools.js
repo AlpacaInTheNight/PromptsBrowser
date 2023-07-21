@@ -75,7 +75,10 @@ PromptsBrowser.collectionTools.generateNextPreview = () => {
 	state.selectedPrompt = nextItem.id;
 	state.savePreviewCollection = collectionToolsId;
 
-	textArea.value = nextItem.id;
+	
+    if(nextItem.addPrompts) textArea.value = `((${nextItem.id})), ${nextItem.addPrompts}`;
+    else textArea.value = nextItem.id;
+
 	textArea.dispatchEvent(new Event('focus'));
 	textArea.dispatchEvent(new Event('input'));
 	textArea.dispatchEvent(new KeyboardEvent('keyup'));
@@ -120,12 +123,18 @@ PromptsBrowser.collectionTools.onCloseWindow = () => {
 
 PromptsBrowser.collectionTools.onGeneratePreviews = (e) => {
 	const {state, data} = PromptsBrowser;
-	const {selectedCollectionPrompts, collectionToolsId} = state;
+	const {selectedCollectionPrompts, collectionToolsId, autoGenerateKeepCurrent} = state;
+    const textArea = PromptsBrowser.DOMCache.containers[state.currentContainer].textArea;
 	const targetCollection = data.original[collectionToolsId];
+    let currentPrompt = "";
 
 	if(!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection) return;
 
 	PromptsBrowser.collectionTools.generateQueue = [];
+
+    if(autoGenerateKeepCurrent && textArea) {
+        currentPrompt = textArea.value;
+    }
 
 	for(const promptId of selectedCollectionPrompts) {
 		const prompt = targetCollection.find(item => item.id === promptId);
@@ -134,6 +143,10 @@ PromptsBrowser.collectionTools.onGeneratePreviews = (e) => {
 		const generateItem = {
 			id: promptId,
 		};
+
+        if(autoGenerateKeepCurrent) {
+            generateItem.addPrompts = currentPrompt;
+        }
 
 		PromptsBrowser.collectionTools.generateQueue.push(generateItem);
 	}
@@ -567,15 +580,36 @@ PromptsBrowser.collectionTools.showTagsAction = (wrapper) => {
 	container.appendChild(removeButton);
 
 	wrapper.appendChild(container);
+
+    PromptsBrowser.tagTooltip.add(tagsInput);
 }
 
 PromptsBrowser.collectionTools.showAutogenerate = (wrapper) => {
+    const {state} = PromptsBrowser;
 
 	const generateButton = document.createElement("div");
 	generateButton.className = "PBE_button";
 	generateButton.innerText = "Generate";
 
 	generateButton.addEventListener("click", PromptsBrowser.collectionTools.onGeneratePreviews);
+
+    const withCurrentPrompts = document.createElement("input");
+    withCurrentPrompts.type = "checkbox";
+
+    const withCurrent = document.createElement("input");
+	withCurrent.id = "PBE_generateWithCurrent";
+	withCurrent.name = "PBE_generateWithCurrent";
+	withCurrent.type = "checkbox";
+	withCurrent.checked = state.autoGenerateKeepCurrent;
+
+	withCurrent.addEventListener("change", (e) => {
+        const value = e.currentTarget.checked;
+        state.autoGenerateKeepCurrent = value;
+    });
+
+	const withCurrentLegend = document.createElement("label");
+	withCurrentLegend.htmlFor = withCurrent.id;
+	withCurrentLegend.textContent = "Keep current prompts";
 
 	const container = document.createElement("fieldset");
 	container.className = "PBE_fieldset";
@@ -584,6 +618,8 @@ PromptsBrowser.collectionTools.showAutogenerate = (wrapper) => {
 
 	container.appendChild(legend);
 	container.appendChild(generateButton);
+	container.appendChild(withCurrent);
+	container.appendChild(withCurrentLegend);
 
 	wrapper.appendChild(container);
 }
@@ -659,7 +695,6 @@ PromptsBrowser.collectionTools.update = (ifShown = false) => {
 
 	PromptsBrowser.collectionTools.showHeader(headerBlock);
 	PromptsBrowser.collectionTools.showPromptsDetailed(contentBlock);
-	PromptsBrowser.collectionTools.showActions(actionsBlock);
 
 	footerBlock.appendChild(closeButton);
 
@@ -667,4 +702,7 @@ PromptsBrowser.collectionTools.update = (ifShown = false) => {
 	wrapper.appendChild(contentBlock);
 	wrapper.appendChild(actionsBlock);
 	wrapper.appendChild(footerBlock);
+
+    PromptsBrowser.collectionTools.showActions(actionsBlock);
+
 }
