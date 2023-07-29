@@ -13,6 +13,14 @@ PromptsBrowser.state = {
 
 		toLowerCase: true,
 		spaceMode: "space",
+
+        saveStyleMeta: {
+            seed: false,
+            size: false,
+            quality: false,
+            sampler: false,
+            negative: false,
+        }
 	},
 
 	showControlPanel: true,
@@ -91,12 +99,26 @@ PromptsBrowser.supportedContainers = {
 		results: "txt2img_results",
 		gallery: "txt2img_gallery_container",
 		buttons: "txt2img_generate_box",
+        settings: "txt2img_settings",
+        seed: "txt2img_seed",
+        width: "txt2img_width",
+        height: "txt2img_height",
+        steps: "txt2img_steps",
+        cfg: "txt2img_cfg_scale",
+        sampling: "txt2img_sampling",
 	},
 	img2Img: {
 		prompt: "img2img_prompt_container",
 		results: "img2img_results",
 		gallery: "img2img_gallery_container",
 		buttons: "img2img_generate_box",
+        settings: "img2img_settings",
+        seed: "img2img_seed",
+        width: "img2img_width",
+        height: "img2img_height",
+        steps: "img2img_steps",
+        cfg: "img2img_cfg_scale",
+        sampling: "img2img_sampling",
 	}
 }
 
@@ -571,6 +593,13 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
 			if(!state.showViews.includes("positive")) positivePrompts.style.display = "none";
 			if(!state.showViews.includes("negative")) negativePrompts.style.display = "none";
 		}
+
+        if(container.seed) domContainer.seedInput = mainContainer.querySelector(`#${container.seed} input`);
+        if(container.width) domContainer.widthInput = mainContainer.querySelector(`#${container.width} input`);
+        if(container.height) domContainer.heightInput = mainContainer.querySelector(`#${container.height} input`);
+        if(container.steps) domContainer.stepsInput = mainContainer.querySelector(`#${container.steps} input`);
+        if(container.cfg) domContainer.cfgInput = mainContainer.querySelector(`#${container.cfg} input`);
+        if(container.sampling) domContainer.samplingInput = mainContainer.querySelector(`#${container.sampling} input`);
 
 		if(container.gallery) {
 			domContainer.imageArea = PromptsBrowser.gradioApp().querySelector(`#${container.gallery}`);

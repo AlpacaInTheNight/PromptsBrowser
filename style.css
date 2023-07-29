@@ -838,6 +838,13 @@
 
 /* Styles window */
 
+.PBE_stylesWindow {
+    width: 80vw;
+    height: 80vh;
+    top: 10vh;
+    left: 10vw;
+}
+
 .PBE_stylesHeader {
 	height: 110px;
 	flex-wrap: nowrap;
@@ -850,6 +857,7 @@
 	justify-content: center;
 	align-items: center;
 	padding-right: 10px;
+    padding-top: 10px;
 	flex-shrink: 0;
 }
 
