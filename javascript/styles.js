@@ -152,15 +152,12 @@ PromptsBrowser.styles.onToggleShortMode = (e) => {
 	PromptsBrowser.styles.update();
 }
 
-PromptsBrowser.styles.onSaveStyle = (e) => {
-	const {data, state} = PromptsBrowser;
+PromptsBrowser.styles.grabCurrentStyle = (styleName) => {
+    const {data, state} = PromptsBrowser;
     const {saveStyleMeta = {}} = state.config || {};
 	const collectionId = state.newStyleCollection;
-	if(!collectionId) return;
-	const styleNameInput = PromptsBrowser.DOMCache.stylesWindow.querySelector("#PBE_newStyleName");
-
-	const name = styleNameInput.value;
-	if(!name || !data.styles) return;
+	if(!collectionId) return false;
+	if(!data.styles) return false;
 
     let seed = undefined;
     let negative = undefined;
@@ -205,7 +202,9 @@ PromptsBrowser.styles.onSaveStyle = (e) => {
 	const targetCollection = data.styles[collectionId];
 	if(!targetCollection) return;
 
-    const newStyle = {name, positive: activePrompts};
+    const newStyle = {positive: JSON.parse(JSON.stringify(activePrompts))};
+    if(styleName) newStyle.name = styleName;
+
     if(saveStyleMeta.seed && seed !== undefined) newStyle.seed = seed;
     if(saveStyleMeta.negative && negative !== undefined) newStyle.negative = negative;
     
@@ -216,6 +215,21 @@ PromptsBrowser.styles.onSaveStyle = (e) => {
     if(saveStyleMeta.quality && cfg !== undefined) newStyle.cfg = cfg;
     
     if(saveStyleMeta.sampler && sampling) newStyle.sampling = sampling;
+
+	return newStyle;
+}
+
+PromptsBrowser.styles.onSaveStyle = () => {
+	const {data, state} = PromptsBrowser;
+	const collectionId = state.newStyleCollection;
+	if(!collectionId) return;
+	const styleNameInput = PromptsBrowser.DOMCache.stylesWindow.querySelector("#PBE_newStyleName");
+
+	const name = styleNameInput.value;
+	if(!name || !data.styles) return;
+
+    const newStyle = PromptsBrowser.styles.grabCurrentStyle(name);
+    if(!newStyle) return;
 
 	targetCollection.push(newStyle);
 
@@ -259,9 +273,7 @@ PromptsBrowser.styles.removeStyle = (e) => {
 
 PromptsBrowser.styles.updateStyle = (e) => {
 	const {data} = PromptsBrowser;
-	const {state} = PromptsBrowser;
 	if(!data.styles) return;
-	const activePrompts = PromptsBrowser.getCurrentPrompts();
 
 	let collectionId = undefined;
 	let index = undefined;
@@ -285,7 +297,18 @@ PromptsBrowser.styles.updateStyle = (e) => {
 	if(!targetStyle) return;
 
 	if( confirm(`Replace style "${targetStyle.name}" params to the currently selected?`) ) {
-		targetStyle.positive = JSON.parse(JSON.stringify(activePrompts));
+        const newStyle = PromptsBrowser.styles.grabCurrentStyle();
+        if(!newStyle) return;
+
+        for(const i in newStyle) {
+            targetStyle[i] = newStyle[i];
+        }
+
+        for(const i in targetStyle) {
+            if(i === "name") continue;
+
+            if(!newStyle[i]) delete targetStyle[i];
+        }
 
 		PromptsBrowser.db.updateStyles(collectionId);
 		PromptsBrowser.styles.update();
