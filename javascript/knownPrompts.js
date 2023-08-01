@@ -18,6 +18,132 @@ PromptsBrowser.knownPrompts.init = (wrapper, positivePrompts, containerId) => {
 	wrapper.insertBefore(promptBrowser, positivePrompts);
 }
 
+PromptsBrowser.knownPrompts.checkFilter = (prompt) => {
+    const {state} = PromptsBrowser;
+
+    if(state.filterCategory) {
+        if(state.filterCategory === "__none") {
+            if(prompt.category !== undefined && prompt.category.length) return false;
+
+        } else {
+            if(!prompt.category) return false;
+            if(!prompt.category.includes(state.filterCategory)) return false;
+        }
+    }
+
+    if(state.filterCollection) {
+        if(!prompt.collections) return false;
+        if(!prompt.collections.includes(state.filterCollection)) return false;
+    }
+
+    if(state.filterName) {
+        if(!prompt.id.toLowerCase().includes(state.filterName)) return false;
+    }
+
+    if(state.filterTags && Array.isArray(state.filterTags)) {
+        if(!prompt.tags) return false;
+        let out = true;
+        const TAG_MODE = "includeAll";
+
+        if(TAG_MODE === "includeAll") {
+            out = false;
+
+            for(const filterTag of state.filterTags) {
+                let fulfil = false;
+
+                for(const promptTag of prompt.tags) {
+                    if(promptTag === filterTag) {
+                        fulfil = true;
+                        break;
+                    }
+                }
+
+                if(!fulfil) {
+                    out = true;
+                    break;
+                }
+            }
+
+        } else {
+            for(const filterTag of state.filterTags) {
+                for(const promptTag of prompt.tags) {
+                    if(promptTag.includes(filterTag)) {
+                        out = false;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if(out)  return false;
+    }
+
+    return true;
+}
+
+PromptsBrowser.knownPrompts.addPromptItem = (targetItem) => {
+    if(!targetItem) return;
+    const {DEFAULT_PROMPT_WEIGHT} = PromptsBrowser.params;
+    const activePrompts = PromptsBrowser.getCurrentPrompts();
+	const {id, addAtStart, addAfter, addStart, addEnd} = targetItem;
+
+    if(activePrompts.some(item => item.id === id)) return;
+
+	const newPrompt = {id, weight: DEFAULT_PROMPT_WEIGHT, isExternalNetwork: targetItem.isExternalNetwork};
+
+	if(addStart) window.PromptsBrowser.addStrToActive(addStart, true);
+
+	if(addAfter) {
+		if(addAtStart) {
+			window.PromptsBrowser.addStrToActive(addAfter, true);
+			activePrompts.unshift(newPrompt);
+
+		} else {
+			activePrompts.push(newPrompt);
+			window.PromptsBrowser.addStrToActive(addAfter, false);
+		}
+
+	} else {
+		if(addAtStart) activePrompts.unshift(newPrompt);
+		else activePrompts.push(newPrompt);
+	}
+
+	if(addEnd) window.PromptsBrowser.addStrToActive(addEnd, false);
+}
+
+/**
+ * Adds a random prompt from the prompts corresponding to the current filter settings.
+ */
+PromptsBrowser.knownPrompts.onAddRandom = () => {
+    const {state} = PromptsBrowser;
+    const {united} = PromptsBrowser.data;
+    const activePrompts = PromptsBrowser.getCurrentPrompts();
+    let dataArr = [];
+
+    if(state.filterCollection) {
+		const targetCategory = PromptsBrowser.data.original[state.filterCollection];
+		if(targetCategory) {
+			for(const id in targetCategory) {
+				const targetOriginalItem = targetCategory[id];
+				const targetMixedItem = united.find(item => item.id === targetOriginalItem.id);
+				if(targetMixedItem && PromptsBrowser.knownPrompts.checkFilter(targetMixedItem)) dataArr.push({...targetMixedItem});
+			}
+		}
+
+	} else {
+		for(const id in united) {
+            if(PromptsBrowser.knownPrompts.checkFilter(united[id])) dataArr.push({...united[id]});
+        }
+	}
+
+    dataArr = dataArr.filter(dataItem => !activePrompts.some(item => item.id === dataItem.id));
+
+    const randomPrompt = dataArr[Math.floor(Math.random() * dataArr.length)];
+
+    PromptsBrowser.knownPrompts.addPromptItem(randomPrompt);
+    PromptsBrowser.currentPrompts.update();
+}
+
 PromptsBrowser.knownPrompts.onDragStart = (e) => {
 	const {state} = PromptsBrowser;
 	const splash = e.currentTarget.querySelector(".PBE_promptElementSplash");
@@ -74,16 +200,13 @@ PromptsBrowser.knownPrompts.onHover = (e) => {
 
 PromptsBrowser.knownPrompts.onPromptClick = (e) => {
 	const {united} = PromptsBrowser.data;
-	const {DEFAULT_PROMPT_WEIGHT} = PromptsBrowser.params;
 	const {state} = PromptsBrowser;
 
 	PromptsBrowser.synchroniseCurrentPrompts();
-	const activePrompts = PromptsBrowser.getCurrentPrompts();
 
 	const promptItem = e.currentTarget.dataset.prompt;
 	const targetItem = united.find(item => item.id === promptItem);
 	if(!targetItem) return;
-	const {addAtStart, addAfter, addStart, addEnd} = targetItem;
 
 	if(e.shiftKey) {
 		state.editingPrompt = promptItem;
@@ -117,29 +240,7 @@ PromptsBrowser.knownPrompts.onPromptClick = (e) => {
 		return;
 	}
 	
-	if(activePrompts.some(item => item.id === promptItem)) return;
-
-	const newPrompt = {id: promptItem, weight: DEFAULT_PROMPT_WEIGHT, isExternalNetwork: targetItem.isExternalNetwork};
-
-	if(addStart) window.PromptsBrowser.addStrToActive(addStart, true);
-
-	if(addAfter) {
-		if(addAtStart) {
-			window.PromptsBrowser.addStrToActive(addAfter, true);
-			activePrompts.unshift(newPrompt);
-
-		} else {
-			activePrompts.push(newPrompt);
-			window.PromptsBrowser.addStrToActive(addAfter, false);
-		}
-
-	} else {
-		if(addAtStart) activePrompts.unshift(newPrompt);
-		else activePrompts.push(newPrompt);
-	}
-
-	if(addEnd) window.PromptsBrowser.addStrToActive(addEnd, false);
-
+    PromptsBrowser.knownPrompts.addPromptItem(targetItem);
 	PromptsBrowser.currentPrompts.update();
 }
 
@@ -280,8 +381,7 @@ PromptsBrowser.knownPrompts.showHeader = (wrapper, params = {}) => {
 
 PromptsBrowser.knownPrompts.update = (params) => {
 	const {united} = PromptsBrowser.data;
-	const {DEFAULT_PROMPT_WEIGHT} = PromptsBrowser.params;
-	const {state} = PromptsBrowser;
+	const {state, makeElement} = PromptsBrowser;
 	const wrapper = PromptsBrowser.DOMCache.containers[state.currentContainer].promptsCatalogue;
 	wrapper.innerHTML = "";
 
@@ -331,66 +431,25 @@ PromptsBrowser.knownPrompts.update = (params) => {
 		dataArr.reverse()
 	}
 
+    //show Add Random card
+    if(dataArr.length) {
+
+        const addRandom = makeElement({
+            element: "div",
+            className: "PBE_promptElement PBE_promptElement_random",
+            content: "Add random"
+        });
+
+        addRandom.addEventListener("click", PromptsBrowser.knownPrompts.onAddRandom);
+
+        proptsContainer.appendChild(addRandom);
+    }
+
 	for(const prompt of dataArr) {
 		const {id} = prompt;
 		if(shownItems > MAX_ITEMS_TO_DISPLAY) break;
 
-		if(state.filterCategory) {
-			if(state.filterCategory === "__none") {
-				if(prompt.category !== undefined && prompt.category.length) continue;
-
-			} else {
-				if(!prompt.category) continue;
-				if(!prompt.category.includes(state.filterCategory)) continue;
-			}
-		}
-
-		if(state.filterCollection) {
-			if(!prompt.collections) continue;
-			if(!prompt.collections.includes(state.filterCollection)) continue;
-		}
-
-        if(state.filterName) {
-            if(!prompt.id.toLowerCase().includes(state.filterName)) continue;
-        }
-
-		if(state.filterTags && Array.isArray(state.filterTags)) {
-			if(!prompt.tags) continue;
-			let out = true;
-            const TAG_MODE = "includeAll";
-
-            if(TAG_MODE === "includeAll") {
-                out = false;
-
-                for(const filterTag of state.filterTags) {
-                    let fulfil = false;
-
-                    for(const promptTag of prompt.tags) {
-                        if(promptTag === filterTag) {
-                            fulfil = true;
-                            break;
-                        }
-                    }
-
-                    if(!fulfil) {
-                        out = true;
-                        break;
-                    }
-                }
-
-            } else {
-                for(const filterTag of state.filterTags) {
-                    for(const promptTag of prompt.tags) {
-                        if(promptTag.includes(filterTag)) {
-                            out = false;
-                            break;
-                        }
-                    }
-                }
-            }
-			
-			if(out) continue;
-		}
+        if(!PromptsBrowser.knownPrompts.checkFilter(prompt)) continue;
 		
 		const promptElement = document.createElement("div");
 		promptElement.className = "PBE_promptElement";

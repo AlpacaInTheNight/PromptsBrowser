@@ -372,6 +372,11 @@
 	user-select: none;
 }
 
+.PBE_promptElement_random {
+    background-color: mediumaquamarine;
+    background: linear-gradient(48deg, rgba(0,0,0,1) 0%, rgba(29,253,111,1) 47%, rgba(0,0,0,1) 100%);
+}
+
 .PBE_promptElementWeight {
 	position: absolute;
 	bottom: 0;
