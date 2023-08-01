@@ -31,23 +31,66 @@ def saveStylePreview(postJSON):
     if not os.path.isdir(savePath): os.makedirs(savePath)
 
     savePath += safeFileName + fileExtension
+    if fileExtension[0] == ".": fileExtension = fileExtension[1:]
 
     shutil.copy(src, savePath)
 
     #updating collection data
+    pathToMetaFile = stylesCataloguePath + collection + os.sep + "meta.json"
     pathToDataFile = stylesCataloguePath + collection + os.sep + "data.json"
+    pathToOrderFile = stylesCataloguePath + collection + os.sep + "order.json"
+    newStyleDefault = {"name": style}
 
-    if not os.path.isfile(pathToDataFile) or os.path.getsize(pathToDataFile) == 0: dataFile = []
-    else:
-        f = open(pathToDataFile)
-        dataFile = json.load(f)
+    #"short" | "expanded"
+    format = "short"
+
+    if os.path.isfile(pathToMetaFile):
+        f = open(pathToMetaFile)
+        metaFile = json.load(f)
+        f.close()
+        if metaFile["format"]: format = metaFile["format"]
+
+
+    #saving data in case of the short format collection
+    if format == "short":
+        if not os.path.isfile(pathToDataFile) or os.path.getsize(pathToDataFile) == 0: dataFile = []
+        else:
+            f = open(pathToDataFile)
+            dataFile = json.load(f)
+            f.close()
+
+        targetStyle = next((item for item in dataFile if item['name'] == style), None)
+        if targetStyle:
+            targetStyle["previewImage"] = fileExtension
+            with open(pathToDataFile, 'w') as outfile: json.dump(dataFile, outfile, indent="\t")
+
+    #saving data in case of the expanded format collection
+    elif format == "expanded":
+        safeFileName = makeFileNameSafe(style)
+        stylesFolder = stylesCataloguePath + collection + os.sep + "styles"
+        filePath = stylesFolder + os.sep + safeFileName + ".json"
+
+        if not os.path.isdir(stylesFolder): os.makedirs(stylesFolder)
+
+        if not os.path.isfile(filePath):
+            if(not os.path.isfile(pathToOrderFile) or os.path.getsize(pathToOrderFile) == 0): orderFile = []
+            else:
+                f = open(pathToOrderFile)
+                orderFile = json.load(f)
+                f.close()
+            
+            with open(filePath, 'w') as outfile: json.dump(newStyleDefault, outfile, indent="\t")
+
+            if not style in orderFile:
+                orderFile.append(style)
+                with open(pathToOrderFile, 'w') as outfile: json.dump(orderFile, outfile, indent="\t")
+        
+        f = open(filePath)
+        styleFile = json.load(f)
+        styleFile["previewImage"] = fileExtension
         f.close()
 
-    targetStyle = next((item for item in dataFile if item['name'] == style), None)
-    if targetStyle:
-        if fileExtension[0] == ".": fileExtension = fileExtension[1:]
-        targetStyle["previewImage"] = fileExtension
-        with open(pathToDataFile, 'w') as outfile: json.dump(dataFile, outfile, indent="\t")
+        with open(filePath, 'w') as outfile: json.dump(styleFile, outfile, indent="\t")
     
     emitMessage("updated style preview and data for: " + collection)
     return "ok"

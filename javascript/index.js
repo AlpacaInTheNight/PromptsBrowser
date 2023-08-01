@@ -278,7 +278,7 @@ PromptsBrowser.db.createNewCollection = (id, mode = "short") => {
 	})();
 }
 
-PromptsBrowser.db.createNewStylesCollection = (id) => {
+PromptsBrowser.db.createNewStylesCollection = (id, mode = "short") => {
 	if(!id) return;
 
 	(async () => {
@@ -288,7 +288,7 @@ PromptsBrowser.db.createNewStylesCollection = (id) => {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({id})
+			body: JSON.stringify({id, mode})
 		});
 		//const answer = await rawResponse.json();
 

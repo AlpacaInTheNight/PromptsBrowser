@@ -98,11 +98,13 @@ PromptsBrowser.setupWindow.onCreate = (e) => {
 		
 	} else if(viewMode === "newStylesCollection") {
 		const newNameInput = setupWindow.querySelector(".PBE_newCollectionName");
-		if(!newNameInput) return;
+        const formatSelect = setupWindow.querySelector(".PBE_newStyleCollectionFormat");
+		if(!newNameInput || !formatSelect) return;
 		const newName = window.PromptsBrowser.makeFileNameSafe(newNameInput.value);
-		if(!newName) return;
+        const format = formatSelect.value;
+		if(!newName || !format) return;
 		
-		PromptsBrowser.db.createNewStylesCollection(newName);
+		PromptsBrowser.db.createNewStylesCollection(newName, format);
 
 	}
 
@@ -276,20 +278,37 @@ PromptsBrowser.setupWindow.showNewCollection = (wrapper) => {
 }
 
 PromptsBrowser.setupWindow.showNewStylesCollection = (wrapper) => {
-	const newName = document.createElement("div");
-	const newNameLabel = document.createElement("div");
-	const newNameInput = document.createElement("input");
-	newName.className = "PBE_rowBlock";
-	newName.style.maxWidth = "none";
-	newNameInput.className = "PBE_input PBE_newCollectionName";
+    const {makeElement, makeSelect} = PromptsBrowser;
 
+
+    const newName = makeElement({element: "div", className: "PBE_rowBlock"});
+    const format = makeElement({element: "div", className: "PBE_rowBlock"});
+    newName.style.maxWidth = "none";
+    format.style.maxWidth = "none";
+
+    const newNameLabel = makeElement({element: "div", content: "New styles collection name"});
+    const formatLabel = makeElement({element: "div", content: "Store format"});
+
+    const newNameInput = makeElement({element: "input", className: "PBE_input PBE_newCollectionName"});
 	newNameInput.addEventListener("change", PromptsBrowser.setupWindow.onUpdateDirName);
-	newNameLabel.innerText = "New styles collection name";
 
 	newName.appendChild(newNameLabel);
 	newName.appendChild(newNameInput);
 
+    const formatSelect = makeSelect({
+        className: "PBE_select PBE_newStyleCollectionFormat",
+        value: "short",
+        options: [
+            {id: "short", name: "Short"},
+            {id: "expanded", name: "Expanded"},
+        ],
+    });
+
+    format.appendChild(formatLabel);
+	format.appendChild(formatSelect);
+
 	wrapper.appendChild(newName);
+	wrapper.appendChild(format);
 }
 
 PromptsBrowser.setupWindow.update = () => {

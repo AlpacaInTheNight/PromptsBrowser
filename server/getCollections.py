@@ -102,12 +102,65 @@ def getCollections():
     stylesDirs = os.listdir(stylesDirectoryContent)
     for dirName in stylesDirs:
         if not os.path.isdir(stylesDirectoryContent + "/" + dirName): continue
+
         pathToDataFile = stylesDirectoryContent + "/" + dirName + "/" + "data.json"
-        if not os.path.isfile(pathToDataFile): continue
+        pathToOrderFile = stylesDirectoryContent + "/" + dirName + "/" + "order.json"
+        pathToMetaFile = stylesDirectoryContent + "/" + dirName + "/" + "meta.json"
+        pathToStylesFolder = stylesDirectoryContent + "/" + dirName + "/" + "styles"
+
+        #"short" | "expanded"
+        format = "short"
+        dataFile = []
+
+        #checking meta file information and getting its data. creating one if none.
+        if not os.path.isfile(pathToMetaFile):
+            with open(pathToMetaFile, 'w') as outfile: json.dump({"format": "short"}, outfile)
+
+        else:
+            f = open(pathToMetaFile)
+            metaFile = json.load(f)
+            f.close()
+            if metaFile["format"]: format = metaFile["format"]
         
-        f = open(pathToDataFile)
-        dataFile = json.load(open(pathToDataFile))
-        f.close()
+
+        if format == "short":
+            if not os.path.isfile(pathToDataFile): continue
+            f = open(pathToDataFile)
+            dataFile = json.load(f)
+            f.close()
+        
+        else:
+            if not os.path.isfile(pathToOrderFile): continue
+            f = open(pathToOrderFile)
+            JSONOrder = json.load(open(pathToOrderFile))
+            f.close()
+
+            newStylesFromFolder = []
+            stylesObject = {}
+
+            if os.path.isdir(pathToStylesFolder):
+                jsonFileNames = [filename for filename in os.listdir(pathToStylesFolder) if filename.endswith('.json')]
+
+                for fileName in jsonFileNames:
+                    with open(os.path.join(pathToStylesFolder, fileName)) as jsonFile:
+                        styleJSON = json.load(jsonFile)
+                        if not "name" in styleJSON or not styleJSON["name"]: continue
+                        styleId = styleJSON["name"]
+                        stylesObject[styleId] = styleJSON
+                
+            for orderItem in JSONOrder:
+                if orderItem in stylesObject and stylesObject[orderItem]: dataFile.append(stylesObject[orderItem])
+
+            """
+            Adding new styles that was found in styles folder, but that was not pressent in the order.json file.
+            This allows to add styles to the collection by simply copying their .json files into collections styles folder.
+            """
+            for styleId in stylesObject:
+                styleItem = stylesObject[styleId]
+                if not styleItem["name"] in JSONOrder:
+                    newStylesFromFolder.append(styleItem)
+            
+            if newStylesFromFolder: dataFile += newStylesFromFolder
 
         dataList["styles"][dirName] = dataFile
 
