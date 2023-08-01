@@ -200,6 +200,7 @@ PromptsBrowser.promptsFilter.updateAdditionalSetup = (wrapper, type, addFilterBu
 			<option value="categories">Have categories</option>
 			<option value="tags">Have tags</option>
 			<option value="comment">Have comment</option>
+			<option value="autogen">Have autogen style</option>
 			<option value="png">Is PNG</option>
 			<option value="jpg">Is JPG</option>
 		`;

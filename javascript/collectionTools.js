@@ -1,7 +1,13 @@
-
 if(!window.PromptsBrowser) window.PromptsBrowser = {};
 
 PromptsBrowser.collectionTools = {};
+
+PromptsBrowser.collectionTools.autogen = {
+    collection: "",
+    style: "",
+}
+
+PromptsBrowser.collectionTools.autogenStyleSelector = undefined;
 
 /**
  * Auto generate previews timer.
@@ -47,8 +53,8 @@ PromptsBrowser.collectionTools.updateCurrentCollection = () => {
 	PromptsBrowser.collectionTools.updateViews();
 }
 
-PromptsBrowser.collectionTools.generateNextPreview = () => {
-	const {state} = PromptsBrowser;
+PromptsBrowser.collectionTools.generateNextPreview = async () => {
+	const {state, data} = PromptsBrowser;
 	const {collectionToolsId} = state;
 	const {generateQueue} = PromptsBrowser.collectionTools;
 	const textArea = PromptsBrowser.DOMCache.containers[state.currentContainer].textArea;
@@ -75,9 +81,24 @@ PromptsBrowser.collectionTools.generateNextPreview = () => {
 	state.selectedPrompt = nextItem.id;
 	state.savePreviewCollection = collectionToolsId;
 
-	
-    if(nextItem.addPrompts) textArea.value = `((${nextItem.id})), ${nextItem.addPrompts}`;
-    else textArea.value = nextItem.id;
+    if(nextItem.autogen && nextItem.autogen.collection && nextItem.autogen.style) {
+        const delay = ms => new Promise(res => setTimeout(res, ms));
+
+        const targetCollection = data.styles[nextItem.autogen.collection];
+        if(targetCollection) {
+            const targetStyle = targetCollection.find(item => item.name === nextItem.autogen.style);
+            if(targetStyle) {
+                PromptsBrowser.applyStyle(targetStyle, true, true);
+                await delay(600); //need a pause due to a hacky nature of changing APP state
+
+                textArea.value = `((${nextItem.id})), ${textArea.value}`;
+            }
+        }
+
+    } else if(nextItem.addPrompts) {
+        textArea.value = `((${nextItem.id})), ${nextItem.addPrompts}`;
+
+    } else textArea.value = nextItem.id;
 
 	textArea.dispatchEvent(new Event('focus'));
 	textArea.dispatchEvent(new Event('input'));
@@ -121,9 +142,18 @@ PromptsBrowser.collectionTools.onCloseWindow = () => {
 	wrapper.style.display = "none";
 }
 
+PromptsBrowser.collectionTools.onChangeAutogenerateType = (e) => {
+    const {state, data} = PromptsBrowser;
+    const value = e.currentTarget.value;
+    if(!value) return;
+
+    state.autoGenerateType = value;
+}
+
 PromptsBrowser.collectionTools.onGeneratePreviews = (e) => {
 	const {state, data} = PromptsBrowser;
-	const {selectedCollectionPrompts, collectionToolsId, autoGenerateKeepCurrent} = state;
+    const {autogen} = PromptsBrowser.collectionTools;
+	const {selectedCollectionPrompts, collectionToolsId, autoGenerateType} = state;
     const textArea = PromptsBrowser.DOMCache.containers[state.currentContainer].textArea;
 	const targetCollection = data.original[collectionToolsId];
     let currentPrompt = "";
@@ -132,7 +162,7 @@ PromptsBrowser.collectionTools.onGeneratePreviews = (e) => {
 
 	PromptsBrowser.collectionTools.generateQueue = [];
 
-    if(autoGenerateKeepCurrent && textArea) {
+    if(autoGenerateType === "current" && textArea) {
         currentPrompt = textArea.value;
     }
 
@@ -144,14 +174,39 @@ PromptsBrowser.collectionTools.onGeneratePreviews = (e) => {
 			id: promptId,
 		};
 
-        if(autoGenerateKeepCurrent) {
+        if(autoGenerateType === "current") {
             generateItem.addPrompts = currentPrompt;
+
+        } else if(autoGenerateType === "autogen") {
+            if(prompt.autogen) generateItem.autogen = {...prompt.autogen};
+
+        } else if(autoGenerateType === "selected") {
+            if(prompt.autogen) generateItem.autogen = {...autogen};
         }
 
 		PromptsBrowser.collectionTools.generateQueue.push(generateItem);
 	}
 
 	PromptsBrowser.collectionTools.generateNextPreview();
+}
+
+PromptsBrowser.collectionTools.onAssignAutogenStyle = (e) => {
+    const {state, data} = PromptsBrowser;
+    const {collection, style} = PromptsBrowser.collectionTools.autogen;
+	const {selectedCollectionPrompts, collectionToolsId} = state;
+	const targetCollection = data.original[collectionToolsId];
+
+	if(!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection) return;
+
+	for(const promptId of selectedCollectionPrompts) {
+		const prompt = targetCollection.find(item => item.id === promptId);
+		if(!prompt) continue;
+
+        if(collection && style) prompt.autogen = {collection, style};
+        else delete prompt.autogen;
+	}
+
+	PromptsBrowser.collectionTools.updateCurrentCollection();
 }
 
 PromptsBrowser.collectionTools.onAddCategory = (e) => {
@@ -375,6 +430,40 @@ PromptsBrowser.collectionTools.onMoveSelected = (e, isCopy = false) => {
 
 PromptsBrowser.collectionTools.onCopySelected = (e) => PromptsBrowser.collectionTools.onMoveSelected(e, true);
 
+
+PromptsBrowser.collectionTools.onChangeAutogenCollection = (e) => {
+    const {state, data} = PromptsBrowser;
+    const collection = e.currentTarget.value;
+    let setFirst = false;
+
+    PromptsBrowser.collectionTools.autogen.collection = collection;
+
+    if(collection && PromptsBrowser.collectionTools.autogenStyleSelector) {
+        let styleOptions = "";
+
+        const targetCollection = data.styles[collection];
+        if(targetCollection) {
+            for(const styleItem of targetCollection) {
+                if(!setFirst) {
+                    PromptsBrowser.collectionTools.autogen.style = styleItem.name;
+                    PromptsBrowser.collectionTools.autogenStyleSelector.value = styleItem.name;
+                    setFirst = true;
+                }
+                styleOptions += `<option value="${styleItem.name}">${styleItem.name}</option>`;
+            }
+        }
+
+        PromptsBrowser.collectionTools.autogenStyleSelector.innerHTML = styleOptions;
+    }
+}
+
+PromptsBrowser.collectionTools.onChangeAutogenStyle = (e) => {
+    const {state, data} = PromptsBrowser;
+    const style = e.currentTarget.value;
+
+    PromptsBrowser.collectionTools.autogen.style = style;
+}
+
 PromptsBrowser.collectionTools.showHeader = (wrapper) => {
 	PromptsBrowser.promptsFilter.update(wrapper, "collectionTools");
 
@@ -584,19 +673,70 @@ PromptsBrowser.collectionTools.showTagsAction = (wrapper) => {
     PromptsBrowser.tagTooltip.add(tagsInput);
 }
 
+PromptsBrowser.collectionTools.showAutogenStyle = (wrapper) => {
+    const {state, data, makeElement, makeSelect} = PromptsBrowser;
+    const {collection, style} = PromptsBrowser.collectionTools.autogen;
+
+    const container = makeElement({element: "fieldset", className: "PBE_fieldset"});
+    const legend = makeElement({element: "legend", content: "Autogenerate style"});
+
+    //collection select
+    const colOptions = [{id: "__none", name: "None"}];
+
+    for(const colId in data.styles) colOptions.push({id: colId, name: colId});
+    const stylesCollectionsSelect = makeSelect({
+        className: "PBE_select", value: collection, options: colOptions,
+        onChange: PromptsBrowser.collectionTools.onChangeAutogenCollection
+    });
+
+    container.appendChild(stylesCollectionsSelect);
+
+    //style select
+    const styleOptions = [];
+
+    if(collection) {
+        const targetCollection = data.styles[collection];
+        if(targetCollection) {
+            for(const styleItem of targetCollection) styleOptions.push({id: styleItem.name, name: styleItem.name});
+        }
+    }
+    
+    const styleSelect = makeSelect({
+        className: "PBE_select", value: style || "", options: styleOptions,
+        onChange: PromptsBrowser.collectionTools.onChangeAutogenStyle
+    });
+
+    container.appendChild(styleSelect);
+    PromptsBrowser.collectionTools.autogenStyleSelector = styleSelect;
+
+    //assign button
+    const assignButton = makeElement({element: "div", className: "PBE_button", content: "Assign"});
+    assignButton.addEventListener("click", PromptsBrowser.collectionTools.onAssignAutogenStyle);
+    container.appendChild(assignButton);
+
+    //append to wrapper
+    container.appendChild(legend);
+	wrapper.appendChild(container);
+}
+
 PromptsBrowser.collectionTools.showAutogenerate = (wrapper) => {
-    const {state} = PromptsBrowser;
+    const {state, data, makeElement, makeSelect} = PromptsBrowser;
 
-	const generateButton = document.createElement("div");
-	generateButton.className = "PBE_button";
-	generateButton.innerText = "Generate";
-
+    const generateButton = makeElement({element: "div", className: "PBE_button", content: "Generate"});
 	generateButton.addEventListener("click", PromptsBrowser.collectionTools.onGeneratePreviews);
 
-    const withCurrentPrompts = document.createElement("input");
-    withCurrentPrompts.type = "checkbox";
+    const generateTypeSelect = makeSelect({
+        className: "PBE_select", value: state.autoGenerateType,
+        options: [
+            {id: "prompt", name: "Prompt only"},
+            {id: "current", name: "With current prompts"},
+            {id: "autogen", name: "With prompt autogen style"},
+            {id: "selected", name: "With selected autogen style"},
+        ],
+        onChange: PromptsBrowser.collectionTools.onChangeAutogenerateType
+    });
 
-    const withCurrent = document.createElement("input");
+    /* const withCurrent = document.createElement("input");
 	withCurrent.id = "PBE_generateWithCurrent";
 	withCurrent.name = "PBE_generateWithCurrent";
 	withCurrent.type = "checkbox";
@@ -609,7 +749,7 @@ PromptsBrowser.collectionTools.showAutogenerate = (wrapper) => {
 
 	const withCurrentLegend = document.createElement("label");
 	withCurrentLegend.htmlFor = withCurrent.id;
-	withCurrentLegend.textContent = "Keep current prompts";
+	withCurrentLegend.textContent = "Keep current prompts"; */
 
 	const container = document.createElement("fieldset");
 	container.className = "PBE_fieldset";
@@ -617,9 +757,10 @@ PromptsBrowser.collectionTools.showAutogenerate = (wrapper) => {
 	legend.innerText = "Generate preview";
 
 	container.appendChild(legend);
+	container.appendChild(generateTypeSelect);
 	container.appendChild(generateButton);
-	container.appendChild(withCurrent);
-	container.appendChild(withCurrentLegend);
+	/* container.appendChild(withCurrent);
+	container.appendChild(withCurrentLegend); */
 
 	wrapper.appendChild(container);
 }
@@ -652,6 +793,7 @@ PromptsBrowser.collectionTools.showActions = (wrapper) => {
 	if(Object.keys(PromptsBrowser.data.original).length > 1) PromptsBrowser.collectionTools.showCopyOrMove(wrapper);
 	PromptsBrowser.collectionTools.showCategoryAction(wrapper);
 	PromptsBrowser.collectionTools.showTagsAction(wrapper);
+	PromptsBrowser.collectionTools.showAutogenStyle(wrapper);
 	PromptsBrowser.collectionTools.showAutogenerate(wrapper);
 }
 

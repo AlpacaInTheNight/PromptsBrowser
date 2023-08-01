@@ -52,7 +52,8 @@ PromptsBrowser.state = {
 	selectedNewPrompts: [],
 	selectedCollectionPrompts: [],
 	promptsFilter: {},
-    autoGenerateKeepCurrent: false,
+    autoGenerateType: "prompt",
+    //autoGenerateKeepCurrent: false,
 }
 
 PromptsBrowser.params = {};

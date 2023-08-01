@@ -42,3 +42,23 @@ window.PromptsBrowser.makeCheckbox = function(params) {
 	
     return wrapper;
 }
+
+window.PromptsBrowser.makeSelect = function(params) {
+    if(!params) return;
+
+    const {makeElement} = window.PromptsBrowser;
+    const {id, value = "", options = [], className, onChange} = params;
+
+    const selectElement = makeElement({element: "select", id, className});
+    if(onChange) selectElement.addEventListener("change", onChange);
+
+    let htmlOptions = "";
+    for(const option of options) {
+		htmlOptions += `<option value="${option.id}">${option.name}</option>`;
+	}
+
+    selectElement.innerHTML = htmlOptions;
+    selectElement.value = value;
+	
+    return selectElement;
+}

@@ -43,6 +43,37 @@ PromptsBrowser.promptEdit.onAddTags = (targetItem, inputElement) => {
     PromptsBrowser.promptEdit.update(targetItem);
 }
 
+PromptsBrowser.promptEdit.onChangeAutogenCollection = (value, prompt) => {
+    if(!prompt) return;
+    const {data} = PromptsBrowser;
+
+    if(!prompt.autogen) prompt.autogen = {};
+    if(!value || value === "__none") delete prompt.autogen.collection;
+    else {
+        prompt.autogen.collection = value;
+
+        const targetCollection = data.styles[value];
+        if(!targetCollection) return;
+        prompt.autogen.style = "";
+
+        for(const styleItem of targetCollection) {
+            prompt.autogen.style = styleItem.name;
+            break;
+        }
+    }
+
+    PromptsBrowser.promptEdit.update(prompt);
+}
+
+PromptsBrowser.promptEdit.onChangeAutogenStyle = (value, prompt) => {
+    if(!prompt || !value) return;
+
+    if(!prompt.autogen) prompt.autogen = {};
+    prompt.autogen.style = value;
+
+    PromptsBrowser.promptEdit.update(prompt);
+}
+
 PromptsBrowser.promptEdit.addCollectionSelector = (wrapper) => {
 	const {united} = PromptsBrowser.data;
 	const {state} = PromptsBrowser;
@@ -178,6 +209,9 @@ PromptsBrowser.promptEdit.saveEdit = () => {
 	const tagsList = wrapper.querySelectorAll(".PBE_tagsList > div");
 	const categoriesList = wrapper.querySelectorAll(".PBE_categoryList > div");
 
+	const autoGenCollectionSelect = wrapper.querySelector("#PBE_autoGentCollection");
+	const autoGentStyleSelect = wrapper.querySelector("#PBE_autoGentStyle");
+
 	const comment = commentBlock ? commentBlock.value : "";
 	const addAtStart = addAtStartInput.checked;
 	const addAfter = addAfterInput.value;
@@ -185,6 +219,8 @@ PromptsBrowser.promptEdit.saveEdit = () => {
 	const addEnd = addEndInput.value;
     const tags = [];
     const category = [];
+    const autogenCollection = autoGenCollectionSelect?.value || undefined;
+    const autogenStyle = autoGentStyleSelect?.value || undefined;
 
     for(const divItem of tagsList) tags.push(divItem.innerText);
     for(const divItem of categoriesList) category.push(divItem.innerText);
@@ -213,6 +249,13 @@ PromptsBrowser.promptEdit.saveEdit = () => {
 
     if(!addEnd) delete collectionPrompt.addEnd;
     else collectionPrompt.addEnd = addEnd;
+
+    if(autogenStyle && autogenCollection) {
+        if(!collectionPrompt.autogen) collectionPrompt.autogen = {}
+        collectionPrompt.autogen.collection = autogenCollection;
+        collectionPrompt.autogen.style = autogenStyle;
+
+    } else delete collectionPrompt.autogen;
 
 	PromptsBrowser.db.saveJSONData(state.editTargetCollection);
     PromptsBrowser.db.updateMixedList();
@@ -319,8 +362,45 @@ PromptsBrowser.promptEdit.showAddSetup = (wrapper) => {
 	wrapper.appendChild(sisterTagsEnd);
 }
 
+PromptsBrowser.promptEdit.showAutoGenBlock = (wrapper, prompt) => {
+    if(!wrapper || !prompt) return;
+    const {state, data, makeElement, makeSelect} = PromptsBrowser;
+    const {autogen = {}} = prompt;
+	const collection = autogen.collection || "__none";
+    
+    const autoGenBlock = makeElement({element: "div", className: "PBE_rowBlock", content: "Autogen:"});
+    autoGenBlock.style.height = "40px";
+    const colOptions = [{id: "__none", name: "None"}];
+
+    for(const colId in data.styles) colOptions.push({id: colId, name: colId});
+    const stylesCollectionsSelect = makeSelect({
+        id: "PBE_autoGentCollection", value: collection, options: colOptions,
+        onChange: (e) => PromptsBrowser.promptEdit.onChangeAutogenCollection(e.currentTarget.value, prompt)
+    });
+
+    autoGenBlock.appendChild(stylesCollectionsSelect);
+
+    if(autogen.collection) {
+        const targetCollection = data.styles[autogen.collection];
+        if(targetCollection) {
+            const styleOptions = [];
+
+            for(const styleItem of targetCollection) styleOptions.push({id: styleItem.name, name: styleItem.name});
+
+            const styleSelect = makeSelect({
+                id: "PBE_autoGentStyle", value: autogen.style || "", options: styleOptions,
+                onChange: (e) => PromptsBrowser.promptEdit.onChangeAutogenStyle(e.currentTarget.value, prompt)
+            });
+
+            autoGenBlock.appendChild(styleSelect);
+        }
+    }
+
+	wrapper.appendChild(autoGenBlock);
+}
+
 PromptsBrowser.promptEdit.update = (targetItem) => {
-	const {state} = PromptsBrowser;
+	const {state, data, makeElement, makeSelect} = PromptsBrowser;
 	const wrapper = PromptsBrowser.DOMCache.promptEdit;
 	if(!wrapper || !state.editingPrompt) return;
 	if(!targetItem) targetItem = PromptsBrowser.promptEdit.getTargetItem();
@@ -328,11 +408,8 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
     PromptsBrowser.onCloseActiveWindow = PromptsBrowser.promptEdit.onCloseWindow;
 	wrapper.innerHTML = "";
 
-	const headerBlock = document.createElement("div");
-	const headerTitle = document.createElement("div");
-	headerBlock.className = "PBE_rowBlock";
-	headerTitle.className = "PBE_promptEditTitle";
-	headerTitle.innerText = state.editingPrompt;
+    const headerBlock = makeElement({element: "div", className: "PBE_rowBlock"});
+    const headerTitle = makeElement({element: "div", className: "PBE_rowBlock", content: state.editingPrompt});
 
 	headerBlock.appendChild(headerTitle);
 	PromptsBrowser.promptEdit.addCollectionSelector(headerBlock);
@@ -340,51 +417,24 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
 	wrapper.style.display = "flex";
 	wrapper.style.backgroundImage = PromptsBrowser.utils.getPromptPreviewURL(state.editingPrompt, state.editTargetCollection);
 	
-	const currentTagsBlock = document.createElement("div");
-	const currentCategoriesBlock = document.createElement("div");
-	const addTagBlock = document.createElement("div");
-	const addCategoryBlock = document.createElement("div");
-	const footerBlock = document.createElement("div");
+    const currentTagsBlock          = makeElement({element: "div", className: "PBE_rowBlock"});
+    const currentCategoriesBlock    = makeElement({element: "div", className: "PBE_rowBlock"});
+    const addTagBlock               = makeElement({element: "div", className: "PBE_rowBlock"});
+    const addCategoryBlock          = makeElement({element: "div", className: "PBE_rowBlock"});
+    const footerBlock               = makeElement({element: "div", className: "PBE_rowBlock"});
 
-	const tagsTitle = document.createElement("div");
-	const tagsList = document.createElement("div");
+    const tagsTitle                 = makeElement({element: "div", content: "Tags:"});
+    const tagsList                  = makeElement({element: "div", className: "PBE_List PBE_Scrollbar PBE_tagsList"});
+    const tagInput                  = makeElement({element: "input", id: "PBE_addTagInput"});
+    const addTagButton              = makeElement({element: "button", content: "Add tag", className: "PBE_button"});
+    const categoriesTitle           = makeElement({element: "div", content: "Categories:"});
+    const categoriesList            = makeElement({element: "div", className: "PBE_List PBE_Scrollbar PBE_categoryList"});
+    const categorySelect            = makeElement({element: "select", id: "PBE_addCategorySelect"});
+    const addCategoryButton         = makeElement({element: "button", content: "Add category", className: "PBE_button"});
+    const commentArea               = makeElement({element: "textarea", id: "PBE_commentArea", className: "PBE_Textarea PBE_Scrollbar"});
 
-	const tagInput = document.createElement("input");
-	const addTagButton = document.createElement("button");
-
-	const categoriesTitle = document.createElement("div");
-	const categoriesList = document.createElement("div");
-
-	const categorySelect = document.createElement("select");
-	const addCategoryButton = document.createElement("button");
-
-	const commentArea = document.createElement("textarea");
-
-	const cancelButton = document.createElement("button");
-	const saveButton = document.createElement("button");
-
-	currentTagsBlock.className = "PBE_rowBlock";
-	currentCategoriesBlock.className = "PBE_rowBlock";
-	addTagBlock.className = "PBE_rowBlock";
-	addCategoryBlock.className = "PBE_rowBlock";
-	footerBlock.className = "PBE_rowBlock";
-	tagsList.className = "PBE_List PBE_Scrollbar PBE_tagsList";
-	categoriesList.className = "PBE_List PBE_Scrollbar PBE_categoryList";
-	commentArea.className = "PBE_Textarea PBE_Scrollbar";
-
-	tagInput.id = "PBE_addTagInput";
-	categorySelect.id = "PBE_addCategorySelect";
-	commentArea.id = "PBE_commentArea";
-	tagsTitle.innerText = "Tags:";
-	categoriesTitle.innerText = "Categories:";
-	addTagButton.innerText = "Add tag";
-	addTagButton.className = "PBE_button";
-	addCategoryButton.innerText = "Add category";
-	addCategoryButton.className = "PBE_button";
-	cancelButton.innerText = "Cancel";
-	cancelButton.className = "PBE_button";
-	saveButton.innerText = "Save";
-	saveButton.className = "PBE_button";
+    const cancelButton              = makeElement({element: "button", content: "Cancel", className: "PBE_button"});
+    const saveButton                = makeElement({element: "button", content: "Save", className: "PBE_button"});
 
 	commentArea.value = targetItem.comment || "";
 
@@ -488,6 +538,9 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
 
 	wrapper.appendChild(addTagBlock);
 	wrapper.appendChild(addCategoryBlock);
+
+    //autogen block
+    PromptsBrowser.promptEdit.showAutoGenBlock(wrapper, targetItem);
 
 	PromptsBrowser.promptEdit.showAddSetup(wrapper);
 

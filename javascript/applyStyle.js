@@ -7,10 +7,12 @@ window.PromptsBrowser.triggerEvents = function(element) {
     element.dispatchEvent(new KeyboardEvent('blur'));
 }
 
-window.PromptsBrowser.applyStyle = function(style, isAfter) {
+window.PromptsBrowser.applyStyle = function(style, isAfter, override = false) {
     if(!style) return;
 	const {state, triggerEvents} = PromptsBrowser;
     const {positive, negative, seed, width, height, steps, cfg, sampling} = style;
+
+    if(override) PromptsBrowser.setCurrentPrompts([]);
 
 	const activePrompts = PromptsBrowser.getCurrentPrompts();
     const negativePrompts = PromptsBrowser.DOMCache.containers[state.currentContainer].negativePrompts;

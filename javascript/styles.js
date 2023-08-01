@@ -223,6 +223,10 @@ PromptsBrowser.styles.onSaveStyle = () => {
 	const {data, state} = PromptsBrowser;
 	const collectionId = state.newStyleCollection;
 	if(!collectionId) return;
+
+    const targetCollection = data.styles[collectionId];
+	if(!targetCollection) return;
+
 	const styleNameInput = PromptsBrowser.DOMCache.stylesWindow.querySelector("#PBE_newStyleName");
 
 	const name = styleNameInput.value;
@@ -375,7 +379,7 @@ PromptsBrowser.styles.applyStyle = (e, isAfter) => {
 	const targetStyle = data.styles[collectionId][index];
 	if(!targetStyle) return;
 
-    window.PromptsBrowser.applyStyle(targetStyle, isAfter);
+    PromptsBrowser.applyStyle(targetStyle, isAfter);
 
 	PromptsBrowser.styles.update();
 }
