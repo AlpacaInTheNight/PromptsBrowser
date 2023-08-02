@@ -1,0 +1,32 @@
+{
+	"positive": [
+		{
+			"id": "1girl",
+			"weight": 1
+		},
+		{
+			"id": "solo",
+			"weight": 1
+		},
+		{
+			"id": "adult woman",
+			"weight": 1
+		},
+		{
+			"id": "standing",
+			"weight": 1
+		},
+		{
+			"id": "concept art",
+			"weight": 1
+		}
+	],
+	"name": "Female Concept",
+	"seed": 3627953848,
+	"negative": "(((nsfw, nude, child))), lowres, bad anatomy, cropped, worst quality, low quality, normal quality, jpeg artifacts, blurry, missing leg, bad eye, signature, watermark, username, blurry, artist name",
+	"width": 512,
+	"height": 512,
+	"steps": 20,
+	"cfg": 7,
+	"sampling": "DPM++ 2M Karras"
+}

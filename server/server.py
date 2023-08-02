@@ -2,6 +2,7 @@ import http.server
 import socketserver
 import json
 import os
+from shutil import copyfile
 
 import constant
 from utils import emitMessage, getWebUIDirectory, isPortInUse
@@ -33,6 +34,8 @@ def initExtension():
     markerFile = webUIDir + constant.MARKER_FILE
     promptsCataloguePath = webUIDir + constant.PROMPTS_FOLDER
     stylesCataloguePath = webUIDir + constant.STYLES_FOLDER
+    autogenCataloguePath = webUIDir + constant.STYLES_FOLDER + os.sep + constant.DEFAULT_AUTOGEN
+    autogenPreset = webUIDir + "extensions" + os.sep + "PromptsBrowser" + os.sep + "server" + os.sep + "autogen"
     
     #check if extension is in extensions directory inside Stable Diffusion WebUI directory
     if not os.path.isfile(markerFile):
@@ -59,6 +62,22 @@ def initExtension():
         pathToDefaultStyle = stylesCataloguePath + os.sep + constant.DEFAULT_STYLES + os.sep
         os.makedirs(pathToDefaultStyle + "preview")
         with open(pathToDefaultStyle + "data.json", 'w') as outfile: json.dump([], outfile, indent="\t")
+
+    #checks if autogen style collection exists and is up to date
+    if not os.path.isdir(autogenCataloguePath):
+        os.makedirs(autogenCataloguePath)
+        os.makedirs(autogenCataloguePath + os.sep + "preview")
+        os.makedirs(autogenCataloguePath + os.sep + "styles")
+        with open(autogenCataloguePath + os.sep + "meta.json", 'w') as outfile: json.dump({"format": "expanded"}, outfile, indent="\t")
+        with open(autogenCataloguePath + os.sep + "order.json", 'w') as outfile: json.dump([], outfile, indent="\t")
+
+    autogenPresets = [filename for filename in os.listdir(autogenPreset + os.sep + "styles") if filename.endswith('.json')]
+    for fileName in autogenPresets:
+        if not os.path.isdir(autogenCataloguePath + os.sep + "styles" + os.sep + fileName):
+            srcAutogenPreset = autogenPreset + os.sep + "styles" + os.sep + fileName
+            dstAutogenPreset = autogenCataloguePath + os.sep + "styles" + os.sep + fileName
+            copyfile(srcAutogenPreset, dstAutogenPreset)
+
 
 initExtension()
 

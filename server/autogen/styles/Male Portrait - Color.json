@@ -1,0 +1,32 @@
+{
+	"positive": [
+		{
+			"id": "1boy",
+			"weight": 1
+		},
+		{
+			"id": "adult male",
+			"weight": 1
+		},
+		{
+			"id": "portrait",
+			"weight": 1.3
+		},
+		{
+			"id": "short hair",
+			"weight": 1
+		},
+		{
+			"id": "black suit",
+			"weight": 1
+		}
+	],
+	"name": "Male Portrait - Color",
+	"seed": 3627953848,
+	"negative": "nsfw, nude, child, bare shoulders, lowres, bad anatomy, cropped, worst quality, low quality, normal quality, jpeg artifacts, blurry, missing leg, bad eye, signature, watermark, username, blurry, artist name",
+	"width": 512,
+	"height": 512,
+	"steps": 20,
+	"cfg": 7,
+	"sampling": "DPM++ 2M Karras"
+}

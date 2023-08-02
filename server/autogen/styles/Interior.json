@@ -1,0 +1,16 @@
+{
+	"positive": [
+		{
+			"id": "interior",
+			"weight": 1
+		}
+	],
+	"name": "Interior",
+	"seed": 3627953848,
+	"negative": "nsfw, cropped, worst quality, low quality, normal quality, jpeg artifacts, blurry, signature, watermark, username, blurry, artist name",
+	"width": 512,
+	"height": 512,
+	"steps": 20,
+	"cfg": 7,
+	"sampling": "DPM++ 2M Karras"
+}

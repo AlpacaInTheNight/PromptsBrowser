@@ -6,4 +6,5 @@ PROMPTS_FOLDER      = "prompts_catalogue"
 STYLES_FOLDER       = "styles_catalogue"
 DEFAULT_CATALOGUE   = "myprompts"
 DEFAULT_STYLES      = "mystyles"
+DEFAULT_AUTOGEN     = "autogen"
 
