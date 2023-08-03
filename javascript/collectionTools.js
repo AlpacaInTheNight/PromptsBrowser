@@ -694,7 +694,7 @@ PromptsBrowser.collectionTools.showTagsAction = (wrapper) => {
 
 	wrapper.appendChild(container);
 
-    PromptsBrowser.tagTooltip.add(tagsInput);
+    PromptsBrowser.tagTooltip.add(tagsInput, true);
 }
 
 PromptsBrowser.collectionTools.showAutogenStyle = (wrapper) => {

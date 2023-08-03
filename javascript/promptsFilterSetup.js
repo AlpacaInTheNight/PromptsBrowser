@@ -232,6 +232,8 @@ PromptsBrowser.promptsFilter.updateAdditionalSetup = (wrapper, type, addFilterBu
 		const inputElement = document.createElement("input");
 		inputElement.className = "PBE_input PBE_filterName";
 
+        if(type === "tag") PromptsBrowser.tagTooltip.add(inputElement, true);
+
         inputElement.addEventListener("keydown", (e) => {
             if(e.keyCode !== 13) return;
 

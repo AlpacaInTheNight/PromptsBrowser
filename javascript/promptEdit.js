@@ -548,5 +548,5 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
 
 	wrapper.appendChild(footerBlock);
 
-    PromptsBrowser.tagTooltip.add(tagInput);
+    PromptsBrowser.tagTooltip.add(tagInput, true);
 }

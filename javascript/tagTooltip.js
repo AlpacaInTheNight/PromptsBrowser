@@ -11,7 +11,7 @@ PromptsBrowser.tagTooltip.input = undefined;
 
 PromptsBrowser.tagTooltip.knownTags = [];
 
-PromptsBrowser.tagTooltip.add = (inputContainer) => {
+PromptsBrowser.tagTooltip.add = (inputContainer, fixed = false) => {
     PromptsBrowser.tagTooltip.updateTagsList();
 
     //removing old element from the page
@@ -23,13 +23,11 @@ PromptsBrowser.tagTooltip.add = (inputContainer) => {
 
     const autocompliteWindow = document.createElement("div");
 	autocompliteWindow.className = "PBE_autocompliteBox PBE_autocompliteTags";
+    if(fixed) inputContainer.dataset.position = "fixed";
 
 	document.body.appendChild(autocompliteWindow);
 
-    const rect = inputContainer.getBoundingClientRect();
-    autocompliteWindow.style.top = rect.top + rect.height + "px";
-    autocompliteWindow.style.left = rect.left + "px";
-    autocompliteWindow.style.zIndex = 1000;
+    PromptsBrowser.tagTooltip.setBoxPosition(inputContainer, autocompliteWindow);
     autocompliteWindow.innerText = "";
 
     PromptsBrowser.tagTooltip.container = autocompliteWindow;
@@ -39,6 +37,13 @@ PromptsBrowser.tagTooltip.add = (inputContainer) => {
 	inputContainer.addEventListener("blur", PromptsBrowser.tagTooltip.onUnfocus);
 	inputContainer.addEventListener("keyup", PromptsBrowser.tagTooltip.processCarretPosition);
     inputContainer.addEventListener("click", PromptsBrowser.tagTooltip.processCarretPosition);
+}
+
+PromptsBrowser.tagTooltip.setBoxPosition = (inputContainer, boxContainer) => {
+    const rect = inputContainer.getBoundingClientRect();
+    boxContainer.style.top = rect.top + rect.height + "px";
+    boxContainer.style.left = rect.left + "px";
+    boxContainer.style.zIndex = 1000;
 }
 
 PromptsBrowser.tagTooltip.updateTagsList = () => {
@@ -60,7 +65,7 @@ PromptsBrowser.tagTooltip.updateTagsList = () => {
 }
 
 PromptsBrowser.tagTooltip.onUnfocus = (e) => {
-    const inputElement = PromptsBrowser.tagTooltip.input;
+    const inputElement = e;
 	const autoCompleteBox = PromptsBrowser.tagTooltip.container;
 
 	if(!autoCompleteBox || !inputElement) return;
@@ -74,7 +79,7 @@ PromptsBrowser.tagTooltip.onUnfocus = (e) => {
 }
 
 PromptsBrowser.tagTooltip.onKeyDown = (e) => {
-	const inputElement = PromptsBrowser.tagTooltip.input;
+	const inputElement = e;
 	const autoCompleteBox = PromptsBrowser.tagTooltip.container;
 
 	if(!autoCompleteBox || !inputElement) return;
@@ -86,6 +91,7 @@ PromptsBrowser.tagTooltip.onKeyDown = (e) => {
 
 	e.stopPropagation();
 	e.preventDefault();
+    e.stopImmediatePropagation();
 }
 
 PromptsBrowser.tagTooltip.onClickHint = (e) => {
@@ -172,6 +178,8 @@ PromptsBrowser.tagTooltip.onApplyHint = (start, end, newTag) => {
 }
 
 PromptsBrowser.tagTooltip.processCarretPosition = (e) => {
+    PromptsBrowser.tagTooltip.input = e.currentTarget;
+    const elementPosition = e.currentTarget.dataset.position || "";
 	clearTimeout(PromptsBrowser.tagTooltip.unfocusTimeout);
 
 	if(e.keyCode === 38 || e.keyCode === 40 || e.keyCode === 13) {
@@ -186,10 +194,16 @@ PromptsBrowser.tagTooltip.processCarretPosition = (e) => {
 	}
 
 	const {selectedIndex = 0, knownTags = []} = PromptsBrowser.tagTooltip;
-	const inputElement = PromptsBrowser.tagTooltip.input;
+	const inputElement = e.currentTarget;
 	const autoCompleteBox = PromptsBrowser.tagTooltip.container;
 	if(!autoCompleteBox || !inputElement) return;
 	autoCompleteBox.innerHTML = "";
+
+    PromptsBrowser.tagTooltip.setBoxPosition(inputElement, autoCompleteBox);
+
+    if(autoCompleteBox.style.position !== elementPosition) {
+        autoCompleteBox.style.position = elementPosition;
+    }
 
 	const MAX_HINTS = 20;
 	let currHints = 0;
