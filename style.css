@@ -714,6 +714,14 @@
 	padding: 4px;
 }
 
+.PBE_collectionToolsStatus {
+    font-family: sans-serif;
+    color: cornflowerblue;
+    text-shadow: 1px 1px 1px black;
+    font-size: 16px;
+    padding: 0px 10px;
+}
+
 .PBE_collectionToolsActions {
 	flex-wrap: wrap;
 	padding: 5px;

@@ -76,7 +76,9 @@ PromptsBrowser.collectionTools.generateNextPreview = async () => {
 		return;
 	}
 
-	PromptsBrowser.utils.log(`Generating preview for ${nextItem.id}. ${generateQueue.length} items in queue left`);
+    const message = `Generating preview for "${nextItem.id}". ${generateQueue.length} items in queue left. `;
+	PromptsBrowser.utils.log(message);
+    PromptsBrowser.collectionTools.updateAutogenInfo(message);
 
 	state.selectedPrompt = nextItem.id;
 	state.savePreviewCollection = collectionToolsId;
@@ -320,6 +322,8 @@ PromptsBrowser.collectionTools.onSelectItem = (e) => {
 		state.selectedCollectionPrompts = state.selectedCollectionPrompts.filter(promptId => promptId !== id);
 		e.currentTarget.parentNode.classList.remove("selected");
 	}
+
+    PromptsBrowser.collectionTools.updateSelectedInfo();
 }
 
 PromptsBrowser.collectionTools.onToggleSelected = (e) => {
@@ -797,8 +801,57 @@ PromptsBrowser.collectionTools.showActions = (wrapper) => {
 	PromptsBrowser.collectionTools.showAutogenerate(wrapper);
 }
 
+PromptsBrowser.collectionTools.updateAutogenInfo = (status, wrapper) => {
+    if(!wrapper) wrapper = document.querySelector(".PBE_collectionToolsAutogenInfo");
+    if(!wrapper) return;
+
+    wrapper.innerText = status;
+}
+
+PromptsBrowser.collectionTools.updateSelectedInfo = (wrapper) => {
+    if(!wrapper) wrapper = document.querySelector(".PBE_collectionToolsSelectedInfo");
+    if(!wrapper) return;
+    
+    const {selectedCollectionPrompts} = PromptsBrowser.state;
+    let text = "";
+    const prevItems = [];
+    const MAX_SHOWN_DETAILED = 3;
+
+    if(!selectedCollectionPrompts || !selectedCollectionPrompts.length) {
+        wrapper.innerText = "No items selected";
+        return;
+    }
+
+    for(let i = 0; i < selectedCollectionPrompts.length; i++) {
+        if(i + 1 > MAX_SHOWN_DETAILED) break;
+        prevItems.push(`"${selectedCollectionPrompts[i]}"`);
+    }
+
+    if(prevItems.length) text += prevItems.join(", ");
+
+    const allSelected = selectedCollectionPrompts.length;
+    if(allSelected > MAX_SHOWN_DETAILED) {
+        text += `, and ${allSelected - MAX_SHOWN_DETAILED} more items selected.`
+    }
+
+    wrapper.innerText = text;
+}
+
+PromptsBrowser.collectionTools.showStatus = (wrapper) => {
+    const {state, data, makeElement} = PromptsBrowser;
+
+    const autogenStatus = makeElement({element: "div", className: "PBE_collectionToolsAutogenInfo"});
+    const selectedStatus = makeElement({element: "div", className: "PBE_collectionToolsSelectedInfo"});
+
+    PromptsBrowser.collectionTools.updateAutogenInfo("", autogenStatus);
+    PromptsBrowser.collectionTools.updateSelectedInfo(selectedStatus);
+
+    wrapper.appendChild(autogenStatus);
+    wrapper.appendChild(selectedStatus);
+}
+
 PromptsBrowser.collectionTools.update = (ifShown = false) => {
-	const {state, data} = PromptsBrowser;
+	const {state, data, makeElement} = PromptsBrowser;
 	const wrapper = PromptsBrowser.DOMCache.collectionTools;
 	clearTimeout(PromptsBrowser.collectionTools.generateNextTimer);
 
@@ -832,6 +885,8 @@ PromptsBrowser.collectionTools.update = (ifShown = false) => {
 	const contentBlock = document.createElement("div");
 	contentBlock.className = "PBE_dataBlock PBE_Scrollbar PBE_windowContent";
 
+    const statusBlock = makeElement({element: "div", className: "PBE_collectionToolsStatus PBE_row"});
+
 	const actionsBlock = document.createElement("div");
 	actionsBlock.className = "PBE_collectionToolsActions PBE_row";
 
@@ -842,9 +897,11 @@ PromptsBrowser.collectionTools.update = (ifShown = false) => {
 
 	wrapper.appendChild(headerBlock);
 	wrapper.appendChild(contentBlock);
+	wrapper.appendChild(statusBlock);
 	wrapper.appendChild(actionsBlock);
 	wrapper.appendChild(footerBlock);
 
+    PromptsBrowser.collectionTools.showStatus(statusBlock);
     PromptsBrowser.collectionTools.showActions(actionsBlock);
 
 }
