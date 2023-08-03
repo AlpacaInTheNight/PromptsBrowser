@@ -44,9 +44,29 @@ PromptsBrowser.collectionTools.updateViews = () => {
 }
 
 PromptsBrowser.collectionTools.updateCurrentCollection = () => {
-	const {state} = PromptsBrowser;
-	const {collectionToolsId} = state;
+	const {state, data} = PromptsBrowser;
+    const {promptsFilter} = PromptsBrowser.state;
+	const {collectionToolsId, selectedCollectionPrompts} = state;
 	if(!collectionToolsId) return;
+	const filterSetup = promptsFilter["collectionTools"];
+	const targetCollection = data.original[collectionToolsId];
+	if(!targetCollection) return;
+
+	for(const item of targetCollection) {
+		const {id} = item;
+		if(!id) continue;
+
+		/**
+		 * Removing prompt from selected if it will not be shown.
+		 */
+		if(!PromptsBrowser.utils.checkFilter(item, filterSetup)) {
+			if(selectedCollectionPrompts.includes(id)) {
+				state.selectedCollectionPrompts = state.selectedCollectionPrompts.filter(selId => selId !== id);
+			}
+
+			continue;
+		}
+    }
 
 	PromptsBrowser.db.saveJSONData(collectionToolsId);
 	PromptsBrowser.db.updateMixedList();
@@ -740,21 +760,6 @@ PromptsBrowser.collectionTools.showAutogenerate = (wrapper) => {
         onChange: PromptsBrowser.collectionTools.onChangeAutogenerateType
     });
 
-    /* const withCurrent = document.createElement("input");
-	withCurrent.id = "PBE_generateWithCurrent";
-	withCurrent.name = "PBE_generateWithCurrent";
-	withCurrent.type = "checkbox";
-	withCurrent.checked = state.autoGenerateKeepCurrent;
-
-	withCurrent.addEventListener("change", (e) => {
-        const value = e.currentTarget.checked;
-        state.autoGenerateKeepCurrent = value;
-    });
-
-	const withCurrentLegend = document.createElement("label");
-	withCurrentLegend.htmlFor = withCurrent.id;
-	withCurrentLegend.textContent = "Keep current prompts"; */
-
 	const container = document.createElement("fieldset");
 	container.className = "PBE_fieldset";
 	const legend = document.createElement("legend");
@@ -763,8 +768,6 @@ PromptsBrowser.collectionTools.showAutogenerate = (wrapper) => {
 	container.appendChild(legend);
 	container.appendChild(generateTypeSelect);
 	container.appendChild(generateButton);
-	/* container.appendChild(withCurrent);
-	container.appendChild(withCurrentLegend); */
 
 	wrapper.appendChild(container);
 }
