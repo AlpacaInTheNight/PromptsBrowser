@@ -12,8 +12,6 @@ PromptsBrowser.synchroniseCurrentPrompts = (noTextAreaUpdate = true) => {
 	if(!textArea) return;
 	let activePrompts = PromptsBrowser.getCurrentPrompts();
 	let value = textArea.value;
-    console.log("synchronise: activePrompts - ", activePrompts);
-    console.log("synchronise: value - ", value);
 
 	//trying to fix LORAs/Hypernetworks added without a preceding comma
 	value = value.replace(/([^,])\ </g, "$1,\ <");
@@ -48,7 +46,6 @@ PromptsBrowser.synchroniseCurrentPrompts = (noTextAreaUpdate = true) => {
 	}
 
 	activePrompts = newPBE_currentPrompts;
-    console.log("synchronise: NEW activePrompts - ", activePrompts);
 
 	PromptsBrowser.setCurrentPrompts(activePrompts);
 	PromptsBrowser.currentPrompts.update(noTextAreaUpdate);
