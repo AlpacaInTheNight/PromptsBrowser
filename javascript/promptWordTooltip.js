@@ -35,6 +35,7 @@ PromptsBrowser.promptWordTooltip.onKeyDown = (e) => {
 
 	e.stopPropagation();
 	e.preventDefault();
+    e.stopImmediatePropagation();
 }
 
 PromptsBrowser.promptWordTooltip.onUnfocus = (e) => {
@@ -178,7 +179,7 @@ PromptsBrowser.promptWordTooltip.onApplyHint = (start, end, newPrompt) => {
 	textArea.value = newValue;
 
 	PromptsBrowser.promptWordTooltip.selectedIndex = 0;
-	PromptsBrowser.synchroniseCurrentPrompts();
+	PromptsBrowser.synchroniseCurrentPrompts(false);
 }
 
 PromptsBrowser.promptWordTooltip.processCarretPosition = (e) => {
@@ -195,6 +196,7 @@ PromptsBrowser.promptWordTooltip.processCarretPosition = (e) => {
 		if(block) {
 			e.stopPropagation();
 			e.preventDefault();
+            e.stopImmediatePropagation();
 
 			return false;
 		}
@@ -239,11 +241,12 @@ PromptsBrowser.promptWordTooltip.processCarretPosition = (e) => {
 	word = word.trim();
 	if(!word) return;
 
+    word = word.toLowerCase();
 	const possiblePrompts = [];
 
 	for(const prompt of promptsList) {
 		if(!prompt.id) continue;
-		if(prompt.id.includes(word)) possiblePrompts.push(prompt.id);
+		if(prompt.id.toLowerCase().includes(word)) possiblePrompts.push(prompt.id);
 	}
 
 	if(!possiblePrompts.length || (possiblePrompts.length === 1 && word === possiblePrompts[0])) {

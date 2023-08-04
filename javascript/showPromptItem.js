@@ -1,6 +1,9 @@
 
 if(!window.PromptsBrowser) window.PromptsBrowser = {};
 
+/**
+ * Shows prompt card
+ */
 PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
 	const {DEFAULT_PROMPT_WEIGHT} = PromptsBrowser.params;
 	const {index = 0, isShadowed = false, noSplash = false, url} = options;
@@ -64,9 +67,6 @@ PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
 		splashElement.innerText = id;
 
 		if(weight !== DEFAULT_PROMPT_WEIGHT) {
-			/* weightContainer.className = "PBE_promptElementWeight";
-			weightContainer.innerText = weight; */
-	
 			splashElement.appendChild(weightContainer.cloneNode(true));
 		}
 

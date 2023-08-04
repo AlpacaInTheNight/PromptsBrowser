@@ -11,6 +11,22 @@ PromptsBrowser.promptTools.init = (wrapper) => {
 	PromptsBrowser.DOMCache.promptTools = promptTools;
 
 	wrapper.appendChild(promptTools);
+
+    PromptsBrowser.onCloseActiveWindow = PromptsBrowser.promptTools.onCloseWindow;
+
+    promptTools.addEventListener("click", () => {
+        PromptsBrowser.onCloseActiveWindow = PromptsBrowser.promptTools.onCloseWindow;
+    });
+}
+
+PromptsBrowser.promptTools.onCloseWindow = () => {
+    const {state} = PromptsBrowser;
+    const wrapper = PromptsBrowser.DOMCache.promptTools;
+
+    if(!wrapper) return;
+
+    state.promptToolsId = undefined;
+    wrapper.style.display = "none";
 }
 
 PromptsBrowser.promptTools.onToggleButton = (e) => {
@@ -109,13 +125,9 @@ PromptsBrowser.promptTools.showCurrentPrompts = (wrapper) => {
 	showCategory.addEventListener("click", PromptsBrowser.promptTools.onToggleButton);
 	showName.addEventListener("click", PromptsBrowser.promptTools.onToggleButton);
 
-	/* let promptElement = PromptsBrowser.showPromptItem({id: state.promptToolsId});
-	currentPromptsContainer.appendChild(promptElement); */
-
 	for(const i in activePrompts) {
 		const currPrompt = activePrompts[i];
 		const isShadowed = currPrompt.id !== state.promptToolsId;
-		//if(currPrompt.id === state.promptToolsId) continue;
 
 		promptElement = PromptsBrowser.showPromptItem({id: currPrompt.id, isExternalNetwork: currPrompt.isExternalNetwork}, {isShadowed});
 		promptElement.addEventListener("click", PromptsBrowser.promptTools.onElementClick);
@@ -221,6 +233,7 @@ PromptsBrowser.promptTools.update = () => {
 	const wrapper = PromptsBrowser.DOMCache.promptTools;
 
 	if(!wrapper || !state.promptToolsId) return;
+    PromptsBrowser.onCloseActiveWindow = PromptsBrowser.promptTools.onCloseWindow;
 	wrapper.innerHTML = "";
 	wrapper.style.display = "flex";
 
@@ -241,10 +254,7 @@ PromptsBrowser.promptTools.update = () => {
 	PromptsBrowser.promptTools.showCurrentPrompts(currentPromptsBlock);
 	PromptsBrowser.promptTools.showPossiblePromptswrapper(possiblePromptsBlock);
 
-	closeButton.addEventListener("click", (e) => {
-		state.promptToolsId = undefined;
-		wrapper.style.display = "none";
-	});
+	closeButton.addEventListener("click", PromptsBrowser.promptTools.onCloseWindow);
 
 	footerBlock.appendChild(closeButton);
 

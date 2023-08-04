@@ -103,6 +103,14 @@
 	text-shadow: 1px 1px 1px black;
 }
 
+.PBE_fieldset label {
+    font-size: 17px;
+    font-family: sans-serif;
+    color: cornflowerblue;
+    text-shadow: 1px 1px 1px black;
+    cursor: pointer;
+}
+
 .PBE_fieldset > div,
 .PBE_fieldset > input,
 .PBE_fieldset > select {
@@ -260,7 +268,9 @@
 .PBE_promptsCatalogueHeader {
 	display: flex;
 	flex-direction: row;
-	flex-wrap: wrap;
+	flex-wrap: nowrap;
+    width: 100%;
+    overflow: hidden;
 	align-items: center;
 	padding: 0 10px;
 }
@@ -270,6 +280,10 @@
 	color: black;
 	margin-right: 5px;
 	height: 40px;
+    width: 1px;
+    flex-shrink: 1;
+    flex-grow: 1;
+    display: flex;
 }
 
 .PBE_promptsCatalogueHeader input {
@@ -321,6 +335,14 @@
 	color: black;
 }
 
+.PBE_promptEditInfoItem {
+    cursor: pointer;
+}
+
+.PBE_promptEditInfoItem:hover {
+    background-color: rgba(255, 0, 0, 0.2);
+}
+
 .PBE_currentPrompts {
 	display: flex;
 	flex-direction: row;
@@ -348,6 +370,11 @@
 	text-transform: capitalize;
 	cursor: pointer;
 	user-select: none;
+}
+
+.PBE_promptElement_random {
+    background-color: mediumaquamarine;
+    background: linear-gradient(48deg, rgba(0,0,0,1) 0%, rgba(29,253,111,1) 47%, rgba(0,0,0,1) 100%);
 }
 
 .PBE_promptElementWeight {
@@ -403,6 +430,15 @@
 	transform-origin: bottom center;
 }
 
+.PBE_promptElementIndex {
+    position: absolute;
+    right: 4px;
+    bottom: 0;
+    font-size: 12px;
+    color: cornflowerblue;
+    text-shadow: 1px 1px 1px black;
+}
+
 .PBE_promptElementSplash {
 	display: none;
 	transition: transform 0.2s;
@@ -434,6 +470,11 @@
 }
 
 .PBE_promptElementSplash .PBE_promptElementWeight {
+	bottom: auto;
+	top: 0;
+}
+
+.PBE_promptElementSplash .PBE_promptElementIndex {
 	bottom: auto;
 	top: 0;
 }
@@ -687,6 +728,14 @@
 	padding: 4px;
 }
 
+.PBE_collectionToolsStatus {
+    font-family: sans-serif;
+    color: cornflowerblue;
+    text-shadow: 1px 1px 1px black;
+    font-size: 16px;
+    padding: 0px 10px;
+}
+
 .PBE_collectionToolsActions {
 	flex-wrap: wrap;
 	padding: 5px;
@@ -816,6 +865,13 @@
 
 /* Styles window */
 
+.PBE_stylesWindow {
+    width: 80vw;
+    height: 80vh;
+    top: 10vh;
+    left: 10vw;
+}
+
 .PBE_stylesHeader {
 	height: 110px;
 	flex-wrap: nowrap;
@@ -828,6 +884,7 @@
 	justify-content: center;
 	align-items: center;
 	padding-right: 10px;
+    padding-top: 10px;
 	flex-shrink: 0;
 }
 

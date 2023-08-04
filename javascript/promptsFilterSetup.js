@@ -169,14 +169,14 @@ PromptsBrowser.promptsFilter.update = function(wrapper, filterId) {
 	typeSelect.addEventListener("change", (e) => {
 		const value = e.currentTarget.value;
 
-		PromptsBrowser.promptsFilter.updateAdditionalSetup(addionalSetup, value);
+		PromptsBrowser.promptsFilter.updateAdditionalSetup(addionalSetup, value, addFilterButton);
 	});
 
 	addFilterButton.addEventListener("click", PromptsBrowser.promptsFilter.onAddNewFilter);
 	cancelButton.addEventListener("click", PromptsBrowser.promptsFilter.onHideNewFilter);
 
 	PromptsBrowser.promptsFilter.showActiveFilters(activeFilters, filterId);
-	PromptsBrowser.promptsFilter.updateAdditionalSetup(addionalSetup, "name");
+	PromptsBrowser.promptsFilter.updateAdditionalSetup(addionalSetup, "name", addFilterButton);
 	newFilterContainer.appendChild(actionButton);
 	newFilterContainer.appendChild(typeSelect);
 	newFilterContainer.appendChild(addionalSetup);
@@ -189,7 +189,7 @@ PromptsBrowser.promptsFilter.update = function(wrapper, filterId) {
 	wrapper.appendChild(filtersContainer);
 }
 
-PromptsBrowser.promptsFilter.updateAdditionalSetup = (wrapper, type) => {
+PromptsBrowser.promptsFilter.updateAdditionalSetup = (wrapper, type, addFilterButton) => {
 	wrapper.innerHTML = "";
 
 	if(type === "meta") {
@@ -200,6 +200,7 @@ PromptsBrowser.promptsFilter.updateAdditionalSetup = (wrapper, type) => {
 			<option value="categories">Have categories</option>
 			<option value="tags">Have tags</option>
 			<option value="comment">Have comment</option>
+			<option value="autogen">Have autogen style</option>
 			<option value="png">Is PNG</option>
 			<option value="jpg">Is JPG</option>
 		`;
@@ -230,6 +231,14 @@ PromptsBrowser.promptsFilter.updateAdditionalSetup = (wrapper, type) => {
 	if(type === "tag" || type === "name") {
 		const inputElement = document.createElement("input");
 		inputElement.className = "PBE_input PBE_filterName";
+
+        if(type === "tag") PromptsBrowser.tagTooltip.add(inputElement, true);
+
+        inputElement.addEventListener("keydown", (e) => {
+            if(e.keyCode !== 13) return;
+
+            addFilterButton.dispatchEvent(new Event('click'));
+        });
 
 		wrapper.appendChild(inputElement);
 		return;

@@ -1,4 +1,4 @@
-# Prompts Browser Extension 0.8
+# Prompts Browser Extension 0.9.0
 Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui).
 
 1. [Installation](#installation)
@@ -12,19 +12,21 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 1. [Prompt editor](#prompt-editor)
 1. [Setup window](#setup-window)
 1. [Autocomplite](#autocomplite)
+1. [Collections database](#collections-database)
 
-![](preview.jpg)
+![](img/preview.jpg)
 
 ## Installation:
 
-1. Make sure you have the latest AUTOMATIC1111/stable-diffusion-webui version instaled. Prompt Browser 0.8 was tested and adapted for Webui version 1.2.1.
+1. Make sure you have the latest AUTOMATIC1111/stable-diffusion-webui version instaled. Prompt Browser 0.9.0 was tested and adapted for Webui version 1.5.1.
 
-2. Install Node.js <https://nodejs.org/en/download>
-The collections server runs on Node.js at the moment.
+2. Unzip/clone the plugin into the `extensions/PromptsBrowser` folder.
 
-3. Unzip/clone the plugin into the `extensions/PromptsBrowser` folder.
+3. In the stable-diffusion folder will be created folder `prompts_catalogue` with subfolder `myprompts` - this will be the first collection of prompts. As well as the folder `styles_catalogue` where new styles will be stored.
 
-4. In the stable-diffusion folder will be created folder `prompts_catalogue` with subfolder `myprompts` - this will be the first collection of prompts. As well as the folder `styles_catalogue` where new styles will be stored.
+### Important
+
+This extension modifies the DOM directly, without working through any API for such purposes (which does not exist, as far as I know). As such, an update to SDWebUI could potentially break some functionality of this extension until the extension is in turn updated to work with a newer version of SDWebUI. If something stops working after SDWebUI update - create a ticket.
 
 
 ## Usage:
@@ -59,10 +61,10 @@ The collections server runs on Node.js at the moment.
 ### Adding new prompts to the collection
 
 1. Enter text in the text box - the text will be divided by the presence of a comma in the prompts in the text box. If you click on the icon of a prompt, it will become the selected one. Now you can generate an image and if any of the currently active prompts is selected there will be a button `Save preview` above the generated image. By saving the preview, it will be added to the collection, and the preview image for that sample will be added to the collection's `preview` folder.
-![](savePreview.jpg)
+![](img/savePreview.jpg)
 
 2. The `Add unknown` button above the Prompts entry field opens a window for adding new prompts. In this window you can select new prompts and a collection of prompts, where you can add them with the `Add new prompts` button. The `Toggle all` button selects or deselects all new proppts. The `All collections` toggle switches on or off the check for all possible collections (by default, it is on and only those prompts that are not in any of the possible collections will be displayed).
-![](addNew.jpg)
+![](img/addNew.jpg)
 
 
 ### Generating previews for prompts
@@ -74,7 +76,7 @@ The collections server runs on Node.js at the moment.
 
 ### Prompt tools
 
-![](promptTool.jpg)
+![](img/promptTool.jpg)
 
 1. If you `double-click` on the active prompt, the Prompt Tools window will open.
 
@@ -89,7 +91,7 @@ The collections server runs on Node.js at the moment.
 
 ### Styles
 
-![](styles.jpg)
+![](img/styles.jpg)
 
 1. Above the text box there is now a `styles` button which opens the Styles window.
 
@@ -114,7 +116,7 @@ The collections server runs on Node.js at the moment.
 
 ### Collection editor
 
-![](collectionEdit.jpg)
+![](img/collectionEdit.jpg)
 
 1. You can open the `Collection editor` by clicking the `Edit collection` button above the list of known prompts.
 
@@ -136,7 +138,7 @@ The collections server runs on Node.js at the moment.
 
 ### Prompt editor
 
-![](editPrompt.jpg)
+![](img/editPrompt.jpg)
 
 1. By clicking on prompt in the `Known prompts list` holding `shift` key you will open target Prompt Editor window.
 
@@ -165,7 +167,7 @@ The collections server runs on Node.js at the moment.
 
 ### Setup window
 
-![](setup.jpg)
+![](img/setup.jpg)
 
 1. Click on `Setup` button at the top menu to open Setup window.
 
@@ -188,3 +190,11 @@ The collections server runs on Node.js at the moment.
 ### Autocomplite
 
 1. When you manually type prompts, a menu with similar prompts from the database of known prompts will be displayed. You can finish a prompt from the autocomplite menu by clicking on it or by selecting it with the up and down arrows and pressing Enter.
+
+### Collections database
+
+This extension does not come with a pre-built prompts database. It is up to the user to choose a ready-made database or create their own. Remember that collections goes into the **prompts_catalogue** folder inside your Stable Diffusion Web UI directory. This directory is being crated after at least one start of SDWebUI with the installed Prompts Browser Extension.
+
+Some existing collections:
+
+1. [prompts_portrait](https://github.com/AlpacaInTheNight/prompts_portrait) - A proof of concept collection for generating character portraits. Comes with tags and categories tagged in. Previews are generated with Anything V4.5 model.

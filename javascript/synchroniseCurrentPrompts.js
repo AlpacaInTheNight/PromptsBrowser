@@ -4,7 +4,7 @@ if(!window.PromptsBrowser) window.PromptsBrowser = {};
 /**
  * Synchronises text content of the textarea with the array of active prompts used by the extension.
  */
-PromptsBrowser.synchroniseCurrentPrompts = () => {
+PromptsBrowser.synchroniseCurrentPrompts = (noTextAreaUpdate = true) => {
 	const {normalizePrompt} = window.PromptsBrowser;
 	const {DEFAULT_PROMPT_WEIGHT, PROMPT_WEIGHT_FACTOR} = PromptsBrowser.params;
 	const {state} = PromptsBrowser;
@@ -48,5 +48,5 @@ PromptsBrowser.synchroniseCurrentPrompts = () => {
 	activePrompts = newPBE_currentPrompts;
 
 	PromptsBrowser.setCurrentPrompts(activePrompts);
-	PromptsBrowser.currentPrompts.update(true);
+	PromptsBrowser.currentPrompts.update(noTextAreaUpdate);
 }

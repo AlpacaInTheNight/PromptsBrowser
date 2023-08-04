@@ -19,6 +19,33 @@ PromptsBrowser.setupWindow.init = (wrapper) => {
 
 	PromptsBrowser.DOMCache.setupWindow = setupWindow;
 	wrapper.appendChild(setupWindow);
+
+    PromptsBrowser.onCloseActiveWindow = PromptsBrowser.setupWindow.onCloseWindow;
+
+    setupWindow.addEventListener("click", () => {
+        PromptsBrowser.onCloseActiveWindow = PromptsBrowser.setupWindow.onCloseWindow;
+    });
+}
+
+PromptsBrowser.setupWindow.onCloseWindow = () => {
+    const {viewMode} = PromptsBrowser.setupWindow;
+    const wrapper = PromptsBrowser.DOMCache.setupWindow;
+    if(!wrapper) return;
+
+    if(viewMode === "newCollection" || viewMode === "newStylesCollection") {
+        PromptsBrowser.setupWindow.viewMode = "normal";
+        PromptsBrowser.setupWindow.update();
+        return true;
+
+    } else wrapper.style.display = "none";
+}
+
+PromptsBrowser.setupWindow.onChangeShowIndex = (e) => {
+	const {state} = PromptsBrowser;
+	const checked = e.currentTarget.checked;
+
+	state.config.showPromptIndex = checked;
+	localStorage.setItem("PBE_config", JSON.stringify(state.config));
 }
 
 PromptsBrowser.setupWindow.onChangeLowerCase = (e) => {
@@ -79,11 +106,13 @@ PromptsBrowser.setupWindow.onCreate = (e) => {
 		
 	} else if(viewMode === "newStylesCollection") {
 		const newNameInput = setupWindow.querySelector(".PBE_newCollectionName");
-		if(!newNameInput) return;
+        const formatSelect = setupWindow.querySelector(".PBE_newStyleCollectionFormat");
+		if(!newNameInput || !formatSelect) return;
 		const newName = window.PromptsBrowser.makeFileNameSafe(newNameInput.value);
-		if(!newName) return;
+        const format = formatSelect.value;
+		if(!newName || !format) return;
 		
-		PromptsBrowser.db.createNewStylesCollection(newName);
+		PromptsBrowser.db.createNewStylesCollection(newName, format);
 
 	}
 
@@ -219,6 +248,32 @@ PromptsBrowser.setupWindow.showNormalizeSetup = (wrapper) => {
 	wrapper.appendChild(spaceBlock);
 }
 
+PromptsBrowser.setupWindow.showPromptCardsSetup = (wrapper) => {
+	const {state, makeElement} = PromptsBrowser;
+	const {config} = state;
+
+    const indexBlock = makeElement({element: "div", className: "PBE_rowBlock"});
+    indexBlock.style.maxWidth = "none";
+
+    const indexInput = makeElement({
+        element: "input",
+        className: "PBE_setupPromptIndex",
+        id: "PBE_setupPromptIndex",
+        name: "PBE_setupPromptIndex",
+        type: "checkbox",
+    })
+	indexInput.checked = config.showPromptIndex;
+	indexInput.addEventListener("change", PromptsBrowser.setupWindow.onChangeShowIndex);
+
+    const indexLegend = makeElement({element: "label", content: "Show prompt index in database"});
+	indexLegend.htmlFor = indexInput.id;
+
+	indexBlock.appendChild(indexLegend);
+	indexBlock.appendChild(indexInput);
+
+	wrapper.appendChild(indexBlock);
+}
+
 PromptsBrowser.setupWindow.showNewCollection = (wrapper) => {
 	const newName = document.createElement("div");
 	const newNameLabel = document.createElement("div");
@@ -257,20 +312,37 @@ PromptsBrowser.setupWindow.showNewCollection = (wrapper) => {
 }
 
 PromptsBrowser.setupWindow.showNewStylesCollection = (wrapper) => {
-	const newName = document.createElement("div");
-	const newNameLabel = document.createElement("div");
-	const newNameInput = document.createElement("input");
-	newName.className = "PBE_rowBlock";
-	newName.style.maxWidth = "none";
-	newNameInput.className = "PBE_input PBE_newCollectionName";
+    const {makeElement, makeSelect} = PromptsBrowser;
 
+
+    const newName = makeElement({element: "div", className: "PBE_rowBlock"});
+    const format = makeElement({element: "div", className: "PBE_rowBlock"});
+    newName.style.maxWidth = "none";
+    format.style.maxWidth = "none";
+
+    const newNameLabel = makeElement({element: "div", content: "New styles collection name"});
+    const formatLabel = makeElement({element: "div", content: "Store format"});
+
+    const newNameInput = makeElement({element: "input", className: "PBE_input PBE_newCollectionName"});
 	newNameInput.addEventListener("change", PromptsBrowser.setupWindow.onUpdateDirName);
-	newNameLabel.innerText = "New styles collection name";
 
 	newName.appendChild(newNameLabel);
 	newName.appendChild(newNameInput);
 
+    const formatSelect = makeSelect({
+        className: "PBE_select PBE_newStyleCollectionFormat",
+        value: "short",
+        options: [
+            {id: "short", name: "Short"},
+            {id: "expanded", name: "Expanded"},
+        ],
+    });
+
+    format.appendChild(formatLabel);
+	format.appendChild(formatSelect);
+
 	wrapper.appendChild(newName);
+	wrapper.appendChild(format);
 }
 
 PromptsBrowser.setupWindow.update = () => {
@@ -279,6 +351,7 @@ PromptsBrowser.setupWindow.update = () => {
 	const wrapper = PromptsBrowser.DOMCache.setupWindow;
 	if(!wrapper) return;
 	
+    PromptsBrowser.onCloseActiveWindow = PromptsBrowser.setupWindow.onCloseWindow;
 	wrapper.style.display = "flex";
 
 	if(viewMode === "newCollection") wrapper.innerHTML = "New prompts collection";
@@ -302,6 +375,7 @@ PromptsBrowser.setupWindow.update = () => {
 		PromptsBrowser.setupWindow.showCreateNew(contentBlock);
 		PromptsBrowser.setupWindow.showWeightSetup(contentBlock);
 		PromptsBrowser.setupWindow.showNormalizeSetup(contentBlock);
+		PromptsBrowser.setupWindow.showPromptCardsSetup(contentBlock);
 	}
 
 	footerBlock.className = "PBE_rowBlock PBE_rowBlock_wide";
@@ -309,13 +383,7 @@ PromptsBrowser.setupWindow.update = () => {
 	closeButton.innerText = viewMode === "normal" ? "Close" : "Cancel";
 	closeButton.className = "PBE_button";
 
-	closeButton.addEventListener("click", (e) => {
-		if(viewMode === "newCollection" || viewMode === "newStylesCollection") {
-			PromptsBrowser.setupWindow.viewMode = "normal";
-			PromptsBrowser.setupWindow.update();
-
-		} else wrapper.style.display = "none";
-	});
+	closeButton.addEventListener("click", PromptsBrowser.setupWindow.onCloseWindow);
 
 	if(viewMode === "newCollection" || viewMode === "newStylesCollection") {
 		const createButton = document.createElement("button");

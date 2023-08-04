@@ -13,6 +13,15 @@ PromptsBrowser.state = {
 
 		toLowerCase: true,
 		spaceMode: "space",
+        showPromptIndex: false,
+
+        saveStyleMeta: {
+            seed: false,
+            size: false,
+            quality: false,
+            sampler: false,
+            negative: false,
+        }
 	},
 
 	showControlPanel: true,
@@ -23,6 +32,7 @@ PromptsBrowser.state = {
 	editingPrompt: undefined,
 	filesIteration: (new Date().valueOf()), //to avoid getting old image cache
 	filterCategory: undefined,
+	filterName: undefined,
 	filterCollection: undefined,
 	filterTags: undefined,
 	filterStyleCollection: undefined,
@@ -43,6 +53,8 @@ PromptsBrowser.state = {
 	selectedNewPrompts: [],
 	selectedCollectionPrompts: [],
 	promptsFilter: {},
+    autoGenerateType: "prompt",
+    //autoGenerateKeepCurrent: false,
 }
 
 PromptsBrowser.params = {};
@@ -53,6 +65,7 @@ PromptsBrowser.params.NEW_CARD_GRADIENT = "linear-gradient(135deg, rgba(180,221,
 
 PromptsBrowser.data.categories = [
 	"character",
+    "character description",
 	"portrait",
 	"body",
 	"composition",
@@ -80,18 +93,34 @@ PromptsBrowser.data.categories = [
 	"creature"
 ].sort();
 
+PromptsBrowser.onCloseActiveWindow = undefined;
+
 PromptsBrowser.supportedContainers = {
 	text2Img: {
 		prompt: "txt2img_prompt_container",
 		results: "txt2img_results",
 		gallery: "txt2img_gallery_container",
 		buttons: "txt2img_generate_box",
+        settings: "txt2img_settings",
+        seed: "txt2img_seed",
+        width: "txt2img_width",
+        height: "txt2img_height",
+        steps: "txt2img_steps",
+        cfg: "txt2img_cfg_scale",
+        sampling: "txt2img_sampling",
 	},
 	img2Img: {
 		prompt: "img2img_prompt_container",
 		results: "img2img_results",
 		gallery: "img2img_gallery_container",
 		buttons: "img2img_generate_box",
+        settings: "img2img_settings",
+        seed: "img2img_seed",
+        width: "img2img_width",
+        height: "img2img_height",
+        steps: "img2img_steps",
+        cfg: "img2img_cfg_scale",
+        sampling: "img2img_sampling",
 	}
 }
 
@@ -178,7 +207,7 @@ PromptsBrowser.utils.collectionHavePreview = (prompt, collectionId) => {
 	const targetCollection = original[collectionId];
 	if(!targetCollection) return false;
 
-	const targetPrompt = targetCollection.find(item => item.id === prompt);
+	const targetPrompt = targetCollection.find(item => item.id.toLowerCase() === prompt.toLowerCase());
 	if(!targetPrompt) return false;
 
 	return targetPrompt.previewImage ? true : false;
@@ -197,7 +226,7 @@ PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionId) => {
 		if(!targetCollection) return NEW_CARD_GRADIENT;
 		targetPrompt = targetCollection.find(item => item.id === prompt);
 
-	} else targetPrompt = united.find(item => item.id === prompt);
+	} else targetPrompt = united.find(item => item.id.toLowerCase() === prompt.toLowerCase());
 
 	if(!targetPrompt) return NEW_CARD_GRADIENT;
 	if(!targetPrompt.previewImage) return EMPTY_CARD_GRADIENT;
@@ -226,7 +255,7 @@ PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionId) => {
 
 	const safeFileName = PromptsBrowser.makeFileNameSafe(prompt);
 
-	const url = `url('./file=prompts_catalogue/${collectionId}/preview/${safeFileName}.${fileExtension}?${state.filesIteration}'), ${EMPTY_CARD_GRADIENT}`;
+	const url = `url("./file=prompts_catalogue/${collectionId}/preview/${safeFileName}.${fileExtension}?${state.filesIteration}"), ${EMPTY_CARD_GRADIENT}`;
 	return url;
 }
 
@@ -250,7 +279,7 @@ PromptsBrowser.db.createNewCollection = (id, mode = "short") => {
 	})();
 }
 
-PromptsBrowser.db.createNewStylesCollection = (id) => {
+PromptsBrowser.db.createNewStylesCollection = (id, mode = "short") => {
 	if(!id) return;
 
 	(async () => {
@@ -260,7 +289,7 @@ PromptsBrowser.db.createNewStylesCollection = (id) => {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({id})
+			body: JSON.stringify({id, mode})
 		});
 		//const answer = await rawResponse.json();
 
@@ -290,9 +319,9 @@ PromptsBrowser.db.movePreviewImage = (item, from, to, type) => {
 	})();
 }
 
-PromptsBrowser.db.saveJSONData = (collectionId) => {
+PromptsBrowser.db.saveJSONData = (collectionId, noClear = false) => {
 	if(!collectionId) return;
-
+ 
 	const targetData = PromptsBrowser.data.original[collectionId];
 	if(!targetData) return;
 
@@ -303,7 +332,7 @@ PromptsBrowser.db.saveJSONData = (collectionId) => {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({collection: collectionId, data: JSON.stringify(targetData)})
+			body: JSON.stringify({collection: collectionId, data: JSON.stringify(targetData), noClear})
 		});
 		//const content = await rawResponse.json();
 
@@ -333,7 +362,7 @@ PromptsBrowser.db.savePromptPreview = (callUpdate = true) => {
 	src = src.slice(fileMarkIndex + 5);
 
 	const cacheMarkIndex = src.indexOf("?");
-	if(cacheMarkIndex) src = src.substring(0, cacheMarkIndex);
+	if(cacheMarkIndex && cacheMarkIndex !== -1) src = src.substring(0, cacheMarkIndex);
 
 	const imageExtension = src.split('.').pop();
 
@@ -453,6 +482,14 @@ PromptsBrowser.onChangeTab = (e) => {
 	}
 }
 
+PromptsBrowser.onDocumentKey = (e) => {
+    if(e.key !== "Escape") return;
+    let hold = false;
+
+    if(PromptsBrowser.onCloseActiveWindow) hold = PromptsBrowser.onCloseActiveWindow();
+    if(!hold) PromptsBrowser.onCloseActiveWindow = undefined;
+}
+
 PromptsBrowser.loadConfig = () => {
 	const {state} = PromptsBrowser;
 
@@ -487,6 +524,9 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
 
 	tabsContainer.removeEventListener("click", PromptsBrowser.onChangeTab);
 	tabsContainer.addEventListener("click", PromptsBrowser.onChangeTab);
+
+    document.removeEventListener('keyup', PromptsBrowser.onDocumentKey);
+    document.addEventListener('keyup', PromptsBrowser.onDocumentKey);
 
 	for(const containerId in PromptsBrowser.supportedContainers) {
 		DOMCache.containers[containerId] = {};
@@ -555,6 +595,13 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
 			if(!state.showViews.includes("positive")) positivePrompts.style.display = "none";
 			if(!state.showViews.includes("negative")) negativePrompts.style.display = "none";
 		}
+
+        if(container.seed) domContainer.seedInput = mainContainer.querySelector(`#${container.seed} input`);
+        if(container.width) domContainer.widthInput = mainContainer.querySelector(`#${container.width} input`);
+        if(container.height) domContainer.heightInput = mainContainer.querySelector(`#${container.height} input`);
+        if(container.steps) domContainer.stepsInput = mainContainer.querySelector(`#${container.steps} input`);
+        if(container.cfg) domContainer.cfgInput = mainContainer.querySelector(`#${container.cfg} input`);
+        if(container.sampling) domContainer.samplingInput = mainContainer.querySelector(`#${container.sampling} input`);
 
 		if(container.gallery) {
 			domContainer.imageArea = PromptsBrowser.gradioApp().querySelector(`#${container.gallery}`);

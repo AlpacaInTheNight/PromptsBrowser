@@ -152,6 +152,22 @@ PromptsBrowser.currentPrompts.update = (noTextAreaUpdate = false) => {
 				return;
 			}
 
+            if(e.shiftKey) {
+                const {united} = PromptsBrowser.data;
+                targetPrompt = united.find(item => item.id.toLowerCase() === currentId.toLowerCase());
+
+                if(targetPrompt) {
+                    state.editingPrompt = currentId;
+                    PromptsBrowser.promptEdit.update();
+
+                } else {
+                    PromptsBrowser.promptScribe.onOpenScriber();
+                    
+                }
+
+                return;
+            }
+
 			const selectedElements = wrapper.querySelectorAll(".PBE_selectedCurrentElement");
 			for(let i = 0; i < selectedElements.length; ++i) {
 				selectedElements[i].classList.remove("PBE_selectedCurrentElement");

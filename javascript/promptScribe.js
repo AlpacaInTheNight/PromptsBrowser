@@ -11,6 +11,12 @@ PromptsBrowser.promptScribe.init = (wrapper) => {
 	PromptsBrowser.DOMCache.promptScribe = promptScribe;
 
 	wrapper.appendChild(promptScribe);
+
+    PromptsBrowser.onCloseActiveWindow = PromptsBrowser.promptScribe.onCloseWindow;
+
+    promptScribe.addEventListener("click", () => {
+        PromptsBrowser.onCloseActiveWindow = PromptsBrowser.promptScribe.onCloseWindow;
+    });
 }
 
 PromptsBrowser.promptScribe.initButton = (positiveWrapper) => {
@@ -22,6 +28,16 @@ PromptsBrowser.promptScribe.initButton = (positiveWrapper) => {
 	addUnknownButton.addEventListener("click", PromptsBrowser.promptScribe.onOpenScriber);
 
 	positiveWrapper.appendChild(addUnknownButton);
+}
+
+PromptsBrowser.promptScribe.onCloseWindow = () => {
+    const {state} = PromptsBrowser;
+    const wrapper = PromptsBrowser.DOMCache.promptScribe;
+
+    if(!wrapper) return;
+
+    state.showScriberWindow = undefined;
+    wrapper.style.display = "none";
 }
 
 PromptsBrowser.promptScribe.onOpenScriber = () => {
@@ -169,7 +185,7 @@ PromptsBrowser.promptScribe.showUnknownPrompts = (wrapper, initial = false) => {
 		let isKnown = false;
 
 		for(const knownPrompt of database) {
-			if(knownPrompt.id === item.id) {
+			if(knownPrompt.id.toLowerCase() === item.id.toLowerCase()) {
 				isKnown = true;
 				break;
 			}
@@ -216,6 +232,7 @@ PromptsBrowser.promptScribe.update = (initial) => {
 	const wrapper = PromptsBrowser.DOMCache.promptScribe;
 
 	if(!wrapper) return;
+    PromptsBrowser.onCloseActiveWindow = PromptsBrowser.promptScribe.onCloseWindow;
 	wrapper.innerHTML = "";
 	wrapper.style.display = "flex";
 

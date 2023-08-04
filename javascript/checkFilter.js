@@ -10,7 +10,7 @@ if(!PromptsBrowser.utils) PromptsBrowser.utils = {};
  */
 PromptsBrowser.utils.checkFilter = (prompt, filter) => {
 	if(!filter || !filter.length) return true; //no filter requirements
-	let {id, comment = ""} = prompt;
+	let {id, comment = "", autogen = {}} = prompt;
 	if(!id) return false; //invalid prompt
 
 	const {tags = [], category = [], previewImage} = prompt;
@@ -18,6 +18,7 @@ PromptsBrowser.utils.checkFilter = (prompt, filter) => {
 
 	id = id.toLowerCase();
 	comment = comment.toLowerCase();
+    const haveAutogen = autogen.collection && autogen.style;
 
 	for(const filterItem of filter) {
 		const {action, type, value} = filterItem;
@@ -50,6 +51,7 @@ PromptsBrowser.utils.checkFilter = (prompt, filter) => {
 			else if(value === "categories") fulfil = isInclude ? category.length : !category.length;
 			else if(value === "tags") fulfil = isInclude ? !!tags.length : !tags.length;
 			else if(value === "comment") fulfil = isInclude ? !!comment : !comment;
+			else if(value === "autogen") fulfil = isInclude ? haveAutogen : !haveAutogen;
 
 		}
 

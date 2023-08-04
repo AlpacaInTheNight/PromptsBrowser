@@ -9,6 +9,69 @@ PromptsBrowser.promptEdit.init = (wrapper) => {
 
 	PromptsBrowser.DOMCache.promptEdit = promptEdit;
 	wrapper.appendChild(promptEdit);
+
+    PromptsBrowser.onCloseActiveWindow = PromptsBrowser.promptEdit.onCloseWindow;
+
+    promptEdit.addEventListener("click", () => {
+        PromptsBrowser.onCloseActiveWindow = PromptsBrowser.promptEdit.onCloseWindow;
+    });
+}
+
+PromptsBrowser.promptEdit.onCloseWindow = () => {
+    const {state} = PromptsBrowser;
+    const wrapper = PromptsBrowser.DOMCache.promptEdit;
+    if(!wrapper || !state.editingPrompt) return;
+
+    state.editingPrompt = undefined;
+    wrapper.style.display = "none";
+}
+
+PromptsBrowser.promptEdit.onAddTags = (targetItem, inputElement) => {
+    if(!inputElement || !targetItem) return;
+    const value = inputElement.value;
+
+    let tags = value.split(",").map(item => item.trim());
+
+    //removing empty tags
+    tags = tags.filter(item => item);
+
+    for(const tag of tags) {
+        if(targetItem.tags.includes(tag)) continue;
+        targetItem.tags.push(tag);
+    }
+
+    PromptsBrowser.promptEdit.update(targetItem);
+}
+
+PromptsBrowser.promptEdit.onChangeAutogenCollection = (value, prompt) => {
+    if(!prompt) return;
+    const {data} = PromptsBrowser;
+
+    if(!prompt.autogen) prompt.autogen = {};
+    if(!value || value === "__none") delete prompt.autogen.collection;
+    else {
+        prompt.autogen.collection = value;
+
+        const targetCollection = data.styles[value];
+        if(!targetCollection) return;
+        prompt.autogen.style = "";
+
+        for(const styleItem of targetCollection) {
+            prompt.autogen.style = styleItem.name;
+            break;
+        }
+    }
+
+    PromptsBrowser.promptEdit.update(prompt);
+}
+
+PromptsBrowser.promptEdit.onChangeAutogenStyle = (value, prompt) => {
+    if(!prompt || !value) return;
+
+    if(!prompt.autogen) prompt.autogen = {};
+    prompt.autogen.style = value;
+
+    PromptsBrowser.promptEdit.update(prompt);
 }
 
 PromptsBrowser.promptEdit.addCollectionSelector = (wrapper) => {
@@ -94,8 +157,8 @@ PromptsBrowser.promptEdit.addMoveBlock = (wrapper) => {
 
 		PromptsBrowser.data.original[to].push(JSON.parse(JSON.stringify(originalItem)));
 
-		PromptsBrowser.db.saveJSONData(to);
-		PromptsBrowser.db.movePreviewImage(state.editingPrompt, from, to, "copy");
+        PromptsBrowser.db.movePreviewImage(state.editingPrompt, from, to, "copy");
+		PromptsBrowser.db.saveJSONData(to, true);
 		PromptsBrowser.db.updateMixedList();
 		PromptsBrowser.promptEdit.update();
 	});
@@ -109,12 +172,15 @@ PromptsBrowser.promptEdit.addMoveBlock = (wrapper) => {
 		const originalItem = PromptsBrowser.data.original[from].find(item => item.id === state.editingPrompt);
 		if(!originalItem) return;
 
-		PromptsBrowser.data.original[to].push(JSON.parse(JSON.stringify(originalItem)));
+        if(!PromptsBrowser.data.original[to].some(item => item.id === state.editingPrompt)) {
+            PromptsBrowser.data.original[to].push(JSON.parse(JSON.stringify(originalItem)));
+        }
+		
 		PromptsBrowser.data.original[from] = PromptsBrowser.data.original[from].filter(item => item.id !== state.editingPrompt);
 
-		PromptsBrowser.db.saveJSONData(to);
-		PromptsBrowser.db.saveJSONData(from);
-		PromptsBrowser.db.movePreviewImage(state.editingPrompt, from, to, "move");
+        PromptsBrowser.db.movePreviewImage(state.editingPrompt, from, to, "move");
+		PromptsBrowser.db.saveJSONData(to, true);
+		PromptsBrowser.db.saveJSONData(from, true);
 		PromptsBrowser.db.updateMixedList();
 		PromptsBrowser.promptEdit.update();
 	});
@@ -140,12 +206,24 @@ PromptsBrowser.promptEdit.saveEdit = () => {
 	const addAfterInput = wrapper.querySelector(".PBE_promptEdit_addAfter");
 	const addStartInput = wrapper.querySelector(".PBE_promptEdit_addStart");
 	const addEndInput = wrapper.querySelector(".PBE_promptEdit_addEnd");
+	const tagsList = wrapper.querySelectorAll(".PBE_tagsList > div");
+	const categoriesList = wrapper.querySelectorAll(".PBE_categoryList > div");
+
+	const autoGenCollectionSelect = wrapper.querySelector("#PBE_autoGentCollection");
+	const autoGentStyleSelect = wrapper.querySelector("#PBE_autoGentStyle");
 
 	const comment = commentBlock ? commentBlock.value : "";
 	const addAtStart = addAtStartInput.checked;
 	const addAfter = addAfterInput.value;
 	const addStart = addStartInput.value;
 	const addEnd = addEndInput.value;
+    const tags = [];
+    const category = [];
+    const autogenCollection = autoGenCollectionSelect?.value || undefined;
+    const autogenStyle = autoGentStyleSelect?.value || undefined;
+
+    for(const divItem of tagsList) tags.push(divItem.innerText);
+    for(const divItem of categoriesList) category.push(divItem.innerText);
 
 	state.editItem.comment = comment;
 	if(!state.editItem.comment) delete state.editItem.comment;
@@ -154,45 +232,33 @@ PromptsBrowser.promptEdit.saveEdit = () => {
 	if(indexInOrigin !== -1) collection[indexInOrigin] = state.editItem;
 	else collection.push(state.editItem);
 
-	const targetItem = united.find(item => item.id === state.editingPrompt);
+    const collectionPrompt = collection.find(item => item.id === state.editingPrompt);
+    if(!collectionPrompt) return;
 
-	if(targetItem) {
-		targetItem.tags = [];
-		targetItem.category = [];
+    collectionPrompt.tags = tags;
+    collectionPrompt.category = category;
 
-		for(const originalId in PromptsBrowser.data.original) {
-			const originalCollection = PromptsBrowser.data.original[originalId];
+    if(!addAtStart) delete collectionPrompt.addAtStart;
+    else collectionPrompt.addAtStart = addAtStart;
 
-			const collectionPrompt = originalCollection.find(item => item.id === state.editingPrompt);
-			if(!collectionPrompt) continue;
+    if(!addAfter) delete collectionPrompt.addAfter;
+    else collectionPrompt.addAfter = addAfter;
 
-			if(collectionPrompt.tags) {
-				collectionPrompt.tags.forEach(item => {
-					if(!targetItem.tags.includes(item)) targetItem.tags.push(item);
-				});
-			}
+    if(!addStart) delete collectionPrompt.addStart;
+    else collectionPrompt.addStart = addStart;
 
-			if(collectionPrompt.category) {
-				collectionPrompt.category.forEach(item => {
-					if(!targetItem.category.includes(item)) targetItem.category.push(item);
-				});
-			}
+    if(!addEnd) delete collectionPrompt.addEnd;
+    else collectionPrompt.addEnd = addEnd;
 
-			if(!addAtStart) delete collectionPrompt.addAtStart;
-			else collectionPrompt.addAtStart = addAtStart;
+    if(autogenStyle && autogenCollection) {
+        if(!collectionPrompt.autogen) collectionPrompt.autogen = {}
+        collectionPrompt.autogen.collection = autogenCollection;
+        collectionPrompt.autogen.style = autogenStyle;
 
-			if(!addAfter) delete collectionPrompt.addAfter;
-			else collectionPrompt.addAfter = addAfter;
-
-			if(!addStart) delete collectionPrompt.addStart;
-			else collectionPrompt.addStart = addStart;
-
-			if(!addEnd) delete collectionPrompt.addEnd;
-			else collectionPrompt.addEnd = addEnd;
-		}
-	}
+    } else delete collectionPrompt.autogen;
 
 	PromptsBrowser.db.saveJSONData(state.editTargetCollection);
+    PromptsBrowser.db.updateMixedList();
 
 	state.editTargetCollection = undefined;
 	state.editingPrompt = undefined;
@@ -296,19 +362,54 @@ PromptsBrowser.promptEdit.showAddSetup = (wrapper) => {
 	wrapper.appendChild(sisterTagsEnd);
 }
 
+PromptsBrowser.promptEdit.showAutoGenBlock = (wrapper, prompt) => {
+    if(!wrapper || !prompt) return;
+    const {state, data, makeElement, makeSelect} = PromptsBrowser;
+    const {autogen = {}} = prompt;
+	const collection = autogen.collection || "__none";
+    
+    const autoGenBlock = makeElement({element: "div", className: "PBE_rowBlock", content: "Autogen:"});
+    autoGenBlock.style.height = "40px";
+    const colOptions = [{id: "__none", name: "None"}];
+
+    for(const colId in data.styles) colOptions.push({id: colId, name: colId});
+    const stylesCollectionsSelect = makeSelect({
+        id: "PBE_autoGentCollection", value: collection, options: colOptions,
+        onChange: (e) => PromptsBrowser.promptEdit.onChangeAutogenCollection(e.currentTarget.value, prompt)
+    });
+
+    autoGenBlock.appendChild(stylesCollectionsSelect);
+
+    if(autogen.collection) {
+        const targetCollection = data.styles[autogen.collection];
+        if(targetCollection) {
+            const styleOptions = [];
+
+            for(const styleItem of targetCollection) styleOptions.push({id: styleItem.name, name: styleItem.name});
+
+            const styleSelect = makeSelect({
+                id: "PBE_autoGentStyle", value: autogen.style || "", options: styleOptions,
+                onChange: (e) => PromptsBrowser.promptEdit.onChangeAutogenStyle(e.currentTarget.value, prompt)
+            });
+
+            autoGenBlock.appendChild(styleSelect);
+        }
+    }
+
+	wrapper.appendChild(autoGenBlock);
+}
+
 PromptsBrowser.promptEdit.update = (targetItem) => {
-	const {state} = PromptsBrowser;
+	const {state, data, makeElement, makeSelect} = PromptsBrowser;
 	const wrapper = PromptsBrowser.DOMCache.promptEdit;
 	if(!wrapper || !state.editingPrompt) return;
 	if(!targetItem) targetItem = PromptsBrowser.promptEdit.getTargetItem();
 	if(!targetItem) return;
+    PromptsBrowser.onCloseActiveWindow = PromptsBrowser.promptEdit.onCloseWindow;
 	wrapper.innerHTML = "";
 
-	const headerBlock = document.createElement("div");
-	const headerTitle = document.createElement("div");
-	headerBlock.className = "PBE_rowBlock";
-	headerTitle.className = "PBE_promptEditTitle";
-	headerTitle.innerText = state.editingPrompt;
+    const headerBlock = makeElement({element: "div", className: "PBE_rowBlock"});
+    const headerTitle = makeElement({element: "div", className: "PBE_rowBlock", content: state.editingPrompt});
 
 	headerBlock.appendChild(headerTitle);
 	PromptsBrowser.promptEdit.addCollectionSelector(headerBlock);
@@ -316,56 +417,30 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
 	wrapper.style.display = "flex";
 	wrapper.style.backgroundImage = PromptsBrowser.utils.getPromptPreviewURL(state.editingPrompt, state.editTargetCollection);
 	
-	const currentTagsBlock = document.createElement("div");
-	const currentCategoriesBlock = document.createElement("div");
-	const addTagBlock = document.createElement("div");
-	const addCategoryBlock = document.createElement("div");
-	const footerBlock = document.createElement("div");
+    const currentTagsBlock          = makeElement({element: "div", className: "PBE_rowBlock"});
+    const currentCategoriesBlock    = makeElement({element: "div", className: "PBE_rowBlock"});
+    const addTagBlock               = makeElement({element: "div", className: "PBE_rowBlock"});
+    const addCategoryBlock          = makeElement({element: "div", className: "PBE_rowBlock"});
+    const footerBlock               = makeElement({element: "div", className: "PBE_rowBlock"});
 
-	const tagsTitle = document.createElement("div");
-	const tagsList = document.createElement("div");
+    const tagsTitle                 = makeElement({element: "div", content: "Tags:"});
+    const tagsList                  = makeElement({element: "div", className: "PBE_List PBE_Scrollbar PBE_tagsList"});
+    const tagInput                  = makeElement({element: "input", id: "PBE_addTagInput"});
+    const addTagButton              = makeElement({element: "button", content: "Add tag", className: "PBE_button"});
+    const categoriesTitle           = makeElement({element: "div", content: "Categories:"});
+    const categoriesList            = makeElement({element: "div", className: "PBE_List PBE_Scrollbar PBE_categoryList"});
+    const categorySelect            = makeElement({element: "select", id: "PBE_addCategorySelect"});
+    const addCategoryButton         = makeElement({element: "button", content: "Add category", className: "PBE_button"});
+    const commentArea               = makeElement({element: "textarea", id: "PBE_commentArea", className: "PBE_Textarea PBE_Scrollbar"});
 
-	const tagInput = document.createElement("input");
-	const addTagButton = document.createElement("button");
-
-	const categoriesTitle = document.createElement("div");
-	const categoriesList = document.createElement("div");
-
-	const categorySelect = document.createElement("select");
-	const addCategoryButton = document.createElement("button");
-
-	const commentArea = document.createElement("textarea");
-
-	const cancelButton = document.createElement("button");
-	const saveButton = document.createElement("button");
-
-	currentTagsBlock.className = "PBE_rowBlock";
-	currentCategoriesBlock.className = "PBE_rowBlock";
-	addTagBlock.className = "PBE_rowBlock";
-	addCategoryBlock.className = "PBE_rowBlock";
-	footerBlock.className = "PBE_rowBlock";
-	tagsList.className = "PBE_List PBE_Scrollbar";
-	categoriesList.className = "PBE_List PBE_Scrollbar";
-	commentArea.className = "PBE_Textarea PBE_Scrollbar";
-
-	tagInput.id = "PBE_addTagInput";
-	categorySelect.id = "PBE_addCategorySelect";
-	commentArea.id = "PBE_commentArea";
-	tagsTitle.innerText = "Tags:";
-	categoriesTitle.innerText = "Categories:";
-	addTagButton.innerText = "Add tag";
-	addTagButton.className = "PBE_button";
-	addCategoryButton.innerText = "Add category";
-	addCategoryButton.className = "PBE_button";
-	cancelButton.innerText = "Cancel";
-	cancelButton.className = "PBE_button";
-	saveButton.innerText = "Save";
-	saveButton.className = "PBE_button";
+    const cancelButton              = makeElement({element: "button", content: "Cancel", className: "PBE_button"});
+    const saveButton                = makeElement({element: "button", content: "Save", className: "PBE_button"});
 
 	commentArea.value = targetItem.comment || "";
 
 	for(const tagItem of targetItem.tags) {
 		const tagElement = document.createElement("div");
+        tagElement.className = "PBE_promptEditInfoItem";
 		tagElement.innerText = tagItem;
 
 		tagElement.addEventListener("click", (e) => {
@@ -381,6 +456,7 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
 
 	for(const categoryItem of targetItem.category) {
 		const categoryElement = document.createElement("div");
+        categoryElement.className = "PBE_promptEditInfoItem";
 		categoryElement.innerText = categoryItem;
 
 		categoryElement.addEventListener("click", (e) => {
@@ -405,15 +481,18 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
 	}
 	categorySelect.innerHTML = options;
 
+    tagInput.addEventListener("keyup", (e) => {
+        if(e.keyCode !== 13) return;
+        if(e.currentTarget.dataset.hint) return;
+
+        PromptsBrowser.promptEdit.onAddTags(targetItem, tagInput);
+    });
+
 	addTagButton.addEventListener("click", (e) => {
 		const inputElement = wrapper.querySelector("#PBE_addTagInput");
 		if(!inputElement) return;
-		const value = inputElement.value;
 
-		if(targetItem.tags.includes(value)) return;
-		targetItem.tags.push(value);
-
-		PromptsBrowser.promptEdit.update(targetItem);
+        PromptsBrowser.promptEdit.onAddTags(targetItem, inputElement);
 	});
 
 	addCategoryButton.addEventListener("click", (e) => {
@@ -429,10 +508,7 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
 
 	commentArea.addEventListener("change", (e) => targetItem.comment = e.currentTarget.value);
 
-	cancelButton.addEventListener("click", (e) => {
-		state.editingPrompt = undefined;
-		wrapper.style.display = "none";
-	});
+	cancelButton.addEventListener("click", PromptsBrowser.promptEdit.onCloseWindow);
 
 	saveButton.addEventListener("click", PromptsBrowser.promptEdit.saveEdit);
 
@@ -444,7 +520,7 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
 
 	addTagBlock.appendChild(tagInput);
 	addTagBlock.appendChild(addTagButton);
-
+ 
 	addCategoryBlock.appendChild(categorySelect);
 	addCategoryBlock.appendChild(addCategoryButton);
 
@@ -463,9 +539,14 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
 	wrapper.appendChild(addTagBlock);
 	wrapper.appendChild(addCategoryBlock);
 
+    //autogen block
+    PromptsBrowser.promptEdit.showAutoGenBlock(wrapper, targetItem);
+
 	PromptsBrowser.promptEdit.showAddSetup(wrapper);
 
 	wrapper.appendChild(commentArea);
 
 	wrapper.appendChild(footerBlock);
+
+    PromptsBrowser.tagTooltip.add(tagInput, true);
 }
