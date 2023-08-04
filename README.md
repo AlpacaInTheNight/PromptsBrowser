@@ -1,4 +1,4 @@
-# Prompts Browser Extension 0.8
+# Prompts Browser Extension 0.9.0
 Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui).
 
 1. [Installation](#installation)
@@ -17,7 +17,7 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 
 ## Installation:
 
-1. Make sure you have the latest AUTOMATIC1111/stable-diffusion-webui version instaled. Prompt Browser 0.8 was tested and adapted for Webui version 1.2.1.
+1. Make sure you have the latest AUTOMATIC1111/stable-diffusion-webui version instaled. Prompt Browser 0.9.0 was tested and adapted for Webui version 1.5.1.
 
 2. Unzip/clone the plugin into the `extensions/PromptsBrowser` folder.
 
