@@ -24,6 +24,10 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 
 3. In the stable-diffusion folder will be created folder `prompts_catalogue` with subfolder `myprompts` - this will be the first collection of prompts. As well as the folder `styles_catalogue` where new styles will be stored.
 
+### Important
+
+This extension modifies the DOM directly, without working through any API for such purposes (which does not exist, as far as I know). As such, an update to SDWebUI could potentially break some functionality of this extension until the extension is in turn updated to work with a newer version of SDWebUI. If something stops working after SDWebUI update - create a ticket.
+
 
 ## Usage:
 
