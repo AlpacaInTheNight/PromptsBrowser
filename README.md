@@ -12,6 +12,7 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 1. [Prompt editor](#prompt-editor)
 1. [Setup window](#setup-window)
 1. [Autocomplite](#autocomplite)
+1. [Collections database](#collections-database)
 
 ![](img/preview.jpg)
 
@@ -185,3 +186,11 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 ### Autocomplite
 
 1. When you manually type prompts, a menu with similar prompts from the database of known prompts will be displayed. You can finish a prompt from the autocomplite menu by clicking on it or by selecting it with the up and down arrows and pressing Enter.
+
+### Collections database
+
+This extension does not come with a pre-built prompts database. It is up to the user to choose a ready-made database or create their own. Remember that collections goes into the **prompts_catalogue** folder inside your Stable Diffusion Web UI directory. This directory is being crated after at least one start of SDWebUI with the installed Prompts Browser Extension.
+
+Some existing collections:
+
+1. [prompts_portrait](https://github.com/AlpacaInTheNight/prompts_portrait) - A proof of concept collection for generating character portraits. Comes with tags and categories tagged in. Previews are generated with Anything V4.5 model.
