@@ -13,6 +13,7 @@ PromptsBrowser.state = {
 
 		toLowerCase: true,
 		spaceMode: "space",
+        showPromptIndex: false,
 
         saveStyleMeta: {
             seed: false,

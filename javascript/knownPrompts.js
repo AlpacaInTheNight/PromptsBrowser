@@ -382,6 +382,7 @@ PromptsBrowser.knownPrompts.showHeader = (wrapper, params = {}) => {
 PromptsBrowser.knownPrompts.update = (params) => {
 	const {united} = PromptsBrowser.data;
 	const {state, makeElement} = PromptsBrowser;
+    const {showPromptIndex = false} = state.config;
 	const wrapper = PromptsBrowser.DOMCache.containers[state.currentContainer].promptsCatalogue;
 	wrapper.innerHTML = "";
 
@@ -445,7 +446,8 @@ PromptsBrowser.knownPrompts.update = (params) => {
         proptsContainer.appendChild(addRandom);
     }
 
-	for(const prompt of dataArr) {
+    for(const index in dataArr) {
+        const prompt = dataArr[index];
 		const {id} = prompt;
 		if(shownItems > MAX_ITEMS_TO_DISPLAY) break;
 
@@ -463,21 +465,28 @@ PromptsBrowser.knownPrompts.update = (params) => {
 		splashElement.style.backgroundImage = PromptsBrowser.utils.getPromptPreviewURL(id, state.filterCollection);
 		splashElement.innerText = id;
 
+        if(showPromptIndex && state.filterCollection) {
+            promptElement.appendChild(makeElement({
+                element: "div",
+                className: "PBE_promptElementIndex",
+                content: index,
+            }));
+            splashElement.appendChild(makeElement({
+                element: "div",
+                className: "PBE_promptElementIndex",
+                content: index,
+            }));
+        }
+
 		promptElement.appendChild(splashElement);
 		promptElement.innerHTML += id;
 
 		promptElement.addEventListener("dragstart", PromptsBrowser.knownPrompts.onDragStart);
-
 		promptElement.addEventListener("dragover", PromptsBrowser.knownPrompts.onDragOver);
-
 		promptElement.addEventListener("dragenter", PromptsBrowser.knownPrompts.onDragEnter);
-
 		promptElement.addEventListener("dragleave", PromptsBrowser.knownPrompts.onDragLeave);
-
 		promptElement.addEventListener("drop", PromptsBrowser.knownPrompts.onDrop);
-	
 		promptElement.addEventListener("click", PromptsBrowser.knownPrompts.onPromptClick);
-
 		promptElement.addEventListener("mouseover", PromptsBrowser.knownPrompts.onHover);
 
 		proptsContainer.appendChild(promptElement);

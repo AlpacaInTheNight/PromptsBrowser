@@ -430,6 +430,15 @@
 	transform-origin: bottom center;
 }
 
+.PBE_promptElementIndex {
+    position: absolute;
+    right: 4px;
+    bottom: 0;
+    font-size: 12px;
+    color: cornflowerblue;
+    text-shadow: 1px 1px 1px black;
+}
+
 .PBE_promptElementSplash {
 	display: none;
 	transition: transform 0.2s;
@@ -461,6 +470,11 @@
 }
 
 .PBE_promptElementSplash .PBE_promptElementWeight {
+	bottom: auto;
+	top: 0;
+}
+
+.PBE_promptElementSplash .PBE_promptElementIndex {
 	bottom: auto;
 	top: 0;
 }

@@ -3,12 +3,13 @@ if(!window.PromptsBrowser) window.PromptsBrowser = {};
 window.PromptsBrowser.makeElement = function(params) {
     if(!params) return;
 
-    const {element, id, className, type, content, title} = params;
+    const {element, id, name, className, type, content, title} = params;
     if(!element) return;
 
     const newElement = document.createElement(element);
     if(type) newElement.type = type;
     if(id) newElement.id = id;
+    if(name) newElement.name = name;
     if(className) newElement.className = className;
     if(content) newElement.innerText = content;
     if(title) newElement.title = title;

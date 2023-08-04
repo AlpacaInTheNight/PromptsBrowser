@@ -40,6 +40,14 @@ PromptsBrowser.setupWindow.onCloseWindow = () => {
     } else wrapper.style.display = "none";
 }
 
+PromptsBrowser.setupWindow.onChangeShowIndex = (e) => {
+	const {state} = PromptsBrowser;
+	const checked = e.currentTarget.checked;
+
+	state.config.showPromptIndex = checked;
+	localStorage.setItem("PBE_config", JSON.stringify(state.config));
+}
+
 PromptsBrowser.setupWindow.onChangeLowerCase = (e) => {
 	const {state} = PromptsBrowser;
 	const checked = e.currentTarget.checked;
@@ -240,6 +248,32 @@ PromptsBrowser.setupWindow.showNormalizeSetup = (wrapper) => {
 	wrapper.appendChild(spaceBlock);
 }
 
+PromptsBrowser.setupWindow.showPromptCardsSetup = (wrapper) => {
+	const {state, makeElement} = PromptsBrowser;
+	const {config} = state;
+
+    const indexBlock = makeElement({element: "div", className: "PBE_rowBlock"});
+    indexBlock.style.maxWidth = "none";
+
+    const indexInput = makeElement({
+        element: "input",
+        className: "PBE_setupPromptIndex",
+        id: "PBE_setupPromptIndex",
+        name: "PBE_setupPromptIndex",
+        type: "checkbox",
+    })
+	indexInput.checked = config.showPromptIndex;
+	indexInput.addEventListener("change", PromptsBrowser.setupWindow.onChangeShowIndex);
+
+    const indexLegend = makeElement({element: "label", content: "Show prompt index in database"});
+	indexLegend.htmlFor = indexInput.id;
+
+	indexBlock.appendChild(indexLegend);
+	indexBlock.appendChild(indexInput);
+
+	wrapper.appendChild(indexBlock);
+}
+
 PromptsBrowser.setupWindow.showNewCollection = (wrapper) => {
 	const newName = document.createElement("div");
 	const newNameLabel = document.createElement("div");
@@ -341,6 +375,7 @@ PromptsBrowser.setupWindow.update = () => {
 		PromptsBrowser.setupWindow.showCreateNew(contentBlock);
 		PromptsBrowser.setupWindow.showWeightSetup(contentBlock);
 		PromptsBrowser.setupWindow.showNormalizeSetup(contentBlock);
+		PromptsBrowser.setupWindow.showPromptCardsSetup(contentBlock);
 	}
 
 	footerBlock.className = "PBE_rowBlock PBE_rowBlock_wide";
