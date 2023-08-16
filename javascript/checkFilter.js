@@ -53,6 +53,9 @@ PromptsBrowser.utils.checkFilter = (prompt, filter) => {
 			else if(value === "comment") fulfil = isInclude ? !!comment : !comment;
 			else if(value === "autogen") fulfil = isInclude ? haveAutogen : !haveAutogen;
 
+            else if(value === "categories3") fulfil = isInclude ? category.length >= 3 : category.length < 3;
+            else if(value === "tags3") fulfil = isInclude ? tags.length >= 3 : tags.length < 3;
+
 		}
 
 		if(!fulfil) return false;
