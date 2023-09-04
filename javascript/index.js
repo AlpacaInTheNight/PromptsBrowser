@@ -222,7 +222,6 @@ PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionId) => {
     let fileExtension = "";
 
     const targetPrompt = united.find(item => item.id.toLowerCase() === prompt.toLowerCase());
-    console.log(prompt, collectionId, targetPrompt);
     if(!targetPrompt || !targetPrompt.knownPreviews) return NEW_CARD_GRADIENT;
 
     if(!collectionId && state.filterCollection) collectionId = state.filterCollection;

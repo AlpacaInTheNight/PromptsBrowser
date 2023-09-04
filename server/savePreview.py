@@ -29,8 +29,12 @@ def savePreview(postJSON):
 
     webUIDir = getWebUIDirectory()
     promptsCataloguePath = webUIDir + constant.PROMPTS_FOLDER + os.sep
-    savePath = promptsCataloguePath + collection + os.sep + "preview" + os.sep
-    savePath += safeFileName + fileExtension
+    collectionPath = promptsCataloguePath + collection + os.sep + "preview" + os.sep
+    savePath = collectionPath + safeFileName + fileExtension
+
+    #removing any previous previews
+    if os.path.isfile(collectionPath + safeFileName + ".jpg"): os.remove(collectionPath + safeFileName + ".jpg")
+    if os.path.isfile(collectionPath + safeFileName + ".png"): os.remove(collectionPath + safeFileName + ".png")
     
     shutil.copy(src, savePath)
 
