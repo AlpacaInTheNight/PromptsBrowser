@@ -172,18 +172,17 @@ PromptsBrowser.db.movePrompt = (promptA, promptB, collectionId) => {
 	if(!collectionId) return;
 	const targetCollection = PromptsBrowser.data.original[collectionId];
 	if(!targetCollection) return;
-
 	
 	const indexInOriginB = targetCollection.findIndex(item => item.id === promptB);
+    const indexInOriginA = targetCollection.findIndex(item => item.id === promptA);
+
 	const element = targetCollection.splice(indexInOriginB, 1)[0];
+	targetCollection.splice(indexInOriginA, 0, element);
 
-	const indexInOriginA = targetCollection.findIndex(item => item.id === promptA);
-	targetCollection.splice(indexInOriginA + 1, 0, element);
-
-	PromptsBrowser.db.saveJSONData(collectionId);
+	PromptsBrowser.db.saveJSONData(collectionId, false, true);
 	PromptsBrowser.db.updateMixedList();
 	PromptsBrowser.knownPrompts.update();
-	PromptsBrowser.currentPrompts.update();
+	//PromptsBrowser.currentPrompts.update();
 }
 
 PromptsBrowser.gradioApp = () => {
@@ -306,7 +305,7 @@ PromptsBrowser.db.movePreviewImage = (item, from, to, type) => {
 	})();
 }
 
-PromptsBrowser.db.saveJSONData = (collectionId, noClear = false) => {
+PromptsBrowser.db.saveJSONData = (collectionId, noClear = false, noUpdate = false) => {
 	if(!collectionId) return;
  
 	const targetData = PromptsBrowser.data.original[collectionId];
@@ -323,8 +322,10 @@ PromptsBrowser.db.saveJSONData = (collectionId, noClear = false) => {
 		});
 		//const content = await rawResponse.json();
 
-		PromptsBrowser.knownPrompts.update();
-		PromptsBrowser.currentPrompts.update(true);
+        if(!noUpdate) {
+		    PromptsBrowser.knownPrompts.update();
+		    PromptsBrowser.currentPrompts.update(true);
+        }
 	})();
 }
 

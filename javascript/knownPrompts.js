@@ -384,6 +384,16 @@ PromptsBrowser.knownPrompts.update = (params) => {
 	const {state, makeElement} = PromptsBrowser;
     const {showPromptIndex = false} = state.config;
 	const wrapper = PromptsBrowser.DOMCache.containers[state.currentContainer].promptsCatalogue;
+    let scrollState = 0;
+
+    if(wrapper) {
+        let prevPromptContainer = wrapper.querySelector(".PBE_promptsCatalogueContent");
+        if(prevPromptContainer) {
+            scrollState = prevPromptContainer.scrollTop;
+            prevPromptContainer = undefined;
+        }
+    }
+
 	wrapper.innerHTML = "";
 
 	const MAX_ITEMS_TO_DISPLAY = 1000;
@@ -494,4 +504,6 @@ PromptsBrowser.knownPrompts.update = (params) => {
 	}
 
 	wrapper.appendChild(proptsContainer);
+
+    proptsContainer.scrollTo(0, scrollState);
 }
