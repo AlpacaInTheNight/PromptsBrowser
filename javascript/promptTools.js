@@ -150,6 +150,7 @@ PromptsBrowser.promptTools.showCurrentPrompts = (wrapper) => {
 }
 
 PromptsBrowser.promptTools.showPossiblePromptswrapper = (wrapper) => {
+    const {replaceAllRegex} = window.PromptsBrowser;
 	const {united} = PromptsBrowser.data;
 	const {state} = PromptsBrowser;
 	const prompt = state.promptToolsId;
@@ -157,6 +158,7 @@ PromptsBrowser.promptTools.showPossiblePromptswrapper = (wrapper) => {
 	if(!prompt) return;
 	let targetTags = [];
 	let targetCategories = [];
+    let targetNameWords = replaceAllRegex(prompt.toLowerCase(), "_", " ").split(" ");
 
 	const targetPromptItem = united.find(item => item.id === prompt);
 	if(targetPromptItem) {
@@ -165,22 +167,34 @@ PromptsBrowser.promptTools.showPossiblePromptswrapper = (wrapper) => {
 	}
 
 	const nameArr = prompt.split(" ");
-
-	const sameTags = [];
-	const sameCategory = [];
-	const similarId = [];
-
+    const possiblePrompts = [];
 	const addedIds = [];
 
 	united.forEach(item => {
 		const {id, tags, category} = item;
 
+        //similarity index based on the same tags, categories and words used in the prompt name
+        let simIndex = 0;
+
 		if(id === prompt) return;
+
+        let nameWords = replaceAllRegex(id.toLowerCase(), "_", " ").split(" ");
+
+        if(state.toggledButtons.includes("tools_tags"))
+            targetTags.forEach(tagItem => {if(tags.includes(tagItem)) simIndex++});
+        
+        if(state.toggledButtons.includes("tools_category"))
+            targetCategories.forEach(catItem => {if(category.includes(catItem)) simIndex++});
+        
+        if(state.toggledButtons.includes("tools_name"))
+            targetNameWords.forEach(wordItem => {if(nameWords.includes(wordItem)) simIndex++});
+        
+        
 
 		if(state.toggledButtons.includes("tools_tags") && targetTags.length) {
 			targetTags.some(targetTag => {
 				if(tags.includes(targetTag)) {
-					sameTags.push(item);
+					possiblePrompts.push({...item, simIndex});
 
 					return true;
 				}
@@ -190,7 +204,7 @@ PromptsBrowser.promptTools.showPossiblePromptswrapper = (wrapper) => {
 		if(state.toggledButtons.includes("tools_category") && targetCategories.length) {
 			targetCategories.some(targetCategory => {
 				if(category.includes(targetCategory)) {
-					sameCategory.push(item);
+                    possiblePrompts.push({...item, simIndex});
 
 					return true;
 				}
@@ -205,13 +219,21 @@ PromptsBrowser.promptTools.showPossiblePromptswrapper = (wrapper) => {
 				for(const itemWord of itemNameArr) {
 					
 					if( itemWord.toLowerCase().includes(word.toLowerCase()) ) {
-						similarId.push(item);
+                        possiblePrompts.push({...item, simIndex});
 						break wordLoop;
 					}
 				}
 			}
 		}
 	});
+
+    //sorting possible prompts based on their similarity to the selected prompt
+    possiblePrompts.sort( (A, B) => {
+        if(A.simIndex < B.simIndex) return 1;
+        if(A.simIndex > B.simIndex) return -1;
+
+        return 0;
+    });
 
 	function addElement(item) {
 		if(addedIds.includes(item.id)) return;
@@ -223,9 +245,7 @@ PromptsBrowser.promptTools.showPossiblePromptswrapper = (wrapper) => {
 		wrapper.appendChild(promptElement);
 	}
 
-	for(const item of sameTags) addElement(item);
-	for(const item of sameCategory) addElement(item);
-	for(const item of similarId) addElement(item);
+	for(const item of possiblePrompts) addElement(item);
 }
 
 PromptsBrowser.promptTools.update = () => {
