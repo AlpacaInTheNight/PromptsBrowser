@@ -5,6 +5,7 @@ if(!window.PromptsBrowser) window.PromptsBrowser = {};
  * Shows prompt card
  */
 PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
+    const {replaceAllRegex} = window.PromptsBrowser;
 	const {DEFAULT_PROMPT_WEIGHT} = PromptsBrowser.params;
 	const {index = 0, isShadowed = false, noSplash = false, url} = options;
 	const {id = "", weight = DEFAULT_PROMPT_WEIGHT, isExternalNetwork = false} = promptItem;
@@ -19,6 +20,11 @@ PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
 	promptElement.draggable = "true";
 	if(isExternalNetwork) promptElement.classList.add("PBE_externalNetwork");
 	if(isShadowed) promptElement.classList.add("PBE_shadowedElement");
+
+    let promptName = id;
+    promptName = replaceAllRegex(promptName, "\\\\", "");
+    promptName = replaceAllRegex(promptName, ":", ": ");
+    promptName = replaceAllRegex(promptName, "_", " ");
 
 	if(weight !== DEFAULT_PROMPT_WEIGHT) {
 		weightContainer.className = "PBE_promptElementWeight";
@@ -64,7 +70,7 @@ PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
 		const splashElement = document.createElement("div");
 		splashElement.className = "PBE_promptElementSplash PBE_currentElement";
 		splashElement.style.backgroundImage = imageSrc;
-		splashElement.innerText = id;
+		splashElement.innerText = promptName;
 
 		if(weight !== DEFAULT_PROMPT_WEIGHT) {
 			splashElement.appendChild(weightContainer.cloneNode(true));
@@ -82,7 +88,7 @@ PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
 		});
 	}
 
-	promptElement.innerHTML += id;
+	promptElement.innerHTML += promptName;
 	return promptElement;
 }
 

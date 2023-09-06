@@ -370,6 +370,7 @@
 	text-transform: capitalize;
 	cursor: pointer;
 	user-select: none;
+    word-break: break-word;
 }
 
 .PBE_promptElement_random {
