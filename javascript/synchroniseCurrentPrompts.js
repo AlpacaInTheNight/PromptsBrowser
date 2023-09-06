@@ -18,12 +18,14 @@ PromptsBrowser.synchroniseCurrentPrompts = (noTextAreaUpdate = true) => {
 
 	const newPBE_currentPrompts = [];
 	const prompts = value.split(",");
+    let currNestedWeight = 0;
 
 	for(const i in prompts) {
 		let promptItem = prompts[i].trim();
 		if(!promptItem) continue;
 
-		const {id, weight, isExternalNetwork} = window.PromptsBrowser.promptStringToObject(promptItem);
+		const {id, weight, isExternalNetwork, nestedWeight} = window.PromptsBrowser.promptStringToObject(promptItem, currNestedWeight);
+        currNestedWeight = nestedWeight;
 		promptItem = id;
 
 		if(!isExternalNetwork) promptItem = normalizePrompt(promptItem);
