@@ -1,6 +1,22 @@
 
 if(!window.PromptsBrowser) window.PromptsBrowser = {};
 
+PromptsBrowser.onPromptCardHover = (e) => {
+    const splash = e.currentTarget.querySelector(".PBE_promptElementSplash");
+    if(!splash) return;
+    const BIG_CARD_HEIGHT = 300;
+
+    splash.style.display = "";
+    const position = e.currentTarget.getBoundingClientRect();
+
+    const bottomPosition = position.y + position.height + BIG_CARD_HEIGHT;
+
+    if (bottomPosition < window.innerHeight) splash.style.top = position.top + "px";
+    else splash.style.top = (position.top - position.height - BIG_CARD_HEIGHT) + "px";
+    
+    splash.style.left = position.left + "px";
+}
+
 /**
  * Shows prompt card
  */
@@ -78,14 +94,7 @@ PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
 
 		promptElement.appendChild(splashElement);
 
-		promptElement.addEventListener("mouseover", (e) => {
-			const splash = e.currentTarget.querySelector(".PBE_promptElementSplash");
-			if(!splash) return;
-	
-			const position = e.currentTarget.getBoundingClientRect();
-			splash.style.top = position.top + "px";
-			splash.style.left = position.left + "px";
-		});
+		promptElement.addEventListener("mouseover", PromptsBrowser.onPromptCardHover);
 	}
 
 	promptElement.innerHTML += promptName;
