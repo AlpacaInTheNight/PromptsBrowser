@@ -347,7 +347,7 @@ PromptsBrowser.setupWindow.showNewStylesCollection = (wrapper) => {
 
 PromptsBrowser.setupWindow.update = () => {
 	const {viewMode} = PromptsBrowser.setupWindow;
-	const {state} = PromptsBrowser;
+	const {state, makeElement} = PromptsBrowser;
 	const wrapper = PromptsBrowser.DOMCache.setupWindow;
 	if(!wrapper) return;
 	
@@ -378,6 +378,12 @@ PromptsBrowser.setupWindow.update = () => {
 		PromptsBrowser.setupWindow.showPromptCardsSetup(contentBlock);
 	}
 
+    const statusBlock = makeElement({element: "div", className: "PBE_setupWindowStatus PBE_row"});
+    statusBlock.innerHTML = `
+        version: ${PromptsBrowser.meta.version}
+        <a target='_blank' href='https://github.com/AlpacaInTheNight/PromptsBrowser'>Project Page</a>
+    `;
+
 	footerBlock.className = "PBE_rowBlock PBE_rowBlock_wide";
 	footerBlock.style.justifyContent = "space-evenly";
 	closeButton.innerText = viewMode === "normal" ? "Close" : "Cancel";
@@ -398,5 +404,6 @@ PromptsBrowser.setupWindow.update = () => {
 	footerBlock.appendChild(closeButton);
 
 	wrapper.appendChild(contentBlock);
+	wrapper.appendChild(statusBlock);
 	wrapper.appendChild(footerBlock);
 }

@@ -866,6 +866,19 @@
 	left: calc(50% - 300px);
 }
 
+.PBE_setupWindowStatus {
+    font-family: sans-serif;
+    color: cornflowerblue;
+    text-shadow: 1px 1px 1px black;
+    font-size: 16px;
+    padding: 0px 10px;
+}
+
+.PBE_setupWindowStatus a {
+    color: cornflowerblue;
+    margin: 0 10px;
+}
+
 /* Setup window end */
 
 
