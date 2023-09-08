@@ -12,6 +12,7 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 1. [Prompt editor](#prompt-editor)
 1. [Setup window](#setup-window)
 1. [Autocomplite](#autocomplite)
+1. [Normalize](#normalize)
 1. [Collections database](#collections-database)
 
 ![](img/preview.jpg)
