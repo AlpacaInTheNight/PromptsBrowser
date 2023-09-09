@@ -138,17 +138,22 @@
 }
 
 .PBE_toggleButton {
-	outline: 4px double dodgerblue;
+	outline: 4px double cornflowerblue;
 	cursor: pointer;
 	height: 40px;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	padding: 0 10px;
+    color: cornflowerblue;
+    text-shadow: 1px 1px 1px black;
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: 16px;
 }
 
 .PBE_toggledButton {
-	outline: 4px solid dodgerblue;
+	outline: 4px solid cornflowerblue;
 }
 
 .PBE_swap {
@@ -304,6 +309,10 @@
 	padding: 0 10px 0 10px;
     margin-top: 10px;
 	z-index: 501;
+}
+
+.PBE_promptsCatalogueContent:hover {
+    z-index: 503;
 }
 
 .PBE_promptEdit {
