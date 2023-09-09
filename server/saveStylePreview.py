@@ -26,12 +26,16 @@ def saveStylePreview(postJSON):
 
     webUIDir = getWebUIDirectory()
     stylesCataloguePath = webUIDir + constant.STYLES_FOLDER + os.sep
-    savePath = stylesCataloguePath + collection + os.sep + "preview" + os.sep
+    collectionPath = stylesCataloguePath + collection + os.sep + "preview" + os.sep
 
-    if not os.path.isdir(savePath): os.makedirs(savePath)
+    if not os.path.isdir(collectionPath): os.makedirs(collectionPath)
 
-    savePath += safeFileName + fileExtension
+    savePath = collectionPath + safeFileName + fileExtension
     if fileExtension[0] == ".": fileExtension = fileExtension[1:]
+
+    #removing any previous previews
+    if os.path.isfile(collectionPath + safeFileName + ".jpg"): os.remove(collectionPath + safeFileName + ".jpg")
+    if os.path.isfile(collectionPath + safeFileName + ".png"): os.remove(collectionPath + safeFileName + ".png")
 
     shutil.copy(src, savePath)
 

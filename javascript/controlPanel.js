@@ -108,14 +108,15 @@ PromptsBrowser.controlPanel.update = () => {
 	const setupButton = document.createElement("button");
 	setupButton.className = "PBE_button";
 	setupButton.innerText = "Setup";
+    setupButton.style.marginRight = "10px";
 
 	setupButton.addEventListener("click", PromptsBrowser.setupWindow.update);
+
+    controlPanel.appendChild(setupButton);
 
 	controlPanel.appendChild(iconKnownPrompts);
 	controlPanel.appendChild(iconCurrentPrompts);
 	controlPanel.appendChild(iconPositiveTextArea);
 	controlPanel.appendChild(iconNegativeTextArea);
-
-	controlPanel.appendChild(setupButton);
 }
 

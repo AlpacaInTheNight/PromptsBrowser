@@ -1,10 +1,27 @@
 
 if(!window.PromptsBrowser) window.PromptsBrowser = {};
 
+PromptsBrowser.onPromptCardHover = (e) => {
+    const splash = e.currentTarget.querySelector(".PBE_promptElementSplash");
+    if(!splash) return;
+    const BIG_CARD_HEIGHT = 300;
+
+    splash.style.display = "";
+    const position = e.currentTarget.getBoundingClientRect();
+
+    const bottomPosition = position.y + position.height + BIG_CARD_HEIGHT;
+
+    if (bottomPosition < window.innerHeight) splash.style.top = position.top + "px";
+    else splash.style.top = (position.top - position.height - BIG_CARD_HEIGHT) + "px";
+    
+    splash.style.left = position.left + "px";
+}
+
 /**
  * Shows prompt card
  */
 PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
+    const {replaceAllRegex} = window.PromptsBrowser;
 	const {DEFAULT_PROMPT_WEIGHT} = PromptsBrowser.params;
 	const {index = 0, isShadowed = false, noSplash = false, url} = options;
 	const {id = "", weight = DEFAULT_PROMPT_WEIGHT, isExternalNetwork = false} = promptItem;
@@ -19,6 +36,11 @@ PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
 	promptElement.draggable = "true";
 	if(isExternalNetwork) promptElement.classList.add("PBE_externalNetwork");
 	if(isShadowed) promptElement.classList.add("PBE_shadowedElement");
+
+    let promptName = id;
+    promptName = replaceAllRegex(promptName, "\\\\", "");
+    promptName = replaceAllRegex(promptName, ":", ": ");
+    promptName = replaceAllRegex(promptName, "_", " ");
 
 	if(weight !== DEFAULT_PROMPT_WEIGHT) {
 		weightContainer.className = "PBE_promptElementWeight";
@@ -64,7 +86,7 @@ PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
 		const splashElement = document.createElement("div");
 		splashElement.className = "PBE_promptElementSplash PBE_currentElement";
 		splashElement.style.backgroundImage = imageSrc;
-		splashElement.innerText = id;
+		splashElement.innerText = promptName;
 
 		if(weight !== DEFAULT_PROMPT_WEIGHT) {
 			splashElement.appendChild(weightContainer.cloneNode(true));
@@ -72,17 +94,10 @@ PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
 
 		promptElement.appendChild(splashElement);
 
-		promptElement.addEventListener("mouseover", (e) => {
-			const splash = e.currentTarget.querySelector(".PBE_promptElementSplash");
-			if(!splash) return;
-	
-			const position = e.currentTarget.getBoundingClientRect();
-			splash.style.top = position.top + "px";
-			splash.style.left = position.left + "px";
-		});
+		promptElement.addEventListener("mouseover", PromptsBrowser.onPromptCardHover);
 	}
 
-	promptElement.innerHTML += id;
+	promptElement.innerHTML += promptName;
 	return promptElement;
 }
 

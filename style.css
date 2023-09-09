@@ -138,17 +138,22 @@
 }
 
 .PBE_toggleButton {
-	outline: 4px double dodgerblue;
+	outline: 4px double cornflowerblue;
 	cursor: pointer;
 	height: 40px;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	padding: 0 10px;
+    color: cornflowerblue;
+    text-shadow: 1px 1px 1px black;
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: 16px;
 }
 
 .PBE_toggledButton {
-	outline: 4px solid dodgerblue;
+	outline: 4px solid cornflowerblue;
 }
 
 .PBE_swap {
@@ -203,7 +208,7 @@
 /* Windows end*/
 
 .PBE_controlPanel {
-	padding: 10px;
+	padding: 10px 0;
 	display: flex;
 	flex-direction: row;
 	z-index: 2;
@@ -217,7 +222,7 @@
 
 .PBE_toggleControlPanel {
 	position: relative;
-	left: -15px;
+	left: -22px;
 	border-radius: 10px;
 	user-select: none;
 	display: flex;
@@ -263,6 +268,7 @@
 	position: relative;
 	width: 100%;
 	margin: 10px;
+    margin-top: 10px;
 }
 
 .PBE_promptsCatalogueHeader {
@@ -279,16 +285,18 @@
 .PBE_promptsCatalogueHeader input {
 	color: black;
 	margin-right: 5px;
-	height: 40px;
+	height: 30px;
     width: 1px;
     flex-shrink: 1;
     flex-grow: 1;
     display: flex;
+    padding: 0 5px;
+    border-radius: 10px;
 }
 
 .PBE_promptsCatalogueHeader input {
 	padding: 0 10px;
-	height: 38px;
+	height: 28px;
 }
 
 .PBE_promptsCatalogueContent {
@@ -298,8 +306,13 @@
 	max-height: 300px;
 	overflow: auto;
 	overflow-x: hidden;
-	padding: 10px;
+	padding: 0 10px 0 10px;
+    margin-top: 10px;
 	z-index: 501;
+}
+
+.PBE_promptsCatalogueContent:hover {
+    z-index: 503;
 }
 
 .PBE_promptEdit {
@@ -348,6 +361,7 @@
 	flex-direction: row;
 	flex-wrap: wrap;
 	padding: 5px 15px 15px 15px;
+    z-index: 502;
 }
 
 .PBE_promptElement {
@@ -370,6 +384,7 @@
 	text-transform: capitalize;
 	cursor: pointer;
 	user-select: none;
+    word-break: break-word;
 }
 
 .PBE_promptElement_random {
@@ -858,6 +873,19 @@
 	height: 500px;
 	top: calc(50% - 250px);
 	left: calc(50% - 300px);
+}
+
+.PBE_setupWindowStatus {
+    font-family: sans-serif;
+    color: cornflowerblue;
+    text-shadow: 1px 1px 1px black;
+    font-size: 16px;
+    padding: 0px 10px;
+}
+
+.PBE_setupWindowStatus a {
+    color: cornflowerblue;
+    margin: 0 10px;
 }
 
 /* Setup window end */

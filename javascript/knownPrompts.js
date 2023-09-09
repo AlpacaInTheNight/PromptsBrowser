@@ -190,14 +190,6 @@ PromptsBrowser.knownPrompts.onDrop = (e) => {
 	}
 }
 
-PromptsBrowser.knownPrompts.onHover = (e) => {
-	const splash = e.currentTarget.querySelector(".PBE_promptElementSplash");
-	const position = e.currentTarget.getBoundingClientRect();
-	splash.style.display = "";
-
-	splash.style.top = position.top + "px";
-}
-
 PromptsBrowser.knownPrompts.onPromptClick = (e) => {
 	const {united} = PromptsBrowser.data;
 	const {state} = PromptsBrowser;
@@ -384,6 +376,16 @@ PromptsBrowser.knownPrompts.update = (params) => {
 	const {state, makeElement} = PromptsBrowser;
     const {showPromptIndex = false} = state.config;
 	const wrapper = PromptsBrowser.DOMCache.containers[state.currentContainer].promptsCatalogue;
+    let scrollState = 0;
+
+    if(wrapper) {
+        let prevPromptContainer = wrapper.querySelector(".PBE_promptsCatalogueContent");
+        if(prevPromptContainer) {
+            scrollState = prevPromptContainer.scrollTop;
+            prevPromptContainer = undefined;
+        }
+    }
+
 	wrapper.innerHTML = "";
 
 	const MAX_ITEMS_TO_DISPLAY = 1000;
@@ -487,11 +489,13 @@ PromptsBrowser.knownPrompts.update = (params) => {
 		promptElement.addEventListener("dragleave", PromptsBrowser.knownPrompts.onDragLeave);
 		promptElement.addEventListener("drop", PromptsBrowser.knownPrompts.onDrop);
 		promptElement.addEventListener("click", PromptsBrowser.knownPrompts.onPromptClick);
-		promptElement.addEventListener("mouseover", PromptsBrowser.knownPrompts.onHover);
+		promptElement.addEventListener("mouseover", PromptsBrowser.onPromptCardHover);
 
 		proptsContainer.appendChild(promptElement);
 		shownItems++;
 	}
 
 	wrapper.appendChild(proptsContainer);
+
+    proptsContainer.scrollTo(0, scrollState);
 }

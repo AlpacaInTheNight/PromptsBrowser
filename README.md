@@ -1,4 +1,4 @@
-# Prompts Browser Extension 0.9.0
+# Prompts Browser Extension 1.0.0
 Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui).
 
 1. [Installation](#installation)
@@ -12,13 +12,14 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 1. [Prompt editor](#prompt-editor)
 1. [Setup window](#setup-window)
 1. [Autocomplite](#autocomplite)
+1. [Normalize](#normalize)
 1. [Collections database](#collections-database)
 
 ![](img/preview.jpg)
 
 ## Installation:
 
-1. Make sure you have the latest AUTOMATIC1111/stable-diffusion-webui version instaled. Prompt Browser 0.9.0 was tested and adapted for Webui version 1.5.1.
+1. Make sure you have the latest AUTOMATIC1111/stable-diffusion-webui version instaled. Prompt Browser 1.0.0 was tested and adapted for Webui versions 1.5.1 - 1.6.0.
 
 2. Unzip/clone the plugin into the `extensions/PromptsBrowser` folder.
 
@@ -40,10 +41,13 @@ This extension modifies the DOM directly, without working through any API for su
 
 3. `Shift + click`: opens prompt edition window.
 
-4. `Ctrl/Meta + click`: opens the dialog of removing the sample from the collection (it will be lost).
+4. `Ctrl/Meta + click`: opens the dialog of removing the prompt from the collection (it will be lost).
 
 5. Prompts in the collection can be moved by drag and drop.
 
+6. You can filter prompts using filter params like collection, category, tags (supports autocomplite of known tags) and name.
+
+7. You can change sorting mode in the order drop down menu.
 
 ### Active Prompts
 
@@ -73,6 +77,13 @@ This extension modifies the DOM directly, without working through any API for su
 
 2. You can use the `Collection editor` to generate previews for multiple prompts at once. You can open the Collection editor by clicking the `Edit collection` button above the list of known prompts. In the Collection editor window, you can click on the preview square of the prompt to mark it. You can also click on the `Toggle all` button to select all the prompts in the collection. You can also filter the prompts so that only prompts without previews are displayed. To do this, set the filter "exclude - meta - have preview". After that, you can click "Generate" and previews will be generated for all selected prompts one by one.
 
+3. You can select additional styles to be used during autogeneration.
+
+	1. `Prompt only` - only prompt itself will be used for generating preview.
+	1. `With current prompt` - target prompt will be added to the current prompts in the positive prompts textbox..
+	1. `With prompt autogen style` - If a prompt has a style assigned for autogeneration, it will use that prompt and the assigned style. If the prompt does not have an autogenerate-style, only the prompt itself will be used.
+	1. `With selected autogen style` - the currently selected style in the `Autogenerate style` field will be used as the style for autogeneration.
+
 
 ### Prompt tools
 
@@ -84,20 +95,24 @@ This extension modifies the DOM directly, without working through any API for su
 
 3. Based on categories, tags and name of the prompt, similar prompts will be displayed.
 
-4. Clicking on a promt from the list of similar promts will replace the selected promt with the target one.
+4. Prompts will be sorted by their similarity to the selected prompt according to the selected parameters (tags, categories and name).
 
-5. `Shift + click` on a promt from the list will add the target promt to the active promts (keeping the selected promt).
+5. Clicking on a promt from the list of similar promts will replace the selected promt with the target one.
+
+6. `Shift + click` on a promt from the list will add the target promt to the active promts (keeping the selected promt).
 
 
 ### Styles
 
 ![](img/styles.jpg)
 
-1. Above the text box there is now a `styles` button which opens the Styles window.
+1. Above the text box there is a `styles` button which opens the Styles window.
 
 1. A list of active prompts will be displayed at the top.
 
-1. The current prompts can be saved as a style by typing in the text box above the name of the style and clicking the `save` button next to it.
+1. The current prompts can be saved as a style by typing in the text box above the name of the style and clicking the `Save as style` button next to it.
+
+1. In the list of style collections, you can select the collection where the style will be saved. You can also select the current generation parameters that will be saved along with the style's prompts (such as negative prompts, size, sampler, etc).
 
 1. "Simple mode" switch changes styles view mode from the simple to the detailed mode.
 
@@ -120,6 +135,8 @@ This extension modifies the DOM directly, without working through any API for su
 
 1. You can open the `Collection editor` by clicking the `Edit collection` button above the list of known prompts.
 
+1. The collection selected in the collections filter field of known prompts will be opened for editing. If no collection is selected, the first collection from the list of collections will be opened.
+
 1. You can click on the preview square of the prompt to mark it.
 
 1. You can also select/deselect all prompts by clicking on `Toggle all`.
@@ -134,7 +151,9 @@ This extension modifies the DOM directly, without working through any API for su
 
 1. In the `Tags` block you can write tags and add or remove them from all selected prompts.
 
-1. By pressing `Generate` button you will start generating preview for all selected prompts.
+1. In the `Autogenerate style` you can assign style to be used with preview image autogeneration for this prompt.
+
+1. By pressing `Generate` button you will start generating preview for all selected prompts. See autogeneration subsection of [Generating previews for prompts](#generating-previews-for-prompts).
 
 ### Prompt editor
 
@@ -152,6 +171,8 @@ This extension modifies the DOM directly, without working through any API for su
 
 1. You can select new category and click `Add category` to add new category to the target prompt.
 
+1. `Autogen` - assigns style to be used with prompt preview autogeneration. See autogeneration subsection of [Generating previews for prompts](#generating-previews-for-prompts).
+
 1. `Add at the beginning` - if checked will always add prompt to the start of other prompts. By default will add new prompt at the end of active prompts list.
 
 1. `Subsequent prompts` - prompts to add right after target prompt.
@@ -159,6 +180,8 @@ This extension modifies the DOM directly, without working through any API for su
 1. `Add prompts at the start` - prompts to add at the start of the active prompts.
 
 1. `Add prompts at the end` - prompts to add at the end of the active prompts.
+
+1. `Add at the beginning`, `Subsequent prompts`, `Add prompts at the start` and `Add prompts at the end` are useful when working with LORAs. For example, if a LORA requires specific prompts for activation, you can assign them to be automatically appended along with the LORA. You can also assign LORA prompt for some prompts if you always want to use them together. 
 
 1. You can add comment for the prompt in the comment text area.
 
@@ -173,11 +196,11 @@ This extension modifies the DOM directly, without working through any API for su
 
 1. `New prompts collections` - will open creation of the new prompts collection.
 
+1. `New styles collections` - will open creation of the new styles collection.
+
 1. `Collection name` - name of the collection. A folder with the same name will be created.
 
-1. `Store format` - the way prompts are stored. In the `short` format all prompts data will be saved in the file `data.json`. In the `expanded` format a folder `prompts` will be added to the collection folder and every prompt will be stored as a separate file. The expanded format makes it easier to work with the collection when using version control systems like Git.
-
-1. `New styles collections` - will open creation of the new styles collection.
+1. `Store format` - the way prompts/styles are stored. In the `short` format all prompts/styles data will be saved in the file `data.json`. In the `expanded` format a folder `prompts`/`styles` will be added to the collection folder and every prompt/style will be stored as a separate file. The expanded format makes it easier to work with the collection when using version control systems like Git.
 
 1. `Below 1 scroll weight` - how much weight one mouse wheel movement will change when below weight 1.
 
@@ -187,9 +210,15 @@ This extension modifies the DOM directly, without working through any API for su
 
 1. `Spaces in prompts transform` - changes the handling of spaces in multiword prompts. Can be `Do nothing`, `To space` and `To underscore`.
 
+1. `Show prompt index in database` - will display the ordinal id of the prompt in the collection if the collection is selected in the collection filter. Useful when manually sorting prompts within a collection.
+
 ### Autocomplite
 
 1. When you manually type prompts, a menu with similar prompts from the database of known prompts will be displayed. You can finish a prompt from the autocomplite menu by clicking on it or by selecting it with the up and down arrows and pressing Enter.
+
+### Normalize
+
+1. The `normalize` button is displayed above the positive prompt field. It activates the function of normalization of the entered prompts according to the settings of normalization of prompts set in the [Setup window](#setup-window). Useful when inserting prompts from external sources.
 
 ### Collections database
 
@@ -197,4 +226,4 @@ This extension does not come with a pre-built prompts database. It is up to the 
 
 Some existing collections:
 
-1. [prompts_portrait](https://github.com/AlpacaInTheNight/prompts_portrait) - A proof of concept collection for generating character portraits. Comes with tags and categories tagged in. Previews are generated with Anything V4.5 model.
+1. [prompts_portrait](https://github.com/AlpacaInTheNight/prompts_portrait) - A proof of concept collection for generating character portraits. Comes with tags and categories tagged in.

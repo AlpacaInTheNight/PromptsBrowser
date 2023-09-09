@@ -58,7 +58,7 @@ window.PromptsBrowser.normalizePrompt = function(prompt) {
  * Converts prompt string to prompt object (including meta data like weight and external network).
  * @param {*} promptItem 
  */
-window.PromptsBrowser.promptStringToObject = function(promptItem) {
+window.PromptsBrowser.promptStringToObject = function(promptItem, nestedWeight = 0) {
 	const {DEFAULT_PROMPT_WEIGHT, PROMPT_WEIGHT_FACTOR} = PromptsBrowser.params;
 
 	//prompt weight
@@ -67,29 +67,60 @@ window.PromptsBrowser.promptStringToObject = function(promptItem) {
 	//prompt is a marker for usage of LORA/Hypernetwork
 	let isExternalNetwork = false;
 
-	//getting single prompt weight if it is using parenthesis syntax (currently not working with multiple prompts grouped by weight)
-	if( promptItem.startsWith("(") && promptItem.endsWith(")") ) {
-		let weightLvlStart = 1;
-		let weightLvlEnd = 1;
+    let currChar = "";
+    let isEscape = false;
+    let i = 0;
 
-		if( promptItem.startsWith("((") ) {
-			weightLvlStart = 2;
-			if(promptItem.startsWith("(((")) weightLvlStart = 3;
-		}
+    //entering weight
+    while(i < promptItem.length) {
+        if(isEscape) {isEscape = false; i++; continue}
 
-		if( promptItem.endsWith("))") ) {
-			weightLvlEnd = 2;
-			if( promptItem.endsWith(")))") ) weightLvlEnd = 3;
-		}
+        currChar = promptItem.charAt(i);
+        if(currChar === "\\") {isEscape = true; i++; continue}
+        if(currChar !== "(") break;
 
-		if(weightLvlStart === weightLvlEnd) {
-			promptItem = promptItem.replace(/^\(+/, '');
-			promptItem = promptItem.replace(/\)+$/, '');
+        nestedWeight += 1;
+        i++;
+    }
 
-			weight = Number( Math.pow(PROMPT_WEIGHT_FACTOR, weightLvlStart).toFixed(2) );
-		}
-		
-	}
+    //getting prompt weight
+    weight = Number( Math.pow(PROMPT_WEIGHT_FACTOR, nestedWeight).toFixed(2) );
+
+    //outing weight
+    i = promptItem.length - 1;
+
+    while(i < promptItem.length) {
+        if(isEscape) {isEscape = false; i--; continue}
+
+        currChar = promptItem.charAt(i);
+        if(promptItem.charAt(i - 1) === "\\") {isEscape = true; i--; continue}
+        if(currChar !== ")") break;
+
+        nestedWeight -= 1;
+        i--;
+    }
+
+    //getting new prompt name without weight syntax characters
+    i = 0;
+    isEscape = false;
+    let newPromptItem = "";
+    while(i < promptItem.length) {
+        currChar = promptItem.charAt(i);
+
+        if(currChar === "\\") {
+            isEscape = true;
+            newPromptItem += currChar;
+            i++;
+            continue;
+        }
+
+        if( (currChar !== "(" && currChar !== ")") || isEscape) newPromptItem += currChar;
+        if(isEscape) isEscape = false;
+
+        i++;
+    }
+
+    promptItem = newPromptItem;
 
 	//detecting external network prompt
 	if( promptItem.startsWith("<") && promptItem.endsWith(">") ) {
@@ -110,7 +141,7 @@ window.PromptsBrowser.promptStringToObject = function(promptItem) {
 		}
 	}
 
-	promptObject = {id: promptItem, weight, isExternalNetwork};
+	promptObject = {id: promptItem, weight, isExternalNetwork, nestedWeight};
 
 	return promptObject;
 }

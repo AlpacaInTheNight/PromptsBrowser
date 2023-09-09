@@ -172,18 +172,17 @@ PromptsBrowser.db.movePrompt = (promptA, promptB, collectionId) => {
 	if(!collectionId) return;
 	const targetCollection = PromptsBrowser.data.original[collectionId];
 	if(!targetCollection) return;
-
 	
 	const indexInOriginB = targetCollection.findIndex(item => item.id === promptB);
+    const indexInOriginA = targetCollection.findIndex(item => item.id === promptA);
+
 	const element = targetCollection.splice(indexInOriginB, 1)[0];
+	targetCollection.splice(indexInOriginA, 0, element);
 
-	const indexInOriginA = targetCollection.findIndex(item => item.id === promptA);
-	targetCollection.splice(indexInOriginA + 1, 0, element);
-
-	PromptsBrowser.db.saveJSONData(collectionId);
+	PromptsBrowser.db.saveJSONData(collectionId, false, true);
 	PromptsBrowser.db.updateMixedList();
 	PromptsBrowser.knownPrompts.update();
-	PromptsBrowser.currentPrompts.update();
+	//PromptsBrowser.currentPrompts.update();
 }
 
 PromptsBrowser.gradioApp = () => {
@@ -214,44 +213,31 @@ PromptsBrowser.utils.collectionHavePreview = (prompt, collectionId) => {
 }
 
 PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionId) => {
-	const {EMPTY_CARD_GRADIENT, NEW_CARD_GRADIENT} = PromptsBrowser.params;
+    const {EMPTY_CARD_GRADIENT, NEW_CARD_GRADIENT} = PromptsBrowser.params;
 	if(!prompt) return NEW_CARD_GRADIENT;
 	
-	const {united, original} = PromptsBrowser.data;
+	const {united} = PromptsBrowser.data;
 	const {state} = PromptsBrowser;
-	let targetPrompt = {};
+    let fileExtension = "";
 
-	if(collectionId) {
-		const targetCollection = original[collectionId];
-		if(!targetCollection) return NEW_CARD_GRADIENT;
-		targetPrompt = targetCollection.find(item => item.id === prompt);
+    const targetPrompt = united.find(item => item.id.toLowerCase() === prompt.toLowerCase());
+    if(!targetPrompt || !targetPrompt.knownPreviews) return NEW_CARD_GRADIENT;
 
-	} else targetPrompt = united.find(item => item.id.toLowerCase() === prompt.toLowerCase());
+    if(!collectionId && state.filterCollection) collectionId = state.filterCollection;
 
-	if(!targetPrompt) return NEW_CARD_GRADIENT;
-	if(!targetPrompt.previewImage) return EMPTY_CARD_GRADIENT;
-	const fileExtension = targetPrompt.previewImage;
+    if(collectionId && targetPrompt.knownPreviews[collectionId])
+        fileExtension = targetPrompt.knownPreviews[collectionId];
+    
+    if(!fileExtension) {
+        for(let colId in targetPrompt.knownPreviews) {
+            fileExtension = targetPrompt.knownPreviews[colId];
+            collectionId = colId;
+            break;
+        }
+    }
 
-	if(
-		!collectionId &&
-		state.filterCollection &&
-		targetPrompt.collections &&
-		targetPrompt.collections.includes(state.filterCollection) &&
-		PromptsBrowser.utils.collectionHavePreview(prompt, state.filterCollection)
-	) {
-		collectionId = state.filterCollection;
-	}
-
-	if(!collectionId) {
-		targetPrompt.collections.some(collectionItem => {
-			if(PromptsBrowser.utils.collectionHavePreview(prompt, collectionItem)) {
-				collectionId = collectionItem;
-				return true;
-			}
-		});
-	}
-
-	if(!collectionId) return NEW_CARD_GRADIENT;
+    if(!collectionId) return EMPTY_CARD_GRADIENT;
+    if(!fileExtension) return EMPTY_CARD_GRADIENT;
 
 	const safeFileName = PromptsBrowser.makeFileNameSafe(prompt);
 
@@ -319,7 +305,7 @@ PromptsBrowser.db.movePreviewImage = (item, from, to, type) => {
 	})();
 }
 
-PromptsBrowser.db.saveJSONData = (collectionId, noClear = false) => {
+PromptsBrowser.db.saveJSONData = (collectionId, noClear = false, noUpdate = false) => {
 	if(!collectionId) return;
  
 	const targetData = PromptsBrowser.data.original[collectionId];
@@ -336,8 +322,10 @@ PromptsBrowser.db.saveJSONData = (collectionId, noClear = false) => {
 		});
 		//const content = await rawResponse.json();
 
-		PromptsBrowser.knownPrompts.update();
-		PromptsBrowser.currentPrompts.update(true);
+        if(!noUpdate) {
+		    PromptsBrowser.knownPrompts.update();
+		    PromptsBrowser.currentPrompts.update(true);
+        }
 	})();
 }
 
@@ -634,7 +622,7 @@ PromptsBrowser.db.updateMixedList = () => {
 
 		for(const collectionPrompt of collection) {
 			const {id, isExternalNetwork, previewImage, addAtStart, addAfter, addStart, addEnd} = collectionPrompt;
-			let newItem = {id, tags: [], category: [], collections: []};
+			let newItem = {id, tags: [], category: [], collections: [], knownPreviews: {}};
 			if(addedIds[id]) newItem = unitedList.find(item => item.id === id);
 
 			if(addAtStart) newItem.addAtStart = addAtStart;
@@ -643,7 +631,9 @@ PromptsBrowser.db.updateMixedList = () => {
 			if(addEnd) newItem.addEnd = addEnd;
 
 			if(isExternalNetwork) newItem.isExternalNetwork = true;
-			if(previewImage) newItem.previewImage = previewImage;
+			if(previewImage) {
+                newItem.knownPreviews[collectionId] = previewImage;
+            }
 
 			if(!newItem.collections.includes(collectionId)) {
 				newItem.collections.push(collectionId);
