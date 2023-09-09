@@ -25,7 +25,7 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
    
 3. If installing from WebUI do not change the extension directory and stop Stable Diffusion and start it again.
 
-5. In the stable-diffusion directory will be created directory `prompts_catalogue` with subdirectory `myprompts` - this will be the first collection of prompts. As well as the directory `styles_catalogue` where new styles will be stored.
+5. In the stable-diffusion webUI directory will be created directory `prompts_catalogue` with subdirectory `myprompts` - this will be the first collection of prompts. As well as the directory `styles_catalogue` where new styles will be stored.
 
 ### Important
 
