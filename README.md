@@ -226,4 +226,4 @@ This extension does not come with a pre-built prompts database. It is up to the 
 
 Some existing collections:
 
-1. [prompts_portrait](https://github.com/AlpacaInTheNight/prompts_portrait) - A proof of concept collection for generating character portraits. Comes with tags and categories tagged in. Previews are generated with Anything V4.5 model.
+1. [prompts_portrait](https://github.com/AlpacaInTheNight/prompts_portrait) - A proof of concept collection for generating character portraits. Comes with tags and categories tagged in.
