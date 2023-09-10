@@ -1,3 +1,84 @@
-import subprocess
+#import subprocess
+from pydantic import BaseModel
+from modules.api.models import *
+from modules.api import api
 
-subprocess.Popen("python extensions/PromptsBrowser/server/server.py")
+import gradio as gr
+
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import Response
+
+from server.getCollections import getCollections
+from server.savePreview import savePreview
+from server.saveStylePreview import saveStylePreview
+from server.saveStyles import saveStyles
+from server.savePrompts import savePrompts
+from server.newCollection import newCollection
+from server.newStylesCollection import newStylesCollection
+from server.movePreview import movePreview
+
+#subprocess.Popen("python extensions/PromptsBrowser/server/server.py")
+
+class ReqSavePreview(BaseModel):
+    src: str
+    prompt: str
+    collection: str
+
+class ReqSaveStylePreview(BaseModel):
+    src: str
+    style: str
+    collection: str
+
+class ReqSaveStyles(BaseModel):
+    data: str
+    collection: str
+
+class ReqNewCollection(BaseModel):
+    id: str
+    mode: str
+
+class ReqMovePreview(BaseModel):
+    item: str
+    movefrom: str
+    to: str
+    type: str
+
+class ReqSavePrompts(BaseModel):
+    data: str
+    collection: str
+    noClear: bool
+
+def on_app_started(_: gr.Blocks, app: FastAPI):
+    ROOT_URL = "/promptBrowser/"
+
+    @app.get(ROOT_URL + "getPrompts")
+    async def get_collections(): return getCollections()
+    
+    @app.post(ROOT_URL + "savePreview")
+    async def save_preview(req: ReqSavePreview): return savePreview(req)
+    
+    @app.post(ROOT_URL + "saveStylePreview")
+    async def save_style_preview(req: ReqSaveStylePreview): return saveStylePreview(req)
+    
+    @app.post(ROOT_URL + "saveStyles")
+    async def save_styles(req: ReqSaveStyles): return saveStyles(req)
+    
+    @app.post(ROOT_URL + "newCollection")
+    async def new_collection(req: ReqNewCollection): return newCollection(req)
+    
+    @app.post(ROOT_URL + "newStylesCollection")
+    async def new_styles_collection(req: ReqNewCollection): return newStylesCollection(req)
+    
+    @app.post(ROOT_URL + "movePreview")
+    async def move_preview(req: ReqMovePreview): return movePreview(req)
+    
+    @app.post(ROOT_URL + "savePrompts")
+    async def save_prompts(req: ReqSavePrompts): return savePrompts(req)
+
+
+try:
+    import modules.script_callbacks as script_callbacks
+
+    script_callbacks.on_app_started(on_app_started)
+except:
+    pass

@@ -1,17 +1,18 @@
 import json
 import os
-import constant
 
-from utils import makeFileNameSafe
-from utils import getWebUIDirectory
-from utils import emitMessage
-from utils import removeUnusedPreviews
+from . import constant
+
+from .utils import makeFileNameSafe
+from .utils import getWebUIDirectory
+from .utils import emitMessage
+from .utils import removeUnusedPreviews
 
 def savePrompts(postJSON):
-    data = postJSON["data"]
-    collection = postJSON["collection"]
+    data = postJSON.data
+    collection = postJSON.collection
     noClear = False
-    if "noClear" in postJSON: noClear = postJSON["noClear"]
+    if "noClear" in postJSON: noClear = postJSON.noClear
 
     if not data or not collection: return
 

@@ -1,16 +1,17 @@
 import json
 import os
-import constant
 import shutil
 
-from utils import makeFileNameSafe
-from utils import getWebUIDirectory
-from utils import emitMessage
+from . import constant
+
+from .utils import makeFileNameSafe
+from .utils import getWebUIDirectory
+from .utils import emitMessage
 
 def saveStylePreview(postJSON):
-    src = postJSON["src"]
-    style = postJSON["style"]
-    collection = postJSON["collection"]
+    src = postJSON.src
+    style = postJSON.style
+    collection = postJSON.collection
     
     if not src or not style or not collection: return "failed"
 

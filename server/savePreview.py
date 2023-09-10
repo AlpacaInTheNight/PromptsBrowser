@@ -1,16 +1,17 @@
 import json
 import os
-import constant
 import shutil
 
-from utils import makeFileNameSafe
-from utils import getWebUIDirectory
-from utils import emitMessage
+from . import constant
+
+from .utils import makeFileNameSafe
+from .utils import getWebUIDirectory
+from .utils import emitMessage
 
 def savePreview(postJSON):
-    src = postJSON["src"]
-    prompt = postJSON["prompt"]
-    collection = postJSON["collection"]
+    src = postJSON.src
+    prompt = postJSON.prompt
+    collection = postJSON.collection
     isExternalNetwork = False
 
     if "isExternalNetwork" in postJSON and postJSON["isExternalNetwork"]: isExternalNetwork = True

@@ -2,7 +2,7 @@ import os
 import socket
 from datetime import datetime
 
-import constant
+from . import constant
 
 #Make sure to update client-side makeFileNameSafe method as well
 def makeFileNameSafe(fileName: str):

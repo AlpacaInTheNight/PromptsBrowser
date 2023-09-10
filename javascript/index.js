@@ -247,9 +247,10 @@ PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionId) => {
 
 PromptsBrowser.db.createNewCollection = (id, mode = "short") => {
 	if(!id) return;
+    const url = PromptsBrowser.db.getURL("newCollection");
 
 	(async () => {
-		const rawResponse = await fetch('http://127.0.0.1:3000/newCollection', {
+		const rawResponse = await fetch(url, {
 			method: 'POST',
 			headers: {
 				'Accept': 'application/json',
@@ -267,9 +268,10 @@ PromptsBrowser.db.createNewCollection = (id, mode = "short") => {
 
 PromptsBrowser.db.createNewStylesCollection = (id, mode = "short") => {
 	if(!id) return;
+    const url = PromptsBrowser.db.getURL("newStylesCollection");
 
 	(async () => {
-		const rawResponse = await fetch('http://127.0.0.1:3000/newStylesCollection', {
+		const rawResponse = await fetch(url, {
 			method: 'POST',
 			headers: {
 				'Accept': 'application/json',
@@ -285,17 +287,18 @@ PromptsBrowser.db.createNewStylesCollection = (id, mode = "short") => {
 	})();
 }
 
-PromptsBrowser.db.movePreviewImage = (item, from, to, type) => {
+PromptsBrowser.db.movePreviewImage = (item, movefrom, to, type) => {
 	const {state} = PromptsBrowser;
+    const url = PromptsBrowser.db.getURL("movePreview");
 
 	(async () => {
-		const rawResponse = await fetch('http://127.0.0.1:3000/movePreview', {
+		const rawResponse = await fetch(url, {
 			method: 'POST',
 			headers: {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({item, from, to, type})
+			body: JSON.stringify({item, movefrom, to, type})
 		});
 		//const content = await rawResponse.json();
 
@@ -311,8 +314,10 @@ PromptsBrowser.db.saveJSONData = (collectionId, noClear = false, noUpdate = fals
 	const targetData = PromptsBrowser.data.original[collectionId];
 	if(!targetData) return;
 
+    const url = PromptsBrowser.db.getURL("savePrompts");
+
 	(async () => {
-		const rawResponse = await fetch('http://127.0.0.1:3000/savePrompts', {
+		const rawResponse = await fetch(url, {
 			method: 'POST',
 			headers: {
 				'Accept': 'application/json',
@@ -333,6 +338,7 @@ PromptsBrowser.db.savePromptPreview = (callUpdate = true) => {
 	const {state} = PromptsBrowser;
 	const {united} = PromptsBrowser.data;
 	const {selectedPrompt, savePreviewCollection, currentContainer} = state;
+    const url = PromptsBrowser.db.getURL("savePreview");
 
 	const imageArea = PromptsBrowser.DOMCache.containers[currentContainer].imageArea;
 	if(!imageArea) return;
@@ -395,7 +401,7 @@ PromptsBrowser.db.savePromptPreview = (callUpdate = true) => {
 
 	(async () => {
 
-		const rawResponse = await fetch('http://127.0.0.1:3000/savePreview', {
+		const rawResponse = await fetch(url, {
 			method: 'POST',
 			headers: {
 				'Accept': 'application/json',
@@ -408,14 +414,80 @@ PromptsBrowser.db.savePromptPreview = (callUpdate = true) => {
 	})();
 }
 
+PromptsBrowser.db.onUpdateStylePreview = (e) => {
+	const {state, data} = PromptsBrowser;
+
+	let collectionId = undefined;
+	let styleId = undefined;
+
+	if(e.currentTarget.dataset.action) {
+		const {selectedItem} = PromptsBrowser.styles;
+		collectionId = selectedItem.collection;
+		styleId = selectedItem.styleId;
+
+	} else {
+		collectionId = e.currentTarget.dataset.id;
+		styleId = e.currentTarget.dataset.id;
+	}
+
+	if(!collectionId || !styleId) return;
+
+	const imageArea = PromptsBrowser.DOMCache.containers[state.currentContainer].imageArea;
+	if(!imageArea) return;
+
+	const imageContainer = imageArea.querySelector("img");
+	if(!imageContainer) return;
+
+	let src = imageContainer.src;
+	const fileMarkIndex = src.indexOf("file=");
+	if(fileMarkIndex === -1) return;
+	src = src.slice(fileMarkIndex + 5);
+
+	const cacheMarkIndex = src.indexOf("?");
+	if(cacheMarkIndex && cacheMarkIndex !== -1) src = src.substring(0, cacheMarkIndex);
+
+	const imageExtension = src.split('.').pop();
+
+    const url = PromptsBrowser.db.getURL("saveStylePreview");
+
+	(async () => {
+		const saveData = {src, style: styleId, collection: collectionId};
+
+		const rawResponse = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(saveData)
+		});
+		//const content = await rawResponse.json();
+
+		const targetStylesCollection = data.styles[collectionId];
+		if(targetStylesCollection) {
+			targetStylesCollection.some(item => {
+				if(item.name === styleId) {
+					item.previewImage = imageExtension;
+	
+					return true;
+				}
+			});
+		}
+
+		PromptsBrowser.styles.update();
+	})();
+}
+
 PromptsBrowser.db.updateStyles = (collectionId) => {
 	if(!collectionId) return;
 
 	const targetData = PromptsBrowser.data.styles[collectionId];
 	if(!targetData) return;
 
+    const url = PromptsBrowser.db.getURL("saveStyles");
+
 	(async () => {
-		const rawResponse = await fetch('http://127.0.0.1:3000/saveStyles', {
+		const rawResponse = await fetch(url, {
 			method: 'POST',
 			headers: {
 				'Accept': 'application/json',
@@ -659,8 +731,20 @@ PromptsBrowser.db.updateMixedList = () => {
 	PromptsBrowser.data.united = unitedList;
 }
 
+PromptsBrowser.db.getURL = (endpoint) => {
+    const DEV_SERVER = "http://127.0.0.1:3000/";
+    const USER_SERVER = window.location.origin + "/promptBrowser/";
+
+    //@TODO - add some kind of quick switch between servers
+    const server = USER_SERVER;
+
+    return server + endpoint;
+}
+
 PromptsBrowser.db.loadDatabase = () => {
-	fetch("http://127.0.0.1:3000/getPrompts", {
+    const url = PromptsBrowser.db.getURL("getPrompts")
+    
+	fetch(url, {
 		method: 'GET',
 	}).then(data => data.json()).then(res => {
 		if(!res || !res.prompts) return; //TODO: process server error here

@@ -1,15 +1,15 @@
 import json
 import os
-import constant
-import shutil
 
-from utils import makeFileNameSafe
-from utils import getWebUIDirectory
-from utils import emitMessage
+from . import constant
+
+from .utils import makeFileNameSafe
+from .utils import getWebUIDirectory
+from .utils import emitMessage
 
 def saveStyles(postJSON):
-    data = postJSON["data"]
-    collection = postJSON["collection"]
+    data = postJSON.data
+    collection = postJSON.collection
     
     if not data or not collection: return "failed"
 

@@ -1,17 +1,17 @@
-import json
 import os
-import constant
 import shutil
 
-from utils import makeFileNameSafe
-from utils import getWebUIDirectory
-from utils import emitMessage
+from . import constant
+
+from .utils import makeFileNameSafe
+from .utils import getWebUIDirectory
+from .utils import emitMessage
 
 def movePreview(postJSON):
-    item = postJSON["item"]
-    itemFrom = postJSON["from"]
-    itemTo = postJSON["to"]
-    itemType = postJSON["type"]
+    item = postJSON.item
+    itemFrom = postJSON.movefrom
+    itemTo = postJSON.to
+    itemType = postJSON.type
 
     if not item or not itemFrom or not itemTo or not itemType: return "failed"
 

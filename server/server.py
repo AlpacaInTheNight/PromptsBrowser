@@ -4,17 +4,18 @@ import json
 import os
 from shutil import copyfile
 
-import constant
-from utils import emitMessage, getWebUIDirectory, isPortInUse
+from . import constant
 
-from getCollections import getCollections
-from savePreview import savePreview
-from saveStylePreview import saveStylePreview
-from saveStyles import saveStyles
-from savePrompts import savePrompts
-from newCollection import newCollection
-from newStylesCollection import newStylesCollection
-from movePreview import movePreview
+from .utils import emitMessage, getWebUIDirectory, isPortInUse
+
+from .getCollections import getCollections
+from .savePreview import savePreview
+from .saveStylePreview import saveStylePreview
+from .saveStyles import saveStyles
+from .savePrompts import savePrompts
+from .newCollection import newCollection
+from .newStylesCollection import newStylesCollection
+from .movePreview import movePreview
 
 if isPortInUse(constant.PORT):
     emitMessage(f'Server already running or port {constant.PORT} not available')

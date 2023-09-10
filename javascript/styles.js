@@ -35,67 +35,7 @@ PromptsBrowser.styles.initButton = (positiveWrapper) => {
 	positiveWrapper.appendChild(addStylesButton);
 }
 
-PromptsBrowser.styles.onUpdatePreview = (e) => {
-	const {state, data} = PromptsBrowser;
 
-	let collectionId = undefined;
-	let styleId = undefined;
-
-	if(e.currentTarget.dataset.action) {
-		const {selectedItem} = PromptsBrowser.styles;
-		collectionId = selectedItem.collection;
-		styleId = selectedItem.styleId;
-
-	} else {
-		collectionId = e.currentTarget.dataset.id;
-		styleId = e.currentTarget.dataset.id;
-	}
-
-	if(!collectionId || !styleId) return;
-
-	const imageArea = PromptsBrowser.DOMCache.containers[state.currentContainer].imageArea;
-	if(!imageArea) return;
-
-	const imageContainer = imageArea.querySelector("img");
-	if(!imageContainer) return;
-
-	let src = imageContainer.src;
-	const fileMarkIndex = src.indexOf("file=");
-	if(fileMarkIndex === -1) return;
-	src = src.slice(fileMarkIndex + 5);
-
-	const cacheMarkIndex = src.indexOf("?");
-	if(cacheMarkIndex && cacheMarkIndex !== -1) src = src.substring(0, cacheMarkIndex);
-
-	const imageExtension = src.split('.').pop();
-
-	(async () => {
-		const saveData = {src, style: styleId, collection: collectionId};
-
-		const rawResponse = await fetch('http://127.0.0.1:3000/saveStylePreview', {
-			method: 'POST',
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(saveData)
-		});
-		//const content = await rawResponse.json();
-
-		const targetStylesCollection = data.styles[collectionId];
-		if(targetStylesCollection) {
-			targetStylesCollection.some(item => {
-				if(item.name === styleId) {
-					item.previewImage = imageExtension;
-	
-					return true;
-				}
-			});
-		}
-
-		PromptsBrowser.styles.update();
-	})();
-}
 
 PromptsBrowser.styles.onCloseWindow = () => {
     const {state} = PromptsBrowser;
@@ -636,7 +576,7 @@ PromptsBrowser.styles.showActions = (wrapper) => {
 	updatePreviewButton.className = "PBE_button";
 	updatePreviewButton.title = "Delete selected style";
 	updatePreviewButton.dataset.action = "true";
-	updatePreviewButton.addEventListener("click", PromptsBrowser.styles.onUpdatePreview);
+	updatePreviewButton.addEventListener("click", PromptsBrowser.db.onUpdateStylePreview);
 	
 	editContainer.appendChild(editLegend);
 	editContainer.appendChild(updateButton);
@@ -768,7 +708,7 @@ PromptsBrowser.styles.showStyles = (wrapper) => {
 		addAfterButton.addEventListener("click", PromptsBrowser.styles.applyStyle);
 		removeButton.addEventListener("click", PromptsBrowser.styles.removeStyle);
 		updateButton.addEventListener("click", PromptsBrowser.styles.updateStyle);
-		updatePreview.addEventListener("click", PromptsBrowser.styles.onUpdatePreview);
+		updatePreview.addEventListener("click", PromptsBrowser.db.onUpdateStylePreview);
 
 		actionsContainer.appendChild(addBeforeButton);
 		if(activePrompts && activePrompts.length) actionsContainer.appendChild(addAfterButton);

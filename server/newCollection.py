@@ -1,13 +1,14 @@
 import json
 import os
-import constant
 
-from utils import getWebUIDirectory
-from utils import emitMessage
+from . import constant
+
+from .utils import getWebUIDirectory
+from .utils import emitMessage
 
 def newCollection(postJSON):
-    id = postJSON["id"]
-    mode = postJSON["mode"]
+    id = postJSON.id
+    mode = postJSON.mode
 
     if not id or not mode: return "failed"
 

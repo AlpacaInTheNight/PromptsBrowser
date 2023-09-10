@@ -1,7 +1,7 @@
 import json
 import os
-import constant
-from utils import emitMessage, getWebUIDirectory, makeFileNameSafe
+from . import constant
+from .utils import emitMessage, getWebUIDirectory, makeFileNameSafe
 
 def getCollections():
     webUIDir = getWebUIDirectory()
