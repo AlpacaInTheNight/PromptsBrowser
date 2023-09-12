@@ -1,6 +1,7 @@
 import os
 import socket
 from datetime import datetime
+from os.path import dirname, abspath, join, isdir, isfile
 
 from . import constant
 
@@ -27,6 +28,13 @@ def makeFileNameSafe(fileName: str):
 
     return fileName
 
+#Returns directory containing prompts and styles collections
+def getCollectionsDir():
+    extensionDir = dirname(dirname(abspath(__file__)))
+    if not extensionDir: return False
+    print(extensionDir)
+
+    return extensionDir
 
 def getWebUIDirectory():
     curr = os.getcwd()
@@ -56,12 +64,13 @@ def emitMessage(message: str):
 
 
 def removeUnusedPreviews(collection, prompts):
-    webUIDir = getWebUIDirectory()
-    promptsCataloguePath = webUIDir + constant.PROMPTS_FOLDER + os.sep
-    pathToCollection = promptsCataloguePath + collection + os.sep
-    pathToPreviews = pathToCollection + "preview" + os.sep
+    collDir = getCollectionsDir()
 
-    if not os.path.isdir(pathToPreviews): return
+    pathPromptsCatalogue    = join(collDir, constant.PROMPTS_DIR)
+    pathToCollection        = join(pathPromptsCatalogue, collection)
+    pathToPreviews          = join(pathToCollection, "preview")
+
+    if not isdir(pathToPreviews): return
 
     imageFileNames = [filename for filename in os.listdir(pathToPreviews) if (filename.endswith('.png') or filename.endswith('.jpg'))]
 
@@ -82,7 +91,7 @@ def removeUnusedPreviews(collection, prompts):
                 break
         
         if not used:
-            os.remove(pathToPreviews + fileName)
+            os.remove(join(pathToPreviews, fileName))
             emitMessage("removed not used preview: " + fileName + f' from collection "{collection}"')
 
 def isPortInUse(port: int) -> bool:

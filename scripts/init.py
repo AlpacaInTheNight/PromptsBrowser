@@ -8,6 +8,8 @@ import gradio as gr
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import Response
 
+from server.initServer import initServer
+
 from server.getCollections import getCollections
 from server.savePreview import savePreview
 from server.saveStylePreview import saveStylePreview
@@ -47,6 +49,8 @@ class ReqSavePrompts(BaseModel):
     data: str
     collection: str
     noClear: bool
+
+initServer()
 
 def on_app_started(_: gr.Blocks, app: FastAPI):
     ROOT_URL = "/promptBrowser/"

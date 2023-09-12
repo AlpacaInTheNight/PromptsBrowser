@@ -1,12 +1,14 @@
 import json
 import os
+from os.path import join, isdir, isfile
+
 from . import constant
-from .utils import emitMessage, getWebUIDirectory, makeFileNameSafe
+from .utils import emitMessage, getCollectionsDir, makeFileNameSafe
 
 def getCollections():
-    webUIDir = getWebUIDirectory()
-    promptsCataloguePath = webUIDir + constant.PROMPTS_FOLDER
-    stylesDirectoryContent = webUIDir + constant.STYLES_FOLDER
+    collDir = getCollectionsDir()
+    pathPromptsCatalogue    = join(collDir, constant.PROMPTS_DIR)
+    pathStylesCatalogue     = join(collDir, constant.STYLES_DIR)
 
     dataList = {
         "prompts": {},
@@ -14,22 +16,22 @@ def getCollections():
     }
 
     #getting promopt collections
-    promptsDirs = os.listdir(promptsCataloguePath)
+    promptsDirs = os.listdir(pathPromptsCatalogue)
     for dirName in promptsDirs:
-        if not os.path.isdir(promptsCataloguePath + "/" + dirName): continue
+        if not isdir(join(pathPromptsCatalogue, dirName)): continue
 
-        pathToDataFile = promptsCataloguePath + "/" + dirName + "/" + "data.json"
-        pathToOrderFile = promptsCataloguePath + "/" + dirName + "/" + "order.json"
-        pathToMetaFile = promptsCataloguePath + "/" + dirName + "/" + "meta.json"
-        pathToPromptsFolder = promptsCataloguePath + "/" + dirName + "/" + "prompts"
-        pathToPreviewFolder = promptsCataloguePath + "/" + dirName + "/" + "preview"
+        pathToDataFile      = join(pathPromptsCatalogue, dirName, "data.json")
+        pathToOrderFile     = join(pathPromptsCatalogue, dirName, "order.json")
+        pathToMetaFile      = join(pathPromptsCatalogue, dirName, "meta.json")
+        pathToPromptsDir    = join(pathPromptsCatalogue, dirName, "prompts")
+        pathToPreviewDir    = join(pathPromptsCatalogue, dirName, "preview")
 
         #"short" | "expanded"
         format = "short"
         dataFile = []
 
         #checking meta file information and getting its data. creating one if none.
-        if not os.path.isfile(pathToMetaFile):
+        if not isfile(pathToMetaFile):
             with open(pathToMetaFile, 'w') as outfile: json.dump({"format": "short"}, outfile)
 
         else:
@@ -40,25 +42,25 @@ def getCollections():
 
         #getting data based on the collection format type
         if format == "short":
-            if not os.path.isfile(pathToDataFile): continue
+            if not isfile(pathToDataFile): continue
             f = open(pathToDataFile)
             dataFile = json.load(f)
             f.close()
 
         else:
-            if not os.path.isfile(pathToOrderFile): continue
+            if not isfile(pathToOrderFile): continue
             f = open(pathToOrderFile)
             JSONOrder = json.load(open(pathToOrderFile))
             f.close()
 
-            newPromptsFromFolder = []
+            newPromptsFromDir = []
             promptsObject = {}
 
-            if os.path.isdir(pathToPromptsFolder):
-                jsonFileNames = [filename for filename in os.listdir(pathToPromptsFolder) if filename.endswith('.json')]
+            if isdir(pathToPromptsDir):
+                jsonFileNames = [filename for filename in os.listdir(pathToPromptsDir) if filename.endswith('.json')]
 
                 for fileName in jsonFileNames:
-                    with open(os.path.join(pathToPromptsFolder, fileName)) as jsonFile:
+                    with open(join(pathToPromptsDir, fileName)) as jsonFile:
                         promptJSON = json.load(jsonFile)
                         if not "id" in promptJSON or not promptJSON["id"]: continue
                         promptId = promptJSON["id"]
@@ -68,23 +70,23 @@ def getCollections():
                 if orderItem in promptsObject and promptsObject[orderItem]: dataFile.append(promptsObject[orderItem])
             
             """
-            Adding new prompts that was found in prompts folder, but that was not pressent in the order.json file.
-            This allows to add prompts to the collection by simply copying their .json files into collections prompts folder.
+            Adding new prompts that was found in prompts directory, but that was not pressent in the order.json file.
+            This allows to add prompts to the collection by simply copying their .json files into collections prompts directory.
             """
             for promptId in promptsObject:
                 promptItem = promptsObject[promptId]
                 if not promptItem["id"] in JSONOrder:
                     #emitMessage(f'new prompt found: "{promptItem["id"]}" in collection: "{dirName}"')
-                    newPromptsFromFolder.append(promptItem)
+                    newPromptsFromDir.append(promptItem)
             
-            if newPromptsFromFolder: dataFile += newPromptsFromFolder
+            if newPromptsFromDir: dataFile += newPromptsFromDir
 
 
         """
         Getting preview images to mark prompt if it have one or not.
         """
-        if os.path.isdir(pathToPreviewFolder):
-            imageFileNames = [filename for filename in os.listdir(pathToPreviewFolder) if filename.endswith('.jpg') or filename.endswith('.png')]
+        if isdir(pathToPreviewDir):
+            imageFileNames = [filename for filename in os.listdir(pathToPreviewDir) if filename.endswith('.jpg') or filename.endswith('.png')]
 
             for promptItem in dataFile:
                 previewImage = ""
@@ -99,21 +101,21 @@ def getCollections():
         dataList["prompts"][dirName] = dataFile
     
     #Getting styles collections
-    stylesDirs = os.listdir(stylesDirectoryContent)
+    stylesDirs = os.listdir(pathStylesCatalogue)
     for dirName in stylesDirs:
-        if not os.path.isdir(stylesDirectoryContent + "/" + dirName): continue
+        if not isdir(join(pathStylesCatalogue, dirName)): continue
 
-        pathToDataFile = stylesDirectoryContent + "/" + dirName + "/" + "data.json"
-        pathToOrderFile = stylesDirectoryContent + "/" + dirName + "/" + "order.json"
-        pathToMetaFile = stylesDirectoryContent + "/" + dirName + "/" + "meta.json"
-        pathToStylesFolder = stylesDirectoryContent + "/" + dirName + "/" + "styles"
+        pathToDataFile      = join(pathStylesCatalogue, dirName, "data.json")
+        pathToOrderFile     = join(pathStylesCatalogue, dirName, "order.json")
+        pathToMetaFile      = join(pathStylesCatalogue, dirName, "meta.json")
+        pathToStylesDir     = join(pathStylesCatalogue, dirName, "styles")
 
         #"short" | "expanded"
         format = "short"
         dataFile = []
 
         #checking meta file information and getting its data. creating one if none.
-        if not os.path.isfile(pathToMetaFile):
+        if not isfile(pathToMetaFile):
             with open(pathToMetaFile, 'w') as outfile: json.dump({"format": "short"}, outfile)
 
         else:
@@ -124,25 +126,25 @@ def getCollections():
         
 
         if format == "short":
-            if not os.path.isfile(pathToDataFile): continue
+            if not isfile(pathToDataFile): continue
             f = open(pathToDataFile)
             dataFile = json.load(f)
             f.close()
         
         else:
-            if not os.path.isfile(pathToOrderFile): continue
+            if not isfile(pathToOrderFile): continue
             f = open(pathToOrderFile)
             JSONOrder = json.load(open(pathToOrderFile))
             f.close()
 
-            newStylesFromFolder = []
+            newStylesFromDir = []
             stylesObject = {}
 
-            if os.path.isdir(pathToStylesFolder):
-                jsonFileNames = [filename for filename in os.listdir(pathToStylesFolder) if filename.endswith('.json')]
+            if isdir(pathToStylesDir):
+                jsonFileNames = [filename for filename in os.listdir(pathToStylesDir) if filename.endswith('.json')]
 
                 for fileName in jsonFileNames:
-                    with open(os.path.join(pathToStylesFolder, fileName)) as jsonFile:
+                    with open(join(pathToStylesDir, fileName)) as jsonFile:
                         styleJSON = json.load(jsonFile)
                         if not "name" in styleJSON or not styleJSON["name"]: continue
                         styleId = styleJSON["name"]
@@ -152,15 +154,15 @@ def getCollections():
                 if orderItem in stylesObject and stylesObject[orderItem]: dataFile.append(stylesObject[orderItem])
 
             """
-            Adding new styles that was found in styles folder, but that was not pressent in the order.json file.
-            This allows to add styles to the collection by simply copying their .json files into collections styles folder.
+            Adding new styles that was found in styles directory, but that was not pressent in the order.json file.
+            This allows to add styles to the collection by simply copying their .json files into collections styles directory.
             """
             for styleId in stylesObject:
                 styleItem = stylesObject[styleId]
                 if not styleItem["name"] in JSONOrder:
-                    newStylesFromFolder.append(styleItem)
+                    newStylesFromDir.append(styleItem)
             
-            if newStylesFromFolder: dataFile += newStylesFromFolder
+            if newStylesFromDir: dataFile += newStylesFromDir
 
         dataList["styles"][dirName] = dataFile
 

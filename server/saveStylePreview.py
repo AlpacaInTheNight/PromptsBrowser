@@ -1,11 +1,12 @@
 import json
 import os
 import shutil
+from os.path import join, isdir, isfile
 
 from . import constant
 
 from .utils import makeFileNameSafe
-from .utils import getWebUIDirectory
+from .utils import getCollectionsDir
 from .utils import emitMessage
 
 def saveStylePreview(postJSON):
@@ -25,31 +26,33 @@ def saveStylePreview(postJSON):
     fileExtension = os.path.splitext(fileName)[1]
     safeFileName = makeFileNameSafe(style)
 
-    webUIDir = getWebUIDirectory()
-    stylesCataloguePath = webUIDir + constant.STYLES_FOLDER + os.sep
-    collectionPath = stylesCataloguePath + collection + os.sep + "preview" + os.sep
+    collDir = getCollectionsDir()
 
-    if not os.path.isdir(collectionPath): os.makedirs(collectionPath)
+    stylesCataloguePath     = join(collDir, constant.STYLES_DIR)
+    collectionPath          = join(stylesCataloguePath, collection, "preview")
 
-    savePath = collectionPath + safeFileName + fileExtension
+    if not isdir(collectionPath): os.makedirs(collectionPath)
+
+    savePath = join(collectionPath, safeFileName + fileExtension)
     if fileExtension[0] == ".": fileExtension = fileExtension[1:]
 
     #removing any previous previews
-    if os.path.isfile(collectionPath + safeFileName + ".jpg"): os.remove(collectionPath + safeFileName + ".jpg")
-    if os.path.isfile(collectionPath + safeFileName + ".png"): os.remove(collectionPath + safeFileName + ".png")
+    if isfile(join(collectionPath, safeFileName + ".jpg")): os.remove(join(collectionPath, safeFileName + ".jpg"))
+    if isfile(join(collectionPath, safeFileName + ".png")): os.remove(join(collectionPath, safeFileName + ".png"))
 
     shutil.copy(src, savePath)
 
     #updating collection data
-    pathToMetaFile = stylesCataloguePath + collection + os.sep + "meta.json"
-    pathToDataFile = stylesCataloguePath + collection + os.sep + "data.json"
-    pathToOrderFile = stylesCataloguePath + collection + os.sep + "order.json"
+    pathToMetaFile      = join(stylesCataloguePath, collection, "meta.json")
+    pathToDataFile      = join(stylesCataloguePath, collection, "data.json")
+    pathToOrderFile     = join(stylesCataloguePath, collection, "order.json")
+
     newStyleDefault = {"name": style}
 
     #"short" | "expanded"
     format = "short"
 
-    if os.path.isfile(pathToMetaFile):
+    if isfile(pathToMetaFile):
         f = open(pathToMetaFile)
         metaFile = json.load(f)
         f.close()
@@ -58,7 +61,7 @@ def saveStylePreview(postJSON):
 
     #saving data in case of the short format collection
     if format == "short":
-        if not os.path.isfile(pathToDataFile) or os.path.getsize(pathToDataFile) == 0: dataFile = []
+        if not isfile(pathToDataFile) or os.path.getsize(pathToDataFile) == 0: dataFile = []
         else:
             f = open(pathToDataFile)
             dataFile = json.load(f)
@@ -72,13 +75,14 @@ def saveStylePreview(postJSON):
     #saving data in case of the expanded format collection
     elif format == "expanded":
         safeFileName = makeFileNameSafe(style)
-        stylesFolder = stylesCataloguePath + collection + os.sep + "styles"
-        filePath = stylesFolder + os.sep + safeFileName + ".json"
 
-        if not os.path.isdir(stylesFolder): os.makedirs(stylesFolder)
+        stylesDir    = join(stylesCataloguePath, collection, "styles")
+        filePath     = join(stylesDir, safeFileName + ".json")
 
-        if not os.path.isfile(filePath):
-            if(not os.path.isfile(pathToOrderFile) or os.path.getsize(pathToOrderFile) == 0): orderFile = []
+        if not isdir(stylesDir): os.makedirs(stylesDir)
+
+        if not isfile(filePath):
+            if(not isfile(pathToOrderFile) or os.path.getsize(pathToOrderFile) == 0): orderFile = []
             else:
                 f = open(pathToOrderFile)
                 orderFile = json.load(f)

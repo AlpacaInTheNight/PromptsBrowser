@@ -33,9 +33,9 @@ def set_default_headers(self):
 def initExtension():
     webUIDir = getWebUIDirectory()
     markerFile = webUIDir + constant.MARKER_FILE
-    promptsCataloguePath = webUIDir + constant.PROMPTS_FOLDER
-    stylesCataloguePath = webUIDir + constant.STYLES_FOLDER
-    autogenCataloguePath = webUIDir + constant.STYLES_FOLDER + os.sep + constant.DEFAULT_AUTOGEN
+    promptsCataloguePath = webUIDir + constant.PROMPTS_DIR
+    stylesCataloguePath = webUIDir + constant.STYLES_DIR
+    autogenCataloguePath = webUIDir + constant.STYLES_DIR + os.sep + constant.DEFAULT_AUTOGEN
     autogenPreset = webUIDir + "extensions" + os.sep + "PromptsBrowser" + os.sep + "server" + os.sep + "autogen"
     
     #check if extension is in extensions directory inside Stable Diffusion WebUI directory

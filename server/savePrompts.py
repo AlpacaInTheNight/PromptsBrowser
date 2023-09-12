@@ -1,10 +1,11 @@
 import json
 import os
+from os.path import join, isdir, isfile
 
 from . import constant
 
 from .utils import makeFileNameSafe
-from .utils import getWebUIDirectory
+from .utils import getCollectionsDir
 from .utils import emitMessage
 from .utils import removeUnusedPreviews
 
@@ -19,14 +20,14 @@ def savePrompts(postJSON):
     #"short" | "expanded"
     format = "short"
 
-    webUIDir = getWebUIDirectory()
-    promptsCataloguePath = webUIDir + constant.PROMPTS_FOLDER + os.sep
+    collDir = getCollectionsDir()
 
-    pathToCollection = promptsCataloguePath + collection + os.sep
-    pathToDataFile = pathToCollection + "data.json"
-    pathToMetaFile = pathToCollection + "meta.json"
+    pathPromptsCatalogue    = join(collDir, constant.PROMPTS_DIR)
+    pathToCollection        = join(pathPromptsCatalogue, collection)
+    pathToDataFile          = join(pathToCollection, "data.json")
+    pathToMetaFile          = join(pathToCollection, "meta.json")
 
-    if os.path.isfile(pathToMetaFile):
+    if isfile(pathToMetaFile):
         f = open(pathToMetaFile)
         metaFile = json.load(f)
         f.close()
@@ -55,8 +56,8 @@ def saveCollectionExpanded(pathToCollection, data, collection, noClear):
     if not data or not collection or not pathToCollection: return "failed"
 
     dataJSON = json.loads(data)
-    promptsFolder = pathToCollection + "prompts"
-    if not os.path.isdir(promptsFolder): os.makedirs(promptsFolder)
+    promptsDir = join(pathToCollection, "prompts")
+    if not isdir(promptsDir): os.makedirs(promptsDir)
 
     promptOrder = []
     expectedFiles = []
@@ -69,9 +70,9 @@ def saveCollectionExpanded(pathToCollection, data, collection, noClear):
         expectedFiles.append(safeFileName + ".json")
         promptOrder.append(promptId)
 
-        pathToPromptFile = promptsFolder + os.sep + safeFileName + ".json"
+        pathToPromptFile = join(promptsDir, safeFileName + ".json")
 
-        if os.path.isfile(pathToPromptFile):
+        if isfile(pathToPromptFile):
             f = open(pathToPromptFile)
             promptJSON = json.load(f)
             f.close()
@@ -84,14 +85,14 @@ def saveCollectionExpanded(pathToCollection, data, collection, noClear):
             with open(pathToPromptFile, 'w') as outfile: json.dump(promptItem, outfile, indent="\t")
             emitMessage(f'update prompts: added prompt: "{promptId}" to collection "{collection}"')
         
-    jsonFileNames = [filename for filename in os.listdir(promptsFolder) if filename.endswith('.json')]
+    jsonFileNames = [filename for filename in os.listdir(promptsDir) if filename.endswith('.json')]
     for fileName in jsonFileNames:
         if fileName not in expectedFiles:
-            pathToPromptFile = promptsFolder + os.sep + fileName
+            pathToPromptFile = join(promptsDir, fileName)
             os.remove(pathToPromptFile)
             emitMessage(f'update prompts: removed prompt file: "{fileName}" from collection "{collection}"')
     
-    with open(pathToCollection + "order.json", 'w') as outfile: json.dump(promptOrder, outfile, indent="\t")
+    with open(join(pathToCollection, "order.json"), 'w') as outfile: json.dump(promptOrder, outfile, indent="\t")
     
     if not noClear: removeUnusedPreviews(collection, dataJSON)
 

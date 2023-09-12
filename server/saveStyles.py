@@ -1,10 +1,11 @@
 import json
 import os
+from os.path import join, isdir, isfile
 
 from . import constant
 
 from .utils import makeFileNameSafe
-from .utils import getWebUIDirectory
+from .utils import getCollectionsDir
 from .utils import emitMessage
 
 def saveStyles(postJSON):
@@ -16,14 +17,14 @@ def saveStyles(postJSON):
     #"short" | "expanded"
     format = "short"
 
-    webUIDir = getWebUIDirectory()
-    stylesCataloguePath = webUIDir + constant.STYLES_FOLDER + os.sep
+    collDir = getCollectionsDir()
 
-    pathToCollection = stylesCataloguePath + collection + os.sep
-    pathToDataFile = stylesCataloguePath + collection + os.sep + "data.json"
-    pathToMetaFile = pathToCollection + "meta.json"
+    pathStylesCatalogue     = join(collDir, constant.STYLES_DIR)
+    pathToCollection        = join(pathStylesCatalogue, collection)
+    pathToDataFile          = join(pathStylesCatalogue, collection, "data.json")
+    pathToMetaFile          = join(pathToCollection, "meta.json")
 
-    if os.path.isfile(pathToMetaFile):
+    if isfile(pathToMetaFile):
         f = open(pathToMetaFile)
         metaFile = json.load(f)
         f.close()
@@ -50,8 +51,8 @@ def saveCollectionExpanded(pathToCollection, data, collection):
     if not data or not collection or not pathToCollection: return "failed"
 
     dataJSON = json.loads(data)
-    stylesFolder = pathToCollection + "styles"
-    if not os.path.isdir(stylesFolder): os.makedirs(stylesFolder)
+    stylesDir = join(pathToCollection, "styles")
+    if not isdir(stylesDir): os.makedirs(stylesDir)
 
     promptOrder = []
     expectedFiles = []
@@ -64,9 +65,9 @@ def saveCollectionExpanded(pathToCollection, data, collection):
         expectedFiles.append(safeFileName + ".json")
         promptOrder.append(styleId)
 
-        pathToStyleFile = stylesFolder + os.sep + safeFileName + ".json"
+        pathToStyleFile = join(stylesDir, safeFileName + ".json")
 
-        if os.path.isfile(pathToStyleFile):
+        if isfile(pathToStyleFile):
             f = open(pathToStyleFile)
             styleJSON = json.load(f)
             f.close()
@@ -79,13 +80,13 @@ def saveCollectionExpanded(pathToCollection, data, collection):
             with open(pathToStyleFile, 'w') as outfile: json.dump(styleItem, outfile, indent="\t")
             emitMessage(f'update styles: added style: "{styleId}" to collection "{collection}"')
         
-    jsonFileNames = [filename for filename in os.listdir(stylesFolder) if filename.endswith('.json')]
+    jsonFileNames = [filename for filename in os.listdir(stylesDir) if filename.endswith('.json')]
     for fileName in jsonFileNames:
         if fileName not in expectedFiles:
-            pathToStyleFile = stylesFolder + os.sep + fileName
+            pathToStyleFile = join(stylesDir, fileName)
             os.remove(pathToStyleFile)
             emitMessage(f'update styles: removed style file: "{fileName}" from collection "{collection}"')
     
-    with open(pathToCollection + "order.json", 'w') as outfile: json.dump(promptOrder, outfile, indent="\t")
+    with open(join(pathToCollection, "order.json"), 'w') as outfile: json.dump(promptOrder, outfile, indent="\t")
  
     return "ok"

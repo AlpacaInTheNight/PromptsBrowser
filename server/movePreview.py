@@ -1,10 +1,11 @@
 import os
 import shutil
+from os.path import join, isdir, isfile
 
 from . import constant
 
 from .utils import makeFileNameSafe
-from .utils import getWebUIDirectory
+from .utils import getCollectionsDir
 from .utils import emitMessage
 
 def movePreview(postJSON):
@@ -15,26 +16,27 @@ def movePreview(postJSON):
 
     if not item or not itemFrom or not itemTo or not itemType: return "failed"
 
-    webUIDir = getWebUIDirectory()
-    promptsCataloguePath = webUIDir + constant.PROMPTS_FOLDER + os.sep
+    collDir = getCollectionsDir()
 
-    pathToPreviewFolder = promptsCataloguePath + itemFrom + os.sep + "preview" + os.sep
-    savePath = promptsCataloguePath + itemTo + os.sep + "preview" + os.sep
+    pathPromptsCatalogue    = join(collDir, constant.PROMPTS_DIR)
+    pathToPreviewDir        = join(pathPromptsCatalogue, itemFrom, "preview")
+    pathSaveDest            = join(pathPromptsCatalogue, itemTo, "preview")
+
     safeFileName = makeFileNameSafe(item)
 
     extension = ".png"
 
-    imageFileNames = [filename for filename in os.listdir(pathToPreviewFolder) if filename.endswith('.jpg') or filename.endswith('.png')]
+    imageFileNames = [filename for filename in os.listdir(pathToPreviewDir) if filename.endswith('.jpg') or filename.endswith('.png')]
     if safeFileName + ".png" in imageFileNames: extension = ".png"
     elif safeFileName + ".jpg" in imageFileNames: extension = ".jpg"
     else:
         emitMessage(f'preview image {itemType}: no image "{safeFileName}.png" or "{safeFileName}.jpg" found')
         return "failed"
 
-    sourcePath = pathToPreviewFolder + safeFileName + extension
-    savePath += safeFileName + extension
+    sourcePath = join(pathToPreviewDir, safeFileName + extension)
+    savePath = join(pathSaveDest, safeFileName + extension)
 
-    if not os.path.isfile(sourcePath):
+    if not isfile(sourcePath):
         emitMessage(f'preview image {itemType}: source file "{sourcePath}" not found')
         return "failed"
 

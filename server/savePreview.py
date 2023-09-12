@@ -1,11 +1,12 @@
 import json
 import os
 import shutil
+from os.path import join, isdir, isfile
 
 from . import constant
 
 from .utils import makeFileNameSafe
-from .utils import getWebUIDirectory
+from .utils import getCollectionsDir
 from .utils import emitMessage
 
 def savePreview(postJSON):
@@ -28,21 +29,27 @@ def savePreview(postJSON):
     fileExtension = os.path.splitext(fileName)[1]
     safeFileName = makeFileNameSafe(prompt)
 
-    webUIDir = getWebUIDirectory()
-    promptsCataloguePath = webUIDir + constant.PROMPTS_FOLDER + os.sep
-    collectionPath = promptsCataloguePath + collection + os.sep + "preview" + os.sep
-    savePath = collectionPath + safeFileName + fileExtension
+    collDir = getCollectionsDir()
+
+    pathPromptsCatalogue    = join(collDir, constant.PROMPTS_DIR)
+    pathCollection          = join(pathPromptsCatalogue, collection, "preview")
+    savePath                = join(pathCollection, safeFileName + fileExtension)
 
     #removing any previous previews
-    if os.path.isfile(collectionPath + safeFileName + ".jpg"): os.remove(collectionPath + safeFileName + ".jpg")
-    if os.path.isfile(collectionPath + safeFileName + ".png"): os.remove(collectionPath + safeFileName + ".png")
+    if isfile(join(pathCollection, safeFileName + ".jpg")):
+        os.remove(join(pathCollection, safeFileName + ".jpg"))
+
+    if isfile(join(pathCollection, safeFileName + ".png")):
+        os.remove(join(pathCollection, safeFileName + ".png"))
     
+    #copying image
     shutil.copy(src, savePath)
 
     #updating collection data
-    pathToMetaFile = promptsCataloguePath + collection + os.sep + "meta.json"
-    pathToDataFile = promptsCataloguePath + collection + os.sep + "data.json"
-    pathToOrderFile = promptsCataloguePath + collection + os.sep + "order.json"
+    pathToMetaFile      = join(pathPromptsCatalogue, collection, "meta.json")
+    pathToDataFile      = join(pathPromptsCatalogue, collection, "data.json")
+    pathToOrderFile     = join(pathPromptsCatalogue, collection, "order.json")
+
     newPromptDefault = {"id": prompt, "tags": [], "category": []}
 
     if isExternalNetwork: newPromptDefault["isExternalNetwork"] = True
@@ -50,7 +57,7 @@ def savePreview(postJSON):
     #"short" | "expanded"
     format = "short"
 
-    if os.path.isfile(pathToMetaFile):
+    if isfile(pathToMetaFile):
         f = open(pathToMetaFile)
         metaFile = json.load(f)
         f.close()
@@ -58,7 +65,7 @@ def savePreview(postJSON):
 
     #saving data in case of the short format collection
     if format == "short":
-        if not os.path.isfile(pathToDataFile):
+        if not isfile(pathToDataFile):
             emitMessage('collection format is set to "short", but file "data.json" is not found')
             return "failed"
 
@@ -75,13 +82,14 @@ def savePreview(postJSON):
     #saving data in case of the expanded format collection
     elif format == "expanded":
         safeFileName = makeFileNameSafe(prompt)
-        promptsFolder = promptsCataloguePath + collection + os.sep + "prompts"
-        filePath = promptsFolder + os.sep + safeFileName + ".json"
 
-        if not os.path.isdir(promptsFolder): os.makedirs(promptsFolder)
+        promptsDir = join(pathPromptsCatalogue, collection, "prompts")
+        filePath = join(promptsDir, safeFileName + ".json")
 
-        if not os.path.isfile(filePath):
-            if(not os.path.isfile(pathToOrderFile) or os.path.getsize(pathToOrderFile) == 0): orderFile = []
+        if not isdir(promptsDir): os.makedirs(promptsDir)
+
+        if not isfile(filePath):
+            if(not isfile(pathToOrderFile) or os.path.getsize(pathToOrderFile) == 0): orderFile = []
             else:
                 f = open(pathToOrderFile)
                 orderFile = json.load(f)

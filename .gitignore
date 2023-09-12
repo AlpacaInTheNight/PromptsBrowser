@@ -104,3 +104,6 @@ dist
 .tern-port
 *.pyc
 .vscode/settings.json
+/styles_catalogue
+/prompts_catalogue
+/.vscode
