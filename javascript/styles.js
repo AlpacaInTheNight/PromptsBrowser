@@ -483,7 +483,7 @@ PromptsBrowser.styles.showStylesShort = (wrapper) => {
 	const {data} = PromptsBrowser;
 	const {filterStyleCollection, filterStyleName} = PromptsBrowser.state;
 	const {EMPTY_CARD_GRADIENT, NEW_CARD_GRADIENT} = PromptsBrowser.params;
-	const activePrompts = PromptsBrowser.getCurrentPrompts();
+	//const activePrompts = PromptsBrowser.getCurrentPrompts();
 
 	let styles = [];
 
@@ -503,7 +503,7 @@ PromptsBrowser.styles.showStylesShort = (wrapper) => {
 		return 0;
 	});
 
-	const iteration = new Date().valueOf();
+	//const iteration = new Date().valueOf();
 
 	for(const style of styles) {
 		const {name, positive, id, index, previewImage} = style;
@@ -513,8 +513,9 @@ PromptsBrowser.styles.showStylesShort = (wrapper) => {
 		let url = EMPTY_CARD_GRADIENT;
 
 		if(previewImage) {
-			const safeFileName = PromptsBrowser.makeFileNameSafe(name);
-			url = `url('./file=styles_catalogue/${id}/preview/${safeFileName}.${previewImage}?${iteration}')`;
+			//const safeFileName = PromptsBrowser.makeFileNameSafe(name);
+			//url = `url('./file=styles_catalogue/${id}/preview/${safeFileName}.${previewImage}?${iteration}')`;
+            url = PromptsBrowser.utils.getStylePreviewURL(style);
 		}
 
 		const element = PromptsBrowser.showPromptItem({id: name}, {url});
@@ -652,9 +653,10 @@ PromptsBrowser.styles.showStyles = (wrapper) => {
 		updatePreview.className = "PBE_button";
 
 		if(previewImage) {
-			const safeFileName = PromptsBrowser.makeFileNameSafe(name);
-			const iteration = new Date().valueOf();
-			const url = `url('./file=styles_catalogue/${id}/preview/${safeFileName}.${previewImage}?${iteration}')`;
+			//const safeFileName = PromptsBrowser.makeFileNameSafe(name);
+			//const iteration = new Date().valueOf();
+			//const url = `url('./file=styles_catalogue/${id}/preview/${safeFileName}.${previewImage}?${iteration}')`;
+            url = PromptsBrowser.utils.getStylePreviewURL(style);
 
 			stylesItem.style.backgroundImage = url;
 		}

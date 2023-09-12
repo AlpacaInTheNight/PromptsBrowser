@@ -1,12 +1,10 @@
 #import subprocess
+from os.path import join, isdir
 from pydantic import BaseModel
-from modules.api.models import *
-from modules.api import api
-
 import gradio as gr
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import Response
+from fastapi.responses import FileResponse
 
 from server.initServer import initServer
 
@@ -18,6 +16,9 @@ from server.savePrompts import savePrompts
 from server.newCollection import newCollection
 from server.newStylesCollection import newStylesCollection
 from server.movePreview import movePreview
+
+from server.utils import emitMessage, getCollectionsDir
+from server.constant import PROMPTS_DIR, STYLES_DIR
 
 #subprocess.Popen("python extensions/PromptsBrowser/server/server.py")
 
@@ -54,6 +55,19 @@ initServer()
 
 def on_app_started(_: gr.Blocks, app: FastAPI):
     ROOT_URL = "/promptBrowser/"
+    collDir = getCollectionsDir()
+    pathPromptsCatalogue    = join(collDir, PROMPTS_DIR)
+    pathStylesCatalogue     = join(collDir, STYLES_DIR)
+
+    @app.get(ROOT_URL + "promptImage/{coll_id}/{prompt_id}")
+    async def get_prompt_image(coll_id, prompt_id):
+        url = join(pathPromptsCatalogue, coll_id, "preview", prompt_id)
+        return FileResponse(url)
+
+    @app.get(ROOT_URL + "styleImage/{coll_id}/{style_id}")
+    async def get_style_image(coll_id, style_id):
+        url = join(pathStylesCatalogue, coll_id, "preview", style_id)
+        return FileResponse(url)
 
     @app.get(ROOT_URL + "getPrompts")
     async def get_collections(): return getCollections()

@@ -215,6 +215,7 @@ PromptsBrowser.utils.collectionHavePreview = (prompt, collectionId) => {
 PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionId) => {
     const {EMPTY_CARD_GRADIENT, NEW_CARD_GRADIENT} = PromptsBrowser.params;
 	if(!prompt) return NEW_CARD_GRADIENT;
+    const apiUrl = PromptsBrowser.db.getAPIurl("promptImage");
 	
 	const {united} = PromptsBrowser.data;
 	const {state} = PromptsBrowser;
@@ -241,13 +242,29 @@ PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionId) => {
 
 	const safeFileName = PromptsBrowser.makeFileNameSafe(prompt);
 
-	const url = `url("./file=prompts_catalogue/${collectionId}/preview/${safeFileName}.${fileExtension}?${state.filesIteration}"), ${EMPTY_CARD_GRADIENT}`;
+	//const url = `url("./file=prompts_catalogue/${collectionId}/preview/${safeFileName}.${fileExtension}?${state.filesIteration}"), ${EMPTY_CARD_GRADIENT}`;
+	const url = `url("${apiUrl}/${collectionId}/${safeFileName}.${fileExtension}?${state.filesIteration}"), ${EMPTY_CARD_GRADIENT}`;
 	return url;
+}
+
+PromptsBrowser.utils.getStylePreviewURL = (style) => {
+    const {state} = PromptsBrowser;
+    const {EMPTY_CARD_GRADIENT, NEW_CARD_GRADIENT} = PromptsBrowser.params;
+    if(!style) return NEW_CARD_GRADIENT;
+    const {name, id, previewImage} = style;
+    if(!name || !id || !previewImage) return NEW_CARD_GRADIENT;
+
+    const apiUrl = PromptsBrowser.db.getAPIurl("styleImage");
+
+    const safeFileName = PromptsBrowser.makeFileNameSafe(name);
+
+    const url = `url("${apiUrl}/${id}/${safeFileName}.${previewImage}?${state.filesIteration}"), ${EMPTY_CARD_GRADIENT}`;
+    return url;
 }
 
 PromptsBrowser.db.createNewCollection = (id, mode = "short") => {
 	if(!id) return;
-    const url = PromptsBrowser.db.getURL("newCollection");
+    const url = PromptsBrowser.db.getAPIurl("newCollection");
 
 	(async () => {
 		const rawResponse = await fetch(url, {
@@ -268,7 +285,7 @@ PromptsBrowser.db.createNewCollection = (id, mode = "short") => {
 
 PromptsBrowser.db.createNewStylesCollection = (id, mode = "short") => {
 	if(!id) return;
-    const url = PromptsBrowser.db.getURL("newStylesCollection");
+    const url = PromptsBrowser.db.getAPIurl("newStylesCollection");
 
 	(async () => {
 		const rawResponse = await fetch(url, {
@@ -289,7 +306,7 @@ PromptsBrowser.db.createNewStylesCollection = (id, mode = "short") => {
 
 PromptsBrowser.db.movePreviewImage = (item, movefrom, to, type) => {
 	const {state} = PromptsBrowser;
-    const url = PromptsBrowser.db.getURL("movePreview");
+    const url = PromptsBrowser.db.getAPIurl("movePreview");
 
 	(async () => {
 		const rawResponse = await fetch(url, {
@@ -314,7 +331,7 @@ PromptsBrowser.db.saveJSONData = (collectionId, noClear = false, noUpdate = fals
 	const targetData = PromptsBrowser.data.original[collectionId];
 	if(!targetData) return;
 
-    const url = PromptsBrowser.db.getURL("savePrompts");
+    const url = PromptsBrowser.db.getAPIurl("savePrompts");
 
 	(async () => {
 		const rawResponse = await fetch(url, {
@@ -338,7 +355,7 @@ PromptsBrowser.db.savePromptPreview = (callUpdate = true) => {
 	const {state} = PromptsBrowser;
 	const {united} = PromptsBrowser.data;
 	const {selectedPrompt, savePreviewCollection, currentContainer} = state;
-    const url = PromptsBrowser.db.getURL("savePreview");
+    const url = PromptsBrowser.db.getAPIurl("savePreview");
 
 	const imageArea = PromptsBrowser.DOMCache.containers[currentContainer].imageArea;
 	if(!imageArea) return;
@@ -448,7 +465,7 @@ PromptsBrowser.db.onUpdateStylePreview = (e) => {
 
 	const imageExtension = src.split('.').pop();
 
-    const url = PromptsBrowser.db.getURL("saveStylePreview");
+    const url = PromptsBrowser.db.getAPIurl("saveStylePreview");
 
 	(async () => {
 		const saveData = {src, style: styleId, collection: collectionId};
@@ -484,7 +501,7 @@ PromptsBrowser.db.updateStyles = (collectionId) => {
 	const targetData = PromptsBrowser.data.styles[collectionId];
 	if(!targetData) return;
 
-    const url = PromptsBrowser.db.getURL("saveStyles");
+    const url = PromptsBrowser.db.getAPIurl("saveStyles");
 
 	(async () => {
 		const rawResponse = await fetch(url, {
@@ -731,7 +748,7 @@ PromptsBrowser.db.updateMixedList = () => {
 	PromptsBrowser.data.united = unitedList;
 }
 
-PromptsBrowser.db.getURL = (endpoint) => {
+PromptsBrowser.db.getAPIurl = (endpoint) => {
     const DEV_SERVER = "http://127.0.0.1:3000/";
     const USER_SERVER = window.location.origin + "/promptBrowser/";
 
@@ -742,7 +759,7 @@ PromptsBrowser.db.getURL = (endpoint) => {
 }
 
 PromptsBrowser.db.loadDatabase = () => {
-    const url = PromptsBrowser.db.getURL("getPrompts")
+    const url = PromptsBrowser.db.getAPIurl("getPrompts")
     
 	fetch(url, {
 		method: 'GET',

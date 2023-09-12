@@ -32,7 +32,6 @@ def makeFileNameSafe(fileName: str):
 def getCollectionsDir():
     extensionDir = dirname(dirname(abspath(__file__)))
     if not extensionDir: return False
-    print(extensionDir)
 
     return extensionDir
 
