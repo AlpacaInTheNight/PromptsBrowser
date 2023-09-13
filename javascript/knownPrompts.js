@@ -191,6 +191,7 @@ PromptsBrowser.knownPrompts.onDrop = (e) => {
 }
 
 PromptsBrowser.knownPrompts.onPromptClick = (e) => {
+    const {readonly} = PromptsBrowser.meta;
 	const {united} = PromptsBrowser.data;
 	const {state} = PromptsBrowser;
 
@@ -200,14 +201,14 @@ PromptsBrowser.knownPrompts.onPromptClick = (e) => {
 	const targetItem = united.find(item => item.id === promptItem);
 	if(!targetItem) return;
 
-	if(e.shiftKey) {
+	if(!readonly && e.shiftKey) {
 		state.editingPrompt = promptItem;
 		PromptsBrowser.promptEdit.update();
 
 		return;
 	}
 
-	if(e.metaKey || e.ctrlKey) {
+	if(!readonly && (e.metaKey || e.ctrlKey) ) {
 		let targetCollection = state.filterCollection;
 		if(!targetCollection) {
 			
@@ -237,6 +238,7 @@ PromptsBrowser.knownPrompts.onPromptClick = (e) => {
 }
 
 PromptsBrowser.knownPrompts.showHeader = (wrapper, params = {}) => {
+    const {readonly} = PromptsBrowser.meta;
     const {holdTagsInput = false} = params;
 	const {state} = PromptsBrowser;
 
@@ -352,12 +354,15 @@ PromptsBrowser.knownPrompts.showHeader = (wrapper, params = {}) => {
         PromptsBrowser.knownPrompts.update();
     });
 
-	collectionToolsButton.addEventListener("click", (e) => {
-		if(state.filterCollection) state.collectionToolsId = state.filterCollection;
-		PromptsBrowser.collectionTools.update();
-	});
-
-	headerContainer.appendChild(collectionToolsButton);
+    if(!readonly) {
+        collectionToolsButton.addEventListener("click", (e) => {
+            if(state.filterCollection) state.collectionToolsId = state.filterCollection;
+            PromptsBrowser.collectionTools.update();
+        });
+    
+        headerContainer.appendChild(collectionToolsButton);
+    }
+	
 	headerContainer.appendChild(collectionSelector);
 	headerContainer.appendChild(categorySelector);
 	headerContainer.appendChild(tagsInput);
@@ -372,6 +377,7 @@ PromptsBrowser.knownPrompts.showHeader = (wrapper, params = {}) => {
 }
 
 PromptsBrowser.knownPrompts.update = (params) => {
+    const {readonly} = PromptsBrowser.meta;
 	const {united} = PromptsBrowser.data;
 	const {state, makeElement} = PromptsBrowser;
     const {showPromptIndex = false} = state.config;
@@ -483,11 +489,14 @@ PromptsBrowser.knownPrompts.update = (params) => {
 		promptElement.appendChild(splashElement);
 		promptElement.innerHTML += id;
 
-		promptElement.addEventListener("dragstart", PromptsBrowser.knownPrompts.onDragStart);
-		promptElement.addEventListener("dragover", PromptsBrowser.knownPrompts.onDragOver);
-		promptElement.addEventListener("dragenter", PromptsBrowser.knownPrompts.onDragEnter);
-		promptElement.addEventListener("dragleave", PromptsBrowser.knownPrompts.onDragLeave);
-		promptElement.addEventListener("drop", PromptsBrowser.knownPrompts.onDrop);
+        if(!readonly) {
+            promptElement.addEventListener("dragstart", PromptsBrowser.knownPrompts.onDragStart);
+            promptElement.addEventListener("dragover", PromptsBrowser.knownPrompts.onDragOver);
+            promptElement.addEventListener("dragenter", PromptsBrowser.knownPrompts.onDragEnter);
+            promptElement.addEventListener("dragleave", PromptsBrowser.knownPrompts.onDragLeave);
+            promptElement.addEventListener("drop", PromptsBrowser.knownPrompts.onDrop);
+        }
+
 		promptElement.addEventListener("click", PromptsBrowser.knownPrompts.onPromptClick);
 		promptElement.addEventListener("mouseover", PromptsBrowser.onPromptCardHover);
 

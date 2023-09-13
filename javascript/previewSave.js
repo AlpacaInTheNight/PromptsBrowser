@@ -11,9 +11,10 @@ PromptsBrowser.previewSave.init = (wrapper, containerId) => {
 }
 
 PromptsBrowser.previewSave.update = () => {
+    const {readonly} = PromptsBrowser.meta;
 	const {state} = PromptsBrowser;
 	const wrapper = PromptsBrowser.DOMCache.containers[state.currentContainer].savePromptWrapper;
-	if(!wrapper) return;
+	if(readonly || !wrapper) return;
 	wrapper.innerHTML = "";
 
 	if(!state.selectedPrompt) return;

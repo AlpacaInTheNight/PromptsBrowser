@@ -20,6 +20,8 @@ PromptsBrowser.promptScribe.init = (wrapper) => {
 }
 
 PromptsBrowser.promptScribe.initButton = (positiveWrapper) => {
+    const {readonly} = PromptsBrowser.meta;
+    if(readonly) return;
 	const addUnknownButton = document.createElement("button");
 
 	addUnknownButton.className = "PBE_actionButton PBE_addUnknownButton";

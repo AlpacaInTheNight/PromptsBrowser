@@ -5,7 +5,7 @@ from os.path import join, isdir, isfile
 from . import constant
 from .utils import emitMessage, getCollectionsDir, makeFileNameSafe
 
-def getCollections():
+def getCollections(isReadOnly):
     collDir = getCollectionsDir()
     pathPromptsCatalogue    = join(collDir, constant.PROMPTS_DIR)
     pathStylesCatalogue     = join(collDir, constant.STYLES_DIR)
@@ -14,6 +14,8 @@ def getCollections():
         "prompts": {},
         "styles": {}
     }
+
+    if isReadOnly: dataList["readonly"] = True
 
     #getting promopt collections
     promptsDirs = os.listdir(pathPromptsCatalogue)

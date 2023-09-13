@@ -12,10 +12,13 @@ PromptsBrowser.currentPrompts.init = (wrapper, containerId) => {
 }
 
 PromptsBrowser.currentPrompts.initButton = (positiveWrapper) => {
+    const {readonly} = PromptsBrowser.meta;
 	const normalizeButton = document.createElement("button");
 
 	normalizeButton.className = "PBE_actionButton PBE_normalizeButton";
 	normalizeButton.innerText = "Normalize";
+
+    if(readonly) normalizeButton.className = "PBE_actionButton PBE_normalizeButton_readonly";
 
 	normalizeButton.addEventListener("click", PromptsBrowser.currentPrompts.onNormalizePrompts);
 
@@ -23,6 +26,7 @@ PromptsBrowser.currentPrompts.initButton = (positiveWrapper) => {
 }
 
 PromptsBrowser.currentPrompts.onPromptSelected = (e) => {
+    const {readonly} = PromptsBrowser.meta;
     const {united} = PromptsBrowser.data;
     const {state} = PromptsBrowser;
     const currentId = e.currentTarget.dataset.prompt;
@@ -47,7 +51,7 @@ PromptsBrowser.currentPrompts.onPromptSelected = (e) => {
         return;
     }
 
-    if(e.shiftKey) {
+    if(!readonly && e.shiftKey) {
         if(targetPrompt) {
             state.editingPrompt = currentId;
             PromptsBrowser.promptEdit.update();

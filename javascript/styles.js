@@ -182,9 +182,10 @@ PromptsBrowser.styles.onSaveStyle = () => {
 }
 
 PromptsBrowser.styles.removeStyle = (e) => {
+    const {readonly} = PromptsBrowser.meta;
 	const {data} = PromptsBrowser;
 	const {state} = PromptsBrowser;
-	if(!data.styles) return;
+	if(readonly || !data.styles) return;
 
 	let collectionId = undefined;
 	let index = undefined;
@@ -534,6 +535,7 @@ PromptsBrowser.styles.showStylesShort = (wrapper) => {
 }
 
 PromptsBrowser.styles.showActions = (wrapper) => {
+    const {readonly} = PromptsBrowser.meta;
 
 	const actionContainer = document.createElement("fieldset");
 	actionContainer.className = "PBE_fieldset";
@@ -558,7 +560,6 @@ PromptsBrowser.styles.showActions = (wrapper) => {
 	actionContainer.appendChild(actionLegend);
 	actionContainer.appendChild(addBeforeButton);
 	actionContainer.appendChild(addAfterButton);
-
 
 	const editContainer = document.createElement("fieldset");
 	editContainer.className = "PBE_fieldset";
@@ -599,13 +600,16 @@ PromptsBrowser.styles.showActions = (wrapper) => {
 	systemContainer.appendChild(systemLegend);
 	systemContainer.appendChild(deleteButton);
 
-
 	wrapper.appendChild(actionContainer);
-	wrapper.appendChild(editContainer);
-	wrapper.appendChild(systemContainer);
+
+    if(!readonly) {
+        wrapper.appendChild(editContainer);
+        wrapper.appendChild(systemContainer);
+    }
 }
 
 PromptsBrowser.styles.showStyles = (wrapper) => {
+    const {readonly} = PromptsBrowser.meta;
 	const {data} = PromptsBrowser;
 	const {state} = PromptsBrowser;
 	const {filterStyleCollection, filterStyleName} = state;
@@ -714,14 +718,17 @@ PromptsBrowser.styles.showStyles = (wrapper) => {
 
 		actionsContainer.appendChild(addBeforeButton);
 		if(activePrompts && activePrompts.length) actionsContainer.appendChild(addAfterButton);
-		actionsContainer.appendChild(removeButton);
-		if(activePrompts && activePrompts.length) actionsContainer.appendChild(updateButton);
+
+        if(!readonly) {
+            actionsContainer.appendChild(removeButton);
+            if(activePrompts && activePrompts.length) actionsContainer.appendChild(updateButton);
+        }
 
 		contentContainer.appendChild(currentPromptsContainer);
 		contentContainer.appendChild(actionsContainer);
 
 		styleHeader.appendChild(nameContainer);
-		styleHeader.appendChild(updatePreview);
+		if(!readonly) styleHeader.appendChild(updatePreview);
 
 		stylesItem.appendChild(styleHeader);
 		stylesItem.appendChild(contentContainer);
@@ -732,6 +739,7 @@ PromptsBrowser.styles.showStyles = (wrapper) => {
 }
 
 PromptsBrowser.styles.update = () => {
+    const {readonly} = PromptsBrowser.meta;
     const {state, makeElement} = PromptsBrowser;
 	const wrapper = PromptsBrowser.DOMCache.stylesWindow;
 	if(!wrapper || !state.showStylesWindow) return;
@@ -752,8 +760,10 @@ PromptsBrowser.styles.update = () => {
 
     const addNewContainer = makeElement({element: "div", className: "PBE_row"});
 
-	PromptsBrowser.styles.showCurrentPrompts(currentPromptsBlock);
-	PromptsBrowser.styles.showAddStyle(addNewContainer);
+    if(!readonly) {
+        PromptsBrowser.styles.showCurrentPrompts(currentPromptsBlock);
+        PromptsBrowser.styles.showAddStyle(addNewContainer);
+    }
 
 	if(isShort) {
 		possibleStylesBlock.className = "PBE_dataBlock PBE_Scrollbar PBE_windowContent";
@@ -772,8 +782,11 @@ PromptsBrowser.styles.update = () => {
 	filterBlock.className = "PBE_row PBE_stylesFilter";
 	PromptsBrowser.styles.showFilters(filterBlock);
 
-	wrapper.appendChild(currentPromptsBlock);
-	wrapper.appendChild(addNewContainer);
+    if(!readonly) {
+        wrapper.appendChild(currentPromptsBlock);
+        wrapper.appendChild(addNewContainer);
+    }
+
 	wrapper.appendChild(filterBlock);
 	wrapper.appendChild(possibleStylesBlock);
 

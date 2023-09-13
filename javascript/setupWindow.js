@@ -346,6 +346,7 @@ PromptsBrowser.setupWindow.showNewStylesCollection = (wrapper) => {
 }
 
 PromptsBrowser.setupWindow.update = () => {
+    const {readonly} = PromptsBrowser.meta;
 	const {viewMode} = PromptsBrowser.setupWindow;
 	const {state, makeElement} = PromptsBrowser;
 	const wrapper = PromptsBrowser.DOMCache.setupWindow;
@@ -372,7 +373,7 @@ PromptsBrowser.setupWindow.update = () => {
 		PromptsBrowser.setupWindow.showNewStylesCollection(contentBlock);
 
 	} else {
-		PromptsBrowser.setupWindow.showCreateNew(contentBlock);
+		if(!readonly) PromptsBrowser.setupWindow.showCreateNew(contentBlock);
 		PromptsBrowser.setupWindow.showWeightSetup(contentBlock);
 		PromptsBrowser.setupWindow.showNormalizeSetup(contentBlock);
 		PromptsBrowser.setupWindow.showPromptCardsSetup(contentBlock);

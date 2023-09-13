@@ -765,11 +765,13 @@ PromptsBrowser.db.loadDatabase = () => {
 		method: 'GET',
 	}).then(data => data.json()).then(res => {
 		if(!res || !res.prompts) return; //TODO: process server error here
-		const {prompts, styles} = res;
+		const {prompts, styles, readonly = false} = res;
 
 		PromptsBrowser.data.styles = styles;
 		PromptsBrowser.data.original = prompts;
 		PromptsBrowser.db.updateMixedList();
+
+        PromptsBrowser.meta.readonly = readonly;
 	});
 }
 
