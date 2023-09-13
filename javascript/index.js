@@ -406,16 +406,6 @@ PromptsBrowser.db.savePromptPreview = (callUpdate = true) => {
 
 	originalItem.previewImage = imageExtension;
 
-	if(callUpdate) {
-		state.selectedPrompt = undefined;
-		state.filesIteration++;
-		PromptsBrowser.db.updateMixedList();
-		
-		PromptsBrowser.previewSave.update();
-		PromptsBrowser.knownPrompts.update();
-		PromptsBrowser.currentPrompts.update(true);
-	}
-
 	(async () => {
 
 		const rawResponse = await fetch(url, {
@@ -426,7 +416,17 @@ PromptsBrowser.db.savePromptPreview = (callUpdate = true) => {
 			},
 			body: JSON.stringify(saveData)
 		});
-		//const content = await rawResponse.json();
+		const answer = await rawResponse.json();
+
+        if(answer === "ok" && callUpdate) {
+            state.selectedPrompt = undefined;
+            state.filesIteration++;
+            PromptsBrowser.db.updateMixedList();
+            
+            PromptsBrowser.previewSave.update();
+            PromptsBrowser.knownPrompts.update();
+            PromptsBrowser.currentPrompts.update(true);
+        }
 
 	})();
 }
