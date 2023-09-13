@@ -30,7 +30,7 @@ As of version 1.1.0, the extension now works via FastAPI and no longer depends o
 
 3. On first run in the Prompts Browser Extension directory will be created directory `prompts_catalogue` with subdirectory `myprompts` - this will be the first collection of prompts. As well as the directory `styles_catalogue` where new styles will be stored.
 
-4. With the extension installed, you can add the startup argument stable diffusion `--prompts-browser-readonly`. With this argument, the extension client and server will be read-only, which may be desirable when using the extension when hosting the application online. 
+4. With the extension installed, you can add the startup argument to Stable Diffusion WebUI `--prompts-browser-readonly`. With this argument, the extension client and server will be read-only, which may be desirable when using the extension when hosting the application online. 
 
 ### Important
 
