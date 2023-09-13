@@ -1,4 +1,4 @@
-# Prompts Browser Extension 1.0.0
+# Prompts Browser Extension 1.1.0
 Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui).
 
 1. [Installation](#installation)
@@ -17,15 +17,20 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 
 ![](img/preview.jpg)
 
+### Changes in 1.1.0
+⚠️ Previous versions stored collections in the root of the application. Since version 1.1.0 they are now stored in the extension directory. If you used previous versions, you will need to move your collections there. ⚠️
+
+As of version 1.1.0, the extension now works via FastAPI and no longer depends on an additional local server or extension installation location. This will cover more use cases and customizations of the application.
+
 ## Installation:
 
-1. Make sure you have the latest AUTOMATIC1111/stable-diffusion-webui version instaled. Prompt Browser 1.0.0 was tested and adapted for WebUI versions 1.5.1 - 1.6.0.
+1. Make sure you have the latest AUTOMATIC1111/stable-diffusion-webui version instaled. Prompt Browser 1.1.0 was tested and adapted for WebUI versions 1.6.0.
 
-2. Unzip/clone the plugin into the `extensions/PromptsBrowser` directory. Or install it using WebUI Extensions -> Install from URL tab. 
-   
-3. If installing from WebUI do not change the extension directory and stop Stable Diffusion and start it again.
+2. Unzip/clone the plugin into the extensions directory. Or install it using WebUI Extensions -> Install from URL tab.
 
-5. In the stable-diffusion webUI directory will be created directory `prompts_catalogue` with subdirectory `myprompts` - this will be the first collection of prompts. As well as the directory `styles_catalogue` where new styles will be stored.
+3. On first run in the Prompts Browser Extension directory will be created directory `prompts_catalogue` with subdirectory `myprompts` - this will be the first collection of prompts. As well as the directory `styles_catalogue` where new styles will be stored.
+
+4. With the extension installed, you can add the startup argument stable diffusion `--prompts-browser-readonly`. With this argument, the extension client and server will be read-only, which may be desirable when using the extension when hosting the application online. 
 
 ### Important
 
@@ -37,7 +42,7 @@ This extension modifies the DOM directly, without working through any API for su
 
 ### Known Prompts Browser
 
-1. The known prompts browser will display all known prompts from all the collections added to the `prompts_catalogue` folder.
+1. The known prompts browser will display all known prompts from all the collections added to the `prompts_catalogue` directory.
 
 2. `Click` on a prompt to add it to the active prompts.
 
@@ -66,7 +71,7 @@ This extension modifies the DOM directly, without working through any API for su
 
 ### Adding new prompts to the collection
 
-1. Enter text in the text box - the text will be divided by the presence of a comma in the prompts in the text box. If you click on the icon of a prompt, it will become the selected one. Now you can generate an image and if any of the currently active prompts is selected there will be a button `Save preview` above the generated image. By saving the preview, it will be added to the collection, and the preview image for that sample will be added to the collection's `preview` folder.
+1. Enter text in the text box - the text will be divided by the presence of a comma in the prompts in the text box. If you click on the icon of a prompt, it will become the selected one. Now you can generate an image and if any of the currently active prompts is selected there will be a button `Save preview` above the generated image. By saving the preview, it will be added to the collection, and the preview image for that sample will be added to the collection's `preview` directory.
 ![](img/savePreview.jpg)
 
 2. The `Add unknown` button above the Prompts entry field opens a window for adding new prompts. In this window you can select new prompts and a collection of prompts, where you can add them with the `Add new prompts` button. The `Toggle all` button selects or deselects all new proppts. The `All collections` toggle switches on or off the check for all possible collections (by default, it is on and only those prompts that are not in any of the possible collections will be displayed).
@@ -200,9 +205,9 @@ This extension modifies the DOM directly, without working through any API for su
 
 1. `New styles collections` - will open creation of the new styles collection.
 
-1. `Collection name` - name of the collection. A folder with the same name will be created.
+1. `Collection name` - name of the collection. A directory with the same name will be created.
 
-1. `Store format` - the way prompts/styles are stored. In the `short` format all prompts/styles data will be saved in the file `data.json`. In the `expanded` format a folder `prompts`/`styles` will be added to the collection folder and every prompt/style will be stored as a separate file. The expanded format makes it easier to work with the collection when using version control systems like Git.
+1. `Store format` - the way prompts/styles are stored. In the `short` format all prompts/styles data will be saved in the file `data.json`. In the `expanded` format a directory `prompts`/`styles` will be added to the collection directory and every prompt/style will be stored as a separate file. The expanded format makes it easier to work with the collection when using version control systems like Git.
 
 1. `Below 1 scroll weight` - how much weight one mouse wheel movement will change when below weight 1.
 
@@ -224,7 +229,7 @@ This extension modifies the DOM directly, without working through any API for su
 
 ### Collections database
 
-This extension does not come with a pre-built prompts database. It is up to the user to choose a ready-made database or create their own. Remember that collections goes into the **prompts_catalogue** folder inside your Stable Diffusion Web UI directory. This directory is being crated after at least one start of SDWebUI with the installed Prompts Browser Extension.
+This extension does not come with a pre-built prompts database. It is up to the user to choose a ready-made database or create their own. Remember that collections goes into the **prompts_catalogue** directory inside your Stable Diffusion Web UI directory. This directory is being crated after at least one start of SDWebUI with the installed Prompts Browser Extension.
 
 Some existing collections:
 
