@@ -340,6 +340,10 @@
 	text-transform: capitalize;
 }
 
+.PBE_promptEditSingleCollection {
+    padding: 0 10px;
+}
+
 .PBE_promptEdit select{
 	color: black;
 }

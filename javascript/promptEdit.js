@@ -75,13 +75,22 @@ PromptsBrowser.promptEdit.onChangeAutogenStyle = (value, prompt) => {
 }
 
 PromptsBrowser.promptEdit.addCollectionSelector = (wrapper) => {
+    const {state, data, makeElement, makeSelect} = PromptsBrowser;
 	const {united} = PromptsBrowser.data;
-	const {state} = PromptsBrowser;
 	const targetItem = united.find(item => item.id === state.editingPrompt);
 	if(!targetItem) return;
 
 	if(!targetItem.collections) return;
-	if(targetItem.collections.length === 1) return;
+	if(targetItem.collections.length === 1) {
+        const collName = targetItem.collections[0];
+        const singleCollName = makeElement({
+            element: "div",
+            content: collName,
+            className: "PBE_promptEditSingleCollection"
+        });
+        wrapper.appendChild(singleCollName);
+        return;
+    }
 
 	const collectionSelect = document.createElement("select");
 
