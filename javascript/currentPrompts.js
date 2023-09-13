@@ -22,6 +22,61 @@ PromptsBrowser.currentPrompts.initButton = (positiveWrapper) => {
 	positiveWrapper.appendChild(normalizeButton);
 }
 
+PromptsBrowser.currentPrompts.onPromptSelected = (e) => {
+    const {united} = PromptsBrowser.data;
+    const {state} = PromptsBrowser;
+    const currentId = e.currentTarget.dataset.prompt;
+    const activePrompts = PromptsBrowser.getCurrentPrompts();
+	const wrapper = PromptsBrowser.DOMCache.containers[state.currentContainer].currentPrompts;
+	if(!wrapper) return;
+    if(!currentId) return;
+
+    const targetPrompt = united.find(item => item.id.toLowerCase() === currentId.toLowerCase());
+
+    if(targetPrompt && targetPrompt.collections && targetPrompt.collections[0]) {
+        if(!state.savePreviewCollection || !targetPrompt.collections.includes(state.savePreviewCollection)) {
+            state.savePreviewCollection = targetPrompt.collections[0];
+            PromptsBrowser.previewSave.update();
+        }
+    }
+
+    if(e.ctrlKey || e.metaKey) {
+        PromptsBrowser.setCurrentPrompts(activePrompts.filter(item => item.id !== currentId));
+        PromptsBrowser.currentPrompts.update();
+
+        return;
+    }
+
+    if(e.shiftKey) {
+        if(targetPrompt) {
+            state.editingPrompt = currentId;
+            PromptsBrowser.promptEdit.update();
+
+        } else {
+            PromptsBrowser.promptScribe.onOpenScriber();
+            
+        }
+
+        return;
+    }
+
+    const selectedElements = wrapper.querySelectorAll(".PBE_selectedCurrentElement");
+    for(let i = 0; i < selectedElements.length; ++i) {
+        selectedElements[i].classList.remove("PBE_selectedCurrentElement");
+    }
+
+    if(state.selectedPrompt !== currentId) {
+        e.currentTarget.classList.add("PBE_selectedCurrentElement");
+        state.selectedPrompt = currentId;
+
+    } else {
+        state.selectedPrompt = undefined;
+        
+    }
+    
+    PromptsBrowser.previewSave.update();
+}
+
 PromptsBrowser.currentPrompts.scrollWeight = (e) => {
 	const {state} = PromptsBrowser;
 	const {belowOneWeight = 0.05, aboveOneWeight = 0.01} = state.config;
@@ -141,49 +196,7 @@ PromptsBrowser.currentPrompts.update = (noTextAreaUpdate = false) => {
 			PromptsBrowser.currentPrompts.update();
 		});
 
-		promptElement.addEventListener("click", (e) => {
-			const currentId = e.currentTarget.dataset.prompt;
-			if(!currentId) return;
-
-			if(e.ctrlKey || e.metaKey) {
-				PromptsBrowser.setCurrentPrompts(activePrompts.filter(item => item.id !== currentId));
-				PromptsBrowser.currentPrompts.update();
-
-				return;
-			}
-
-            if(e.shiftKey) {
-                const {united} = PromptsBrowser.data;
-                targetPrompt = united.find(item => item.id.toLowerCase() === currentId.toLowerCase());
-
-                if(targetPrompt) {
-                    state.editingPrompt = currentId;
-                    PromptsBrowser.promptEdit.update();
-
-                } else {
-                    PromptsBrowser.promptScribe.onOpenScriber();
-                    
-                }
-
-                return;
-            }
-
-			const selectedElements = wrapper.querySelectorAll(".PBE_selectedCurrentElement");
-			for(let i = 0; i < selectedElements.length; ++i) {
-				selectedElements[i].classList.remove("PBE_selectedCurrentElement");
-			}
-
-			if(state.selectedPrompt !== currentId) {
-				e.currentTarget.classList.add("PBE_selectedCurrentElement");
-				state.selectedPrompt = currentId;
-
-			} else {
-				state.selectedPrompt = undefined;
-				
-			}
-			
-			PromptsBrowser.previewSave.update();
-		});
+		promptElement.addEventListener("click", PromptsBrowser.currentPrompts.onPromptSelected);
 
 		promptElement.addEventListener("dblclick", (e) => {
 			const currentId = e.currentTarget.dataset.prompt;
