@@ -27,7 +27,7 @@ window.PromptsBrowser.makeCheckbox = function(params) {
 
     const checkBox = makeElement({...params, element: "input", type: "checkbox"});
     const boxTitle = makeElement({element: "label", content: title, title});
-	checkBox.checked = checked;
+    checkBox.checked = checked;
 
     wrapper.appendChild(checkBox);
     wrapper.appendChild(boxTitle);
@@ -40,7 +40,7 @@ window.PromptsBrowser.makeCheckbox = function(params) {
     }
 
     if(data) checkBox.dataset.id = data;
-	
+    
     return wrapper;
 }
 
@@ -55,11 +55,11 @@ window.PromptsBrowser.makeSelect = function(params) {
 
     let htmlOptions = "";
     for(const option of options) {
-		htmlOptions += `<option value="${option.id}">${option.name}</option>`;
-	}
+        htmlOptions += `<option value="${option.id}">${option.name}</option>`;
+    }
 
     selectElement.innerHTML = htmlOptions;
     selectElement.value = value;
-	
+    
     return selectElement;
 }
