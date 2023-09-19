@@ -1,10 +1,20 @@
 
 if(!window.PromptsBrowser) window.PromptsBrowser = {};
 
+/**
+ * Extension setup window.
+ */
 PromptsBrowser.setupWindow = {};
 
+/**
+ * Shown Setup window tab
+ */
 PromptsBrowser.setupWindow.viewMode = "normal";
 
+/**
+ * Inits Setup window HTML on page, loads config data.
+ * @param {*} wrapper 
+ */
 PromptsBrowser.setupWindow.init = (wrapper) => {
     const {state} = PromptsBrowser;
 
@@ -27,6 +37,10 @@ PromptsBrowser.setupWindow.init = (wrapper) => {
     });
 }
 
+/**
+ * Closes Setup window
+ * @returns 
+ */
 PromptsBrowser.setupWindow.onCloseWindow = () => {
     const {viewMode} = PromptsBrowser.setupWindow;
     const wrapper = PromptsBrowser.DOMCache.setupWindow;
@@ -38,6 +52,14 @@ PromptsBrowser.setupWindow.onCloseWindow = () => {
         return true;
 
     } else wrapper.style.display = "none";
+}
+
+PromptsBrowser.setupWindow.onChangeAutocompliteType = (e) => {
+    const {state} = PromptsBrowser;
+    const mode = e.currentTarget.value;
+
+    state.config.autocomplitePromptMode = mode;
+    localStorage.setItem("PBE_config", JSON.stringify(state.config));
 }
 
 PromptsBrowser.setupWindow.onChangeShowIndex = (e) => {
@@ -120,20 +142,28 @@ PromptsBrowser.setupWindow.onCreate = (e) => {
     PromptsBrowser.setupWindow.update();
 }
 
+/**
+ * Shows block with create new collection buttons
+ * @param {*} wrapper 
+ */
 PromptsBrowser.setupWindow.showCreateNew = (wrapper) => {
-    const buttonsBlock = document.createElement("div");
-    const newCollection = document.createElement("button");
-    const newStylesCollection = document.createElement("button");
+    const {makeElement} = PromptsBrowser;
 
-    newCollection.innerText = "New prompts collection";
-    newStylesCollection.innerText = "New styles collection";
+    const buttonsBlock = makeElement({element: "div", className: "PBE_row",
+        style: {
+            justifyContent: "space-around",
+            marginBottom: "20px",
+            marginTop: "5px",
+        }
+    });
 
-    buttonsBlock.className = "PBE_row";
-    buttonsBlock.style.justifyContent = "space-around";
-    buttonsBlock.style.marginBottom = "20px";
-    buttonsBlock.style.marginTop = "5px";
-    newCollection.className = "PBE_button";
-    newStylesCollection.className = "PBE_button";
+    const newCollection = makeElement({
+        element: "button", className: "PBE_button", content: "New prompts collection"
+    });
+
+    const newStylesCollection = makeElement({
+        element: "button", className: "PBE_button", content: "New styles collection"
+    });
 
     newCollection.addEventListener("click", () => {
         PromptsBrowser.setupWindow.viewMode = "newCollection";
@@ -148,6 +178,36 @@ PromptsBrowser.setupWindow.showCreateNew = (wrapper) => {
     buttonsBlock.appendChild(newCollection);
     buttonsBlock.appendChild(newStylesCollection);
     wrapper.appendChild(buttonsBlock);
+}
+
+PromptsBrowser.setupWindow.showIntegrationSetup = (wrapper) => {
+    const {makeElement, makeSelect} = PromptsBrowser;
+    const {autocomplitePromptMode = "prompts"} = PromptsBrowser.state.config;
+
+    const autocompliteTypeBlock = makeElement({
+        element: "div",
+        className: "PBE_rowBlock",
+        title: "Prompt autocomplite in the textarea behavior",
+        style: {maxWidth: "none"}
+    });
+
+    const autocompliteTypeText = makeElement({element: "div", content: "Autocomplite mode"});
+    const autocompliteTypeSelect = makeSelect({
+        className: "PBE_select",
+        value: autocomplitePromptMode,
+        onChange: PromptsBrowser.setupWindow.onChangeAutocompliteType,
+        options: [
+            {id: "off", name: "Off"},
+            {id: "prompts", name: "Prompts only"},
+            {id: "styles", name: "Styles only"},
+            {id: "all", name: "Prompts and styles"},
+        ]
+    });
+
+    autocompliteTypeBlock.appendChild(autocompliteTypeText);
+    autocompliteTypeBlock.appendChild(autocompliteTypeSelect);
+
+    wrapper.appendChild(autocompliteTypeBlock);
 }
 
 PromptsBrowser.setupWindow.showWeightSetup = (wrapper) => {
@@ -374,6 +434,8 @@ PromptsBrowser.setupWindow.update = () => {
 
     } else {
         if(!readonly) PromptsBrowser.setupWindow.showCreateNew(contentBlock);
+
+        PromptsBrowser.setupWindow.showIntegrationSetup(contentBlock);
         PromptsBrowser.setupWindow.showWeightSetup(contentBlock);
         PromptsBrowser.setupWindow.showNormalizeSetup(contentBlock);
         PromptsBrowser.setupWindow.showPromptCardsSetup(contentBlock);

@@ -483,8 +483,7 @@ PromptsBrowser.styles.showFilters = (wrapper) => {
 PromptsBrowser.styles.showStylesShort = (wrapper) => {
     const {data} = PromptsBrowser;
     const {filterStyleCollection, filterStyleName} = PromptsBrowser.state;
-    const {EMPTY_CARD_GRADIENT, NEW_CARD_GRADIENT} = PromptsBrowser.params;
-    //const activePrompts = PromptsBrowser.getCurrentPrompts();
+    const {EMPTY_CARD_GRADIENT} = PromptsBrowser.params;
 
     let styles = [];
 

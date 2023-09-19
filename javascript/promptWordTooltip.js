@@ -1,5 +1,8 @@
 if(!window.PromptsBrowser) window.PromptsBrowser = {};
 
+/**
+ * Prompt autocomplite tooltip window
+ */
 PromptsBrowser.promptWordTooltip = {};
 
 PromptsBrowser.promptWordTooltip.selectedIndex = 0;
@@ -25,6 +28,9 @@ PromptsBrowser.promptWordTooltip.init = (positivePrompts, containerId) => {
 }
 
 PromptsBrowser.promptWordTooltip.onKeyDown = (e) => {
+    const {autocomplitePromptMode = "prompts"} = PromptsBrowser.state.config;
+    if(autocomplitePromptMode === "off") return;
+
     const {state} = PromptsBrowser;
     const autoCompleteBox = PromptsBrowser.DOMCache.containers[state.currentContainer].autocompliteWindow;
     if(!autoCompleteBox) return;
@@ -39,6 +45,9 @@ PromptsBrowser.promptWordTooltip.onKeyDown = (e) => {
 }
 
 PromptsBrowser.promptWordTooltip.onUnfocus = (e) => {
+    const {autocomplitePromptMode = "prompts"} = PromptsBrowser.state.config;
+    if(autocomplitePromptMode === "off") return;
+
     const {state} = PromptsBrowser;
     const autoCompleteBox = PromptsBrowser.DOMCache.containers[state.currentContainer].autocompliteWindow;
     if(!autoCompleteBox) return;
@@ -67,10 +76,14 @@ PromptsBrowser.promptWordTooltip.onHintWindowKey = (e) => {
         const start = Number(selectedHint.dataset.start);
         const end = Number(selectedHint.dataset.end);
         const newPrompt = selectedHint.innerText;
+        const collection = selectedHint.dataset.collection;
+        const style = selectedHint.dataset.style;
     
         if(Number.isNaN(start) || Number.isNaN(end)) return;
     
-        PromptsBrowser.promptWordTooltip.onApplyHint(start, end, newPrompt);
+        if(style) PromptsBrowser.promptWordTooltip.onApplyStyleHint(start, end, style, collection);
+        else PromptsBrowser.promptWordTooltip.onApplyHint(start, end, newPrompt);
+
         return true;
     }
 
@@ -103,11 +116,14 @@ PromptsBrowser.promptWordTooltip.onClickHint = (e) => {
 
     const start = Number(target.dataset.start);
     const end = Number(target.dataset.end);
+    const collection = target.dataset.collection;
+    const style = target.dataset.style;
     const newPrompt = target.innerText;
 
     if(Number.isNaN(start) || Number.isNaN(end)) return;
 
-    PromptsBrowser.promptWordTooltip.onApplyHint(start, end, newPrompt);
+    if(style) PromptsBrowser.promptWordTooltip.onApplyStyleHint(start, end, style, collection);
+    else PromptsBrowser.promptWordTooltip.onApplyHint(start, end, newPrompt);
 }
 
 PromptsBrowser.promptWordTooltip.filterNewPromptsOnly = (str) => {
@@ -125,6 +141,37 @@ PromptsBrowser.promptWordTooltip.filterNewPromptsOnly = (str) => {
     }
 
     return newStrPromptsArr.join(", ");
+}
+
+PromptsBrowser.promptWordTooltip.onApplyStyleHint = (start, end, style, collection) => {
+    const {state, data} = PromptsBrowser;
+    const autoCompleteBox = PromptsBrowser.DOMCache.containers[state.currentContainer].autocompliteWindow;
+    const textArea = PromptsBrowser.DOMCache.containers[state.currentContainer].textArea;
+
+    if(!textArea || !autoCompleteBox) return;
+    if(!style || !collection) return;
+
+    const targetCollection = data.styles[collection];
+    if(!targetCollection) return;
+
+    const targetStyle = targetCollection.find(item => item.name === style);
+    if(!targetStyle) return;
+
+    autoCompleteBox.style.display = "none";
+    let newValue = "";
+
+    const prefix = textArea.value.substring(0, start);
+    const postfix = textArea.value.substring(end);
+
+    newValue += prefix;
+    newValue += postfix;
+
+    textArea.value = newValue;
+
+    PromptsBrowser.promptWordTooltip.selectedIndex = 0;
+    PromptsBrowser.synchroniseCurrentPrompts(false);
+
+    PromptsBrowser.applyStyle(targetStyle, true, false);
 }
 
 PromptsBrowser.promptWordTooltip.onApplyHint = (start, end, newPrompt) => {
@@ -182,7 +229,58 @@ PromptsBrowser.promptWordTooltip.onApplyHint = (start, end, newPrompt) => {
     PromptsBrowser.synchroniseCurrentPrompts(false);
 }
 
+PromptsBrowser.promptWordTooltip.getPossiblePrompts = (word) => {
+    const promptsList = PromptsBrowser.data.united;
+    const possiblePrompts = [];
+
+    for(const prompt of promptsList) {
+        if(!prompt.id) continue;
+        if(prompt.id.toLowerCase().includes(word)) possiblePrompts.push(prompt.id);
+    }
+
+    possiblePrompts.sort();
+
+    return possiblePrompts;
+}
+
+PromptsBrowser.promptWordTooltip.getPossibleStyles = (word) => {
+    const MAX_STYLES = 5;
+    const IGNORED_COLLECTIONS = ["autogen"];
+
+    const {styles} = PromptsBrowser.data;
+    const possibleStyles = [];
+    let addedStyles = 0;
+
+    topLoop: for(const collectionId in styles) {
+        if(IGNORED_COLLECTIONS.includes(collectionId)) continue;
+
+        for(let i = 0; i < styles[collectionId].length; i++) {
+            const styleItem = styles[collectionId][i];
+            if(!styleItem.name) continue;
+
+            if(styleItem.name.toLowerCase().includes(word)) {
+                possibleStyles.push({collection: collectionId, name: styleItem.name});
+                addedStyles++;
+            }
+
+            if(addedStyles > MAX_STYLES) break topLoop;
+        }
+    }
+
+    possibleStyles.sort( (A, B) => {
+        if(A.name > B.name) return 1;
+        if(A.name < B.name) return -1;
+
+        return 0;
+    });
+
+    return possibleStyles;
+}
+
 PromptsBrowser.promptWordTooltip.processCarretPosition = (e) => {
+    const {autocomplitePromptMode = "prompts"} = PromptsBrowser.state.config;
+    if(autocomplitePromptMode === "off") return;
+
     const doc = PromptsBrowser.gradioApp();
     const activeElement = doc.activeElement || document.activeElement;
     const textArea = e.currentTarget;
@@ -211,7 +309,6 @@ PromptsBrowser.promptWordTooltip.processCarretPosition = (e) => {
 
     const MAX_HINTS = 20;
     let currHints = 0;
-    const promptsList = PromptsBrowser.data.united;
     const value = textArea.value;
     const caret = textArea.selectionStart;
     const stopSymbols = [",", "(", ")", "<", ">", ":"];
@@ -242,27 +339,46 @@ PromptsBrowser.promptWordTooltip.processCarretPosition = (e) => {
     if(!word) return;
 
     word = word.toLowerCase();
-    const possiblePrompts = [];
 
-    for(const prompt of promptsList) {
-        if(!prompt.id) continue;
-        if(prompt.id.toLowerCase().includes(word)) possiblePrompts.push(prompt.id);
-    }
+    const showPrompts = autocomplitePromptMode === "prompts" || autocomplitePromptMode === "all";
+    const showStyles = autocomplitePromptMode === "styles" || autocomplitePromptMode === "all";
 
-    if(!possiblePrompts.length || (possiblePrompts.length === 1 && word === possiblePrompts[0])) {
+    const possiblePrompts = showPrompts ? PromptsBrowser.promptWordTooltip.getPossiblePrompts(word) : [];
+    const possibleStyles = showStyles ? PromptsBrowser.promptWordTooltip.getPossibleStyles(word) : [];
+
+    let haveAnyHints = false;
+
+    if(possiblePrompts.length > 1 || (possiblePrompts.length === 1 && word !== possiblePrompts[0])) haveAnyHints = true;
+    if(possibleStyles.length) haveAnyHints = true;
+
+    if(!haveAnyHints) {
         autoCompleteBox.style.display = "none";
         return;
-    } else {
-        autoCompleteBox.style.display = "";
-    }
+    } else autoCompleteBox.style.display = "";
 
-    possiblePrompts.sort();
-
-    for(const item of possiblePrompts) {
+    if(showPrompts) for(const item of possiblePrompts) {
         if(currHints >= MAX_HINTS) break;
         const hintItem = document.createElement("div");
         hintItem.className = "PBE_hintItem";
         hintItem.innerText = item;
+        hintItem.dataset.start = wordStart;
+        hintItem.dataset.end = wordEnd;
+        if(currHints === selectedIndex) hintItem.classList.add("PBE_hintItemSelected");
+
+        hintItem.addEventListener("click", PromptsBrowser.promptWordTooltip.onClickHint);
+
+        autoCompleteBox.appendChild(hintItem);
+
+        currHints++;
+    }
+
+    if(showStyles) for(const item of possibleStyles) {
+        if(currHints >= MAX_HINTS) break;
+        const hintItem = document.createElement("div");
+        hintItem.className = "PBE_hintItem";
+        hintItem.innerText = "Style: " + item.name;
+        hintItem.dataset.collection = item.collection;
+        hintItem.dataset.style = item.name;
         hintItem.dataset.start = wordStart;
         hintItem.dataset.end = wordEnd;
         if(currHints === selectedIndex) hintItem.classList.add("PBE_hintItemSelected");
