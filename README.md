@@ -11,7 +11,7 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 1. [Collection editor](#collection-editor)
 1. [Prompt editor](#prompt-editor)
 1. [Setup window](#setup-window)
-1. [Autocomplite](#autocomplite)
+1. [Autocomplete](#autocomplete)
 1. [Normalize](#normalize)
 1. [Collections database](#collections-database)
 
@@ -52,7 +52,7 @@ This extension modifies the DOM directly, without working through any API for su
 
 5. Prompts in the collection can be moved by drag and drop.
 
-6. You can filter prompts using filter params like collection, category, tags (supports autocomplite of known tags) and name.
+6. You can filter prompts using filter params like collection, category, tags (supports autocomplete of known tags) and name.
 
 7. You can change sorting mode in the order drop down menu.
 
@@ -219,9 +219,9 @@ This extension modifies the DOM directly, without working through any API for su
 
 1. `Show prompt index in database` - will display the ordinal id of the prompt in the collection if the collection is selected in the collection filter. Useful when manually sorting prompts within a collection.
 
-### Autocomplite
+### Autocomplete
 
-1. When you manually type prompts, a menu with similar prompts from the database of known prompts will be displayed. You can finish a prompt from the autocomplite menu by clicking on it or by selecting it with the up and down arrows and pressing Enter.
+1. When you manually type prompts, a menu with similar prompts from the database of known prompts will be displayed. You can finish a prompt from the autocomplete menu by clicking on it or by selecting it with the up and down arrows and pressing Enter.
 
 ### Normalize
 
