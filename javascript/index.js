@@ -15,6 +15,11 @@ PromptsBrowser.state = {
         spaceMode: "space",
         showPromptIndex: false,
 
+        /**
+         * If true, will enable extended syntax element support for prompts used by some addons.
+         */
+        supportExtendedSyntax: true,
+
         saveStyleMeta: {
             seed: false,
             size: false,
@@ -584,7 +589,7 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
     if(!DOMCache.containers) DOMCache.containers = {};
     const mainContainer = PromptsBrowser.gradioApp();
 
-    if(tries > 10) {
+    if(tries > 100) {
         PromptsBrowser.utils.log("No prompt wrapper container found or server did not returned prompts data.");
         return;
     }

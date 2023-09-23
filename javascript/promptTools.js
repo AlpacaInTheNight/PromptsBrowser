@@ -127,6 +127,7 @@ PromptsBrowser.promptTools.showCurrentPrompts = (wrapper) => {
 
     for(const i in activePrompts) {
         const currPrompt = activePrompts[i];
+        if(!currPrompt || currPrompt.isSyntax) continue;
         const isShadowed = currPrompt.id !== state.promptToolsId;
 
         promptElement = PromptsBrowser.showPromptItem({id: currPrompt.id, isExternalNetwork: currPrompt.isExternalNetwork}, {isShadowed});

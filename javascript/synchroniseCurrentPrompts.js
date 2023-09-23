@@ -6,9 +6,13 @@ if(!window.PromptsBrowser) window.PromptsBrowser = {};
  */
 PromptsBrowser.synchroniseCurrentPrompts = (noTextAreaUpdate = true) => {
     const {normalizePrompt} = window.PromptsBrowser;
-    const {DEFAULT_PROMPT_WEIGHT, PROMPT_WEIGHT_FACTOR} = PromptsBrowser.params;
+    const {DEFAULT_PROMPT_WEIGHT} = PromptsBrowser.params;
     const {state} = PromptsBrowser;
-    const textArea = PromptsBrowser.DOMCache.containers[state.currentContainer].textArea
+    const {supportExtendedSyntax = true} = state.config;
+    const textArea = PromptsBrowser.DOMCache.containers[state.currentContainer].textArea;
+    const KEEP_SYNTAX_SYMBOLS = ["{", "}", "|"];
+    const DELIMITER_CHAR = ",";
+    const SPACE_CHAR = " ";
     if(!textArea) return;
     let activePrompts = PromptsBrowser.getCurrentPrompts();
     let value = textArea.value;
@@ -17,20 +21,50 @@ PromptsBrowser.synchroniseCurrentPrompts = (noTextAreaUpdate = true) => {
     value = value.replace(/([^,])\ </g, "$1,\ <");
 
     const newPBE_currentPrompts = [];
-    const prompts = value.split(",");
+    let prompts = [];
+
+    if(supportExtendedSyntax) {
+        prompts = value.split(/([,{}|])/g);
+        prompts = prompts.filter(strItem => strItem);
+    
+        prompts = prompts.map((strItem, i, arr) => {
+            if(typeof strItem !== "string") return strItem;
+    
+            let trimStr = strItem.trim();
+            if(KEEP_SYNTAX_SYMBOLS.includes(trimStr)) {
+                const prevItem = i > 0 ? arr[i-1] : "";
+                const nextItem = arr[i+1];
+    
+                if(prevItem && prevItem[prevItem.length-1] === SPACE_CHAR) strItem = SPACE_CHAR + strItem;
+                if(nextItem && nextItem[0] === SPACE_CHAR) strItem += SPACE_CHAR;
+            }
+            
+            return strItem;
+        });
+    
+        prompts = prompts.filter(strItem => strItem && strItem.trim());
+
+    } else {
+        prompts = value.split(",");
+        prompts = prompts.filter(strItem => strItem && strItem.trim());
+        
+    }
+
     let currNestedWeight = 0;
+    let index = 0;
 
-    for(const i in prompts) {
-        let promptItem = prompts[i].trim();
-        if(!promptItem) continue;
+    for(let i = 0; i < prompts.length; i++) {
+        let promptItem = prompts[i];
+        if(!promptItem || promptItem === ",") continue;
 
-        const {id, weight, isExternalNetwork, nestedWeight} = window.PromptsBrowser.promptStringToObject(promptItem, currNestedWeight);
+        const {id, weight, isExternalNetwork, isSyntax = false, nestedWeight} = window.PromptsBrowser.promptStringToObject(promptItem, currNestedWeight);
+
         currNestedWeight = nestedWeight;
         promptItem = id;
 
-        if(!isExternalNetwork) promptItem = normalizePrompt(promptItem);
+        if(!isExternalNetwork && !isSyntax) promptItem = normalizePrompt(promptItem);
 
-        let targetItem = activePrompts.find(item => item.id === promptItem);
+        let targetItem = !isSyntax ? activePrompts.find(item => item.id === promptItem) : undefined;
         
         if(targetItem) {
             if(targetItem.weight !== weight) targetItem.weight = weight;
@@ -38,13 +72,30 @@ PromptsBrowser.synchroniseCurrentPrompts = (noTextAreaUpdate = true) => {
         } else {
             targetItem = {
                 id: promptItem,
+                index,
                 weight: weight !== undefined ? weight : DEFAULT_PROMPT_WEIGHT
             }
         }
 
         if(isExternalNetwork) targetItem.isExternalNetwork = true;
 
+        /**
+         * If it is a syntax token - also checking if it needs delimiters on its sides in string.
+         */
+        if(isSyntax) {
+            const prevItem = i > 0 ? prompts[i-1] : "";
+            const nextItem = prompts[i+1];
+
+            targetItem.isSyntax = true;
+            targetItem.delimiter = "none";
+
+            if(prevItem === DELIMITER_CHAR && nextItem === DELIMITER_CHAR) targetItem.delimiter = "both";
+            else if(prevItem === DELIMITER_CHAR) targetItem.delimiter = "prev";
+            else if(nextItem === DELIMITER_CHAR) targetItem.delimiter = "next";
+        }
+
         newPBE_currentPrompts.push(targetItem);
+        index++;
     }
 
     activePrompts = newPBE_currentPrompts;

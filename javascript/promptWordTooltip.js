@@ -134,7 +134,7 @@ PromptsBrowser.promptWordTooltip.filterNewPromptsOnly = (str) => {
     const newArr = str.split(",");
 
     for(let prompt of newArr) {
-        const newPrompt = window.PromptsBrowser.promptStringToObject(prompt.trim());
+        const newPrompt = window.PromptsBrowser.promptStringToObject(prompt);
         if(activePrompts.some(item => item.id === newPrompt.id)) continue;
         
         newStrPromptsArr.push(prompt);
@@ -311,7 +311,7 @@ PromptsBrowser.promptWordTooltip.processCarretPosition = (e) => {
     let currHints = 0;
     const value = textArea.value;
     const caret = textArea.selectionStart;
-    const stopSymbols = [",", "(", ")", "<", ">", ":"];
+    const stopSymbols = [",", "(", ")", "<", ">", ":", "|", "{", "}"];
     const textAreaPosition = textArea.getBoundingClientRect();
     let position = caret;
     let word = "";

@@ -23,16 +23,22 @@ window.PromptsBrowser.makeCheckbox = function(params) {
     if(!params) return;
 
     const {makeElement} = window.PromptsBrowser;
-    const {title, checked = false, id, data, onChange} = params;
+    const {name = "", title = "", checked = false, id, data, onChange, wrapper, reverse = false} = params;
 
-    const wrapper = makeElement({element: "div"});
+    if(!wrapper) wrapper = makeElement({element: "div"});
 
     const checkBox = makeElement({...params, element: "input", type: "checkbox"});
-    const boxTitle = makeElement({element: "label", content: title, title});
+    const boxTitle = makeElement({element: "label", content: name, title});
     checkBox.checked = checked;
 
-    wrapper.appendChild(checkBox);
-    wrapper.appendChild(boxTitle);
+    if(reverse) {
+        wrapper.appendChild(boxTitle);
+        wrapper.appendChild(checkBox);
+        
+    } else {
+        wrapper.appendChild(checkBox);
+        wrapper.appendChild(boxTitle);
+    }
 
     if(onChange) checkBox.addEventListener("change", onChange);
 

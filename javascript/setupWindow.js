@@ -62,6 +62,14 @@ PromptsBrowser.setupWindow.onChangeAutocompliteType = (e) => {
     localStorage.setItem("PBE_config", JSON.stringify(state.config));
 }
 
+PromptsBrowser.setupWindow.onChangeExtendedSyntax = (e) => {
+    const {state} = PromptsBrowser;
+    const checked = e.currentTarget.checked;
+
+    state.config.supportExtendedSyntax = checked;
+    localStorage.setItem("PBE_config", JSON.stringify(state.config));
+}
+
 PromptsBrowser.setupWindow.onChangeShowIndex = (e) => {
     const {state} = PromptsBrowser;
     const checked = e.currentTarget.checked;
@@ -181,8 +189,8 @@ PromptsBrowser.setupWindow.showCreateNew = (wrapper) => {
 }
 
 PromptsBrowser.setupWindow.showIntegrationSetup = (wrapper) => {
-    const {makeElement, makeSelect} = PromptsBrowser;
-    const {autocomplitePromptMode = "prompts"} = PromptsBrowser.state.config;
+    const {makeElement, makeSelect, makeCheckbox} = PromptsBrowser;
+    const {autocomplitePromptMode = "prompts", supportExtendedSyntax = true} = PromptsBrowser.state.config;
 
     const autocompliteTypeBlock = makeElement({
         element: "div",
@@ -207,7 +215,24 @@ PromptsBrowser.setupWindow.showIntegrationSetup = (wrapper) => {
     autocompliteTypeBlock.appendChild(autocompliteTypeText);
     autocompliteTypeBlock.appendChild(autocompliteTypeSelect);
 
+    const extendedSyntaxBlock = makeElement({
+        element: "div",
+        className: "PBE_rowBlock",
+        title: "If true, will enable extended syntax element support for prompts used by some addons",
+        style: {maxWidth: "none"}
+    });
+    
+    makeCheckbox({
+        onChange: PromptsBrowser.setupWindow.onChangeExtendedSyntax,
+        checked: supportExtendedSyntax,
+        name: "Extended syntax support",
+        id: "PBE_extendedSyntaxSupport",
+        wrapper: extendedSyntaxBlock,
+        reverse: true,
+    });
+
     wrapper.appendChild(autocompliteTypeBlock);
+    wrapper.appendChild(extendedSyntaxBlock);
 }
 
 PromptsBrowser.setupWindow.showWeightSetup = (wrapper) => {

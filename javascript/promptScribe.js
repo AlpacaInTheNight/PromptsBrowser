@@ -184,6 +184,7 @@ PromptsBrowser.promptScribe.showUnknownPrompts = (wrapper, initial = false) => {
     let unknownPromptsList = [];
 
     for(const item of activePrompts) {
+        if(item.isSyntax) continue;
         let isKnown = false;
 
         for(const knownPrompt of database) {

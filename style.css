@@ -403,6 +403,18 @@
 	font-size: 20px;
 }
 
+.PBE_syntaxElement {
+    width: 20px;
+    font-size: 16px;
+    justify-content: center;
+    align-items: center;
+    background-color: grey !important;
+    background-image: none !important;
+    background: linear-gradient(to bottom, #b5bdc8 0%,#828c95 36%,#28343b 100%) !important;
+    transform: scale(0.9);
+    transform-origin: center center !important;
+}
+
 .PBE_externalNetwork {
 	border-bottom: 8px solid sandybrown;
 }

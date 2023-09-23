@@ -34,6 +34,11 @@ window.PromptsBrowser.makeFileNameSafe = function(fileName) {
     return fileName;
 }
 
+/**
+ * Modifies prompt input so that prompts conform to the same style.
+ * @param {*} prompt 
+ * @returns 
+ */
 window.PromptsBrowser.normalizePrompt = function(prompt) {
     const {state} = PromptsBrowser;
     const {config} = state;
@@ -59,7 +64,13 @@ window.PromptsBrowser.normalizePrompt = function(prompt) {
  * @param {*} promptItem 
  */
 window.PromptsBrowser.promptStringToObject = function(promptItem, nestedWeight = 0) {
+    const {state} = PromptsBrowser;
+    const {supportExtendedSyntax = true} = state.config;
+    const KEEP_SYNTAX_SYMBOLS = ["{", "}", "|"];
     const {DEFAULT_PROMPT_WEIGHT, PROMPT_WEIGHT_FACTOR} = PromptsBrowser.params;
+
+    if(supportExtendedSyntax && KEEP_SYNTAX_SYMBOLS.includes(promptItem.trim())) return {id: promptItem, isSyntax: true};
+    else promptItem = promptItem.trim();
 
     //prompt weight
     let weight = DEFAULT_PROMPT_WEIGHT;
