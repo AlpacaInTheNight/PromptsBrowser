@@ -23,7 +23,8 @@ window.PromptsBrowser.makeCheckbox = function(params) {
     if(!params) return;
 
     const {makeElement} = window.PromptsBrowser;
-    const {name = "", title = "", checked = false, id, data, onChange, wrapper, reverse = false} = params;
+    const {name = "", title = "", checked = false, id, data, onChange, reverse = false} = params;
+    let {wrapper} = params;
 
     if(!wrapper) wrapper = makeElement({element: "div"});
 
