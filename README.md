@@ -14,6 +14,7 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 1. [Autocomplete](#autocomplete)
 1. [Normalize](#normalize)
 1. [Collections database](#collections-database)
+1. [Credits](#credits)
 
 ![](img/preview.jpg)
 
@@ -234,3 +235,9 @@ This extension does not come with a pre-built prompts database. It is up to the 
 Some existing collections:
 
 1. [prompts_portrait](https://github.com/AlpacaInTheNight/prompts_portrait) - A proof of concept collection for generating character portraits. Comes with tags and categories tagged in.
+
+
+### Credits
+
+- Textarea Caret Position - https://github.com/component/textarea-caret-position Library to get a caret position in the textarea element. MIT License.
+ 
