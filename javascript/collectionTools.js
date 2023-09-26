@@ -555,8 +555,10 @@ PromptsBrowser.collectionTools.showPromptsDetailed = (wrapper) => {
         topContainer.appendChild(nameContainer);
         topContainer.appendChild(commentContainer);
 
-        bottomContainer.appendChild(tagsContainer);
-        bottomContainer.appendChild(categoriesContainer);
+        if(tags.length || category.length) {
+            bottomContainer.appendChild(tagsContainer);
+            bottomContainer.appendChild(categoriesContainer);
+        }
 
         contentArea.appendChild(topContainer);
         contentArea.appendChild(bottomContainer);
@@ -634,7 +636,7 @@ PromptsBrowser.collectionTools.showCategoryAction = (wrapper) => {
     categorySelect.classList = "PBE_select PBE_categoryAction";
     addButton.className = "PBE_button";
     addButton.title = "Add selected category to all selected prompts";
-    removeButton.className = "PBE_button";
+    removeButton.className = "PBE_button PBE_buttonCancel";
 
     addButton.innerText = "Add";
     removeButton.title = "Remove selected category from all selected prompts";
@@ -672,7 +674,7 @@ PromptsBrowser.collectionTools.showTagsAction = (wrapper) => {
 
     tagsInput.className = "PBE_input PBE_tagsAction";
     addButton.className = "PBE_button";
-    removeButton.className = "PBE_button";
+    removeButton.className = "PBE_button PBE_buttonCancel";
     addButton.title = "Add target tags to all selected prompts";
     removeButton.title = "Remove target tags from all selected prompts";
 
@@ -782,7 +784,7 @@ PromptsBrowser.collectionTools.showActions = (wrapper) => {
 
     const deleteButton = document.createElement("div");
     deleteButton.innerText = "Delete selected";
-    deleteButton.className = "PBE_button";
+    deleteButton.className = "PBE_button PBE_buttonCancel";
     deleteButton.title = "Delete selected prompts";
     deleteButton.addEventListener("click", PromptsBrowser.collectionTools.onDeleteSelected);
 

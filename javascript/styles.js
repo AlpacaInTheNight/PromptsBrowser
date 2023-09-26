@@ -591,7 +591,7 @@ PromptsBrowser.styles.showActions = (wrapper) => {
 
     const deleteButton = document.createElement("div");
     deleteButton.innerText = "Delete";
-    deleteButton.className = "PBE_button";
+    deleteButton.className = "PBE_button PBE_buttonCancel";
     deleteButton.title = "Delete selected style";
     deleteButton.dataset.action = "true";
     deleteButton.addEventListener("click", PromptsBrowser.styles.removeStyle);
@@ -694,7 +694,7 @@ PromptsBrowser.styles.showStyles = (wrapper) => {
 
         addBeforeButton.className = "PBE_button";
         addAfterButton.className = "PBE_button";
-        removeButton.className = "PBE_button";
+        removeButton.className = "PBE_button PBE_buttonCancel";
         updateButton.className = "PBE_button";
 
         addAfterButton.dataset.isafter = "true";

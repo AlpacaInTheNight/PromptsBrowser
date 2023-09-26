@@ -418,7 +418,7 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
     wrapper.innerHTML = "";
 
     const headerBlock = makeElement({element: "div", className: "PBE_rowBlock"});
-    const headerTitle = makeElement({element: "div", className: "PBE_rowBlock", content: state.editingPrompt});
+    const headerTitle = makeElement({element: "div", className: "PBE_promptEditTitle", content: state.editingPrompt});
 
     headerBlock.appendChild(headerTitle);
     PromptsBrowser.promptEdit.addCollectionSelector(headerBlock);
@@ -442,7 +442,7 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
     const addCategoryButton         = makeElement({element: "button", content: "Add category", className: "PBE_button"});
     const commentArea               = makeElement({element: "textarea", id: "PBE_commentArea", className: "PBE_Textarea PBE_Scrollbar"});
 
-    const cancelButton              = makeElement({element: "button", content: "Cancel", className: "PBE_button"});
+    const cancelButton              = makeElement({element: "button", content: "Cancel", className: "PBE_button PBE_buttonCancel"});
     const saveButton                = makeElement({element: "button", content: "Save", className: "PBE_button"});
 
     commentArea.value = targetItem.comment || "";

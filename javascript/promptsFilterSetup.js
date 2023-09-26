@@ -99,7 +99,7 @@ PromptsBrowser.promptsFilter.showActiveFilters = (wrapper, filterId) => {
         filterElement.innerText += `${type}: ${value}`;
 
         const removeButton = document.createElement("div");
-        removeButton.className = "PBE_filterItemRemove";
+        removeButton.className = "PBE_filterItemRemove PBE_buttonCancel";
         removeButton.innerText = "✕";
         removeButton.dataset.id = filterId;
         removeButton.dataset.index = i;
@@ -126,7 +126,7 @@ PromptsBrowser.promptsFilter.update = function(wrapper, filterId) {
     addFilterButton.innerText = "✓";
 
     const cancelButton = document.createElement("div");
-    cancelButton.className = "PBE_filtersAddNew PBE_filtersRemoveNew";
+    cancelButton.className = "PBE_filtersAddNew PBE_filtersRemoveNew .PBE_buttonCancel";
     cancelButton.innerText = "✕";
 
     const newFilterContainer = document.createElement("div");

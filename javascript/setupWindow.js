@@ -476,6 +476,7 @@ PromptsBrowser.setupWindow.update = () => {
     footerBlock.style.justifyContent = "space-evenly";
     closeButton.innerText = viewMode === "normal" ? "Close" : "Cancel";
     closeButton.className = "PBE_button";
+    if(viewMode !== "normal") closeButton.classList.add("PBE_buttonCancel");
 
     closeButton.addEventListener("click", PromptsBrowser.setupWindow.onCloseWindow);
 
