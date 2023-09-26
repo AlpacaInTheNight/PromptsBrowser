@@ -1,5 +1,6 @@
 import os
 import socket
+import re
 from datetime import datetime
 from os.path import dirname, abspath, join, isdir, isfile
 
@@ -9,7 +10,10 @@ from . import constant
 def makeFileNameSafe(fileName: str):
     if not fileName: return
 
-    fileName = fileName.replace("_", " ")
+    #fileName = fileName.replace(/([^_])_(?!_)/g, " ")
+
+    #replacing only singular underscores to space
+    fileName = re.sub(r'(?<!_)_(?!_)', " ", fileName)
 
     #unix/win
     fileName = fileName.replace("/", "_fsl_")

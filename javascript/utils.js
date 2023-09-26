@@ -1,6 +1,10 @@
 
 if(!window.PromptsBrowser) window.PromptsBrowser = {};
 
+window.PromptsBrowser.regex = {
+    REGX_SINGLE_UNDERSCORE: /(?<!_)_(?!_)/g,
+}
+
 window.PromptsBrowser.replaceAllRegex = function(str, oldStr, newStr) {
     if(!str || !oldStr) return str;
 
@@ -12,9 +16,10 @@ window.PromptsBrowser.replaceAllRegex = function(str, oldStr, newStr) {
  */
 window.PromptsBrowser.makeFileNameSafe = function(fileName) {
     if(!fileName) return;
+    const {REGX_SINGLE_UNDERSCORE} = window.PromptsBrowser.regex;
     const {replaceAllRegex} = window.PromptsBrowser;
 
-    fileName = replaceAllRegex(fileName, "_", " ");
+    fileName = replaceAllRegex(fileName, REGX_SINGLE_UNDERSCORE, " ");
 
     //unix/win
     fileName = replaceAllRegex(fileName, "/", "_fsl_");
@@ -42,6 +47,7 @@ window.PromptsBrowser.makeFileNameSafe = function(fileName) {
 window.PromptsBrowser.normalizePrompt = function(prompt) {
     const {state} = PromptsBrowser;
     const {config} = state;
+    const {REGX_SINGLE_UNDERSCORE} = window.PromptsBrowser.regex;
 
     if(!prompt) return prompt;
 
@@ -53,7 +59,7 @@ window.PromptsBrowser.normalizePrompt = function(prompt) {
 
     if(config.toLowerCase) prompt = prompt.toLowerCase();
     
-    if(config.spaceMode === "space") prompt = prompt.replaceAll("_", " ");
+    if(config.spaceMode === "space") prompt = prompt.replaceAll(REGX_SINGLE_UNDERSCORE, " ");
     else if(config.spaceMode === "underscore") prompt = prompt.replaceAll(" ", "_");
 
     return prompt;
