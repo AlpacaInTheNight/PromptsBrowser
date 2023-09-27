@@ -1,45 +1,45 @@
 
 .interrogate-col > button {
-	flex: 0 !important;
+    flex: 0 !important;
 }
 
 .PBE_Scrollbar::-webkit-scrollbar {
-	width: 4px;
-	height: 6px;
+    width: 4px;
+    height: 6px;
 }
 
 .PBE_Scrollbar::-webkit-scrollbar-track {
-	
+    
 }
 
 .PBE_Scrollbar::-webkit-scrollbar-thumb {
-	background-color: rgba(255, 255, 255, 0.5);
-	outline: 1px solid slategrey;
-	border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.5);
+    outline: 1px solid slategrey;
+    border-radius: 5px;
 }
 
 .PBE_button {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	background: var(--button-primary-background-fill) !important;
-	padding: 0 5px !important;
-	font-size: 16px !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--button-primary-background-fill) !important;
+    padding: 0 5px !important;
+    font-size: 16px !important;
     font-weight: var(--button-large-text-weight) !important;
-	cursor: pointer !important;
-	border-radius: var(--button-large-radius);
-	height: 30px;
-	align-self: auto !important;
-	font-family: sans-serif !important;
-	color: var(--button-primary-text-color) !important;
-	text-shadow: 1px 0px 1px black;
+    cursor: pointer !important;
+    border-radius: var(--button-large-radius);
+    height: 30px;
+    align-self: auto !important;
+    font-family: sans-serif !important;
+    color: var(--button-primary-text-color) !important;
+    text-shadow: 1px 0px 1px black;
     border-color: var(--button-primary-border-color);
-	border-style: solid;
+    border-style: solid;
     border-width: var(--button-border-width);
 }
 
 .PBE_button:hover {
-	background: var(--button-primary-background-fill-hover) !important;
+    background: var(--button-primary-background-fill-hover) !important;
     border-color: var(--button-primary-border-color-hover);
     color: var(--button-primary-text-color-hover) !important;
 }
@@ -84,39 +84,39 @@
 }
 
 .PBE_row {
-	display: flex;
-	flex-direction: row;
+    display: flex;
+    flex-direction: row;
 }
 
 .PBE_column {
-	display: flex;
-	flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
 .PBE_rowBlock {
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	align-items: center;
-	width: 100%;
-	max-width: 500px;
-	margin: 5px 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+    margin: 5px 0;
     background-color: rgba(100, 100, 100, 0.4);
-	padding: 5px 10px;
-	box-sizing: border-box;
+    padding: 5px 10px;
+    box-sizing: border-box;
     font-family: var(--font);
 }
 
 .PBE_rowBlock_wide {
-	max-width: none;
-	justify-content: center;
+    max-width: none;
+    justify-content: center;
 }
 
 .PBE_rowBlock input,
 .PBE_rowBlock select {
-	height: 100%;
+    height: 100%;
     max-width: 200px;
-	width: 200px;
+    width: 200px;
     font-size: 16px;
 }
 
@@ -126,10 +126,10 @@
 }
 
 .PBE_rowBlock input[type=checkbox] {
-	height: 1rem;
-	width: 1rem;
-	max-width: none;
-	cursor: pointer;
+    height: 1rem;
+    width: 1rem;
+    max-width: none;
+    cursor: pointer;
 
     box-shadow: var(--input-shadow);
     border: 1px solid var(--checkbox-border-color);
@@ -145,25 +145,25 @@
 }
 
 .PBE_rowBlock label {
-	cursor: pointer;
+    cursor: pointer;
     user-select: none;
 }
 
 .PBE_fieldset {
-	display: flex;
-	flex-direction: row;
-	border: 1px solid var(--block-border-color);
-	padding: 4px;
-	justify-content: center;
-	align-items: center;
-	margin: 5px;
+    display: flex;
+    flex-direction: row;
+    border: 1px solid var(--block-border-color);
+    padding: 4px;
+    justify-content: center;
+    align-items: center;
+    margin: 5px;
 }
 
 .PBE_fieldset legend {
-	font-family: var(--font);
-	font-size: 17px;
+    font-family: var(--font);
+    font-size: 17px;
     color: var(--body-text-color);
-	/* text-shadow: 1px 1px 1px black; */
+    /* text-shadow: 1px 1px 1px black; */
 }
 
 .PBE_fieldset label {
@@ -177,37 +177,37 @@
 .PBE_fieldset > div,
 .PBE_fieldset > input,
 .PBE_fieldset > select {
-	margin: 0 5px;
-	height: 30px;
+    margin: 0 5px;
+    height: 30px;
 }
 
 .PBE_dataBlock {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
 }
 
 .PBE_dataColumn {
-	display: flex;
-	flex-direction: column;
-	flex-wrap: nowrap;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
 }
 
 .PBE_List {
-	display: flex;
-	flex-direction: row;
-	overflow: auto;
-	align-items: center;
+    display: flex;
+    flex-direction: row;
+    overflow: auto;
+    align-items: center;
 }
 
 .PBE_toggleButton {
-	outline: 4px double var(--primary-300);
-	cursor: pointer;
-	height: 40px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	padding: 0 10px;
+    outline: 4px double var(--primary-300);
+    cursor: pointer;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 10px;
     color: var(--primary-300);
     text-shadow: 1px 1px 1px black;
     font-family: var(--font);
@@ -216,139 +216,139 @@
 }
 
 .PBE_toggledButton {
-	outline: 4px solid var(--primary-300);
+    outline: 4px solid var(--primary-300);
 }
 
 .PBE_swap {
-	outline: 4px solid red;
-	z-index: 2;
+    outline: 4px solid red;
+    z-index: 2;
 }
 
 .PBE_List div{
-	margin: 0 5px;
+    margin: 0 5px;
 }
 
 .PBE_Textarea {
-	color: black;
-	width: 500px;
+    color: black;
+    width: 500px;
 }
 
 /* Windows */
 
 .PBE_generalWindow {
-	display: none;
-	width: 60vw;
-	height: 60vh;
-	position: fixed;
-	top: 20vh;
-	left: 20vw;
-	z-index: 600;
-	flex-direction: column;
-	flex-wrap: nowrap;
-	overflow: hidden;
-	box-shadow: 3px 3px 5px var(--primary-500);
-	/* background: linear-gradient(to right, rgba(207,231,250,1) 0%,rgba(99,147,193,1) 100%); */
+    display: none;
+    width: 60vw;
+    height: 60vh;
+    position: fixed;
+    top: 20vh;
+    left: 20vw;
+    z-index: 600;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    box-shadow: 3px 3px 5px var(--primary-500);
+    /* background: linear-gradient(to right, rgba(207,231,250,1) 0%,rgba(99,147,193,1) 100%); */
     background: var(--background-fill-primary);
 }
 
 .PBE_windowContent {
-	z-index: 3;
-	overflow: auto;
-	overscroll-behavior: contain;
-	padding: 10px;
-	flex-grow: 1;
-	align-content: flex-start;
+    z-index: 3;
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding: 10px;
+    flex-grow: 1;
+    align-content: flex-start;
 }
 
 .PBE_windowCurrentList {
-	display: flex;
-	flex-direction: row;
-	overflow: auto;
-	margin: 10px 10px 0 10px;
-	flex-grow: 1;
-	overflow-y: hidden;
+    display: flex;
+    flex-direction: row;
+    overflow: auto;
+    margin: 10px 10px 0 10px;
+    flex-grow: 1;
+    overflow-y: hidden;
 }
 
 /* Windows end*/
 
 .PBE_controlPanel {
-	padding: 10px 0;
-	display: flex;
-	flex-direction: row;
-	z-index: 2;
-	width: auto !important;
+    padding: 10px 0;
+    display: flex;
+    flex-direction: row;
+    z-index: 2;
+    width: auto !important;
 }
 
 .PBE_controlPanelHidden {
-	position: absolute;
-	width: 20px !important;
+    position: absolute;
+    width: 20px !important;
 }
 
 .PBE_toggleControlPanel {
-	position: relative;
-	left: -22px;
-	border-radius: 10px;
-	user-select: none;
-	display: flex;
-	flex-shrink: 0;
-	justify-content: center;
-	align-items: center;
-	width: 20px;
-	height: 30px;
-	cursor: pointer;
+    position: relative;
+    left: -22px;
+    border-radius: 10px;
+    user-select: none;
+    display: flex;
+    flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
+    width: 20px;
+    height: 30px;
+    cursor: pointer;
     color: var(--button-primary-text-color);
-	background: var(--primary-300);
+    background: var(--primary-300);
 }
 
 .PBE_controlIcon {
-	cursor: pointer;
-	width: 30px;
-	height: 30px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	margin-right: 5px;
-	user-select: none;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 5px;
+    user-select: none;
 
-	color: var(--primary-300);
-	border: 6px double var(--primary-300);
+    color: var(--primary-300);
+    border: 6px double var(--primary-300);
 }
 
 .PBE_activeControlIcon {
-	border: 4px solid var(--primary-300);
+    border: 4px solid var(--primary-300);
 }
 
 .PBE_promptsWrapper {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	position: relative;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    position: relative;
 }
 
 .PBE_promptsCatalogue {
-	display: flex;
-	flex-direction: column;
-	flex-wrap: wrap;
-	position: relative;
-	width: 100%;
-	margin: 10px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    position: relative;
+    width: 100%;
+    margin: 10px;
     margin-top: 10px;
 }
 
 .PBE_promptsCatalogueHeader {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: nowrap;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
     width: 100%;
     overflow: hidden;
-	align-items: center;
-	padding: 0 10px;
+    align-items: center;
+    padding: 0 10px;
 }
 
 .PBE_promptsCatalogueHeader select,
 .PBE_promptsCatalogueHeader input {
-	margin-right: 5px;
-	height: 30px;
+    margin-right: 5px;
+    height: 30px;
     width: 1px;
     max-width: 220px;
     flex-shrink: 1;
@@ -358,19 +358,19 @@
 }
 
 .PBE_promptsCatalogueHeader input {
-	padding: 0 10px;
+    padding: 0 10px;
 }
 
 .PBE_promptsCatalogueContent {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	max-height: 300px;
-	overflow: auto;
-	overflow-x: hidden;
-	padding: 0 10px 0 10px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    max-height: 300px;
+    overflow: auto;
+    overflow-x: hidden;
+    padding: 0 10px 0 10px;
     margin-top: 10px;
-	z-index: 501;
+    z-index: 501;
 }
 
 .PBE_promptsCatalogueContent:hover {
@@ -378,27 +378,27 @@
 }
 
 .PBE_promptEdit {
-	z-index: 700;
-	padding: 10px;
-	align-items: center;
-	background-size: cover;
-	background-position: center;
-	background-repeat: no-repeat;
+    z-index: 700;
+    padding: 10px;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 
     color: var(--body-text-color);
-	text-shadow: 1px 1px 1px black;
-	/* font-weight: bold; */
-	font-size: 18px;
+    text-shadow: 1px 1px 1px black;
+    /* font-weight: bold; */
+    font-size: 18px;
 
-	width: 600px;
-	height: 700px;
-	top: calc(50% - 350px);
-	left: calc(50% - 300px);
+    width: 600px;
+    height: 700px;
+    top: calc(50% - 350px);
+    left: calc(50% - 300px);
 }
 
 .PBE_promptEditTitle {
-	font-size: 22px;
-	text-transform: capitalize;
+    font-size: 22px;
+    text-transform: capitalize;
     font-weight: bold;
     color: var(--link-text-color);
 }
@@ -418,33 +418,33 @@
 }
 
 .PBE_currentPrompts {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	padding: 5px 15px 15px 15px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 5px 15px 15px 15px;
     z-index: 502;
 }
 
 .PBE_promptElement {
-	display: flex;
-	align-items: flex-start;
-	justify-content: center;
-	position: relative;
-	width: 50px;
-	height: 100px;
-	background-color: grey;
-	background-position: center center;
-	background-size: cover;
-	flex-shrink: 0;
-	color: white;
-	text-shadow: 1px 1px 1px black;
-	box-shadow: 0px 0px 2px 0px var(--primary-500) inset;
-	font-weight: bold;
-	text-align: center;
-	font-size: 12px;
-	text-transform: capitalize;
-	cursor: pointer;
-	user-select: none;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    position: relative;
+    width: 50px;
+    height: 100px;
+    background-color: grey;
+    background-position: center center;
+    background-size: cover;
+    flex-shrink: 0;
+    color: white;
+    text-shadow: 1px 1px 1px black;
+    box-shadow: 0px 0px 2px 0px var(--primary-500) inset;
+    font-weight: bold;
+    text-align: center;
+    font-size: 12px;
+    text-transform: capitalize;
+    cursor: pointer;
+    user-select: none;
     word-break: break-word;
 }
 
@@ -454,9 +454,9 @@
 }
 
 .PBE_promptElementWeight {
-	position: absolute;
-	bottom: 0;
-	font-size: 20px;
+    position: absolute;
+    bottom: 0;
+    font-size: 20px;
 }
 
 .PBE_syntaxElement {
@@ -472,51 +472,51 @@
 }
 
 .PBE_externalNetwork {
-	border-bottom: 8px solid sandybrown;
+    border-bottom: 8px solid sandybrown;
 }
 
 .PBE_shadowedElement {
-	box-shadow: 6px 6px 3px rgb(0 0 0 / 70%) inset;
+    box-shadow: 6px 6px 3px rgb(0 0 0 / 70%) inset;
 }
 
 .PBE_shadowedElement::after {
     content: " ";
-	display: flex;
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	top: 0;
-	left: 0;
-	background-color: black;
-	opacity: 0.6;
-	user-select: none;
+    display: flex;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: black;
+    opacity: 0.6;
+    user-select: none;
 }
 
 .PBE_selectedCurrentElement {
-	outline: 5px solid var(--primary-500);
+    outline: 5px solid var(--primary-500);
     z-index: 10 !important;
 }
 
 .PBE_newElement {
-	opacity: 0.5;
-	transform: scale(0.9);
-	transform-origin: center;
+    opacity: 0.5;
+    transform: scale(0.9);
+    transform-origin: center;
 }
 
 .PBE_newElement:hover {
-	opacity: 1;
-	transform: scale(1);
+    opacity: 1;
+    transform: scale(1);
 }
 
 .PBE_selectedNewElement {
-	opacity: 1;
-	transform: scale(1);
-	outline: 2px solid white;
-	box-shadow: 6px 6px 3px black;
+    opacity: 1;
+    transform: scale(1);
+    outline: 2px solid white;
+    box-shadow: 6px 6px 3px black;
 }
 
 .PBE_promptElement.PBE_currentElement {
-	transform-origin: bottom center;
+    transform-origin: bottom center;
 }
 
 .PBE_promptElementIndex {
@@ -529,72 +529,72 @@
 }
 
 .PBE_promptElementSplash {
-	display: none;
-	transition: transform 0.2s;
-	width: 100px;
-	height: 150px;
-	background-color: grey;
-	background-position: center center;
-	background-size: cover;
-	flex-shrink: 0;
-	color: white;
-	text-shadow: 1px 1px 1px black;
-	font-weight: bold;
-	justify-content: center;
-	align-items: flex-end;
-	font-size: 20px;
-	text-transform: capitalize;
-	cursor: pointer;
+    display: none;
+    transition: transform 0.2s;
+    width: 100px;
+    height: 150px;
+    background-color: grey;
+    background-position: center center;
+    background-size: cover;
+    flex-shrink: 0;
+    color: white;
+    text-shadow: 1px 1px 1px black;
+    font-weight: bold;
+    justify-content: center;
+    align-items: flex-end;
+    font-size: 20px;
+    text-transform: capitalize;
+    cursor: pointer;
 
-	box-shadow: 0 0 10px 5px var(--primary-500);
-	transform: scale(2);
-	transform-origin: top left;
-	pointer-events: none;
+    box-shadow: 0 0 10px 5px var(--primary-500);
+    transform: scale(2);
+    transform-origin: top left;
+    pointer-events: none;
 
-	position: fixed;
-	z-index: 5000;
-	top: auto;
-	left: auto;
-	margin-top: 100px;
+    position: fixed;
+    z-index: 5000;
+    top: auto;
+    left: auto;
+    margin-top: 100px;
 }
 
 .PBE_promptElementSplash .PBE_promptElementWeight {
-	bottom: auto;
-	top: 0;
+    bottom: auto;
+    top: 0;
 }
 
 .PBE_promptElementSplash .PBE_promptElementIndex {
-	bottom: auto;
-	top: 0;
+    bottom: auto;
+    top: 0;
 }
 
 .PBE_promptElement:hover {
-	z-index: 500 !important;
-	transform: none !important;
-	box-shadow: 0 0 10px 5px var(--primary-500);
+    z-index: 500 !important;
+    transform: none !important;
+    box-shadow: 0 0 10px 5px var(--primary-500);
 }
 
 .PBE_promptElement:hover .PBE_promptElementSplash{
-	display: flex;
+    display: flex;
 }
 
 .PBE_actionButton {
-	width: 120px;
-	height: 20px;
-	min-width: auto !important;
-	top: -0.75em;
-	background: var(--button-primary-background-fill) !important;
+    width: 120px;
+    height: 20px;
+    min-width: auto !important;
+    top: -0.75em;
+    background: var(--button-primary-background-fill) !important;
     color: var(--button-primary-text-color) !important;
-	text-align: center;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	cursor: pointer !important;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer !important;
 
     font-weight: var(--button-small-text-weight) !important;
-	border-radius: var(--button-small-radius);
+    border-radius: var(--button-small-radius);
     border-color: var(--button-primary-border-color);
-	border-style: solid;
+    border-style: solid;
     border-width: var(--button-border-width);
 }
 
@@ -605,18 +605,18 @@
 }
 
 .PBE_stylesButton {
-	position: absolute;
-	margin-left: 25px !important
+    position: absolute;
+    margin-left: 25px !important
 }
 
 .PBE_addUnknownButton {
-	position: absolute;
-	margin-left: 155px !important
+    position: absolute;
+    margin-left: 155px !important
 }
 
 .PBE_normalizeButton {
-	position: absolute;
-	margin-left: 285px !important
+    position: absolute;
+    margin-left: 285px !important
 }
 
 .PBE_normalizeButton_readonly {
@@ -625,95 +625,95 @@
 }
 
 .PBE_savePromptPreview {
-	position: absolute;
-	width: 100px;
-	top: -14px;
-	left: 8px;
-	z-index: 500;
+    position: absolute;
+    width: 100px;
+    top: -14px;
+    left: 8px;
+    z-index: 500;
 }
 
 .PBE_input {
-	width: 150px;
-	height: 20px;
-	line-height: 20px;
-	font-size: 16px;
-	padding: 0 36px 0 10px;
+    width: 150px;
+    height: 20px;
+    line-height: 20px;
+    font-size: 16px;
+    padding: 0 36px 0 10px;
 }
 
 .PBE_select {
-	width: 150px;
-	height: 20px;
-	line-height: 20px !important;
-	font-size: 16px !important;
-	padding: 0 36px 0 10px !important;
+    width: 150px;
+    height: 20px;
+    line-height: 20px !important;
+    font-size: 16px !important;
+    padding: 0 36px 0 10px !important;
 }
 
 .PBE_savePromptSelect {
-	position: absolute;
-	top: -14px;
-	left: 120px;
-	z-index: 500;
+    position: absolute;
+    top: -14px;
+    left: 120px;
+    z-index: 500;
 }
 
 .PBE_toolsBackImage {
-	position: absolute;
-	filter: grayscale(55%) blur(5px) brightness(53%);
-	width: 100%;
-	height: 100%;
-	background-size: cover;
-	background-position: center;
-	z-index: 1;
+    position: absolute;
+    filter: grayscale(55%) blur(5px) brightness(53%);
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    z-index: 1;
 }
 
 .PBE_toolsHeader {
-	z-index: 4;
-	flex-wrap: nowrap;
+    z-index: 4;
+    flex-wrap: nowrap;
 }
 
 .PBE_toolsSetup {
-	margin: 10px;
-	flex-shrink: 0;
+    margin: 10px;
+    flex-shrink: 0;
 }
 
 .PBE_toolsFooter {
-	z-index: 2;
+    z-index: 2;
 }
 
 
 /* Prompts Scriber */
 
 .PBE_newPromptsHeader {
-	display: flex;
-	flex-direction: row;
-	justify-content: flex-start;
-	align-items: center;
-	padding: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 10px;
 }
 
 .PBE_autocompliteBox {
-	position: absolute;
-	z-index: 501;
-	box-shadow: 3px 3px 5px var(--primary-500);
-	/* background: linear-gradient(to right, rgba(207,231,250,1) 0%,rgba(99,147,193,1) 100%); */
-	background: linear-gradient(to right, var(--primary-100) 0%, var(--primary-500) 100%);
+    position: absolute;
+    z-index: 501;
+    box-shadow: 3px 3px 5px var(--primary-500);
+    /* background: linear-gradient(to right, rgba(207,231,250,1) 0%,rgba(99,147,193,1) 100%); */
+    background: linear-gradient(to right, var(--primary-100) 0%, var(--primary-500) 100%);
     background-color: black;
 }
 
 .PBE_hintItem {
-	font-family: var(--font);
-	/* text-transform: capitalize; */
+    font-family: var(--font);
+    /* text-transform: capitalize; */
     color: var(--button-primary-text-color);
-	text-shadow: 1px 1px 1px black;
-	padding: 0 10px;
-	overflow: hidden;
-	font-size: 16px;
-	cursor: pointer;
+    text-shadow: 1px 1px 1px black;
+    padding: 0 10px;
+    overflow: hidden;
+    font-size: 16px;
+    cursor: pointer;
 }
 
 .PBE_hintItem:hover,
 .PBE_hintItemSelected {
-	background: var(--primary-900);
-	transform: scale(1.05);
+    background: var(--primary-900);
+    transform: scale(1.05);
 }
 
 /* Prompts Scriber end*/
@@ -722,36 +722,36 @@
 /* Collection tools */
 
 .PBE_collectionToolsWindow {
-	width: 90vw;
-	height: 90vh;
-	top: 5vh;
-	left: 5vw;
+    width: 90vw;
+    height: 90vh;
+    top: 5vh;
+    left: 5vw;
 }
 
 .PBE_collectionToolsHeader {
-	padding: 10px;
+    padding: 10px;
 }
 
 .PBE_detailedItemContainer {
-	flex-direction: row;
-	flex-wrap: wrap;
+    flex-direction: row;
+    flex-wrap: wrap;
 }
 
 .PBE_detailedItem {
-	width: 40%;
-	min-height: 60px;
-	font-family: sans-serif;
-	display: flex;
-	flex-direction: row;
-	flex-wrap: nowrap;
-	flex-grow: 1;
-	/* background-color: white; */
-	/* border: 4px solid white; */
-	margin: 2px;
-	color: black;
-	text-shadow: 1px 1px 1px black;
-	content-visibility: auto;
-	contain-intrinsic-size: 1px 5000px;
+    width: 40%;
+    min-height: 60px;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    flex-grow: 1;
+    /* background-color: white; */
+    /* border: 4px solid white; */
+    margin: 2px;
+    color: black;
+    text-shadow: 1px 1px 1px black;
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 5000px;
 }
 
 .PBE_detailedItem:hover {
@@ -759,7 +759,7 @@
 }
 
 .PBE_detailedItem.selected {
-	background: var(--primary-300);
+    background: var(--primary-300);
 }
 
 .PBE_detailedItem.selected .PBE_detailedItemName {
@@ -768,57 +768,57 @@
 
 .PBE_detailedItem:hover .PBE_detailedItemSelector,
 .PBE_detailedItem.selected .PBE_detailedItemSelector {
-	opacity: 1;
+    opacity: 1;
 }
 
 .PBE_detailedItemSelector {
-	cursor: pointer;
-	width: 60px;
-	background: var(--primary-500);
-	margin-right: 10px;
-	flex-shrink: 0;
-	background-size: cover;
-	opacity: 0.5;
-	user-select: none;
+    cursor: pointer;
+    width: 60px;
+    background: var(--primary-500);
+    margin-right: 10px;
+    flex-shrink: 0;
+    background-size: cover;
+    opacity: 0.5;
+    user-select: none;
 }
 
 .PBE_detailedItemContent {
-	display: flex;
-	flex-direction: column;
-	flex-wrap: nowrap;
-	flex-grow: 1;
-	padding: 10px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    flex-grow: 1;
+    padding: 10px;
 }
 
 .PBE_detailedItemTop {
-	flex-grow: 1;
-	display: flex;
-	flex-direction: row;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
 }
 
 .PBE_detailedItemBottom {
-	flex-grow: 1;
-	display: flex;
-	flex-direction: row;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
 }
 
 .PBE_detailedItemName {
-	font-size: 18px;
-	color: var(--body-text-color);
-	text-transform: capitalize;
+    font-size: 18px;
+    color: var(--body-text-color);
+    text-transform: capitalize;
 }
 
 .PBE_detailedItemComment {
-	padding: 0 10px;
-	color: var(--body-text-color);
+    padding: 0 10px;
+    color: var(--body-text-color);
 }
 
 .PBE_detailedItemTags,
 .PBE_detailedItemCategories {
-	width: 50%;
-	background-color: var(--primary-500);
-	color: var(--body-text-color);
-	padding: 4px;
+    width: 50%;
+    background-color: var(--primary-500);
+    color: var(--body-text-color);
+    padding: 4px;
 }
 
 .PBE_collectionToolsStatus {
@@ -830,8 +830,8 @@
 }
 
 .PBE_collectionToolsActions {
-	flex-wrap: wrap;
-	padding: 5px;
+    flex-wrap: wrap;
+    padding: 5px;
 }
 
 /* Collection tools end*/
@@ -840,31 +840,31 @@
 /* Prompts filter */
 
 .PBE_filtersWrapper {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	margin: 5px;
-	padding: 2px 2px 0 2px;
-	/* background-color: white; */
-	border-radius: 10px;
-	flex-grow: 1;
-	/* box-shadow: 2px 2px 4px black inset; */
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin: 5px;
+    padding: 2px 2px 0 2px;
+    /* background-color: white; */
+    border-radius: 10px;
+    flex-grow: 1;
+    /* box-shadow: 2px 2px 4px black inset; */
 }
 
 .PBE_filtersAddNew {
-	height: 20px;
-	width: 20px;
-	border-radius: 10px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	background: var(--button-primary-background-fill) ;
-	color: white;
-	font-family: monospace;
-	font-size: 14px;
-	font-weight: bold;
-	cursor: pointer;
-	margin: 0 0px 2px 2px;
+    height: 20px;
+    width: 20px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--button-primary-background-fill) ;
+    color: white;
+    font-family: monospace;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 0 0px 2px 2px;
 }
 
 .PBE_filtersRemoveNew {
@@ -879,60 +879,60 @@
 
 .PBE_newFilterContainer {
     background-color: var(--primary-300);
-	align-items: center;
-	padding: 0 10px;
-	border-radius: 10px;
-	flex-wrap: nowrap;
-	height: 20px;
+    align-items: center;
+    padding: 0 10px;
+    border-radius: 10px;
+    flex-wrap: nowrap;
+    height: 20px;
 }
 
 .PBE_filterAction {
-	font-family: sans-serif;
-	height: 20px;
-	line-height: 20px;
-	font-size: 16px;
-	border: none;
-	border-radius: 10px;
-	padding: 0 10px;
-	color: var(--button-secondary-text-color);
+    font-family: sans-serif;
+    height: 20px;
+    line-height: 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    padding: 0 10px;
+    color: var(--button-secondary-text-color);
     background: var(--secondary-500);
-	cursor: pointer;
-	width: 80px;
-	text-align: center;
+    cursor: pointer;
+    width: 80px;
+    text-align: center;
 }
 
 .PBE_filterItem {
-	display: flex;
-	flex-wrap: nowrap;
-	height: 20px;
-	background-color: aqua;
-	border-radius: 10px;
-	padding-left: 5px;
-	margin-right: 5px;
-	font-family: sans-serif;
-	font-weight: bold;
-	font-size: 15px;
-	align-items: center;
-	color: black;
-	margin-bottom: 2px;
+    display: flex;
+    flex-wrap: nowrap;
+    height: 20px;
+    background-color: aqua;
+    border-radius: 10px;
+    padding-left: 5px;
+    margin-right: 5px;
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: 15px;
+    align-items: center;
+    color: black;
+    margin-bottom: 2px;
 }
 
 .PBE_filterItemNegative {
-	background-color: coral;
+    background-color: coral;
 }
 
 .PBE_filterItemRemove {
-	/* background-color: crimson; */
-	width: 20px;
-	height: 20px;
-	/* color: white; */
-	font-size: 12px;
-	cursor: pointer;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	border-radius: 10px;
-	margin-left: 5px;
+    /* background-color: crimson; */
+    width: 20px;
+    height: 20px;
+    /* color: white; */
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    margin-left: 5px;
 }
 
 /* Prompts filter end*/
@@ -941,22 +941,22 @@
 /* Setup window */
 
 .PBE_setupWindow {
-	z-index: 600;
-	padding: 10px;
-	align-items: center;
-	background-size: cover;
-	background-position: center;
-	background-repeat: no-repeat;
+    z-index: 600;
+    padding: 10px;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 
-	color: var(--body-text-color);
-	text-shadow: 1px 1px 1px black;
-	/* font-weight: bold; */
-	font-size: 18px;
+    color: var(--body-text-color);
+    text-shadow: 1px 1px 1px black;
+    /* font-weight: bold; */
+    font-size: 18px;
 
-	width: 600px;
-	height: 500px;
-	top: calc(50% - 250px);
-	left: calc(50% - 300px);
+    width: 600px;
+    height: 500px;
+    top: calc(50% - 250px);
+    left: calc(50% - 300px);
 
     font-family: var(--font);
 }
@@ -988,97 +988,97 @@
 }
 
 .PBE_stylesHeader {
-	height: 110px;
-	flex-wrap: nowrap;
-	flex-shrink: 0;
+    height: 110px;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
 }
 
 .PBE_stylesSetup {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	padding-right: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-right: 10px;
     padding-top: 10px;
-	flex-shrink: 0;
+    flex-shrink: 0;
 }
 
 .PBE_newStyleName {
-	padding: 0 5px;
-	border-radius: 10px;
-	height: 30px;
-	width: 256px;
-	margin-bottom: 5px;
-	border: none;
+    padding: 0 5px;
+    border-radius: 10px;
+    height: 30px;
+    width: 256px;
+    margin-bottom: 5px;
+    border: none;
 }
 
 .PBE_styleItem {
-	display: flex;
-	flex-direction: column;
-	flex-wrap: nowrap;
-	/* background-color: rgba(50, 100, 200, 0.5); */
-	margin: 10px 0;
-	background-size: cover;
-	background-position: center;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    /* background-color: rgba(50, 100, 200, 0.5); */
+    margin: 10px 0;
+    background-size: cover;
+    background-position: center;
     background: var(--secondary-900);
 }
 
 .PBE_styleHeader {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	color: white;
-	padding: 2px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    padding: 2px 10px;
     background: var(--secondary-500);
 }
 
 .PBE_styleItemName {
-	/* color: white; */
-	/* text-shadow: 1px 1px 1px black; */
-	font-size: 20px;
+    /* color: white; */
+    /* text-shadow: 1px 1px 1px black; */
+    font-size: 20px;
     color: var(--body-text-color);
     font-family: var(--font);
 }
 
 .PBE_styleItemContent {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: nowrap;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
 }
 
 .PBE_stylesCurrentList {
-	display: flex;
-	flex-direction: row;
-	overflow: auto;
-	margin: 5px;
-	flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+    overflow: auto;
+    margin: 5px;
+    flex-grow: 1;
 }
 
 .PBE_stylesAction {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	margin: 10px;
-	min-height: 90px;
-	flex-shrink: 0;
-	max-width: 210px;
-	justify-content: center;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin: 10px;
+    min-height: 90px;
+    flex-shrink: 0;
+    max-width: 210px;
+    justify-content: center;
 }
 
 .PBE_stylesAction button {
-	margin: 0 2px;
-	width: 100px;
+    margin: 0 2px;
+    width: 100px;
 }
 
 .PBE_stylesFilter {
-	justify-content: flex-start;
-	align-items: center;
-	margin-top: 10px;
-	padding: 0 10px;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 10px;
+    padding: 0 10px;
 }
 
 .PBE_stylesFilter > * {
-	margin-right: 10px;
+    margin-right: 10px;
 }
 
 /* Styles window end */
