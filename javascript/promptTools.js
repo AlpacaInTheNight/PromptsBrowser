@@ -3,6 +3,20 @@ if(!window.PromptsBrowser) window.PromptsBrowser = {};
 
 PromptsBrowser.promptTools = {};
 
+PromptsBrowser.promptTools.currentFilters = {
+    collection: "",
+    category: "",
+    tags: [],
+    name: "",
+}
+
+PromptsBrowser.promptTools.possibleFilters = {
+    collection: "",
+    category: "",
+    tags: [],
+    name: "",
+}
+
 PromptsBrowser.promptTools.init = (wrapper) => {
     const promptTools = document.createElement("div");
     promptTools.className = "PBE_generalWindow PBE_promptTools";
@@ -62,9 +76,13 @@ PromptsBrowser.promptTools.onElementClick = (e) => {
 
     if(clickTargetIndex !== -1) {
 
-        if(e.shiftKey || e.metaKey || e.ctrlKey) {
+        if(e.metaKey || e.ctrlKey) {
             activePrompts = activePrompts.filter(item => item.id !== clickPrompt);
             PromptsBrowser.setCurrentPrompts(activePrompts);
+
+        } else if(e.shiftKey) {
+            state.editingPrompt = clickPrompt;
+            PromptsBrowser.promptEdit.update();
 
         } else {
             state.promptToolsId = clickPrompt;
@@ -93,6 +111,8 @@ PromptsBrowser.promptTools.onElementClick = (e) => {
 
 PromptsBrowser.promptTools.showCurrentPrompts = (wrapper) => {
     const {state} = PromptsBrowser;
+    const {currentFilters} = PromptsBrowser.promptTools;
+    const {checkFilter} = PromptsBrowser.promptsSimpleFilter;
     const activePrompts = PromptsBrowser.getCurrentPrompts();
     if(!state.promptToolsId) return;
 
@@ -128,9 +148,11 @@ PromptsBrowser.promptTools.showCurrentPrompts = (wrapper) => {
     for(const i in activePrompts) {
         const currPrompt = activePrompts[i];
         if(!currPrompt || currPrompt.isSyntax) continue;
+        if(!checkFilter(currPrompt.id, currentFilters)) continue;
         const isShadowed = currPrompt.id !== state.promptToolsId;
 
         promptElement = PromptsBrowser.showPromptItem({id: currPrompt.id, isExternalNetwork: currPrompt.isExternalNetwork}, {isShadowed});
+        
         promptElement.addEventListener("click", PromptsBrowser.promptTools.onElementClick);
         currentPromptsContainer.appendChild(promptElement);
     }
@@ -154,6 +176,8 @@ PromptsBrowser.promptTools.showPossiblePromptswrapper = (wrapper) => {
     const {replaceAllRegex} = window.PromptsBrowser;
     const {united} = PromptsBrowser.data;
     const {state} = PromptsBrowser;
+    const {possibleFilters} = PromptsBrowser.promptTools;
+    const {checkFilter} = PromptsBrowser.promptsSimpleFilter;
     const prompt = state.promptToolsId;
     const activePrompts = PromptsBrowser.getCurrentPrompts();
     if(!prompt) return;
@@ -173,6 +197,8 @@ PromptsBrowser.promptTools.showPossiblePromptswrapper = (wrapper) => {
 
     united.forEach(item => {
         const {id, tags, category} = item;
+
+        if(!checkFilter(id, possibleFilters)) return;
 
         //similarity index based on the same tags, categories and words used in the prompt name
         let simIndex = 0;
@@ -262,17 +288,25 @@ PromptsBrowser.promptTools.update = () => {
     backImage.style.backgroundImage = PromptsBrowser.utils.getPromptPreviewURL(state.promptToolsId);
     backImage.className = "PBE_toolsBackImage";
 
+    const currentFilterBlock = document.createElement("div");
+    const possibleFilterBlock = document.createElement("div");
+
     const currentPromptsBlock = document.createElement("div");
     const possiblePromptsBlock = document.createElement("div");
     const footerBlock = document.createElement("div");
     const closeButton = document.createElement("button");
     footerBlock.className = "PBE_rowBlock PBE_rowBlock_wide PBE_toolsFooter";
+    currentFilterBlock.className = "PBE_dataBlock PBE_toolsFilter";
+    possibleFilterBlock.className = "PBE_dataBlock PBE_toolsFilter";
     currentPromptsBlock.className = "PBE_dataBlock PBE_toolsHeader";
     possiblePromptsBlock.className = "PBE_dataBlock PBE_Scrollbar PBE_windowContent";
     closeButton.innerText = "Close";
     closeButton.className = "PBE_button";
 
+    PromptsBrowser.promptsSimpleFilter.show(currentFilterBlock, PromptsBrowser.promptTools.currentFilters, PromptsBrowser.promptTools.update);
     PromptsBrowser.promptTools.showCurrentPrompts(currentPromptsBlock);
+
+    PromptsBrowser.promptsSimpleFilter.show(possibleFilterBlock, PromptsBrowser.promptTools.possibleFilters, PromptsBrowser.promptTools.update);
     PromptsBrowser.promptTools.showPossiblePromptswrapper(possiblePromptsBlock);
 
     closeButton.addEventListener("click", PromptsBrowser.promptTools.onCloseWindow);
@@ -280,7 +314,12 @@ PromptsBrowser.promptTools.update = () => {
     footerBlock.appendChild(closeButton);
 
     wrapper.appendChild(backImage);
+
+    wrapper.appendChild(currentFilterBlock);
     wrapper.appendChild(currentPromptsBlock);
+
+    wrapper.appendChild(possibleFilterBlock);
     wrapper.appendChild(possiblePromptsBlock);
+
     wrapper.appendChild(footerBlock);
 }

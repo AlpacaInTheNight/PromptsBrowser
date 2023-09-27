@@ -3,7 +3,7 @@ if(!window.PromptsBrowser) window.PromptsBrowser = {};
 window.PromptsBrowser.makeElement = function(params) {
     if(!params) return;
 
-    const {element, id, name, className, type, content, title, style} = params;
+    const {element, id, name, className, type, content, title, style, value, placeholder, onChange} = params;
     if(!element) return;
 
     const newElement = document.createElement(element);
@@ -13,8 +13,12 @@ window.PromptsBrowser.makeElement = function(params) {
     if(className) newElement.className = className;
     if(content) newElement.innerText = content;
     if(title) newElement.title = title;
+    if(value) newElement.value = value;
+    if(placeholder) newElement.placeholder = placeholder;
 
     if(style) for(const i in style) newElement.style[i] = style[i];
+
+    if(onChange) newElement.addEventListener("change", onChange);
 
     return newElement;
 }

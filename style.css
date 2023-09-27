@@ -1,3 +1,4 @@
+@import url("./styles/promptTools.css");
 
 .interrogate-col > button {
     flex: 0 !important;
@@ -81,6 +82,16 @@
     border-color: var(--input-border-color-focus) !important;
     box-shadow: var(--input-shadow-focus) !important;
     background: var(--input-background-fill-focus) !important;
+}
+
+.PBE_filtersContainer {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.PBE_filtersContainer > * {
+    margin-right: 5px;
 }
 
 .PBE_row {
@@ -655,6 +666,15 @@
     z-index: 500;
 }
 
+/* Prompt tools window */
+
+/* .PBE_promptTools {
+    width: 90vw;
+    height: 90vh;
+    top: 5vh;
+    left: 5vw;
+}
+
 .PBE_toolsBackImage {
     position: absolute;
     filter: grayscale(55%) blur(5px) brightness(53%);
@@ -677,8 +697,9 @@
 
 .PBE_toolsFooter {
     z-index: 2;
-}
+} */
 
+/* Prompt tools window end */
 
 /* Prompts Scriber */
 

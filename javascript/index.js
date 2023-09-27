@@ -706,7 +706,8 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
 }
 
 PromptsBrowser.db.updateMixedList = () => {
-    const unitedList = [];
+    const unitedArray = [];
+    const unitedList = {};
     const res = PromptsBrowser.data.original;
     const addedIds = {};
 
@@ -717,7 +718,7 @@ PromptsBrowser.db.updateMixedList = () => {
         for(const collectionPrompt of collection) {
             const {id, isExternalNetwork, previewImage, addAtStart, addAfter, addStart, addEnd} = collectionPrompt;
             let newItem = {id, tags: [], category: [], collections: [], knownPreviews: {}};
-            if(addedIds[id]) newItem = unitedList.find(item => item.id === id);
+            if(addedIds[id]) newItem = unitedArray.find(item => item.id === id);
 
             if(addAtStart) newItem.addAtStart = addAtStart;
             if(addAfter) newItem.addAfter = addAfter;
@@ -745,12 +746,16 @@ PromptsBrowser.db.updateMixedList = () => {
                 });
             }
 
-            if(!addedIds[id]) unitedList.push(newItem);
+            if(!addedIds[id]) {
+                unitedArray.push(newItem);
+                unitedList[id] = newItem;
+            }
             addedIds[id] = true;
         }
     }
 
-    PromptsBrowser.data.united = unitedList;
+    PromptsBrowser.data.united = unitedArray;
+    PromptsBrowser.data.unitedList = unitedList;
 }
 
 PromptsBrowser.db.getAPIurl = (endpoint) => {
