@@ -9,12 +9,12 @@ window.PromptsBrowser.triggerEvents = function(element) {
 
 window.PromptsBrowser.applyStyle = function(style, isAfter, override = false) {
     if(!style) return;
-	const {state, triggerEvents} = PromptsBrowser;
+    const {state, triggerEvents} = PromptsBrowser;
     const {positive, negative, seed, width, height, steps, cfg, sampling} = style;
 
     if(override) PromptsBrowser.setCurrentPrompts([]);
 
-	const activePrompts = PromptsBrowser.getCurrentPrompts();
+    const activePrompts = PromptsBrowser.getCurrentPrompts();
     const negativePrompts = PromptsBrowser.DOMCache.containers[state.currentContainer].negativePrompts;
     const seedInput = PromptsBrowser.DOMCache.containers[state.currentContainer].seedInput;
     const widthInput = PromptsBrowser.DOMCache.containers[state.currentContainer].widthInput;
@@ -23,24 +23,24 @@ window.PromptsBrowser.applyStyle = function(style, isAfter, override = false) {
     const cfgInput = PromptsBrowser.DOMCache.containers[state.currentContainer].cfgInput;
     const samplingInput = PromptsBrowser.DOMCache.containers[state.currentContainer].samplingInput;
 
-	if(isAfter) {
-		for(const prompt of positive) {
-			const {id} = prompt;
-			if( activePrompts.some(item => item.id === id) ) continue;
-	
-			activePrompts.push({...prompt});
-		}
+    if(isAfter) {
+        for(const prompt of positive) {
+            const {id} = prompt;
+            if( activePrompts.some(item => item.id === id) ) continue;
+    
+            activePrompts.push({...prompt});
+        }
 
-	} else {
-		for(let i = positive.length - 1; i >= 0; i--) {
-			const prompt = positive[i];
-			const {id} = prompt;
-			if( activePrompts.some(item => item.id === id) ) continue;
+    } else {
+        for(let i = positive.length - 1; i >= 0; i--) {
+            const prompt = positive[i];
+            const {id} = prompt;
+            if( activePrompts.some(item => item.id === id) ) continue;
 
-			activePrompts.unshift({...prompt});
-		}
+            activePrompts.unshift({...prompt});
+        }
 
-	}
+    }
 
     if(seed !== undefined && seedInput) {
         seedInput.value = seed;
@@ -110,5 +110,5 @@ window.PromptsBrowser.applyStyle = function(style, isAfter, override = false) {
         }, 100);
     }
 
-	PromptsBrowser.currentPrompts.update();
+    PromptsBrowser.currentPrompts.update();
 }

@@ -4,25 +4,83 @@ if(!window.PromptsBrowser) window.PromptsBrowser = {};
 PromptsBrowser.currentPrompts = {};
 
 PromptsBrowser.currentPrompts.init = (wrapper, containerId) => {
-	const currentPrompts = document.createElement("div");
-	currentPrompts.className = "PBE_currentPrompts";
+    const currentPrompts = document.createElement("div");
+    currentPrompts.className = "PBE_currentPrompts";
 
-	PromptsBrowser.DOMCache.containers[containerId].currentPrompts = currentPrompts;
-	wrapper.appendChild(currentPrompts);
+    PromptsBrowser.DOMCache.containers[containerId].currentPrompts = currentPrompts;
+    wrapper.appendChild(currentPrompts);
+}
+
+PromptsBrowser.currentPrompts.onDragStart = (e) => {
+    const {state} = PromptsBrowser;
+    const index = e.currentTarget.dataset.index;
+
+    state.dragCurrentIndex = index;
+    e.dataTransfer.setData("text", index);
+}
+
+PromptsBrowser.currentPrompts.onDragOver = (e) => {
+    e.preventDefault();
+}
+
+PromptsBrowser.currentPrompts.onDragLeave = (e) => {
+    e.currentTarget.classList.remove("PBE_swap");
+}
+
+PromptsBrowser.currentPrompts.onDragEnter = (e) => {
+    const {state} = PromptsBrowser;
+
+    e.preventDefault();
+    const dragIndex = Number(e.currentTarget.dataset.index);
+    const dropIndex = Number(state.dragCurrentIndex);
+
+    if(Number.isNaN(dragIndex) || Number.isNaN(dropIndex)) return;
+    if(dragIndex === undefined || dropIndex === undefined) return;
+    if(dragIndex === dropIndex) return;
+    
+    e.currentTarget.classList.add("PBE_swap");
+}
+
+PromptsBrowser.currentPrompts.onDrop = (e) => {
+    const {state} = PromptsBrowser;
+    const activePrompts = PromptsBrowser.getCurrentPrompts();
+
+    const dragIndex = Number(e.currentTarget.dataset.index);
+    const dropIndex = Number(state.dragCurrentIndex);
+    e.currentTarget.classList.remove("PBE_swap");
+
+    state.dragCurrentIndex = undefined;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const element = activePrompts.splice(dropIndex, 1)[0];
+    activePrompts.splice(dragIndex, 0, element);
+
+    PromptsBrowser.currentPrompts.update();
+}
+
+PromptsBrowser.currentPrompts.onDblClick = (e) => {
+    const {state} = PromptsBrowser;
+
+    const currentId = e.currentTarget.dataset.prompt;
+    if(!currentId) return;
+
+    state.promptToolsId = currentId;
+    PromptsBrowser.promptTools.update();
 }
 
 PromptsBrowser.currentPrompts.initButton = (positiveWrapper) => {
     const {readonly} = PromptsBrowser.meta;
-	const normalizeButton = document.createElement("button");
+    const normalizeButton = document.createElement("button");
 
-	normalizeButton.className = "PBE_actionButton PBE_normalizeButton";
-	normalizeButton.innerText = "Normalize";
+    normalizeButton.className = "PBE_actionButton PBE_normalizeButton";
+    normalizeButton.innerText = "Normalize";
 
     if(readonly) normalizeButton.className = "PBE_actionButton PBE_normalizeButton_readonly";
 
-	normalizeButton.addEventListener("click", PromptsBrowser.currentPrompts.onNormalizePrompts);
+    normalizeButton.addEventListener("click", PromptsBrowser.currentPrompts.onNormalizePrompts);
 
-	positiveWrapper.appendChild(normalizeButton);
+    positiveWrapper.appendChild(normalizeButton);
 }
 
 PromptsBrowser.currentPrompts.onPromptSelected = (e) => {
@@ -30,10 +88,21 @@ PromptsBrowser.currentPrompts.onPromptSelected = (e) => {
     const {united} = PromptsBrowser.data;
     const {state} = PromptsBrowser;
     const currentId = e.currentTarget.dataset.prompt;
+    let index = e.currentTarget.dataset.index;
+    const isSyntax = e.currentTarget.dataset.issyntax ? true : false;
     const activePrompts = PromptsBrowser.getCurrentPrompts();
-	const wrapper = PromptsBrowser.DOMCache.containers[state.currentContainer].currentPrompts;
-	if(!wrapper) return;
-    if(!currentId) return;
+    const wrapper = PromptsBrowser.DOMCache.containers[state.currentContainer].currentPrompts;
+    if(!wrapper || !currentId) return;
+
+    if(index !== undefined) index = Number(index);
+
+    if(isSyntax && index !== undefined && (e.ctrlKey || e.metaKey)) {
+        activePrompts.splice(index, 1)
+        PromptsBrowser.setCurrentPrompts(activePrompts);
+        PromptsBrowser.currentPrompts.update();
+
+        return;
+    }
 
     const targetPrompt = united.find(item => item.id.toLowerCase() === currentId.toLowerCase());
 
@@ -81,148 +150,134 @@ PromptsBrowser.currentPrompts.onPromptSelected = (e) => {
     PromptsBrowser.previewSave.update();
 }
 
+/**
+ * Handles the mouse wheel event and changes the weight of the prompt
+ */
 PromptsBrowser.currentPrompts.scrollWeight = (e) => {
-	const {state} = PromptsBrowser;
-	const {belowOneWeight = 0.05, aboveOneWeight = 0.01} = state.config;
-	if(!e.shiftKey) return;
-	const currentId = e.currentTarget.dataset.prompt;
-	const activePrompts = PromptsBrowser.getCurrentPrompts();
-	const targetItem = activePrompts.find(item => item.id === currentId);
-	if(!currentId || !targetItem) return;
+    const {state} = PromptsBrowser;
+    const {belowOneWeight = 0.05, aboveOneWeight = 0.01} = state.config;
+    if(!e.shiftKey) return;
+    const currentId = e.currentTarget.dataset.prompt;
+    const activePrompts = PromptsBrowser.getCurrentPrompts();
+    const targetItem = activePrompts.find(item => item.id === currentId);
+    if(!currentId || !targetItem) return;
+    if(targetItem.isSyntax) return;
 
-	e.preventDefault();
-	e.stopPropagation();
+    e.preventDefault();
+    e.stopPropagation();
 
-	if(!targetItem.weight) targetItem.weight = 0;
+    if(!targetItem.weight) targetItem.weight = 0;
 
-	if(e.deltaY < 0) { //rising weight
+    if(e.deltaY < 0) { //rising weight
 
-		if(targetItem.weight < 1 && (targetItem.weight + belowOneWeight) > 1 ) {
-			targetItem.weight = 1;
+        if(targetItem.weight < 1 && (targetItem.weight + belowOneWeight) > 1 ) {
+            targetItem.weight = 1;
 
-		} else {
-			if(targetItem.weight >= 1) targetItem.weight += aboveOneWeight;
-			else targetItem.weight += belowOneWeight;
+        } else {
+            if(targetItem.weight >= 1) targetItem.weight += aboveOneWeight;
+            else targetItem.weight += belowOneWeight;
 
-		}
-		
-	} else { //lowering weight
+        }
+        
+    } else { //lowering weight
 
-		if(targetItem.weight > 1 && (targetItem.weight - aboveOneWeight) < 1 ) {
-			targetItem.weight = 1;
+        if(targetItem.weight > 1 && (targetItem.weight - aboveOneWeight) < 1 ) {
+            targetItem.weight = 1;
 
-		} else {
-			if(targetItem.weight <= 1) targetItem.weight -= belowOneWeight;
-			else targetItem.weight -= aboveOneWeight;
+        } else {
+            if(targetItem.weight <= 1) targetItem.weight -= belowOneWeight;
+            else targetItem.weight -= aboveOneWeight;
 
-		}
+        }
 
-	}
+    }
 
-	if(targetItem.weight < 0) targetItem.weight = 0;
-	targetItem.weight = Number(targetItem.weight.toFixed(2));
-	PromptsBrowser.currentPrompts.update();
+    if(targetItem.weight < 0) targetItem.weight = 0;
+    targetItem.weight = Number(targetItem.weight.toFixed(2));
+    PromptsBrowser.currentPrompts.update();
 }
 
 PromptsBrowser.currentPrompts.onNormalizePrompts = () => {
-	PromptsBrowser.synchroniseCurrentPrompts();
-	PromptsBrowser.currentPrompts.update();
+    PromptsBrowser.synchroniseCurrentPrompts();
+    PromptsBrowser.currentPrompts.update();
 }
 
 PromptsBrowser.currentPrompts.update = (noTextAreaUpdate = false) => {
-	const {DEFAULT_PROMPT_WEIGHT} = PromptsBrowser.params;
-	const {state} = PromptsBrowser;
-	const activePrompts = PromptsBrowser.getCurrentPrompts();
+    const {DEFAULT_PROMPT_WEIGHT} = PromptsBrowser.params;
+    const {state} = PromptsBrowser;
+    const activePrompts = PromptsBrowser.getCurrentPrompts();
 
-	const wrapper = PromptsBrowser.DOMCache.containers[state.currentContainer].currentPrompts;
-	const textArea = PromptsBrowser.DOMCache.containers[state.currentContainer].textArea;
+    const wrapper = PromptsBrowser.DOMCache.containers[state.currentContainer].currentPrompts;
+    const textArea = PromptsBrowser.DOMCache.containers[state.currentContainer].textArea;
 
-	if(!wrapper || !textArea) return;
-	wrapper.innerHTML = "";
-	const prompts = [];
+    if(!wrapper || !textArea) return;
+    wrapper.innerHTML = "";
+    const prompts = [];
 
-	for(let index = 0; index < activePrompts.length; index++) {
-		promptItem = activePrompts[index];
-		const id = promptItem.id;
+    for(let index = 0; index < activePrompts.length; index++) {
+        promptItem = activePrompts[index];
+        const id = promptItem.id;
 
-		if(promptItem.isExternalNetwork) {
-			prompts.push(`<${id}:${promptItem.weight}>`);
+        if(promptItem.isExternalNetwork) {
+            prompts.push({text: `<${id}:${promptItem.weight}>`, src: promptItem});
 
-		} else {
-			if(promptItem.weight !== DEFAULT_PROMPT_WEIGHT) {
-				prompts.push(`(${id}: ${promptItem.weight})`);
-			} else prompts.push(id);
-		}
+        } else {
+            if(promptItem.weight !== undefined && promptItem.weight !== DEFAULT_PROMPT_WEIGHT) {
+                prompts.push({text: `(${id}: ${promptItem.weight})`, src: promptItem});
+            } else prompts.push({text: id, src: promptItem});
+        }
 
-		const promptElement = PromptsBrowser.showPromptItem(promptItem, {index});
+        const promptElement = PromptsBrowser.showPromptItem(promptItem, {index});
 
-		if(state.selectedPrompt === id) promptElement.classList.add("PBE_selectedCurrentElement");
+        if(promptItem.isSyntax) {
+            promptElement.dataset.issyntax = "true";
+        } else if(state.selectedPrompt === id) promptElement.classList.add("PBE_selectedCurrentElement");
 
-		promptElement.addEventListener("dragstart", (e) => {
-			const index = e.currentTarget.dataset.index;
+        promptElement.addEventListener("dragstart", PromptsBrowser.currentPrompts.onDragStart);
+        promptElement.addEventListener("dragover", PromptsBrowser.currentPrompts.onDragOver);
+        promptElement.addEventListener("dragenter", PromptsBrowser.currentPrompts.onDragEnter);
+        promptElement.addEventListener("dragleave", PromptsBrowser.currentPrompts.onDragLeave);
+        promptElement.addEventListener("drop", PromptsBrowser.currentPrompts.onDrop);
+        promptElement.addEventListener("click", PromptsBrowser.currentPrompts.onPromptSelected);
+        
+        if(!promptItem.isSyntax) {
+            promptElement.addEventListener("dblclick", PromptsBrowser.currentPrompts.onDblClick);
+            promptElement.addEventListener("mousewheel", PromptsBrowser.currentPrompts.scrollWeight);
+        }
 
-			state.dragCurrentIndex = index;
-			e.dataTransfer.setData("text", index);
-		});
+        wrapper.appendChild(promptElement);
+    }
+    
+    if(noTextAreaUpdate) return;
 
-		promptElement.addEventListener("dragover", (e) => {
-			e.preventDefault();
-		});
+    //textArea.value = prompts.join(", ");
 
-		promptElement.addEventListener("dragenter", (e) => {
-			e.preventDefault();
-			const dragIndex = Number(e.currentTarget.dataset.index);
-			const dropIndex = Number(state.dragCurrentIndex);
+    let newTextValue = "";
+    for(let i = 0; i < prompts.length; i++) {
+        const {text, src} = prompts[i];
+        const nextPromptSrc = prompts[i+1] ? prompts[i+1].src : undefined;
+        newTextValue += text;
 
-			if(Number.isNaN(dragIndex) || Number.isNaN(dropIndex)) return;
-			if(dragIndex === undefined || dropIndex === undefined) return;
-			if(dragIndex === dropIndex) return;
-			
-			e.currentTarget.classList.add("PBE_swap");
-		});
+        let addDelimiter = true;
 
-		promptElement.addEventListener("dragleave", (e) => {
-			e.currentTarget.classList.remove("PBE_swap");
-		});
+        if(!nextPromptSrc) addDelimiter = false;
+        else if(src.delimiter) {
+            if(src.delimiter === "prev" || src.delimiter === "none") addDelimiter = false;
 
-		promptElement.addEventListener("drop", (e) => {
-			const dragIndex = Number(e.currentTarget.dataset.index);
-			const dropIndex = Number(state.dragCurrentIndex);
-			e.currentTarget.classList.remove("PBE_swap");
+        } else if(nextPromptSrc.delimiter) {
+            if(nextPromptSrc.delimiter === "next" || nextPromptSrc.delimiter === "none") addDelimiter = false;
 
-			state.dragCurrentIndex = undefined;
-			e.preventDefault();
-			e.stopPropagation();
+        }
 
-			const element = activePrompts.splice(dropIndex, 1)[0];
-			activePrompts.splice(dragIndex, 0, element);
+        if(addDelimiter) newTextValue += ", ";
+    }
 
-			PromptsBrowser.currentPrompts.update();
-		});
+    textArea.value = newTextValue;
 
-		promptElement.addEventListener("click", PromptsBrowser.currentPrompts.onPromptSelected);
-
-		promptElement.addEventListener("dblclick", (e) => {
-			const currentId = e.currentTarget.dataset.prompt;
-			if(!currentId) return;
-
-			state.promptToolsId = currentId;
-			PromptsBrowser.promptTools.update();
-		});
-
-		promptElement.addEventListener("mousewheel", PromptsBrowser.currentPrompts.scrollWeight);
-
-		wrapper.appendChild(promptElement);
-	}
-	
-	if(noTextAreaUpdate) return;
-
-	textArea.value = prompts.join(", ");
-
-	//Just to be sure every api listening to changes in textarea done their job
-	textArea.dispatchEvent(new Event('focus'));
-	textArea.dispatchEvent(new Event('input'));
-	textArea.dispatchEvent(new KeyboardEvent('keyup'));
-	textArea.dispatchEvent(new KeyboardEvent('keypress'));
-	textArea.dispatchEvent(new Event('blur'));
+    //Just to be sure every api listening to changes in textarea done their job
+    textArea.dispatchEvent(new Event('focus'));
+    textArea.dispatchEvent(new Event('input'));
+    textArea.dispatchEvent(new KeyboardEvent('keyup'));
+    textArea.dispatchEvent(new KeyboardEvent('keypress'));
+    textArea.dispatchEvent(new Event('blur'));
 }

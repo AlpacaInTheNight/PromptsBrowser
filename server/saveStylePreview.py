@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+from urllib.parse import unquote
 from os.path import join, isdir, isfile
 
 from . import constant
@@ -10,7 +11,7 @@ from .utils import getCollectionsDir
 from .utils import emitMessage
 
 def saveStylePreview(postJSON):
-    src = postJSON.src
+    src = unquote(postJSON.src)
     style = postJSON.style
     collection = postJSON.collection
     
