@@ -93,6 +93,7 @@ PromptsBrowser.promptEdit.addCollectionSelector = (wrapper) => {
     }
 
     const collectionSelect = document.createElement("select");
+    collectionSelect.className = "PBE_generalInput";
 
     let options = "";
     for(const collectionItem of targetItem.collections) {
@@ -123,6 +124,7 @@ PromptsBrowser.promptEdit.addMoveBlock = (wrapper) => {
     if(!targetItem) return;
     let atLestOnePossibleCollection = false;
 
+    collectionSelect.className = "PBE_generalInput";
     copyOrMoveBlock.className = "PBE_rowBlock";
     copyButton.className = "PBE_button";
     moveButton.className = "PBE_button";
@@ -328,7 +330,7 @@ PromptsBrowser.promptEdit.showAddSetup = (wrapper) => {
 
     sisterTagsAfter.className = "PBE_rowBlock";
     sisterTagsAfterTitle.textContent = "Subsequent prompts:";
-    sisterTagsAfterInput.className = "PBE_promptEdit_addAfter";
+    sisterTagsAfterInput.className = "PBE_generalInput PBE_promptEdit_addAfter";
     sisterTagsAfterInput.type = "text";
     sisterTagsAfterInput.value = addAfter;
 
@@ -342,7 +344,7 @@ PromptsBrowser.promptEdit.showAddSetup = (wrapper) => {
 
     sisterTagsStart.className = "PBE_rowBlock";
     sisterTagsStartTitle.textContent = "Add prompts at the start:";
-    sisterTagsStartInput.className = "PBE_promptEdit_addStart";
+    sisterTagsStartInput.className = "PBE_generalInput PBE_promptEdit_addStart";
     sisterTagsStartInput.type = "text";
     sisterTagsStartInput.value = addStart;
 
@@ -356,7 +358,7 @@ PromptsBrowser.promptEdit.showAddSetup = (wrapper) => {
 
     sisterTagsEnd.className = "PBE_rowBlock";
     sisterTagsEndTitle.textContent = "Add prompts at the end:";
-    sisterTagsEndInput.className = "PBE_promptEdit_addEnd";
+    sisterTagsEndInput.className = "PBE_generalInput PBE_promptEdit_addEnd";
     sisterTagsEndInput.type = "text";
     sisterTagsEndInput.value = addEnd;
 
@@ -383,7 +385,10 @@ PromptsBrowser.promptEdit.showAutoGenBlock = (wrapper, prompt) => {
 
     for(const colId in data.styles) colOptions.push({id: colId, name: colId});
     const stylesCollectionsSelect = makeSelect({
-        id: "PBE_autoGentCollection", value: collection, options: colOptions,
+        id: "PBE_autoGentCollection",
+        className: "PBE_generalInput",
+        value: collection,
+        options: colOptions,
         onChange: (e) => PromptsBrowser.promptEdit.onChangeAutogenCollection(e.currentTarget.value, prompt)
     });
 
@@ -397,7 +402,10 @@ PromptsBrowser.promptEdit.showAutoGenBlock = (wrapper, prompt) => {
             for(const styleItem of targetCollection) styleOptions.push({id: styleItem.name, name: styleItem.name});
 
             const styleSelect = makeSelect({
-                id: "PBE_autoGentStyle", value: autogen.style || "", options: styleOptions,
+                id: "PBE_autoGentStyle",
+                className: "PBE_generalInput",
+                value: autogen.style || "",
+                options: styleOptions,
                 onChange: (e) => PromptsBrowser.promptEdit.onChangeAutogenStyle(e.currentTarget.value, prompt)
             });
 
@@ -434,11 +442,11 @@ PromptsBrowser.promptEdit.update = (targetItem) => {
 
     const tagsTitle                 = makeElement({element: "div", content: "Tags:"});
     const tagsList                  = makeElement({element: "div", className: "PBE_List PBE_Scrollbar PBE_tagsList"});
-    const tagInput                  = makeElement({element: "input", id: "PBE_addTagInput"});
+    const tagInput                  = makeElement({element: "input", id: "PBE_addTagInput", className: "PBE_generalInput"});
     const addTagButton              = makeElement({element: "button", content: "Add tag", className: "PBE_button"});
     const categoriesTitle           = makeElement({element: "div", content: "Categories:"});
     const categoriesList            = makeElement({element: "div", className: "PBE_List PBE_Scrollbar PBE_categoryList"});
-    const categorySelect            = makeElement({element: "select", id: "PBE_addCategorySelect"});
+    const categorySelect            = makeElement({element: "select", id: "PBE_addCategorySelect", className: "PBE_generalInput"});
     const addCategoryButton         = makeElement({element: "button", content: "Add category", className: "PBE_button"});
     const commentArea               = makeElement({element: "textarea", id: "PBE_commentArea", className: "PBE_Textarea PBE_Scrollbar"});
 

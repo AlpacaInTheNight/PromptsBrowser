@@ -140,7 +140,7 @@ PromptsBrowser.promptScribe.showHeader = (wrapper) => {
     toggleAll.addEventListener("click", PromptsBrowser.promptScribe.onToggleAll);
 
     const collectionSelect = document.createElement("select");
-    collectionSelect.className = "PBE_select";
+    collectionSelect.className = "PBE_generalInput PBE_select";
     collectionSelect.style.margin = "0 10px";
     collectionSelect.style.height = "30px";
 

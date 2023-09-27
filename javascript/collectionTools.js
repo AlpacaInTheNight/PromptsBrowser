@@ -583,7 +583,7 @@ PromptsBrowser.collectionTools.showCopyOrMove = (wrapper) => {
     const {collectionToolsId} = state;
 
     const collectionSelect = document.createElement("select");
-    collectionSelect.className = "PBE_select";
+    collectionSelect.className = "PBE_generalInput PBE_select";
 
     const moveButton = document.createElement("div")
     moveButton.innerText = "Move";
@@ -633,7 +633,7 @@ PromptsBrowser.collectionTools.showCategoryAction = (wrapper) => {
     const addButton = document.createElement("div");
     const removeButton = document.createElement("div");
 
-    categorySelect.classList = "PBE_select PBE_categoryAction";
+    categorySelect.classList = "PBE_generalInput PBE_select PBE_categoryAction";
     addButton.className = "PBE_button";
     addButton.title = "Add selected category to all selected prompts";
     removeButton.className = "PBE_button PBE_buttonCancel";
@@ -672,7 +672,7 @@ PromptsBrowser.collectionTools.showTagsAction = (wrapper) => {
 
     tagsInput.placeholder = "tag1, tag2, tag3";
 
-    tagsInput.className = "PBE_input PBE_tagsAction";
+    tagsInput.className = "PBE_generalInput PBE_input PBE_tagsAction";
     addButton.className = "PBE_button";
     removeButton.className = "PBE_button PBE_buttonCancel";
     addButton.title = "Add target tags to all selected prompts";
@@ -711,7 +711,7 @@ PromptsBrowser.collectionTools.showAutogenStyle = (wrapper) => {
 
     for(const colId in data.styles) colOptions.push({id: colId, name: colId});
     const stylesCollectionsSelect = makeSelect({
-        className: "PBE_select", value: collection, options: colOptions,
+        className: "PBE_generalInput PBE_select", value: collection, options: colOptions,
         onChange: PromptsBrowser.collectionTools.onChangeAutogenCollection
     });
 
@@ -728,7 +728,7 @@ PromptsBrowser.collectionTools.showAutogenStyle = (wrapper) => {
     }
     
     const styleSelect = makeSelect({
-        className: "PBE_select", value: style || "", options: styleOptions,
+        className: "PBE_generalInput PBE_select", value: style || "", options: styleOptions,
         onChange: PromptsBrowser.collectionTools.onChangeAutogenStyle
     });
 
@@ -752,7 +752,7 @@ PromptsBrowser.collectionTools.showAutogenerate = (wrapper) => {
     generateButton.addEventListener("click", PromptsBrowser.collectionTools.onGeneratePreviews);
 
     const generateTypeSelect = makeSelect({
-        className: "PBE_select", value: state.autoGenerateType,
+        className: "PBE_generalInput PBE_select", value: state.autoGenerateType,
         options: [
             {id: "prompt", name: "Prompt only"},
             {id: "current", name: "With current prompts"},

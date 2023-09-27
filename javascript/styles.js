@@ -388,13 +388,13 @@ PromptsBrowser.styles.showAddStyle = (wrapper) => {
     saveButton.innerText = "Save as style";
     saveButton.className = "PBE_button";
     styleNameInput.placeholder = "Style name";
-    styleNameInput.className = "PBE_newStyleName";
+    styleNameInput.className = "PBE_generalInput PBE_newStyleName";
     styleNameInput.id = "PBE_newStyleName";
 
     saveButton.addEventListener("click", PromptsBrowser.styles.onSaveStyle);
 
     const collectionSelect = document.createElement("select");
-    collectionSelect.className = "PBE_select";
+    collectionSelect.className = "PBE_generalInput PBE_select";
     collectionSelect.style.height = "30px";
     collectionSelect.style.marginRight = "5px";
     let options = "";
@@ -457,7 +457,7 @@ PromptsBrowser.styles.showFilters = (wrapper) => {
     toggleShortMode.addEventListener("click", PromptsBrowser.styles.onToggleShortMode);
 
     const collectionSelect = document.createElement("select");
-    collectionSelect.className = "PBE_select";
+    collectionSelect.className = "PBE_generalInput PBE_select";
     let options = "<option value=''>Any</option>";
     for(const collectionId in data.styles) {
         options += `<option value="${collectionId}">${collectionId}</option>`;
@@ -470,7 +470,7 @@ PromptsBrowser.styles.showFilters = (wrapper) => {
 
     const nameFilter = document.createElement("input");
     nameFilter.placeholder = "Search name";
-    nameFilter.className = "PBE_input";
+    nameFilter.className = "PBE_generalInput PBE_input";
     nameFilter.value = state.filterStyleName || "";
 
     nameFilter.addEventListener("change", PromptsBrowser.styles.onChangeFilterName);

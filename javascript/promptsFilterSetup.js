@@ -142,7 +142,7 @@ PromptsBrowser.promptsFilter.update = function(wrapper, filterId) {
     actionButton.dataset.action = "include";
     
     const typeSelect = document.createElement("select");
-    typeSelect.className = "PBE_select PBE_filterType";
+    typeSelect.className = "PBE_generalInput PBE_select PBE_filterType";
     typeSelect.style.margin = "0 5px";
     typeSelect.innerHTML = `
         <option value="name">Name</option>
@@ -194,7 +194,7 @@ PromptsBrowser.promptsFilter.updateAdditionalSetup = (wrapper, type, addFilterBu
 
     if(type === "meta") {
         const metaSelect = document.createElement("select");
-        metaSelect.className = "PBE_select PBE_filterMeta";
+        metaSelect.className = "PBE_generalInput PBE_select PBE_filterMeta";
         metaSelect.innerHTML = `
             <option value="preview">Have preview image</option>
             <option value="categories">Have categories</option>
@@ -215,7 +215,7 @@ PromptsBrowser.promptsFilter.updateAdditionalSetup = (wrapper, type, addFilterBu
     if(type === "category") {
         const categories = PromptsBrowser.data.categories;
         const categorySelector = document.createElement("select");
-        categorySelector.className = "PBE_select PBE_filterCategory";
+        categorySelector.className = "PBE_generalInput PBE_select PBE_filterCategory";
 
         let options = `
             <option value="">All</option>
@@ -233,7 +233,7 @@ PromptsBrowser.promptsFilter.updateAdditionalSetup = (wrapper, type, addFilterBu
 
     if(type === "tag" || type === "name") {
         const inputElement = document.createElement("input");
-        inputElement.className = "PBE_input PBE_filterName";
+        inputElement.className = "PBE_generalInput PBE_input PBE_filterName";
 
         if(type === "tag") PromptsBrowser.tagTooltip.add(inputElement, true);
 

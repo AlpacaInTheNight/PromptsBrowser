@@ -255,6 +255,12 @@ PromptsBrowser.knownPrompts.showHeader = (wrapper, params = {}) => {
     collectionToolsButton.innerText = "Edit collection";
     collectionToolsButton.style.marginRight = "10px";
 
+    categorySelector.className = "PBE_generalInput";
+    collectionSelector.className = "PBE_generalInput";
+    sortingSelector.className = "PBE_generalInput";
+    tagsInput.className = "PBE_generalInput";
+    nameInput.className = "PBE_generalInput";
+
     headerContainer.className = "PBE_promptsCatalogueHeader";
 
     //categories selector

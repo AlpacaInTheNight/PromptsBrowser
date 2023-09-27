@@ -201,7 +201,7 @@ PromptsBrowser.setupWindow.showIntegrationSetup = (wrapper) => {
 
     const autocompliteTypeText = makeElement({element: "div", content: "Autocomplite mode"});
     const autocompliteTypeSelect = makeSelect({
-        className: "PBE_select",
+        className: "PBE_generalInput PBE_select",
         value: autocomplitePromptMode,
         onChange: PromptsBrowser.setupWindow.onChangeAutocompliteType,
         options: [
@@ -247,7 +247,7 @@ PromptsBrowser.setupWindow.showWeightSetup = (wrapper) => {
     scrollBelowOneText.innerText = "Below 1 scroll weight:";
 
     const scrollBelowOneInput = document.createElement("input");
-    scrollBelowOneInput.className = "PBE_input";
+    scrollBelowOneInput.className = "PBE_generalInput PBE_input";
     scrollBelowOneInput.type = "number";
     scrollBelowOneInput.value = config.belowOneWeight || 0.05;
     scrollBelowOneInput.dataset.below = "true";
@@ -266,7 +266,7 @@ PromptsBrowser.setupWindow.showWeightSetup = (wrapper) => {
     scrollAboveOneText.innerText = "Above 1 scroll weight:";
 
     const scrollAboveOneInput = document.createElement("input");
-    scrollAboveOneInput.className = "PBE_input";
+    scrollAboveOneInput.className = "PBE_generalInput PBE_input";
     scrollAboveOneInput.type = "number";
     scrollAboveOneInput.value = config.aboveOneWeight || 0.5;
 
@@ -316,7 +316,7 @@ PromptsBrowser.setupWindow.showNormalizeSetup = (wrapper) => {
     spaceText.innerText = "Spaces in prompts transform:";
 
     const spaceSelector = document.createElement("select");
-    spaceSelector.className = "PBE_select";
+    spaceSelector.className = "PBE_generalInput PBE_select";
     spaceSelector.innerHTML = `
         <option value="">Do nothing</option>
         <option value="space">To space</option>
@@ -365,7 +365,7 @@ PromptsBrowser.setupWindow.showNewCollection = (wrapper) => {
     const newNameInput = document.createElement("input");
     newName.className = "PBE_rowBlock";
     newName.style.maxWidth = "none";
-    newNameInput.className = "PBE_input PBE_newCollectionName";
+    newNameInput.className = "PBE_generalInput PBE_input PBE_newCollectionName";
 
     newNameLabel.innerText = "New prompts collection name";
 
@@ -380,7 +380,7 @@ PromptsBrowser.setupWindow.showNewCollection = (wrapper) => {
     format.className = "PBE_rowBlock";
     format.style.maxWidth = "none";
     formatSelect.value = "short";
-    formatSelect.className = "PBE_select PBE_newCollectionFormat";
+    formatSelect.className = "PBE_generalInput PBE_select PBE_newCollectionFormat";
 
     formatSelect.innerHTML = `
         <option value="short">Short</option>
@@ -408,14 +408,14 @@ PromptsBrowser.setupWindow.showNewStylesCollection = (wrapper) => {
     const newNameLabel = makeElement({element: "div", content: "New styles collection name"});
     const formatLabel = makeElement({element: "div", content: "Store format"});
 
-    const newNameInput = makeElement({element: "input", className: "PBE_input PBE_newCollectionName"});
+    const newNameInput = makeElement({element: "input", className: "PBE_generalInput PBE_input PBE_newCollectionName"});
     newNameInput.addEventListener("change", PromptsBrowser.setupWindow.onUpdateDirName);
 
     newName.appendChild(newNameLabel);
     newName.appendChild(newNameInput);
 
     const formatSelect = makeSelect({
-        className: "PBE_select PBE_newStyleCollectionFormat",
+        className: "PBE_generalInput PBE_select PBE_newStyleCollectionFormat",
         value: "short",
         options: [
             {id: "short", name: "Short"},

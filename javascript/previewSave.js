@@ -24,7 +24,7 @@ PromptsBrowser.previewSave.update = () => {
     savePromptPreviewButton.innerText = "save preview";
 
     const collectionSelect = document.createElement("select");
-    collectionSelect.className = "PBE_select PBE_savePromptSelect";
+    collectionSelect.className = "PBE_generalInput PBE_select PBE_savePromptSelect";
 
     let options = "";
     for(const collectionId in PromptsBrowser.data.original) {
