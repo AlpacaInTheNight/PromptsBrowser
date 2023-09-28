@@ -15,6 +15,14 @@ PromptsBrowser.state = {
         spaceMode: "space",
         showPromptIndex: false,
 
+        cardWidth: 50,
+        cardHeight: 100,
+        splashCardWidth: 200,
+        splashCardHeight: 300,
+
+        rowsInKnownCards: 3,
+        maxCardsShown: 1000,
+
         /**
          * If true, will enable extended syntax element support for prompts used by some addons.
          */

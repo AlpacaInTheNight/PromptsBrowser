@@ -68,6 +68,10 @@
     font-family: var(--font) !important;
 }
 
+select.PBE_generalInput {
+    cursor: pointer;
+}
+
 .PBE_generalInput::placeholder {
     color: var(--input-placeholder-color) !important;
 }
@@ -558,7 +562,7 @@
     cursor: pointer;
 
     box-shadow: 0 0 10px 5px var(--primary-500);
-    transform: scale(2);
+    /* transform: scale(2); */
     transform-origin: top left;
     pointer-events: none;
 
@@ -982,6 +986,13 @@
     font-family: var(--font);
 }
 
+.PBE_setupWindowTopBlock {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 5px;
+    width: 100%;
+}
+
 .PBE_setupWindowStatus {
     font-family: sans-serif;
     color: var(--block-info-text-color);
@@ -1009,7 +1020,7 @@
 }
 
 .PBE_stylesHeader {
-    height: 110px;
+    /* height: 110px; */
     flex-wrap: nowrap;
     flex-shrink: 0;
 }
