@@ -62,7 +62,7 @@ PromptsBrowser.state = {
     editItem: undefined,
     showStylesWindow: undefined,
     showScriberWindow: undefined,
-    toggledButtons: ["tools_tags", "tools_category", "tools_name", "new_in_all_collections", "styles_simplified_view"],
+    toggledButtons: ["tools_tags", "tools_category", "tools_name", "tools_replaceMode", "new_in_all_collections", "styles_simplified_view"],
     selectedNewPrompts: [],
     selectedCollectionPrompts: [],
     promptsFilter: {},

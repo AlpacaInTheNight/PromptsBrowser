@@ -193,7 +193,7 @@ select.PBE_generalInput {
 .PBE_fieldset > input,
 .PBE_fieldset > select {
     margin: 0 5px;
-    height: 30px;
+    /* height: 30px; */
 }
 
 .PBE_dataBlock {
@@ -216,22 +216,25 @@ select.PBE_generalInput {
 }
 
 .PBE_toggleButton {
-    outline: 4px double var(--primary-300);
-    cursor: pointer;
-    height: 40px;
     display: flex;
-    justify-content: center;
     align-items: center;
-    padding: 0 10px;
-    color: var(--primary-300);
-    text-shadow: 1px 1px 1px black;
+    transition: var(--button-transition);
+    cursor: pointer;
+    box-shadow: var(--checkbox-label-shadow);
+    border: var(--checkbox-label-border-width) solid var(--checkbox-label-border-color);
+    border-radius: var(--button-small-radius);
+    background: var(--checkbox-label-background-fill);
+    padding: var(--checkbox-label-padding);
+    color: var(--checkbox-label-text-color);
+    font-weight: var(--checkbox-label-text-weight);
+    font-size: var(--checkbox-label-text-size);
+    line-height: var(--line-md);
     font-family: var(--font);
-    font-weight: bold;
-    font-size: 16px;
 }
 
 .PBE_toggledButton {
-    outline: 4px solid var(--primary-300);
+    background: var(--checkbox-label-background-fill-selected);
+    color: var(--checkbox-label-text-color-selected);
 }
 
 .PBE_swap {
@@ -282,6 +285,7 @@ select.PBE_generalInput {
     margin: 10px 10px 0 10px;
     flex-grow: 1;
     overflow-y: hidden;
+    width: 100%;
 }
 
 /* Windows end*/

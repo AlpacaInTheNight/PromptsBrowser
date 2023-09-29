@@ -477,7 +477,7 @@ PromptsBrowser.setupWindow.showPromptCardsSetup = (wrapper) => {
     knownRowsBlock.appendChild(knownRowsBlockTitle);
     knownRowsBlock.appendChild(knownRowsBlockInput);
     
-    //max shown cards in a block (known cards block only atm)
+    //max shown cards in a block
     const maxCardsBlock = makeElement({element: "div", className: "PBE_rowBlock"});
     maxCardsBlock.style.maxWidth = "none";
 

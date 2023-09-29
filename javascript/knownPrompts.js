@@ -389,6 +389,7 @@ PromptsBrowser.knownPrompts.update = (params) => {
     const {cardWidth = 50, cardHeight = 100, showPromptIndex = false, rowsInKnownCards = 3, maxCardsShown = 1000} = state.config;
     const wrapper = PromptsBrowser.DOMCache.containers[state.currentContainer].promptsCatalogue;
     let scrollState = 0;
+    let shownItems = 0;
 
     if(wrapper) {
         let prevPromptContainer = wrapper.querySelector(".PBE_promptsCatalogueContent");
@@ -399,9 +400,6 @@ PromptsBrowser.knownPrompts.update = (params) => {
     }
 
     wrapper.innerHTML = "";
-
-    //const MAX_ITEMS_TO_DISPLAY = 1000;
-    let shownItems = 0;
 
     if(!united) {
         PromptsBrowser.utils.log("No prompt data to show");
@@ -465,7 +463,6 @@ PromptsBrowser.knownPrompts.update = (params) => {
 
     for(const index in dataArr) {
         const prompt = dataArr[index];
-        const {id} = prompt;
         if(shownItems > maxCardsShown) break;
 
         if(!PromptsBrowser.knownPrompts.checkFilter(prompt)) continue;
