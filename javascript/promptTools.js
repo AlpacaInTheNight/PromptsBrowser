@@ -67,11 +67,20 @@ PromptsBrowser.promptTools.onElementClick = (e) => {
     if(!currPrompt || !clickPrompt) return;
     const replaceMode = state.toggledButtons.includes("tools_replaceMode");
     let activePrompts = PromptsBrowser.getCurrentPrompts();
+    let activePrompt = undefined;
 
-    const targetPrompt = united.find(item => item.id === clickPrompt);
-    if(!targetPrompt) return;
+    let selectedPrompt = activePrompts.find(item => item.id === clickPrompt);
+    if(!selectedPrompt) {
+        selectedPrompt = united.find(item => item.id === clickPrompt);
+    }
+    if(!selectedPrompt) return;
 
-    const currTargetIndex = activePrompts.findIndex(item => item.id === currPrompt);
+    const currTargetIndex = activePrompts.findIndex(item => {
+        if(item.id === currPrompt) {
+            activePrompt = item;
+            return true;
+        }
+    });
     const clickTargetIndex = activePrompts.findIndex(item => item.id === clickPrompt);
     if(currTargetIndex === -1) return;
 
@@ -95,7 +104,11 @@ PromptsBrowser.promptTools.onElementClick = (e) => {
         return;
     }
 
-    const newItem = {id: clickPrompt, weight: DEFAULT_PROMPT_WEIGHT, isExternalNetwork: targetPrompt.isExternalNetwork};
+    const newItem = {
+        id: clickPrompt,
+        weight: DEFAULT_PROMPT_WEIGHT,
+        isExternalNetwork: selectedPrompt.isExternalNetwork
+    };
 
     let action = "";
 
@@ -109,6 +122,8 @@ PromptsBrowser.promptTools.onElementClick = (e) => {
 
     if(action === "add") activePrompts.splice(currTargetIndex, 0, newItem);
     else if (action === "replace") {
+        if(activePrompt && activePrompt.weight !== undefined) newItem.weight = activePrompt.weight;
+
         activePrompts[currTargetIndex] = newItem;
         state.promptToolsId = clickPrompt;
     }
@@ -121,6 +136,7 @@ PromptsBrowser.promptTools.showCurrentPrompts = (wrapper) => {
     const {state, data, makeElement, makeSelect} = PromptsBrowser;
     const {currentFilters} = PromptsBrowser.promptTools;
     const {checkFilter} = PromptsBrowser.promptsSimpleFilter;
+    const {unitedList} = data;
     const activePrompts = PromptsBrowser.getCurrentPrompts();
     if(!state.promptToolsId) return;
 
@@ -171,12 +187,11 @@ PromptsBrowser.promptTools.showCurrentPrompts = (wrapper) => {
     showTags.addEventListener("click", PromptsBrowser.promptTools.onToggleButton);
     showCategory.addEventListener("click", PromptsBrowser.promptTools.onToggleButton);
     showName.addEventListener("click", PromptsBrowser.promptTools.onToggleButton);
-    
 
     for(const i in activePrompts) {
         const currPrompt = activePrompts[i];
         if(!currPrompt || currPrompt.isSyntax) continue;
-        if(!checkFilter(currPrompt.id, currentFilters)) continue;
+        if(unitedList[currPrompt.id] && !checkFilter(currPrompt.id, currentFilters)) continue;
         const isShadowed = currPrompt.id !== state.promptToolsId;
 
         promptElement = PromptsBrowser.showPromptItem({id: currPrompt.id, isExternalNetwork: currPrompt.isExternalNetwork}, {isShadowed});
@@ -206,22 +221,22 @@ PromptsBrowser.promptTools.showPossiblePromptswrapper = (wrapper) => {
     const {maxCardsShown = 1000} = state.config;
     const {possibleFilters} = PromptsBrowser.promptTools;
     const {checkFilter} = PromptsBrowser.promptsSimpleFilter;
-    const prompt = state.promptToolsId;
+    const promptId = state.promptToolsId;
     const activePrompts = PromptsBrowser.getCurrentPrompts();
     const showAll = state.toggledButtons.includes("tools_showAll");
-    if(!prompt) return;
+    if(!promptId) return;
     let targetTags = [];
     let targetCategories = [];
-    let targetNameWords = replaceAllRegex(prompt.toLowerCase(), "_", " ").split(" ");
+    let targetNameWords = replaceAllRegex(promptId.toLowerCase(), "_", " ").split(" ");
     let shownItems = 0;
 
-    const targetPromptItem = united.find(item => item.id === prompt);
+    const targetPromptItem = united.find(item => item.id === promptId);
     if(targetPromptItem) {
         targetTags = targetPromptItem.tags || [];
         targetCategories = targetPromptItem.category || [];
     }
 
-    const nameArr = prompt.split(" ");
+    const nameArr = promptId.split(" ");
     const possiblePrompts = [];
     const addedIds = [];
 
@@ -236,7 +251,7 @@ PromptsBrowser.promptTools.showPossiblePromptswrapper = (wrapper) => {
         //similarity index based on the same tags, categories and words used in the prompt name
         let simIndex = 0;
 
-        if(id === prompt) continue;
+        if(id === promptId) continue;
 
         let nameWords = replaceAllRegex(id.toLowerCase(), "_", " ").split(" ");
 
