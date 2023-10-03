@@ -8,6 +8,14 @@ PromptsBrowser.promptTools.currentFilters = {
     category: "",
     tags: [],
     name: "",
+
+    sorting: "__none",
+    sortingOptions: [
+        {id: "__none", name: "Unsorted"},
+        {id: "weight", name: "By weight"},
+        {id: "alph", name: "Alphabetical"},
+        {id: "alphReversed", name: "Alphabetical reversed"},
+    ]
 }
 
 PromptsBrowser.promptTools.possibleFilters = {
@@ -15,6 +23,14 @@ PromptsBrowser.promptTools.possibleFilters = {
     category: "",
     tags: [],
     name: "",
+
+    sorting: "sim",
+    sortingOptions: [
+        {id: "__none", name: "Unsorted"},
+        {id: "sim", name: "By similarity"},
+        {id: "alph", name: "Alphabetical"},
+        {id: "alphReversed", name: "Alphabetical reversed"},
+    ]
 }
 
 PromptsBrowser.promptTools.init = (wrapper) => {
@@ -136,8 +152,9 @@ PromptsBrowser.promptTools.showCurrentPrompts = (wrapper) => {
     const {state, data, makeElement, makeSelect} = PromptsBrowser;
     const {currentFilters} = PromptsBrowser.promptTools;
     const {checkFilter} = PromptsBrowser.promptsSimpleFilter;
+    const {sorting} = currentFilters;
     const {unitedList} = data;
-    const activePrompts = PromptsBrowser.getCurrentPrompts();
+    const activePrompts = [...PromptsBrowser.getCurrentPrompts()];
     if(!state.promptToolsId) return;
 
     const setupContainer = makeElement({element: "div", className: "PBE_List PBE_toolsSetup"});
@@ -177,7 +194,6 @@ PromptsBrowser.promptTools.showCurrentPrompts = (wrapper) => {
     showTags.dataset.id = "tools_tags";
     showCategory.dataset.id = "tools_category";
     showName.dataset.id = "tools_name";
-    
 
     if(state.toggledButtons.includes("tools_tags")) showTags.classList.add("PBE_toggledButton");
     if(state.toggledButtons.includes("tools_category")) showCategory.classList.add("PBE_toggledButton");
@@ -187,6 +203,38 @@ PromptsBrowser.promptTools.showCurrentPrompts = (wrapper) => {
     showTags.addEventListener("click", PromptsBrowser.promptTools.onToggleButton);
     showCategory.addEventListener("click", PromptsBrowser.promptTools.onToggleButton);
     showName.addEventListener("click", PromptsBrowser.promptTools.onToggleButton);
+
+    switch(sorting) {
+
+        case "alph":
+            //sorting prompts alphabetically
+            activePrompts.sort( (A, B) => {
+                if(A.id.toLowerCase() < B.id.toLowerCase()) return -1;
+                if(A.id.toLowerCase() > B.id.toLowerCase()) return 1;
+
+                return 0;
+            });
+            break;
+
+        case "alphReversed":
+            //sorting prompts alphabetically in reverse orderd
+            activePrompts.sort( (A, B) => {
+                if(A.id.toLowerCase() < B.id.toLowerCase()) return 1;
+                if(A.id.toLowerCase() > B.id.toLowerCase()) return -1;
+
+                return 0;
+            });
+            break;
+
+        case "weight":
+            //sorting prompts based on their weight
+            activePrompts.sort( (A, B) => {
+                if(A.weight < B.weight) return 1;
+                if(A.weight > B.weight) return -1;
+
+                return 0;
+            });
+    }
 
     for(const i in activePrompts) {
         const currPrompt = activePrompts[i];
@@ -220,6 +268,7 @@ PromptsBrowser.promptTools.showPossiblePromptswrapper = (wrapper) => {
     const {state} = PromptsBrowser;
     const {maxCardsShown = 1000} = state.config;
     const {possibleFilters} = PromptsBrowser.promptTools;
+    const {sorting} = possibleFilters;
     const {checkFilter} = PromptsBrowser.promptsSimpleFilter;
     const promptId = state.promptToolsId;
     const activePrompts = PromptsBrowser.getCurrentPrompts();
@@ -310,13 +359,43 @@ PromptsBrowser.promptTools.showPossiblePromptswrapper = (wrapper) => {
         }
     };
 
-    //sorting possible prompts based on their similarity to the selected prompt
-    possiblePrompts.sort( (A, B) => {
-        if(A.simIndex < B.simIndex) return 1;
-        if(A.simIndex > B.simIndex) return -1;
+    switch(sorting) {
 
-        return 0;
-    });
+        case "__none": break;
+
+        case "alph":
+            //sorting possible prompts alphabetically
+            possiblePrompts.sort( (A, B) => {
+                if(A.id.toLowerCase() < B.id.toLowerCase()) return -1;
+                if(A.id.toLowerCase() > B.id.toLowerCase()) return 1;
+
+                return 0;
+            });
+            break;
+
+        case "alphReversed":
+            //sorting possible prompts alphabetically in reverse orderd
+            possiblePrompts.sort( (A, B) => {
+                if(A.id.toLowerCase() < B.id.toLowerCase()) return 1;
+                if(A.id.toLowerCase() > B.id.toLowerCase()) return -1;
+
+                return 0;
+            });
+            break;
+
+        default:
+        case "sim":
+            //sorting possible prompts based on their similarity to the selected prompt
+            possiblePrompts.sort( (A, B) => {
+                if(A.simIndex < B.simIndex) return 1;
+                if(A.simIndex > B.simIndex) return -1;
+
+                if(A.id.toLowerCase() < B.id.toLowerCase()) return -1;
+                if(A.id.toLowerCase() > B.id.toLowerCase()) return 1;
+
+                return 0;
+            });
+    }
 
     function addElement(item) {
         if(addedIds.includes(item.id)) return;
@@ -337,6 +416,15 @@ PromptsBrowser.promptTools.update = () => {
 
     if(!wrapper || !state.promptToolsId) return;
     PromptsBrowser.onCloseActiveWindow = PromptsBrowser.promptTools.onCloseWindow;
+
+    let currScrollState = 0;
+
+    let prevPromptContainer = wrapper.querySelector(".PBE_windowCurrentList");
+    if(prevPromptContainer) {
+        currScrollState = prevPromptContainer.scrollLeft;
+        prevPromptContainer = undefined;
+    }
+
     wrapper.innerHTML = "";
     wrapper.style.display = "flex";
 
@@ -378,4 +466,10 @@ PromptsBrowser.promptTools.update = () => {
     wrapper.appendChild(possiblePromptsBlock);
 
     wrapper.appendChild(footerBlock);
+
+    let currentPromptsContainer = currentPromptsBlock.querySelector(".PBE_windowCurrentList");
+    if(currentPromptsContainer) {
+        currentPromptsContainer.scrollTo(currScrollState, 0);
+        currentPromptsContainer = undefined;
+    }
 }
