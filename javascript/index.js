@@ -580,7 +580,7 @@ PromptsBrowser.onDocumentKey = (e) => {
     if(!hold) PromptsBrowser.onCloseActiveWindow = undefined;
 }
 
-PromptsBrowser.loadConfig = () => {
+PromptsBrowser.loadUIConfig = () => {
     const {state} = PromptsBrowser;
 
     const lsShowViews = localStorage.getItem("PBE_showViews");
@@ -588,6 +588,20 @@ PromptsBrowser.loadConfig = () => {
 
     const showControlPanel = localStorage.getItem("showControlPanel");
     if(showControlPanel === "false") state.showControlPanel = false;
+}
+
+/**
+ * Loading extension configuration from the local storage
+ */
+PromptsBrowser.loadConfig = () => {
+    const {state} = PromptsBrowser;
+
+    //getting config from local storage
+    const savedConfigString = localStorage.getItem("PBE_config");
+    if(savedConfigString) {
+        const savedConfig = JSON.parse(savedConfigString);
+        if(savedConfig) state.config = savedConfig;
+    }
 }
 
 PromptsBrowser.initPromptBrowser = (tries = 0) => {
@@ -766,24 +780,28 @@ PromptsBrowser.db.updateMixedList = () => {
     PromptsBrowser.data.unitedList = unitedList;
 }
 
-PromptsBrowser.db.getAPIurl = (endpoint) => {
-    const DEV_SERVER = "http://127.0.0.1:3000/";
-    const USER_SERVER = window.location.origin + "/promptBrowser/";
-
-    //@TODO - add some kind of quick switch between servers
-    const server = USER_SERVER;
+PromptsBrowser.db.getAPIurl = (endpoint, root = false) => {
+    const server = root ? window.location.origin + "/" : window.location.origin + "/promptBrowser/";
 
     return server + endpoint;
 }
 
-PromptsBrowser.db.loadDatabase = () => {
+PromptsBrowser.db.loadDatabase = async () => {
+    const {state} = PromptsBrowser;
     const url = PromptsBrowser.db.getAPIurl("getPrompts")
     
-    fetch(url, {
+    await fetch(url, {
         method: 'GET',
     }).then(data => data.json()).then(res => {
         if(!res || !res.prompts) return; //TODO: process server error here
         const {prompts, styles, readonly = false} = res;
+        
+
+        if(res.config) {
+            for(const i in res.config) {
+                state.config[i] = res.config[i];
+            }
+        }
 
         PromptsBrowser.data.styles = styles;
         PromptsBrowser.data.original = prompts;
@@ -793,8 +811,10 @@ PromptsBrowser.db.loadDatabase = () => {
     });
 }
 
+PromptsBrowser.loadConfig();
+
 document.addEventListener('DOMContentLoaded', function() {
-    PromptsBrowser.loadConfig();
+    PromptsBrowser.loadUIConfig();
 
     PromptsBrowser.db.loadDatabase();
     

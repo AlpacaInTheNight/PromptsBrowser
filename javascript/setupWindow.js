@@ -16,13 +16,13 @@ PromptsBrowser.setupWindow.viewMode = "normal";
  * @param {*} wrapper 
  */
 PromptsBrowser.setupWindow.init = (wrapper) => {
-    const {state} = PromptsBrowser;
+   /*  const {state} = PromptsBrowser;
 
     const savedConfigString = localStorage.getItem("PBE_config");
     if(savedConfigString) {
         const savedConfig = JSON.parse(savedConfigString);
         if(savedConfig) state.config = savedConfig;
-    }
+    } */
 
     const setupWindow = document.createElement("div");
     setupWindow.className = "PBE_setupWindow PBE_generalWindow";
@@ -585,7 +585,7 @@ PromptsBrowser.setupWindow.update = () => {
 
     if(viewMode === "newCollection") wrapper.innerHTML = "New prompts collection";
     else if(viewMode === "newStylesCollection") wrapper.innerHTML = "New styles collections";
-    else wrapper.innerHTML = "Setup window";
+    else wrapper.innerHTML = "New Collection";
 
     const topBlock = document.createElement("div");
     const contentBlock = document.createElement("div");
@@ -605,10 +605,10 @@ PromptsBrowser.setupWindow.update = () => {
     } else {
         if(!readonly) PromptsBrowser.setupWindow.showCreateNew(topBlock);
 
-        PromptsBrowser.setupWindow.showIntegrationSetup(contentBlock);
+        /* PromptsBrowser.setupWindow.showIntegrationSetup(contentBlock);
         PromptsBrowser.setupWindow.showWeightSetup(contentBlock);
         PromptsBrowser.setupWindow.showNormalizeSetup(contentBlock);
-        PromptsBrowser.setupWindow.showPromptCardsSetup(contentBlock);
+        PromptsBrowser.setupWindow.showPromptCardsSetup(contentBlock); */
     }
 
     const statusBlock = makeElement({element: "div", className: "PBE_setupWindowStatus PBE_row"});

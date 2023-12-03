@@ -20,6 +20,8 @@ from server.movePreview import movePreview
 from server.utils import emitMessage, getCollectionsDir
 from server.constant import PROMPTS_DIR, STYLES_DIR
 
+from scripts.settings import on_ui_settings
+
 class ReqSavePreview(BaseModel):
     src: str
     prompt: str
@@ -99,5 +101,6 @@ try:
     import modules.script_callbacks as script_callbacks
 
     script_callbacks.on_app_started(on_app_started)
+    script_callbacks.on_ui_settings(on_ui_settings)
 except:
     pass
