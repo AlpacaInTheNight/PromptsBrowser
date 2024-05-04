@@ -598,7 +598,7 @@ select.PBE_generalInput {
 }
 
 .PBE_actionButton {
-    width: 120px;
+    width: 110px;
     height: 20px;
     min-width: auto !important;
     top: -0.75em;
@@ -623,24 +623,29 @@ select.PBE_generalInput {
     color: var(--button-primary-text-color-hover) !important;
 }
 
+.PBE_saveStylesButton {
+    position: absolute;
+    margin-left: 20px !important
+}
+
 .PBE_stylesButton {
     position: absolute;
-    margin-left: 25px !important
+    margin-left: 140px !important
 }
 
 .PBE_addUnknownButton {
     position: absolute;
-    margin-left: 155px !important
+    margin-left: 260px !important
 }
 
 .PBE_normalizeButton {
     position: absolute;
-    margin-left: 285px !important
+    margin-left: 380px !important
 }
 
 .PBE_normalizeButton_readonly {
     position: absolute;
-    margin-left: 155px !important
+    margin-left: 140px !important
 }
 
 .PBE_savePromptPreview {
@@ -1059,7 +1064,7 @@ select.PBE_generalInput {
     flex-wrap: nowrap;
     /* background-color: rgba(50, 100, 200, 0.5); */
     margin: 10px 0;
-    background-size: cover;
+    background-size: cover !important;
     background-position: center;
     background: var(--secondary-900);
 }

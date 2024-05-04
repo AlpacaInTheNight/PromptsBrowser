@@ -71,13 +71,13 @@ PromptsBrowser.styles.onChangeFilterName = (e) => {
     PromptsBrowser.styles.update();
 }
 
-PromptsBrowser.styles.onChangeNewCollection = (e) => {
+/* PromptsBrowser.styles.onChangeNewCollection = (e) => {
     const {state} = PromptsBrowser;
     const value = e.currentTarget.value;
     if(!value) return;
 
     state.newStyleCollection = value;
-}
+} */
 
 PromptsBrowser.styles.onToggleShortMode = (e) => {
     const {state} = PromptsBrowser;
@@ -169,7 +169,7 @@ PromptsBrowser.styles.grabCurrentStyle = (styleName) => {
     return newStyle;
 }
 
-PromptsBrowser.styles.onSaveStyle = () => {
+/* PromptsBrowser.styles.onSaveStyle = () => {
     const {data, state} = PromptsBrowser;
     const collectionId = state.newStyleCollection;
     if(!collectionId) return;
@@ -189,7 +189,7 @@ PromptsBrowser.styles.onSaveStyle = () => {
 
     PromptsBrowser.db.updateStyles(collectionId);
     PromptsBrowser.styles.update();
-}
+} */
 
 PromptsBrowser.styles.removeStyle = (e) => {
     const {readonly} = PromptsBrowser.meta;
@@ -291,7 +291,7 @@ PromptsBrowser.styles.onSelectStyle = (e) => {
     
 }
 
-PromptsBrowser.styles.onChangeSaveMeta = (e) => {
+/* PromptsBrowser.styles.onChangeSaveMeta = (e) => {
     const {state} = PromptsBrowser;
     const checked = e.currentTarget.checked;
     const target = e.currentTarget.dataset.id;
@@ -302,7 +302,7 @@ PromptsBrowser.styles.onChangeSaveMeta = (e) => {
 
     state.config.saveStyleMeta[target] = checked;
     localStorage.setItem("PBE_config", JSON.stringify(state.config));
-}
+} */
 
 PromptsBrowser.styles.applyStyle = (e, isAfter) => {
     const {data} = PromptsBrowser;
@@ -342,7 +342,7 @@ PromptsBrowser.styles.onOpenStyles = () => {
     PromptsBrowser.styles.update();
 }
 
-PromptsBrowser.styles.showCurrentPrompts = (wrapper) => {
+/* PromptsBrowser.styles.showCurrentPrompts = (wrapper) => {
     const {data, makeElement, makeCheckbox} = PromptsBrowser;
     const {state} = PromptsBrowser;
     let activePrompts = PromptsBrowser.getCurrentPrompts();
@@ -460,7 +460,7 @@ PromptsBrowser.styles.showAddStyle = (wrapper) => {
 
     wrapper.appendChild(setupContainer);
     wrapper.appendChild(paramsRow);
-}
+} */
 
 PromptsBrowser.styles.showFilters = (wrapper) => {
     const {data} = PromptsBrowser;
@@ -689,7 +689,7 @@ PromptsBrowser.styles.showStyles = (wrapper) => {
         updatePreview.dataset.id = name;
         updatePreview.dataset.collection = id;
 
-        for(const stylePrompt of positive) {
+        if(positive) for(const stylePrompt of positive) {
             const {id, weight, isExternalNetwork} = stylePrompt;
             const promptElement = PromptsBrowser.showPromptItem({id, weight, isExternalNetwork}, {});
             currentPromptsContainer.appendChild(promptElement);
@@ -766,22 +766,22 @@ PromptsBrowser.styles.update = () => {
     wrapper.style.display = "flex";
     const isShort = state.toggledButtons.includes("styles_simplified_view");
 
-    const currentPromptsBlock = document.createElement("div");
+    //const currentPromptsBlock = document.createElement("div");
     const possibleStylesBlock = document.createElement("div");
 
     const footerBlock = document.createElement("div");
     const closeButton = document.createElement("button");
     footerBlock.className = "PBE_rowBlock PBE_rowBlock_wide";
-    currentPromptsBlock.className = "PBE_dataBlock PBE_stylesHeader";
+    //currentPromptsBlock.className = "PBE_dataBlock PBE_stylesHeader";
     closeButton.innerText = "Close";
     closeButton.className = "PBE_button";
 
-    const addNewContainer = makeElement({element: "div", className: "PBE_row"});
+    /* const addNewContainer = makeElement({element: "div", className: "PBE_row"});
 
     if(!readonly) {
         PromptsBrowser.styles.showCurrentPrompts(currentPromptsBlock);
         PromptsBrowser.styles.showAddStyle(addNewContainer);
-    }
+    } */
 
     if(isShort) {
         possibleStylesBlock.className = "PBE_dataBlock PBE_Scrollbar PBE_windowContent";
@@ -800,10 +800,10 @@ PromptsBrowser.styles.update = () => {
     filterBlock.className = "PBE_row PBE_stylesFilter";
     PromptsBrowser.styles.showFilters(filterBlock);
 
-    if(!readonly) {
+    /* if(!readonly) {
         wrapper.appendChild(currentPromptsBlock);
         wrapper.appendChild(addNewContainer);
-    }
+    } */
 
     wrapper.appendChild(filterBlock);
     wrapper.appendChild(possibleStylesBlock);

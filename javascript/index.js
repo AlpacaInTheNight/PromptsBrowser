@@ -61,6 +61,7 @@ PromptsBrowser.state = {
     editTargetCollection: undefined,
     editItem: undefined,
     showStylesWindow: undefined,
+    showSaveStyleWindow: undefined,
     showScriberWindow: undefined,
     toggledButtons: ["tools_tags", "tools_category", "tools_name", "tools_replaceMode", "new_in_all_collections", "styles_simplified_view"],
     selectedNewPrompts: [],
@@ -695,6 +696,7 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
             PromptsBrowser.controlPanel.init(promptContainer, containerId);
             PromptsBrowser.knownPrompts.init(promptContainer, positivePrompts, containerId);
             PromptsBrowser.currentPrompts.init(promptContainer, containerId);
+            PromptsBrowser.saveStyle.initButton(positivePrompts);
             PromptsBrowser.styles.initButton(positivePrompts);
             PromptsBrowser.promptScribe.initButton(positivePrompts);
             PromptsBrowser.currentPrompts.initButton(positivePrompts);
@@ -729,6 +731,7 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
     PromptsBrowser.promptEdit.init(mainContainer);
     PromptsBrowser.promptTools.init(mainContainer);
     PromptsBrowser.collectionTools.init(mainContainer);
+    PromptsBrowser.saveStyle.init(mainContainer);
     PromptsBrowser.styles.init(mainContainer);
     PromptsBrowser.promptScribe.init(mainContainer);
 
