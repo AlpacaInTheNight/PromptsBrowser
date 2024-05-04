@@ -227,6 +227,7 @@ PromptsBrowser.utils.collectionHavePreview = (prompt, collectionId) => {
 
 PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionId) => {
     const {EMPTY_CARD_GRADIENT, NEW_CARD_GRADIENT} = PromptsBrowser.params;
+    const {normalizePrompt} = window.PromptsBrowser;
     if(!prompt) return NEW_CARD_GRADIENT;
     const apiUrl = PromptsBrowser.db.getAPIurl("promptImage");
     
@@ -234,7 +235,15 @@ PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionId) => {
     const {state} = PromptsBrowser;
     let fileExtension = "";
 
-    const targetPrompt = united.find(item => item.id.toLowerCase() === prompt.toLowerCase());
+    let targetPrompt = united.find(item => item.id.toLowerCase() === prompt.toLowerCase());
+
+    //if no target prompt found - searching for the normalized version of the target prompt
+    if(!targetPrompt) {
+        const normalizedPrompt = normalizePrompt(prompt);
+        targetPrompt = united.find(item => item.id.toLowerCase() === normalizedPrompt.toLowerCase());
+    }
+
+    //if no prompt found - returning New Card image.
     if(!targetPrompt || !targetPrompt.knownPreviews) return NEW_CARD_GRADIENT;
 
     if(!collectionId && state.filterCollection) collectionId = state.filterCollection;
@@ -604,6 +613,8 @@ PromptsBrowser.loadConfig = () => {
     }
 }
 
+PromptsBrowser._textAreaSynchronise = () => PromptsBrowser.synchroniseCurrentPrompts(true, false);
+
 PromptsBrowser.initPromptBrowser = (tries = 0) => {
     const {state} = PromptsBrowser;
     const {DOMCache} = PromptsBrowser;
@@ -676,8 +687,8 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
             if(textArea && !textArea.dataset.pbelistenerready) {
                 textArea.dataset.pbelistenerready = "true";
 
-                textArea.removeEventListener("input", PromptsBrowser.synchroniseCurrentPrompts);
-                textArea.addEventListener("input", PromptsBrowser.synchroniseCurrentPrompts);
+                textArea.removeEventListener("input", PromptsBrowser._textAreaSynchronise);
+                textArea.addEventListener("input", PromptsBrowser._textAreaSynchronise);
             }
 
             PromptsBrowser.promptWordTooltip.init(positivePrompts, containerId);

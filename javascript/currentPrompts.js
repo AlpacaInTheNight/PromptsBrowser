@@ -198,7 +198,7 @@ PromptsBrowser.currentPrompts.scrollWeight = (e) => {
 }
 
 PromptsBrowser.currentPrompts.onNormalizePrompts = () => {
-    PromptsBrowser.synchroniseCurrentPrompts();
+    PromptsBrowser.synchroniseCurrentPrompts(true, true);
     PromptsBrowser.currentPrompts.update();
 }
 

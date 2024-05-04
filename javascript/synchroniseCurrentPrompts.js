@@ -4,7 +4,7 @@ if(!window.PromptsBrowser) window.PromptsBrowser = {};
 /**
  * Synchronises text content of the textarea with the array of active prompts used by the extension.
  */
-PromptsBrowser.synchroniseCurrentPrompts = (noTextAreaUpdate = true) => {
+PromptsBrowser.synchroniseCurrentPrompts = (noTextAreaUpdate = true, normalize = false) => {
     const {normalizePrompt} = window.PromptsBrowser;
     const {DEFAULT_PROMPT_WEIGHT} = PromptsBrowser.params;
     const {state} = PromptsBrowser;
@@ -62,7 +62,7 @@ PromptsBrowser.synchroniseCurrentPrompts = (noTextAreaUpdate = true) => {
         currNestedWeight = nestedWeight;
         promptItem = id;
 
-        if(!isExternalNetwork && !isSyntax) promptItem = normalizePrompt(promptItem);
+        if(normalize && !isExternalNetwork && !isSyntax) promptItem = normalizePrompt(promptItem);
 
         let targetItem = !isSyntax ? activePrompts.find(item => item.id === promptItem) : undefined;
         
