@@ -297,8 +297,15 @@ PromptsBrowser.styles.updateStyle = (e) => {
             targetStyle[i] = newStyle[i];
         }
 
+        /**
+         * Removing fields that are not part of the style anymore.
+         * Some fields like name or previewImage must be kept in the object.
+         * TODO: I probably should check dictionary of fields that can be added/removed
+         * instead of hardcoding check for things like a name
+         */
         for(const i in targetStyle) {
             if(i === "name") continue;
+            if(i === "previewImage") continue;
 
             if(!newStyle[i]) delete targetStyle[i];
         }
