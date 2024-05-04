@@ -58,7 +58,7 @@ PromptsBrowser.saveStyle.onSaveStyle = () => {
     const name = styleNameInput.value;
     if(!name || !data.styles) return;
 
-    const newStyle = PromptsBrowser.styles.grabCurrentStyle(name);
+    const newStyle = PromptsBrowser.styles.grabCurrentStyle(name, collectionId);
     if(!newStyle) return;
 
     targetCollection.push(newStyle);
@@ -73,19 +73,6 @@ PromptsBrowser.saveStyle.onChangeNewCollection = (e) => {
     if(!value) return;
 
     state.newStyleCollection = value;
-}
-
-PromptsBrowser.saveStyle.onChangeSaveMeta = (e) => {
-    const {state} = PromptsBrowser;
-    const checked = e.currentTarget.checked;
-    const target = e.currentTarget.dataset.id;
-    if(!target) return;
-
-    if(!state.config) state.config = {};
-    if(!state.config.saveStyleMeta) state.config.saveStyleMeta = {};
-
-    state.config.saveStyleMeta[target] = checked;
-    localStorage.setItem("PBE_config", JSON.stringify(state.config));
 }
 
 PromptsBrowser.saveStyle.showCurrentPrompts = (wrapper) => {
@@ -129,7 +116,6 @@ PromptsBrowser.saveStyle.showCurrentPrompts = (wrapper) => {
 PromptsBrowser.saveStyle.showAddStyle = (wrapper) => {
     const {data, makeElement, makeCheckbox} = PromptsBrowser;
     const {state} = PromptsBrowser;
-    const {saveStyleMeta = {}} = state.config || {};
 
     const setupContainer = document.createElement("div");
 
@@ -162,46 +148,16 @@ PromptsBrowser.saveStyle.showAddStyle = (wrapper) => {
 
     collectionSelect.addEventListener("change", PromptsBrowser.saveStyle.onChangeNewCollection);
 
-    const onChange = PromptsBrowser.saveStyle.onChangeSaveMeta;
-
-    const keepSeed =
-        makeCheckbox({onChange, checked: saveStyleMeta.seed, name: "Seed", id: "PBE_keepSeed", data: "seed"});
-
-    const keepPositive =
-        makeCheckbox({onChange, checked: saveStyleMeta.positive, name: "Positive", id: "PBE_keepPositive", data: "positive"});
-
-    const keepNegative =
-        makeCheckbox({onChange, checked: saveStyleMeta.negative, name: "Negative", id: "PBE_keepNegative", data: "negative"});
-
-    const keepSize =
-        makeCheckbox({onChange, checked: saveStyleMeta.size, name: "Size", id: "PBE_keepSize", data: "size"});
-
-    const keepSampler =
-        makeCheckbox({onChange, checked: saveStyleMeta.sampler, name: "Sampler", id: "PBE_keepSampler", data: "sampler"});
-
-    const keepQuality =
-        makeCheckbox({onChange, checked: saveStyleMeta.quality, name: "Quality", id: "PBE_keepQuality", data: "quality"});
-
     const saveRow = makeElement({element: "div", className: "PBE_row"});
-    const paramsRow = makeElement({element: "fieldset", className: "PBE_fieldset"});
-    const paramsRowLegend = makeElement({element: "legend", content: "Save meta:"});
 
     saveRow.appendChild(collectionSelect);
     saveRow.appendChild(saveButton);
-
-    paramsRow.appendChild(paramsRowLegend);
-    paramsRow.appendChild(keepPositive);
-    paramsRow.appendChild(keepNegative);
-    paramsRow.appendChild(keepSize);
-    paramsRow.appendChild(keepSampler);
-    paramsRow.appendChild(keepQuality);
-    paramsRow.appendChild(keepSeed);
 
     setupContainer.appendChild(styleNameInput);
     setupContainer.appendChild(saveRow);
 
     wrapper.appendChild(setupContainer);
-    wrapper.appendChild(paramsRow);
+    PromptsBrowser.styles.showMetaCheckboxes(wrapper);
 }
 
 PromptsBrowser.saveStyle.update = () => {

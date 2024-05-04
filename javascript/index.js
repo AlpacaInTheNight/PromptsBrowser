@@ -29,12 +29,22 @@ PromptsBrowser.state = {
         supportExtendedSyntax: true,
 
         saveStyleMeta: {
+            positive: true,
             seed: false,
             size: false,
             quality: false,
             sampler: false,
             negative: false,
-        }
+        },
+
+        updateStyleMeta: {
+            positive: true,
+            seed: false,
+            size: false,
+            quality: false,
+            sampler: false,
+            negative: false,
+        },
     },
 
     showControlPanel: true,
