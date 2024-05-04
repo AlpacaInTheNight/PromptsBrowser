@@ -5,7 +5,6 @@ PromptsBrowser.onPromptCardHover = (e) => {
     const {splashCardWidth = 200, splashCardHeight = 300} = PromptsBrowser.state.config;
     const splash = e.currentTarget.querySelector(".PBE_promptElementSplash");
     if(!splash) return;
-    //const BIG_CARD_HEIGHT = 300;
     const BIG_CARD_HEIGHT = splashCardHeight;
 
     splash.style.display = "";
