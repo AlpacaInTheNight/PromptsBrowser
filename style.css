@@ -1086,6 +1086,20 @@ select.PBE_generalInput {
     font-family: var(--font);
 }
 
+.PBE_styleItemMetaInfo {
+    padding: 0.5em;
+    font-size: 14px;
+    color: var(--body-text-color);
+    font-family: var(--font);
+    background-color: rgba(0,0,0, 0.5);
+}
+
+.PBE_styleMetaField {
+    font-weight: bold;
+    font-style: italic;
+    color: var(--body-text-color);
+}
+
 .PBE_styleItemContent {
     display: flex;
     flex-direction: row;

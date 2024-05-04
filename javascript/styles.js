@@ -522,20 +522,13 @@ PromptsBrowser.styles.showStylesShort = (wrapper) => {
         return 0;
     });
 
-    //const iteration = new Date().valueOf();
-
     for(const style of styles) {
-        const {name, positive, id, index, previewImage} = style;
+        const {name, positive, negative, width, height, steps, cfg, sampling, id, index, previewImage} = style;
         if(!name) continue;
         if(filterStyleCollection && filterStyleCollection !== id) continue;
         if(filterStyleName && !name.toLowerCase().includes(filterStyleName)) continue;
         let url = EMPTY_CARD_GRADIENT;
-
-        if(previewImage) {
-            //const safeFileName = PromptsBrowser.makeFileNameSafe(name);
-            //url = `url('./file=styles_catalogue/${id}/preview/${safeFileName}.${previewImage}?${iteration}')`;
-            url = PromptsBrowser.utils.getStylePreviewURL(style);
-        }
+        if(previewImage) url = PromptsBrowser.utils.getStylePreviewURL(style);
 
         const element = PromptsBrowser.showPromptItem({id: name}, {url});
         element.dataset.id = id;
@@ -652,7 +645,7 @@ PromptsBrowser.styles.showStyles = (wrapper) => {
     });
 
     for(const style of styles) {
-        const {name, positive, id, index, previewImage} = style;
+        const {name, positive, negative, width, height, steps, cfg, sampling, id, index, previewImage} = style;
 
         if(filterStyleCollection && filterStyleCollection !== id) continue;
         if(filterStyleName && !name.toLowerCase().includes(filterStyleName)) continue;
@@ -661,6 +654,7 @@ PromptsBrowser.styles.showStyles = (wrapper) => {
         const styleHeader = document.createElement("div");
         const nameContainer = document.createElement("div");
         const contentContainer = document.createElement("div");
+        const metaInfoContainer = document.createElement("div");
         const updatePreview = document.createElement("div");
 
         const currentPromptsContainer = document.createElement("div");
@@ -670,16 +664,13 @@ PromptsBrowser.styles.showStyles = (wrapper) => {
         styleHeader.className = "PBE_styleHeader";
         nameContainer.className = "PBE_styleItemName";
         contentContainer.className = "PBE_styleItemContent";
+        metaInfoContainer.className = "PBE_styleItemMetaInfo";
         currentPromptsContainer.className = "PBE_stylesCurrentList PBE_Scrollbar";
         actionsContainer.className = "PBE_stylesAction";
         updatePreview.className = "PBE_button";
 
         if(previewImage) {
-            //const safeFileName = PromptsBrowser.makeFileNameSafe(name);
-            //const iteration = new Date().valueOf();
-            //const url = `url('./file=styles_catalogue/${id}/preview/${safeFileName}.${previewImage}?${iteration}')`;
             url = PromptsBrowser.utils.getStylePreviewURL(style);
-
             stylesItem.style.backgroundImage = url;
         }
 
@@ -748,8 +739,21 @@ PromptsBrowser.styles.showStyles = (wrapper) => {
         styleHeader.appendChild(nameContainer);
         if(!readonly) styleHeader.appendChild(updatePreview);
 
+        let metaInfo = [];//steps, cfg, sampling
+        if(negative) metaInfo.push(`<span class="PBE_styleMetaField">Negative:</span> "${negative}"`);
+
+        if(width) metaInfo.push(`<span class="PBE_styleMetaField">Width:</span> ${width}`);
+        if(height) metaInfo.push(`<span class="PBE_styleMetaField">Height:</span> ${height}`);
+
+        if(sampling) metaInfo.push(`<span class="PBE_styleMetaField">Sampling:</span> ${sampling}`);
+        if(steps) metaInfo.push(`<span class="PBE_styleMetaField">Steps:</span> ${steps}`);
+        if(cfg) metaInfo.push(`<span class="PBE_styleMetaField">CFG:</span> ${cfg}`);
+
+        metaInfoContainer.innerHTML = metaInfo.join("; ");
+
         stylesItem.appendChild(styleHeader);
         stylesItem.appendChild(contentContainer);
+        stylesItem.appendChild(metaInfoContainer);
 
         wrapper.appendChild(stylesItem);
     }
