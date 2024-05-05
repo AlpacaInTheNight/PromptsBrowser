@@ -395,7 +395,7 @@ PromptsBrowser.styles.applyStyle = (e, isAfter) => {
 
     PromptsBrowser.applyStyle(targetStyle, isAfter);
 
-    PromptsBrowser.styles.update();
+    //PromptsBrowser.styles.update();
 }
 
 PromptsBrowser.styles.onOpenStyles = () => {
@@ -488,8 +488,16 @@ PromptsBrowser.styles.showStylesShort = (wrapper) => {
     }
 }
 
-PromptsBrowser.styles.showActions = (wrapper) => {
+PromptsBrowser.styles.showActions = (wrapper, isShort = true) => {
     const {readonly} = PromptsBrowser.meta;
+
+    if(!isShort) {
+        if(!readonly) {
+            PromptsBrowser.styles.showMetaCheckboxes(wrapper, true);
+        }
+
+        return;
+    }
 
     const actionContainer = document.createElement("fieldset");
     actionContainer.className = "PBE_fieldset";
@@ -653,11 +661,14 @@ PromptsBrowser.styles.showStyles = (wrapper) => {
 
         addAfterButton.dataset.isafter = "true";
 
+        stylesItem.dataset.name = name;
+        stylesItem.dataset.id = id;
         addAfterButton.dataset.id = id;
         addBeforeButton.dataset.id = id;
         removeButton.dataset.id = id;
         updateButton.dataset.id = id;
 
+        stylesItem.dataset.index = index;
         addAfterButton.dataset.index = index;
         addBeforeButton.dataset.index = index;
         removeButton.dataset.index = index;
@@ -699,6 +710,8 @@ PromptsBrowser.styles.showStyles = (wrapper) => {
         stylesItem.appendChild(contentContainer);
         stylesItem.appendChild(metaInfoContainer);
 
+        stylesItem.addEventListener("click", PromptsBrowser.styles.onSelectStyle);
+
         wrapper.appendChild(stylesItem);
     }
 
@@ -714,22 +727,13 @@ PromptsBrowser.styles.update = () => {
     wrapper.style.display = "flex";
     const isShort = state.toggledButtons.includes("styles_simplified_view");
 
-    //const currentPromptsBlock = document.createElement("div");
     const possibleStylesBlock = document.createElement("div");
 
     const footerBlock = document.createElement("div");
     const closeButton = document.createElement("button");
     footerBlock.className = "PBE_rowBlock PBE_rowBlock_wide";
-    //currentPromptsBlock.className = "PBE_dataBlock PBE_stylesHeader";
     closeButton.innerText = "Close";
     closeButton.className = "PBE_button";
-
-    /* const addNewContainer = makeElement({element: "div", className: "PBE_row"});
-
-    if(!readonly) {
-        PromptsBrowser.styles.showCurrentPrompts(currentPromptsBlock);
-        PromptsBrowser.styles.showAddStyle(addNewContainer);
-    } */
 
     if(isShort) {
         possibleStylesBlock.className = "PBE_dataBlock PBE_Scrollbar PBE_windowContent";
@@ -748,20 +752,13 @@ PromptsBrowser.styles.update = () => {
     filterBlock.className = "PBE_row PBE_stylesFilter";
     PromptsBrowser.styles.showFilters(filterBlock);
 
-    /* if(!readonly) {
-        wrapper.appendChild(currentPromptsBlock);
-        wrapper.appendChild(addNewContainer);
-    } */
-
     wrapper.appendChild(filterBlock);
     wrapper.appendChild(possibleStylesBlock);
 
-    if(isShort) {
-        const actionsBlock = document.createElement("div");
-        actionsBlock.className = "PBE_collectionToolsActions PBE_row";
-        PromptsBrowser.styles.showActions(actionsBlock);
-        wrapper.appendChild(actionsBlock);
-    }
+    const actionsBlock = document.createElement("div");
+    actionsBlock.className = "PBE_collectionToolsActions PBE_row";
+    PromptsBrowser.styles.showActions(actionsBlock, isShort);
+    wrapper.appendChild(actionsBlock);
 
     wrapper.appendChild(footerBlock);
 };
