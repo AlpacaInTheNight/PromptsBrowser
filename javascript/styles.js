@@ -264,6 +264,46 @@ PromptsBrowser.styles.removeStyle = (e) => {
     }
 }
 
+PromptsBrowser.styles.onRenameStyle = (e) => {
+    const {data} = PromptsBrowser;
+    if(!data.styles) return;
+
+    let collectionId = undefined;
+    let index = undefined;
+
+    if(e.currentTarget.dataset.action) {
+        const {selectedItem} = PromptsBrowser.styles;
+        collectionId = selectedItem.collection;
+        index = selectedItem.index;
+
+    } else {
+        collectionId = e.currentTarget.dataset.id;
+        index = Number(e.currentTarget.dataset.index);
+    }
+
+    if(!collectionId || Number.isNaN(index)) return;
+
+    const targetCollection = data.styles[collectionId];
+    if(!targetCollection) return;
+
+    const targetStyle = data.styles[collectionId][index];
+    if(!targetStyle) return;
+
+    const nameInputField = document.querySelector("#PBE_stylesWindow .PBE_nameAction");
+    if(!nameInputField || !nameInputField.value) return;
+
+    for(const styleItem of targetCollection) {
+        if(styleItem.name === nameInputField.value) {
+            alert("Style name already used");
+            return;
+        }
+    }
+
+    if( confirm(`Rename style "${targetStyle.name}" to "${nameInputField.value}"?`) ) {
+        PromptsBrowser.db.onRenameStyle(collectionId, targetStyle.name, nameInputField.value);
+    }
+}
+
 PromptsBrowser.styles.updateStyle = (e) => {
     const {data} = PromptsBrowser;
     if(!data.styles) return;
@@ -338,6 +378,7 @@ PromptsBrowser.styles.onSelectStyle = (e) => {
         if(targetCollection) {
             const targetStyle = targetCollection[index];
             const checkBoxesWrapper = document.querySelector("#PBE_stylesWindow .PBE_styleMetaCheckboxes");
+            const nameInputField = document.querySelector("#PBE_stylesWindow .PBE_nameAction");
             
             if(targetStyle && checkBoxesWrapper) {
 
@@ -358,6 +399,10 @@ PromptsBrowser.styles.onSelectStyle = (e) => {
                 }
 
                 if(state.config) state.config.updateStyleMeta = updateStyleMeta;
+            }
+
+            if(targetStyle?.name && nameInputField) {
+                nameInputField.value = targetStyle.name;
             }
 
         }
@@ -489,10 +534,24 @@ PromptsBrowser.styles.showStylesShort = (wrapper) => {
 }
 
 PromptsBrowser.styles.showActions = (wrapper, isShort = true) => {
+    const {makeElement} = PromptsBrowser;
     const {readonly} = PromptsBrowser.meta;
+
+    const nameContainer = makeElement({element: "fieldset", className: "PBE_fieldset"});
+    const nameLegend = makeElement({element: "legend", content: "Name"});
+    const nameField = makeElement({element: "input", className: "PBE_generalInput PBE_input PBE_nameAction"});
+    nameField.placeholder = "Style name";
+    const renameButton = makeElement({element: "div", className: "PBE_button", content: "Rename", title: "Rename selected style"});
+    renameButton.dataset.action = "true";
+    renameButton.addEventListener("click", PromptsBrowser.styles.onRenameStyle);
+
+    nameContainer.appendChild(nameLegend);
+    nameContainer.appendChild(nameField);
+    nameContainer.appendChild(renameButton);
 
     if(!isShort) {
         if(!readonly) {
+            wrapper.appendChild(nameContainer);
             PromptsBrowser.styles.showMetaCheckboxes(wrapper, true);
         }
 
@@ -546,7 +605,6 @@ PromptsBrowser.styles.showActions = (wrapper, isShort = true) => {
     editContainer.appendChild(updateButton);
     editContainer.appendChild(updatePreviewButton);
 
-
     const systemContainer = document.createElement("fieldset");
     systemContainer.className = "PBE_fieldset";
     const systemLegend = document.createElement("legend");
@@ -566,6 +624,7 @@ PromptsBrowser.styles.showActions = (wrapper, isShort = true) => {
 
     if(!readonly) {
         wrapper.appendChild(editContainer);
+        wrapper.appendChild(nameContainer);
         PromptsBrowser.styles.showMetaCheckboxes(wrapper, true);
         wrapper.appendChild(systemContainer);
     }

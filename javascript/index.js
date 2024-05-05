@@ -464,6 +464,40 @@ PromptsBrowser.db.savePromptPreview = (callUpdate = true) => {
     })();
 }
 
+PromptsBrowser.db.onRenameStyle = (collection, oldName, newName) => {
+    const {state, data} = PromptsBrowser;
+
+    if(!collection || !oldName || !newName) return;
+
+    const url = PromptsBrowser.db.getAPIurl("renameStyle");
+
+    (async () => {
+        const saveData = {oldName, newName, collection};
+
+        const rawResponse = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(saveData)
+        });
+
+        const targetStylesCollection = data.styles[collection];
+        if(targetStylesCollection) {
+            targetStylesCollection.some(item => {
+                if(item.name === oldName) {
+                    item.name = newName;
+    
+                    return true;
+                }
+            });
+        }
+
+        PromptsBrowser.styles.update();
+    })();
+}
+
 PromptsBrowser.db.onUpdateStylePreview = (e) => {
     const {state, data} = PromptsBrowser;
 
