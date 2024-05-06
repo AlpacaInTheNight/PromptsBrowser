@@ -1,4 +1,4 @@
-# Prompts Browser Extension 1.1.0
+# Prompts Browser Extension 1.2.0
 Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui).
 
 1. [Installation](#installation)
@@ -18,14 +18,33 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 
 ![](img/preview.jpg)
 
-### Changes in 1.1.0
-⚠️ Previous versions stored collections in the root of the application. Since version 1.1.0 they are now stored in the extension directory. If you used previous versions, you will need to move your collections there. ⚠️
+### Changes in 1.2.0
+⚠️ The extension configuration used to be in a separate window and stored on the client. As of 1.2.0, the extension settings are now stored in the WebUI settings in the "Prompts Browser" category.
 
-As of version 1.1.0, the extension now works via FastAPI and no longer depends on an additional local server or extension installation location. This will cover more use cases and customizations of the application.
+The old extension settings will need to be set again. In addition, a number of new settings are available in version 1.2.0. ⚠️
+
+- The size of the thumbnail on the client can now be customized. It is also possible to specify the maximum number of prompts to be displayed in the prompt list.
+
+- It is possible to specify how many maximum rows of prompts can be displayed in the list of prompts (now it is easier to adapt the extension to different screen/window resolutions).
+
+- The size and format of preview images in collections on disk can now be customized.
+
+- Prompt tools have been updated and made more convenient. Possible prompts for replacement/addition are now sorted by similarity. It is possible to switch between replacement and addition modes of the selected prompt. It is also possible to open prompts for editing and delete prompts from the list of current prompts in the standard way.
+
+- Prompts saved in collections will not be normalized to avoid unwanted changes to the prompt text required for LORAs triggering.
+
+- The Styles window is divided into Save and Load Styles windows.
+
+- Having positive prompts is no longer necessary to create styles. For example, you can now create styles for negative parameters or image quality/size settings.
+
+- The styles loading window has been updated. Now updating styles works identically to saving styles and you can override what information should be stored in a style.
+
+- The style can now be renamed.
+
 
 ## Installation:
 
-1. Make sure you have the latest AUTOMATIC1111/stable-diffusion-webui version instaled. Prompt Browser 1.1.0 was tested and adapted for WebUI versions 1.6.0.
+1. Make sure you have the latest AUTOMATIC1111/stable-diffusion-webui version instaled. Prompt Browser 1.2.0 was tested and adapted for WebUI versions 1.6.0.
 
 2. Unzip/clone the plugin into the extensions directory. Or install it using WebUI Extensions -> Install from URL tab.
 
