@@ -23,6 +23,11 @@ PromptsBrowser.state = {
         rowsInKnownCards: 3,
         maxCardsShown: 1000,
 
+        resizeThumbnails: true,
+        resizeThumbnailsMaxWidth: 300,
+        resizeThumbnailsMaxHeight: 300,
+        resizeThumbnailsFormat: "JPG",
+
         /**
          * If true, will enable extended syntax element support for prompts used by some addons.
          */
@@ -437,7 +442,10 @@ PromptsBrowser.db.savePromptPreview = (callUpdate = true) => {
         PromptsBrowser.data.original[savePreviewCollection].push(originalItem);
     }
 
-    originalItem.previewImage = imageExtension;
+    if(state.config.resizeThumbnails && state.config.resizeThumbnailsFormat) {
+        originalItem.previewImage = state.config.resizeThumbnailsFormat.toLowerCase()
+
+    } else originalItem.previewImage = imageExtension;
 
     (async () => {
 
@@ -551,7 +559,10 @@ PromptsBrowser.db.onUpdateStylePreview = (e) => {
         if(targetStylesCollection) {
             targetStylesCollection.some(item => {
                 if(item.name === styleId) {
-                    item.previewImage = imageExtension;
+                    if(state.config.resizeThumbnails && state.config.resizeThumbnailsFormat) {
+                        item.previewImage = state.config.resizeThumbnailsFormat.toLowerCase()
+                
+                    } else item.previewImage = imageExtension;
     
                     return true;
                 }
@@ -853,7 +864,6 @@ PromptsBrowser.db.loadDatabase = async () => {
     }).then(data => data.json()).then(res => {
         if(!res || !res.prompts) return; //TODO: process server error here
         const {prompts, styles, readonly = false} = res;
-        
 
         if(res.config) {
             for(const i in res.config) {

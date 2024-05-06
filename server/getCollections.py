@@ -62,6 +62,18 @@ def formSetupObject():
 
     if hasattr(opts, "pbe_max_cards_shown"):
         config["maxCardsShown"] = opts.pbe_max_cards_shown
+
+    if hasattr(opts, "pbe_resize_thumbnails"):
+        config["resizeThumbnails"] = opts.pbe_resize_thumbnails
+
+    if hasattr(opts, "pbe_resize_thumbnails_max_width"):
+        config["resizeThumbnailsMaxWidth"] = opts.pbe_resize_thumbnails_max_width
+
+    if hasattr(opts, "pbe_resize_thumbnails_max_height"):
+        config["resizeThumbnailsMaxHeight"] = opts.pbe_resize_thumbnails_max_height
+
+    if hasattr(opts, "pbe_resize_thumbnails_format"):
+        config["resizeThumbnailsFormat"] = opts.pbe_resize_thumbnails_format
     
     return config
 

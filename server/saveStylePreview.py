@@ -6,6 +6,7 @@ from os.path import join, isdir, isfile
 
 from . import constant
 
+from .resize_image import resize_image
 from .utils import makeFileNameSafe
 from .utils import getCollectionsDir
 from .utils import emitMessage
@@ -42,6 +43,9 @@ def saveStylePreview(postJSON):
     if isfile(join(collectionPath, safeFileName + ".png")): os.remove(join(collectionPath, safeFileName + ".png"))
 
     shutil.copy(src, savePath)
+
+    #resize image
+    resize_image(savePath)
 
     #updating collection data
     pathToMetaFile      = join(stylesCataloguePath, collection, "meta.json")

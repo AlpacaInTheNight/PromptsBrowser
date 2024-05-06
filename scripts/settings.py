@@ -159,3 +159,48 @@ def on_ui_settings():
             section=section,
         ),
     )
+
+    shared.opts.add_option(
+        key="pbe_resize_thumbnails",
+        info=shared.OptionInfo(
+            True,
+            label="Resize thumbnails",
+            section=section,
+        ),
+    )
+
+    shared.opts.add_option(
+        key="pbe_resize_thumbnails_max_width",
+        info=shared.OptionInfo(
+            300,
+            label="Resize thumbnails: max width",
+            component=gr.Slider,
+            component_args={"minimum": 10, "maximum": 10000, "step": 1},
+            section=section,
+        ),
+    )
+
+    shared.opts.add_option(
+        key="pbe_resize_thumbnails_max_height",
+        info=shared.OptionInfo(
+            300,
+            label="Resize thumbnails: max height",
+            component=gr.Slider,
+            component_args={"minimum": 10, "maximum": 10000, "step": 1},
+            section=section,
+        ),
+    )
+
+    shared.opts.add_option(
+        key="pbe_resize_thumbnails_format",
+        info=shared.OptionInfo(
+            "JPG",
+            label="Resize thumbnails: file format",
+            component=gr.Dropdown,
+            component_args={"choices": [
+                "JPG",
+                "PNG",
+            ]},
+            section=section,
+        ),
+    )
