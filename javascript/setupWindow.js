@@ -605,6 +605,10 @@ PromptsBrowser.setupWindow.update = () => {
     } else {
         if(!readonly) PromptsBrowser.setupWindow.showCreateNew(topBlock);
 
+        const infoMessage = document.createElement("div");
+        infoMessage.innerText = `The extension settings have moved to the general webUI settings in the "Prompts Browser" category.`;
+        contentBlock.appendChild(infoMessage);
+
         /* PromptsBrowser.setupWindow.showIntegrationSetup(contentBlock);
         PromptsBrowser.setupWindow.showWeightSetup(contentBlock);
         PromptsBrowser.setupWindow.showNormalizeSetup(contentBlock);
