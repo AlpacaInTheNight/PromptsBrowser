@@ -12,6 +12,7 @@ from server.getCollections import getCollections
 from server.savePreview import savePreview
 from server.saveStylePreview import saveStylePreview
 from server.saveStyles import saveStyles
+from server.renameStyle import renameStyle
 from server.savePrompts import savePrompts
 from server.newCollection import newCollection
 from server.newStylesCollection import newStylesCollection
@@ -19,6 +20,8 @@ from server.movePreview import movePreview
 
 from server.utils import emitMessage, getCollectionsDir
 from server.constant import PROMPTS_DIR, STYLES_DIR
+
+from scripts.settings import on_ui_settings
 
 class ReqSavePreview(BaseModel):
     src: str
@@ -32,6 +35,11 @@ class ReqSaveStylePreview(BaseModel):
 
 class ReqSaveStyles(BaseModel):
     data: str
+    collection: str
+
+class ReqRenameStyle(BaseModel):
+    oldName: str
+    newName: str
     collection: str
 
 class ReqNewCollection(BaseModel):
@@ -82,6 +90,9 @@ def on_app_started(_: gr.Blocks, app: FastAPI):
         @app.post(ROOT_URL + "saveStyles")
         async def save_styles(req: ReqSaveStyles): return saveStyles(req)
         
+        @app.post(ROOT_URL + "renameStyle")
+        async def rename_style(req: ReqRenameStyle): return renameStyle(req)
+        
         @app.post(ROOT_URL + "newCollection")
         async def new_collection(req: ReqNewCollection): return newCollection(req)
         
@@ -99,5 +110,6 @@ try:
     import modules.script_callbacks as script_callbacks
 
     script_callbacks.on_app_started(on_app_started)
+    script_callbacks.on_ui_settings(on_ui_settings)
 except:
     pass

@@ -4,16 +4,93 @@ from os.path import join, isdir, isfile
 
 from . import constant
 from .utils import emitMessage, getCollectionsDir, makeFileNameSafe
+from modules.shared import opts
+
+def formSetupObject():
+    config = {}
+
+    if hasattr(opts, "pbe_show_old_setup_window"):
+        config["showOldSetupWindow"] = opts.pbe_show_old_setup_window
+
+    if hasattr(opts, "pbe_autocomplete_prompt_mode"):
+        if opts.pbe_autocomplete_prompt_mode == "Off":
+            config["autocomplitePromptMode"] = "off"
+        elif opts.pbe_autocomplete_prompt_mode == "Prompts only":
+            config["autocomplitePromptMode"] = "prompts"
+        elif opts.pbe_autocomplete_prompt_mode == "Styles only":
+            config["autocomplitePromptMode"] = "styles"
+        elif opts.pbe_autocomplete_prompt_mode == "Prompts and styles":
+            config["autocomplitePromptMode"] = "all"
+
+    if hasattr(opts, "pbe_show_prompt_index"):
+        config["showPromptIndex"] = opts.pbe_show_prompt_index
+
+    if hasattr(opts, "pbe_support_extended_syntax"):
+        config["supportExtendedSyntax"] = opts.pbe_support_extended_syntax
+
+    if hasattr(opts, "pbe_below_one_weight"):
+        config["belowOneWeight"] = opts.pbe_below_one_weight
+
+    if hasattr(opts, "pbe_above_one_weight"):
+        config["aboveOneWeight"] = opts.pbe_above_one_weight
+
+    if hasattr(opts, "pbe_to_lower_case"):
+        config["toLowerCase"] = opts.pbe_to_lower_case
+
+    if hasattr(opts, "pbe_space_mode"):
+        if opts.pbe_space_mode == "Do nothing":
+            config["spaceMode"] = ""
+        elif opts.pbe_space_mode == "To space":
+            config["spaceMode"] = "space"
+        elif opts.pbe_space_mode == "To underscore":
+            config["spaceMode"] = "underscore"
+
+    if hasattr(opts, "pbe_card_width"):
+        config["cardWidth"] = opts.pbe_card_width
+
+    if hasattr(opts, "pbe_card_height"):
+        config["cardHeight"] = opts.pbe_card_height
+    
+    if hasattr(opts, "pbe_splash_card_width"):
+        config["splashCardWidth"] = opts.pbe_splash_card_width
+
+    if hasattr(opts, "pbe_splash_card_height"):
+        config["splashCardHeight"] = opts.pbe_splash_card_height
+
+    if hasattr(opts, "pbe_rows_in_known_cards"):
+        config["rowsInKnownCards"] = opts.pbe_rows_in_known_cards
+
+    if hasattr(opts, "pbe_max_cards_shown"):
+        config["maxCardsShown"] = opts.pbe_max_cards_shown
+
+    if hasattr(opts, "pbe_resize_thumbnails"):
+        config["resizeThumbnails"] = opts.pbe_resize_thumbnails
+
+    if hasattr(opts, "pbe_resize_thumbnails_max_width"):
+        config["resizeThumbnailsMaxWidth"] = opts.pbe_resize_thumbnails_max_width
+
+    if hasattr(opts, "pbe_resize_thumbnails_max_height"):
+        config["resizeThumbnailsMaxHeight"] = opts.pbe_resize_thumbnails_max_height
+
+    if hasattr(opts, "pbe_resize_thumbnails_format"):
+        config["resizeThumbnailsFormat"] = opts.pbe_resize_thumbnails_format
+    
+    return config
+
 
 def getCollections(isReadOnly):
     collDir = getCollectionsDir()
     pathPromptsCatalogue    = join(collDir, constant.PROMPTS_DIR)
     pathStylesCatalogue     = join(collDir, constant.STYLES_DIR)
+    config = formSetupObject()
 
     dataList = {
         "prompts": {},
-        "styles": {}
+        "styles": {},
+        "config": config
     }
+
+    #dataList["options"] = json.dumps(opts)
 
     if isReadOnly: dataList["readonly"] = True
 

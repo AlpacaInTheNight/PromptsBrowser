@@ -16,13 +16,13 @@ PromptsBrowser.setupWindow.viewMode = "normal";
  * @param {*} wrapper 
  */
 PromptsBrowser.setupWindow.init = (wrapper) => {
-    const {state} = PromptsBrowser;
+   /*  const {state} = PromptsBrowser;
 
     const savedConfigString = localStorage.getItem("PBE_config");
     if(savedConfigString) {
         const savedConfig = JSON.parse(savedConfigString);
         if(savedConfig) state.config = savedConfig;
-    }
+    } */
 
     const setupWindow = document.createElement("div");
     setupWindow.className = "PBE_setupWindow PBE_generalWindow";
@@ -75,6 +75,54 @@ PromptsBrowser.setupWindow.onChangeShowIndex = (e) => {
     const checked = e.currentTarget.checked;
 
     state.config.showPromptIndex = checked;
+    localStorage.setItem("PBE_config", JSON.stringify(state.config));
+}
+
+PromptsBrowser.setupWindow.onChangeCardWidth = (e) => {
+    const {state} = PromptsBrowser;
+    const width = Number(e.currentTarget.value);
+
+    state.config.cardWidth = width;
+    localStorage.setItem("PBE_config", JSON.stringify(state.config));
+}
+
+PromptsBrowser.setupWindow.onChangeCardHeight = (e) => {
+    const {state} = PromptsBrowser;
+    const height = Number(e.currentTarget.value);
+
+    state.config.cardHeight = height;
+    localStorage.setItem("PBE_config", JSON.stringify(state.config));
+}
+
+PromptsBrowser.setupWindow.onChangeSplashCardWidth = (e) => {
+    const {state} = PromptsBrowser;
+    const width = Number(e.currentTarget.value);
+
+    state.config.splashCardWidth = width;
+    localStorage.setItem("PBE_config", JSON.stringify(state.config));
+}
+
+PromptsBrowser.setupWindow.onChangeSplashCardHeight = (e) => {
+    const {state} = PromptsBrowser;
+    const height = Number(e.currentTarget.value);
+
+    state.config.splashCardHeight = height;
+    localStorage.setItem("PBE_config", JSON.stringify(state.config));
+}
+
+PromptsBrowser.setupWindow.onChangeKnownRows = (e) => {
+    const {state} = PromptsBrowser;
+    const rows = Number(e.currentTarget.value);
+
+    state.config.rowsInKnownCards = rows;
+    localStorage.setItem("PBE_config", JSON.stringify(state.config));
+}
+
+PromptsBrowser.setupWindow.onChangeMaxCards = (e) => {
+    const {state} = PromptsBrowser;
+    const maxCards = Number(e.currentTarget.value);
+
+    state.config.maxCardsShown = maxCards;
     localStorage.setItem("PBE_config", JSON.stringify(state.config));
 }
 
@@ -157,14 +205,6 @@ PromptsBrowser.setupWindow.onCreate = (e) => {
 PromptsBrowser.setupWindow.showCreateNew = (wrapper) => {
     const {makeElement} = PromptsBrowser;
 
-    const buttonsBlock = makeElement({element: "div", className: "PBE_row",
-        style: {
-            justifyContent: "space-around",
-            marginBottom: "20px",
-            marginTop: "5px",
-        }
-    });
-
     const newCollection = makeElement({
         element: "button", className: "PBE_button", content: "New prompts collection"
     });
@@ -183,9 +223,9 @@ PromptsBrowser.setupWindow.showCreateNew = (wrapper) => {
         PromptsBrowser.setupWindow.update();
     });
 
-    buttonsBlock.appendChild(newCollection);
-    buttonsBlock.appendChild(newStylesCollection);
-    wrapper.appendChild(buttonsBlock);
+    wrapper.appendChild(newCollection);
+    wrapper.appendChild(newStylesCollection);
+    //wrapper.appendChild(buttonsBlock);
 }
 
 PromptsBrowser.setupWindow.showIntegrationSetup = (wrapper) => {
@@ -337,6 +377,7 @@ PromptsBrowser.setupWindow.showPromptCardsSetup = (wrapper) => {
     const {state, makeElement} = PromptsBrowser;
     const {config} = state;
 
+    //show index
     const indexBlock = makeElement({element: "div", className: "PBE_rowBlock"});
     indexBlock.style.maxWidth = "none";
 
@@ -356,7 +397,109 @@ PromptsBrowser.setupWindow.showPromptCardsSetup = (wrapper) => {
     indexBlock.appendChild(indexLegend);
     indexBlock.appendChild(indexInput);
 
+    //card width
+    const widthBlock = makeElement({element: "div", className: "PBE_rowBlock"});
+    widthBlock.style.maxWidth = "none";
+
+    const widthBlockTitle = makeElement({element: "div", className: "", content: "Card width"});
+    const widthBlockInput = makeElement({
+        element: "input",
+        type: "number",
+        className: "PBE_generalInput PBE_input",
+        value: config.cardWidth || 50,
+        onChange: PromptsBrowser.setupWindow.onChangeCardWidth
+    });
+
+    widthBlock.appendChild(widthBlockTitle);
+    widthBlock.appendChild(widthBlockInput);
+
+    //card height
+    const heightBlock = makeElement({element: "div", className: "PBE_rowBlock"});
+    heightBlock.style.maxWidth = "none";
+
+    const heightBlockTitle = makeElement({element: "div", className: "", content: "Card height"});
+    const heightBlockInput = makeElement({
+        element: "input",
+        type: "number",
+        className: "PBE_generalInput PBE_input",
+        value: config.cardHeight || 100,
+        onChange: PromptsBrowser.setupWindow.onChangeCardHeight
+    });
+
+    heightBlock.appendChild(heightBlockTitle);
+    heightBlock.appendChild(heightBlockInput);
+
+    //splash card width
+    const splashWidthBlock = makeElement({element: "div", className: "PBE_rowBlock"});
+    splashWidthBlock.style.maxWidth = "none";
+
+    const splasWidthBlockTitle = makeElement({element: "div", className: "", content: "Splash Card width"});
+    const splasWidthBlockInput = makeElement({
+        element: "input",
+        type: "number",
+        className: "PBE_generalInput PBE_input",
+        value: config.splashCardWidth || 200,
+        onChange: PromptsBrowser.setupWindow.onChangeSplashCardWidth
+    });
+
+    splashWidthBlock.appendChild(splasWidthBlockTitle);
+    splashWidthBlock.appendChild(splasWidthBlockInput);
+
+    //splash card height
+    const splashHeightBlock = makeElement({element: "div", className: "PBE_rowBlock"});
+    splashHeightBlock.style.maxWidth = "none";
+
+    const splashHeightBlockTitle = makeElement({element: "div", className: "", content: "Splash card height"});
+    const splashHeightBlockInput = makeElement({
+        element: "input",
+        type: "number",
+        className: "PBE_generalInput PBE_input",
+        value: config.splashCardHeight || 300,
+        onChange: PromptsBrowser.setupWindow.onChangeSplashCardHeight
+    });
+
+    splashHeightBlock.appendChild(splashHeightBlockTitle);
+    splashHeightBlock.appendChild(splashHeightBlockInput);
+    
+    //card rows in known prompts block
+    const knownRowsBlock = makeElement({element: "div", className: "PBE_rowBlock"});
+    knownRowsBlock.style.maxWidth = "none";
+
+    const knownRowsBlockTitle = makeElement({element: "div", className: "", content: "Known cards rows"});
+    const knownRowsBlockInput = makeElement({
+        element: "input",
+        type: "number",
+        className: "PBE_generalInput PBE_input",
+        value: config.rowsInKnownCards || 3,
+        onChange: PromptsBrowser.setupWindow.onChangeKnownRows
+    });
+
+    knownRowsBlock.appendChild(knownRowsBlockTitle);
+    knownRowsBlock.appendChild(knownRowsBlockInput);
+    
+    //max shown cards in a block
+    const maxCardsBlock = makeElement({element: "div", className: "PBE_rowBlock"});
+    maxCardsBlock.style.maxWidth = "none";
+
+    const maxCardsBlockTitle = makeElement({element: "div", className: "", content: "Max shown cards"});
+    const maxCardsBlockInput = makeElement({
+        element: "input",
+        type: "number",
+        className: "PBE_generalInput PBE_input",
+        value: config.maxCardsShown || 1000,
+        onChange: PromptsBrowser.setupWindow.onChangeMaxCards
+    });
+
+    maxCardsBlock.appendChild(maxCardsBlockTitle);
+    maxCardsBlock.appendChild(maxCardsBlockInput);
+
     wrapper.appendChild(indexBlock);
+    wrapper.appendChild(widthBlock);
+    wrapper.appendChild(heightBlock);
+    wrapper.appendChild(splashWidthBlock);
+    wrapper.appendChild(splashHeightBlock);
+    wrapper.appendChild(knownRowsBlock);
+    wrapper.appendChild(maxCardsBlock);
 }
 
 PromptsBrowser.setupWindow.showNewCollection = (wrapper) => {
@@ -442,13 +585,15 @@ PromptsBrowser.setupWindow.update = () => {
 
     if(viewMode === "newCollection") wrapper.innerHTML = "New prompts collection";
     else if(viewMode === "newStylesCollection") wrapper.innerHTML = "New styles collections";
-    else wrapper.innerHTML = "Setup window";
+    else wrapper.innerHTML = "New Collection";
 
+    const topBlock = document.createElement("div");
     const contentBlock = document.createElement("div");
     const footerBlock = document.createElement("div");
     const closeButton = document.createElement("button");
 
-    contentBlock.className = "PBE_windowContent";
+    topBlock.className = "PBE_row PBE_setupWindowTopBlock";
+    contentBlock.className = "PBE_windowContent PBE_Scrollbar";
     contentBlock.style.width = "100%";
 
     if(viewMode === "newCollection") {
@@ -458,12 +603,16 @@ PromptsBrowser.setupWindow.update = () => {
         PromptsBrowser.setupWindow.showNewStylesCollection(contentBlock);
 
     } else {
-        if(!readonly) PromptsBrowser.setupWindow.showCreateNew(contentBlock);
+        if(!readonly) PromptsBrowser.setupWindow.showCreateNew(topBlock);
 
-        PromptsBrowser.setupWindow.showIntegrationSetup(contentBlock);
+        const infoMessage = document.createElement("div");
+        infoMessage.innerText = `The extension settings have moved to the general webUI settings in the "Prompts Browser" category.`;
+        contentBlock.appendChild(infoMessage);
+
+        /* PromptsBrowser.setupWindow.showIntegrationSetup(contentBlock);
         PromptsBrowser.setupWindow.showWeightSetup(contentBlock);
         PromptsBrowser.setupWindow.showNormalizeSetup(contentBlock);
-        PromptsBrowser.setupWindow.showPromptCardsSetup(contentBlock);
+        PromptsBrowser.setupWindow.showPromptCardsSetup(contentBlock); */
     }
 
     const statusBlock = makeElement({element: "div", className: "PBE_setupWindowStatus PBE_row"});
@@ -492,6 +641,7 @@ PromptsBrowser.setupWindow.update = () => {
 
     footerBlock.appendChild(closeButton);
 
+    wrapper.appendChild(topBlock);
     wrapper.appendChild(contentBlock);
     wrapper.appendChild(statusBlock);
     wrapper.appendChild(footerBlock);

@@ -8,6 +8,14 @@ PromptsBrowser.promptTools.currentFilters = {
     category: "",
     tags: [],
     name: "",
+
+    sorting: "__none",
+    sortingOptions: [
+        {id: "__none", name: "Unsorted"},
+        {id: "weight", name: "By weight"},
+        {id: "alph", name: "Alphabetical"},
+        {id: "alphReversed", name: "Alphabetical reversed"},
+    ]
 }
 
 PromptsBrowser.promptTools.possibleFilters = {
@@ -15,6 +23,14 @@ PromptsBrowser.promptTools.possibleFilters = {
     category: "",
     tags: [],
     name: "",
+
+    sorting: "sim",
+    sortingOptions: [
+        {id: "__none", name: "Unsorted"},
+        {id: "sim", name: "By similarity"},
+        {id: "alph", name: "Alphabetical"},
+        {id: "alphReversed", name: "Alphabetical reversed"},
+    ]
 }
 
 PromptsBrowser.promptTools.init = (wrapper) => {
@@ -65,12 +81,22 @@ PromptsBrowser.promptTools.onElementClick = (e) => {
     const currPrompt = state.promptToolsId;
     const clickPrompt = e.currentTarget.dataset.prompt;
     if(!currPrompt || !clickPrompt) return;
+    const replaceMode = state.toggledButtons.includes("tools_replaceMode");
     let activePrompts = PromptsBrowser.getCurrentPrompts();
+    let activePrompt = undefined;
 
-    const targetPrompt = united.find(item => item.id === clickPrompt);
-    if(!targetPrompt) return;
+    let selectedPrompt = activePrompts.find(item => item.id === clickPrompt);
+    if(!selectedPrompt) {
+        selectedPrompt = united.find(item => item.id === clickPrompt);
+    }
+    if(!selectedPrompt) return;
 
-    const currTargetIndex = activePrompts.findIndex(item => item.id === currPrompt);
+    const currTargetIndex = activePrompts.findIndex(item => {
+        if(item.id === currPrompt) {
+            activePrompt = item;
+            return true;
+        }
+    });
     const clickTargetIndex = activePrompts.findIndex(item => item.id === clickPrompt);
     if(currTargetIndex === -1) return;
 
@@ -94,15 +120,28 @@ PromptsBrowser.promptTools.onElementClick = (e) => {
         return;
     }
 
-    const newItem = {id: clickPrompt, weight: DEFAULT_PROMPT_WEIGHT, isExternalNetwork: targetPrompt.isExternalNetwork};
+    const newItem = {
+        id: clickPrompt,
+        weight: DEFAULT_PROMPT_WEIGHT,
+        isExternalNetwork: selectedPrompt.isExternalNetwork
+    };
+
+    let action = "";
 
     if(e.shiftKey) {
-        activePrompts.splice(currTargetIndex, 0, newItem);
-
+        state.editingPrompt = clickPrompt;
+        PromptsBrowser.promptEdit.update();
     } else {
+        if(replaceMode) action = e.altKey ? "add" : "replace";
+        else action = e.altKey ? "replace" : "add";
+    }
+
+    if(action === "add") activePrompts.splice(currTargetIndex, 0, newItem);
+    else if (action === "replace") {
+        if(activePrompt && activePrompt.weight !== undefined) newItem.weight = activePrompt.weight;
+
         activePrompts[currTargetIndex] = newItem;
         state.promptToolsId = clickPrompt;
-
     }
 
     PromptsBrowser.promptTools.update();
@@ -110,28 +149,47 @@ PromptsBrowser.promptTools.onElementClick = (e) => {
 }
 
 PromptsBrowser.promptTools.showCurrentPrompts = (wrapper) => {
-    const {state} = PromptsBrowser;
+    const {state, data, makeElement, makeSelect} = PromptsBrowser;
     const {currentFilters} = PromptsBrowser.promptTools;
     const {checkFilter} = PromptsBrowser.promptsSimpleFilter;
-    const activePrompts = PromptsBrowser.getCurrentPrompts();
+    const {sorting} = currentFilters;
+    const {unitedList} = data;
+    const activePrompts = [...PromptsBrowser.getCurrentPrompts()];
     if(!state.promptToolsId) return;
 
-    const setupContainer = document.createElement("div");
-    const currentPromptsContainer = document.createElement("div");
+    const setupContainer = makeElement({element: "div", className: "PBE_List PBE_toolsSetup"});
+    const currentPromptsContainer = makeElement({element: "div", className: "PBE_windowCurrentList PBE_Scrollbar"});
+    
+    //setup fieldset
+    const setupField = makeElement({element: "fieldset", className: "PBE_fieldset"});
+    const setupLegend = makeElement({element: "legend", content: "Setup"});
 
-    const showTags = document.createElement("div");
-    const showCategory = document.createElement("div");
-    const showName = document.createElement("div");
+    const showAll = makeElement({element: "div", content: "Show All", className: "PBE_toggleButton"});
+    const replaceMode = makeElement({element: "div", content: "Replace mode", className: "PBE_toggleButton"});
+    showAll.dataset.id = "tools_showAll";
+    replaceMode.dataset.id = "tools_replaceMode";
 
-    setupContainer.className = "PBE_List PBE_toolsSetup";
-    currentPromptsContainer.className = "PBE_windowCurrentList PBE_Scrollbar";
-    showTags.className = "PBE_toggleButton";
-    showCategory.className = "PBE_toggleButton";
-    showName.className = "PBE_toggleButton";
+    if(state.toggledButtons.includes("tools_showAll")) showAll.classList.add("PBE_toggledButton");
+    if(state.toggledButtons.includes("tools_replaceMode")) replaceMode.classList.add("PBE_toggledButton");
+    showAll.addEventListener("click", PromptsBrowser.promptTools.onToggleButton);
+    replaceMode.addEventListener("click", PromptsBrowser.promptTools.onToggleButton);
 
-    showTags.innerText = "Tags";
-    showCategory.innerText = "Category";
-    showName.innerText = "Name";
+    setupField.appendChild(setupLegend);
+    setupField.appendChild(showAll);
+    setupField.appendChild(replaceMode);
+
+    //similarity fieldset
+    const simField = makeElement({element: "fieldset", className: "PBE_fieldset"});
+    const simLegend = makeElement({element: "legend", content: "Similarity by:"});
+
+    const showTags = makeElement({element: "div", content: "Tags", className: "PBE_toggleButton"});
+    const showCategory = makeElement({element: "div", content: "Category", className: "PBE_toggleButton"});
+    const showName = makeElement({element: "div", content: "Name", className: "PBE_toggleButton"});
+
+    simField.appendChild(simLegend);
+    simField.appendChild(showTags);
+    simField.appendChild(showCategory);
+    simField.appendChild(showName);
 
     showTags.dataset.id = "tools_tags";
     showCategory.dataset.id = "tools_category";
@@ -140,15 +198,48 @@ PromptsBrowser.promptTools.showCurrentPrompts = (wrapper) => {
     if(state.toggledButtons.includes("tools_tags")) showTags.classList.add("PBE_toggledButton");
     if(state.toggledButtons.includes("tools_category")) showCategory.classList.add("PBE_toggledButton");
     if(state.toggledButtons.includes("tools_name")) showName.classList.add("PBE_toggledButton");
+    
 
     showTags.addEventListener("click", PromptsBrowser.promptTools.onToggleButton);
     showCategory.addEventListener("click", PromptsBrowser.promptTools.onToggleButton);
     showName.addEventListener("click", PromptsBrowser.promptTools.onToggleButton);
 
+    switch(sorting) {
+
+        case "alph":
+            //sorting prompts alphabetically
+            activePrompts.sort( (A, B) => {
+                if(A.id.toLowerCase() < B.id.toLowerCase()) return -1;
+                if(A.id.toLowerCase() > B.id.toLowerCase()) return 1;
+
+                return 0;
+            });
+            break;
+
+        case "alphReversed":
+            //sorting prompts alphabetically in reverse orderd
+            activePrompts.sort( (A, B) => {
+                if(A.id.toLowerCase() < B.id.toLowerCase()) return 1;
+                if(A.id.toLowerCase() > B.id.toLowerCase()) return -1;
+
+                return 0;
+            });
+            break;
+
+        case "weight":
+            //sorting prompts based on their weight
+            activePrompts.sort( (A, B) => {
+                if(A.weight < B.weight) return 1;
+                if(A.weight > B.weight) return -1;
+
+                return 0;
+            });
+    }
+
     for(const i in activePrompts) {
         const currPrompt = activePrompts[i];
         if(!currPrompt || currPrompt.isSyntax) continue;
-        if(!checkFilter(currPrompt.id, currentFilters)) continue;
+        if(unitedList[currPrompt.id] && !checkFilter(currPrompt.id, currentFilters)) continue;
         const isShadowed = currPrompt.id !== state.promptToolsId;
 
         promptElement = PromptsBrowser.showPromptItem({id: currPrompt.id, isExternalNetwork: currPrompt.isExternalNetwork}, {isShadowed});
@@ -164,9 +255,8 @@ PromptsBrowser.promptTools.showCurrentPrompts = (wrapper) => {
         e.preventDefault();
     })
 
-    setupContainer.appendChild(showTags);
-    setupContainer.appendChild(showCategory);
-    setupContainer.appendChild(showName);
+    setupContainer.appendChild(setupField);
+    setupContainer.appendChild(simField);
 
     wrapper.appendChild(currentPromptsContainer);
     wrapper.appendChild(setupContainer);
@@ -176,34 +266,41 @@ PromptsBrowser.promptTools.showPossiblePromptswrapper = (wrapper) => {
     const {replaceAllRegex} = window.PromptsBrowser;
     const {united} = PromptsBrowser.data;
     const {state} = PromptsBrowser;
+    const {maxCardsShown = 1000} = state.config;
     const {possibleFilters} = PromptsBrowser.promptTools;
+    const {sorting} = possibleFilters;
     const {checkFilter} = PromptsBrowser.promptsSimpleFilter;
-    const prompt = state.promptToolsId;
+    const promptId = state.promptToolsId;
     const activePrompts = PromptsBrowser.getCurrentPrompts();
-    if(!prompt) return;
+    const showAll = state.toggledButtons.includes("tools_showAll");
+    if(!promptId) return;
     let targetTags = [];
     let targetCategories = [];
-    let targetNameWords = replaceAllRegex(prompt.toLowerCase(), "_", " ").split(" ");
+    let targetNameWords = replaceAllRegex(promptId.toLowerCase(), "_", " ").split(" ");
+    let shownItems = 0;
 
-    const targetPromptItem = united.find(item => item.id === prompt);
+    const targetPromptItem = united.find(item => item.id === promptId);
     if(targetPromptItem) {
         targetTags = targetPromptItem.tags || [];
         targetCategories = targetPromptItem.category || [];
     }
 
-    const nameArr = prompt.split(" ");
+    const nameArr = promptId.split(" ");
     const possiblePrompts = [];
     const addedIds = [];
 
-    united.forEach(item => {
+    for(const index in united) {
+        const item = united[index];
+        if(shownItems > maxCardsShown) break;
+
         const {id, tags, category} = item;
 
-        if(!checkFilter(id, possibleFilters)) return;
+        if(!checkFilter(id, possibleFilters)) continue;
 
         //similarity index based on the same tags, categories and words used in the prompt name
         let simIndex = 0;
 
-        if(id === prompt) return;
+        if(id === promptId) continue;
 
         let nameWords = replaceAllRegex(id.toLowerCase(), "_", " ").split(" ");
 
@@ -215,13 +312,18 @@ PromptsBrowser.promptTools.showPossiblePromptswrapper = (wrapper) => {
         
         if(state.toggledButtons.includes("tools_name"))
             targetNameWords.forEach(wordItem => {if(nameWords.includes(wordItem)) simIndex++});
-        
-        
+
+        if(showAll) {
+            possiblePrompts.push({...item, simIndex});
+            shownItems++;
+            continue
+        }
 
         if(state.toggledButtons.includes("tools_tags") && targetTags.length) {
             targetTags.some(targetTag => {
                 if(tags.includes(targetTag)) {
                     possiblePrompts.push({...item, simIndex});
+                    shownItems++;
 
                     return true;
                 }
@@ -232,6 +334,7 @@ PromptsBrowser.promptTools.showPossiblePromptswrapper = (wrapper) => {
             targetCategories.some(targetCategory => {
                 if(category.includes(targetCategory)) {
                     possiblePrompts.push({...item, simIndex});
+                    shownItems++;
 
                     return true;
                 }
@@ -247,20 +350,52 @@ PromptsBrowser.promptTools.showPossiblePromptswrapper = (wrapper) => {
                     
                     if( itemWord.toLowerCase().includes(word.toLowerCase()) ) {
                         possiblePrompts.push({...item, simIndex});
+                        shownItems++;
+
                         break wordLoop;
                     }
                 }
             }
         }
-    });
+    };
 
-    //sorting possible prompts based on their similarity to the selected prompt
-    possiblePrompts.sort( (A, B) => {
-        if(A.simIndex < B.simIndex) return 1;
-        if(A.simIndex > B.simIndex) return -1;
+    switch(sorting) {
 
-        return 0;
-    });
+        case "__none": break;
+
+        case "alph":
+            //sorting possible prompts alphabetically
+            possiblePrompts.sort( (A, B) => {
+                if(A.id.toLowerCase() < B.id.toLowerCase()) return -1;
+                if(A.id.toLowerCase() > B.id.toLowerCase()) return 1;
+
+                return 0;
+            });
+            break;
+
+        case "alphReversed":
+            //sorting possible prompts alphabetically in reverse orderd
+            possiblePrompts.sort( (A, B) => {
+                if(A.id.toLowerCase() < B.id.toLowerCase()) return 1;
+                if(A.id.toLowerCase() > B.id.toLowerCase()) return -1;
+
+                return 0;
+            });
+            break;
+
+        default:
+        case "sim":
+            //sorting possible prompts based on their similarity to the selected prompt
+            possiblePrompts.sort( (A, B) => {
+                if(A.simIndex < B.simIndex) return 1;
+                if(A.simIndex > B.simIndex) return -1;
+
+                if(A.id.toLowerCase() < B.id.toLowerCase()) return -1;
+                if(A.id.toLowerCase() > B.id.toLowerCase()) return 1;
+
+                return 0;
+            });
+    }
 
     function addElement(item) {
         if(addedIds.includes(item.id)) return;
@@ -281,6 +416,15 @@ PromptsBrowser.promptTools.update = () => {
 
     if(!wrapper || !state.promptToolsId) return;
     PromptsBrowser.onCloseActiveWindow = PromptsBrowser.promptTools.onCloseWindow;
+
+    let currScrollState = 0;
+
+    let prevPromptContainer = wrapper.querySelector(".PBE_windowCurrentList");
+    if(prevPromptContainer) {
+        currScrollState = prevPromptContainer.scrollLeft;
+        prevPromptContainer = undefined;
+    }
+
     wrapper.innerHTML = "";
     wrapper.style.display = "flex";
 
@@ -322,4 +466,10 @@ PromptsBrowser.promptTools.update = () => {
     wrapper.appendChild(possiblePromptsBlock);
 
     wrapper.appendChild(footerBlock);
+
+    let currentPromptsContainer = currentPromptsBlock.querySelector(".PBE_windowCurrentList");
+    if(currentPromptsContainer) {
+        currentPromptsContainer.scrollTo(currScrollState, 0);
+        currentPromptsContainer = undefined;
+    }
 }

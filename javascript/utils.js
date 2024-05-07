@@ -46,6 +46,7 @@ window.PromptsBrowser.makeFileNameSafe = function(fileName) {
  */
 window.PromptsBrowser.normalizePrompt = function(prompt) {
     const {state} = PromptsBrowser;
+    const {unitedList} = PromptsBrowser.data;
     const {config} = state;
     const {REGX_SINGLE_UNDERSCORE} = window.PromptsBrowser.regex;
 
@@ -53,6 +54,9 @@ window.PromptsBrowser.normalizePrompt = function(prompt) {
 
     prompt = prompt.trim();
     if(!prompt) return prompt;
+
+    //do not modify saved prompts
+    if(unitedList[prompt]) return prompt;
 
     //Skip external networks prompts.
     if(prompt.startsWith("<") && prompt.endsWith(">")) return prompt;

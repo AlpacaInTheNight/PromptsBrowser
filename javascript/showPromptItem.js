@@ -2,9 +2,10 @@
 if(!window.PromptsBrowser) window.PromptsBrowser = {};
 
 PromptsBrowser.onPromptCardHover = (e) => {
+    const {splashCardWidth = 200, splashCardHeight = 300} = PromptsBrowser.state.config;
     const splash = e.currentTarget.querySelector(".PBE_promptElementSplash");
     if(!splash) return;
-    const BIG_CARD_HEIGHT = 300;
+    const BIG_CARD_HEIGHT = splashCardHeight;
 
     splash.style.display = "";
     const position = e.currentTarget.getBoundingClientRect();
@@ -22,6 +23,7 @@ PromptsBrowser.onPromptCardHover = (e) => {
  */
 PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
     const {replaceAllRegex} = window.PromptsBrowser;
+    const {cardWidth = 50, cardHeight = 100, splashCardWidth = 200, splashCardHeight = 300} = PromptsBrowser.state.config;
     const {DEFAULT_PROMPT_WEIGHT} = PromptsBrowser.params;
     const {index = 0, isShadowed = false, noSplash = false, url} = options;
     const {id = "", weight = DEFAULT_PROMPT_WEIGHT, isExternalNetwork = false, isSyntax = false} = promptItem;
@@ -37,6 +39,9 @@ PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
     if(isExternalNetwork) promptElement.classList.add("PBE_externalNetwork");
     if(isShadowed) promptElement.classList.add("PBE_shadowedElement");
     if(isSyntax) promptElement.classList.add("PBE_syntaxElement");
+
+    promptElement.style.width = `${cardWidth}px`;
+    promptElement.style.height = `${cardHeight}px`;
 
     let promptName = id;
 
@@ -93,6 +98,10 @@ PromptsBrowser.showPromptItem = (promptItem, options = {}) => {
         splashElement.className = "PBE_promptElementSplash PBE_currentElement";
         splashElement.style.backgroundImage = imageSrc;
         splashElement.innerText = promptName;
+
+        splashElement.style.width = `${splashCardWidth}px`;
+        splashElement.style.height = `${splashCardHeight}px`;
+        splashElement.style.marginTop = `${cardHeight}px`;
 
         if(weight !== DEFAULT_PROMPT_WEIGHT) {
             splashElement.appendChild(weightContainer.cloneNode(true));

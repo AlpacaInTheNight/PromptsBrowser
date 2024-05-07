@@ -68,6 +68,10 @@
     font-family: var(--font) !important;
 }
 
+select.PBE_generalInput {
+    cursor: pointer;
+}
+
 .PBE_generalInput::placeholder {
     color: var(--input-placeholder-color) !important;
 }
@@ -189,7 +193,7 @@
 .PBE_fieldset > input,
 .PBE_fieldset > select {
     margin: 0 5px;
-    height: 30px;
+    /* height: 30px; */
 }
 
 .PBE_dataBlock {
@@ -212,22 +216,25 @@
 }
 
 .PBE_toggleButton {
-    outline: 4px double var(--primary-300);
-    cursor: pointer;
-    height: 40px;
     display: flex;
-    justify-content: center;
     align-items: center;
-    padding: 0 10px;
-    color: var(--primary-300);
-    text-shadow: 1px 1px 1px black;
+    transition: var(--button-transition);
+    cursor: pointer;
+    box-shadow: var(--checkbox-label-shadow);
+    border: var(--checkbox-label-border-width) solid var(--checkbox-label-border-color);
+    border-radius: var(--button-small-radius);
+    background: var(--checkbox-label-background-fill);
+    padding: var(--checkbox-label-padding);
+    color: var(--checkbox-label-text-color);
+    font-weight: var(--checkbox-label-text-weight);
+    font-size: var(--checkbox-label-text-size);
+    line-height: var(--line-md);
     font-family: var(--font);
-    font-weight: bold;
-    font-size: 16px;
 }
 
 .PBE_toggledButton {
-    outline: 4px solid var(--primary-300);
+    background: var(--checkbox-label-background-fill-selected);
+    color: var(--checkbox-label-text-color-selected);
 }
 
 .PBE_swap {
@@ -278,6 +285,7 @@
     margin: 10px 10px 0 10px;
     flex-grow: 1;
     overflow-y: hidden;
+    width: 100%;
 }
 
 /* Windows end*/
@@ -471,7 +479,7 @@
 }
 
 .PBE_syntaxElement {
-    width: 20px;
+    width: 20px !important;
     font-size: 16px;
     justify-content: center;
     align-items: center;
@@ -558,7 +566,7 @@
     cursor: pointer;
 
     box-shadow: 0 0 10px 5px var(--primary-500);
-    transform: scale(2);
+    /* transform: scale(2); */
     transform-origin: top left;
     pointer-events: none;
 
@@ -590,7 +598,7 @@
 }
 
 .PBE_actionButton {
-    width: 120px;
+    width: 110px;
     height: 20px;
     min-width: auto !important;
     top: -0.75em;
@@ -615,24 +623,29 @@
     color: var(--button-primary-text-color-hover) !important;
 }
 
+.PBE_saveStylesButton {
+    position: absolute;
+    margin-left: 20px !important
+}
+
 .PBE_stylesButton {
     position: absolute;
-    margin-left: 25px !important
+    margin-left: 140px !important
 }
 
 .PBE_addUnknownButton {
     position: absolute;
-    margin-left: 155px !important
+    margin-left: 260px !important
 }
 
 .PBE_normalizeButton {
     position: absolute;
-    margin-left: 285px !important
+    margin-left: 380px !important
 }
 
 .PBE_normalizeButton_readonly {
     position: absolute;
-    margin-left: 155px !important
+    margin-left: 140px !important
 }
 
 .PBE_savePromptPreview {
@@ -797,8 +810,11 @@
     width: 60px;
     background: var(--primary-500);
     margin-right: 10px;
+    max-height: 200px;
     flex-shrink: 0;
     background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     opacity: 0.5;
     user-select: none;
 }
@@ -818,7 +834,7 @@
 }
 
 .PBE_detailedItemBottom {
-    flex-grow: 1;
+    flex-grow: 0;
     display: flex;
     flex-direction: row;
 }
@@ -832,6 +848,8 @@
 .PBE_detailedItemComment {
     padding: 0 10px;
     color: var(--body-text-color);
+    max-height: 200px;
+    overflow: auto;
 }
 
 .PBE_detailedItemTags,
@@ -982,6 +1000,13 @@
     font-family: var(--font);
 }
 
+.PBE_setupWindowTopBlock {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 5px;
+    width: 100%;
+}
+
 .PBE_setupWindowStatus {
     font-family: sans-serif;
     color: var(--block-info-text-color);
@@ -1009,7 +1034,7 @@
 }
 
 .PBE_stylesHeader {
-    height: 110px;
+    /* height: 110px; */
     flex-wrap: nowrap;
     flex-shrink: 0;
 }
@@ -1039,7 +1064,7 @@
     flex-wrap: nowrap;
     /* background-color: rgba(50, 100, 200, 0.5); */
     margin: 10px 0;
-    background-size: cover;
+    background-size: cover !important;
     background-position: center;
     background: var(--secondary-900);
 }
@@ -1059,6 +1084,20 @@
     font-size: 20px;
     color: var(--body-text-color);
     font-family: var(--font);
+}
+
+.PBE_styleItemMetaInfo {
+    padding: 0.5em;
+    font-size: 14px;
+    color: var(--body-text-color);
+    font-family: var(--font);
+    background-color: rgba(0,0,0, 0.5);
+}
+
+.PBE_styleMetaField {
+    font-weight: bold;
+    font-style: italic;
+    color: var(--body-text-color);
 }
 
 .PBE_styleItemContent {

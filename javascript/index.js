@@ -15,18 +15,41 @@ PromptsBrowser.state = {
         spaceMode: "space",
         showPromptIndex: false,
 
+        cardWidth: 50,
+        cardHeight: 100,
+        splashCardWidth: 200,
+        splashCardHeight: 300,
+
+        rowsInKnownCards: 3,
+        maxCardsShown: 1000,
+
+        resizeThumbnails: true,
+        resizeThumbnailsMaxWidth: 300,
+        resizeThumbnailsMaxHeight: 300,
+        resizeThumbnailsFormat: "JPG",
+
         /**
          * If true, will enable extended syntax element support for prompts used by some addons.
          */
         supportExtendedSyntax: true,
 
         saveStyleMeta: {
+            positive: true,
             seed: false,
             size: false,
             quality: false,
             sampler: false,
             negative: false,
-        }
+        },
+
+        updateStyleMeta: {
+            positive: true,
+            seed: false,
+            size: false,
+            quality: false,
+            sampler: false,
+            negative: false,
+        },
     },
 
     showControlPanel: true,
@@ -53,8 +76,9 @@ PromptsBrowser.state = {
     editTargetCollection: undefined,
     editItem: undefined,
     showStylesWindow: undefined,
+    showSaveStyleWindow: undefined,
     showScriberWindow: undefined,
-    toggledButtons: ["tools_tags", "tools_category", "tools_name", "new_in_all_collections", "styles_simplified_view"],
+    toggledButtons: ["tools_tags", "tools_category", "tools_name", "tools_replaceMode", "new_in_all_collections", "styles_simplified_view"],
     selectedNewPrompts: [],
     selectedCollectionPrompts: [],
     promptsFilter: {},
@@ -219,6 +243,7 @@ PromptsBrowser.utils.collectionHavePreview = (prompt, collectionId) => {
 
 PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionId) => {
     const {EMPTY_CARD_GRADIENT, NEW_CARD_GRADIENT} = PromptsBrowser.params;
+    const {normalizePrompt} = window.PromptsBrowser;
     if(!prompt) return NEW_CARD_GRADIENT;
     const apiUrl = PromptsBrowser.db.getAPIurl("promptImage");
     
@@ -226,7 +251,15 @@ PromptsBrowser.utils.getPromptPreviewURL = (prompt, collectionId) => {
     const {state} = PromptsBrowser;
     let fileExtension = "";
 
-    const targetPrompt = united.find(item => item.id.toLowerCase() === prompt.toLowerCase());
+    let targetPrompt = united.find(item => item.id.toLowerCase() === prompt.toLowerCase());
+
+    //if no target prompt found - searching for the normalized version of the target prompt
+    if(!targetPrompt) {
+        const normalizedPrompt = normalizePrompt(prompt);
+        targetPrompt = united.find(item => item.id.toLowerCase() === normalizedPrompt.toLowerCase());
+    }
+
+    //if no prompt found - returning New Card image.
     if(!targetPrompt || !targetPrompt.knownPreviews) return NEW_CARD_GRADIENT;
 
     if(!collectionId && state.filterCollection) collectionId = state.filterCollection;
@@ -409,7 +442,10 @@ PromptsBrowser.db.savePromptPreview = (callUpdate = true) => {
         PromptsBrowser.data.original[savePreviewCollection].push(originalItem);
     }
 
-    originalItem.previewImage = imageExtension;
+    if(state.config.resizeThumbnails && state.config.resizeThumbnailsFormat) {
+        originalItem.previewImage = state.config.resizeThumbnailsFormat.toLowerCase()
+
+    } else originalItem.previewImage = imageExtension;
 
     (async () => {
 
@@ -433,6 +469,40 @@ PromptsBrowser.db.savePromptPreview = (callUpdate = true) => {
             PromptsBrowser.currentPrompts.update(true);
         }
 
+    })();
+}
+
+PromptsBrowser.db.onRenameStyle = (collection, oldName, newName) => {
+    const {state, data} = PromptsBrowser;
+
+    if(!collection || !oldName || !newName) return;
+
+    const url = PromptsBrowser.db.getAPIurl("renameStyle");
+
+    (async () => {
+        const saveData = {oldName, newName, collection};
+
+        const rawResponse = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(saveData)
+        });
+
+        const targetStylesCollection = data.styles[collection];
+        if(targetStylesCollection) {
+            targetStylesCollection.some(item => {
+                if(item.name === oldName) {
+                    item.name = newName;
+    
+                    return true;
+                }
+            });
+        }
+
+        PromptsBrowser.styles.update();
     })();
 }
 
@@ -489,7 +559,10 @@ PromptsBrowser.db.onUpdateStylePreview = (e) => {
         if(targetStylesCollection) {
             targetStylesCollection.some(item => {
                 if(item.name === styleId) {
-                    item.previewImage = imageExtension;
+                    if(state.config.resizeThumbnails && state.config.resizeThumbnailsFormat) {
+                        item.previewImage = state.config.resizeThumbnailsFormat.toLowerCase()
+                
+                    } else item.previewImage = imageExtension;
     
                     return true;
                 }
@@ -572,7 +645,7 @@ PromptsBrowser.onDocumentKey = (e) => {
     if(!hold) PromptsBrowser.onCloseActiveWindow = undefined;
 }
 
-PromptsBrowser.loadConfig = () => {
+PromptsBrowser.loadUIConfig = () => {
     const {state} = PromptsBrowser;
 
     const lsShowViews = localStorage.getItem("PBE_showViews");
@@ -581,6 +654,22 @@ PromptsBrowser.loadConfig = () => {
     const showControlPanel = localStorage.getItem("showControlPanel");
     if(showControlPanel === "false") state.showControlPanel = false;
 }
+
+/**
+ * Loading extension configuration from the local storage
+ */
+PromptsBrowser.loadConfig = () => {
+    const {state} = PromptsBrowser;
+
+    //getting config from local storage
+    const savedConfigString = localStorage.getItem("PBE_config");
+    if(savedConfigString) {
+        const savedConfig = JSON.parse(savedConfigString);
+        if(savedConfig) state.config = savedConfig;
+    }
+}
+
+PromptsBrowser._textAreaSynchronise = () => PromptsBrowser.synchroniseCurrentPrompts(true, false);
 
 PromptsBrowser.initPromptBrowser = (tries = 0) => {
     const {state} = PromptsBrowser;
@@ -654,14 +743,15 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
             if(textArea && !textArea.dataset.pbelistenerready) {
                 textArea.dataset.pbelistenerready = "true";
 
-                textArea.removeEventListener("input", PromptsBrowser.synchroniseCurrentPrompts);
-                textArea.addEventListener("input", PromptsBrowser.synchroniseCurrentPrompts);
+                textArea.removeEventListener("input", PromptsBrowser._textAreaSynchronise);
+                textArea.addEventListener("input", PromptsBrowser._textAreaSynchronise);
             }
 
             PromptsBrowser.promptWordTooltip.init(positivePrompts, containerId);
             PromptsBrowser.controlPanel.init(promptContainer, containerId);
             PromptsBrowser.knownPrompts.init(promptContainer, positivePrompts, containerId);
             PromptsBrowser.currentPrompts.init(promptContainer, containerId);
+            PromptsBrowser.saveStyle.initButton(positivePrompts);
             PromptsBrowser.styles.initButton(positivePrompts);
             PromptsBrowser.promptScribe.initButton(positivePrompts);
             PromptsBrowser.currentPrompts.initButton(positivePrompts);
@@ -696,6 +786,7 @@ PromptsBrowser.initPromptBrowser = (tries = 0) => {
     PromptsBrowser.promptEdit.init(mainContainer);
     PromptsBrowser.promptTools.init(mainContainer);
     PromptsBrowser.collectionTools.init(mainContainer);
+    PromptsBrowser.saveStyle.init(mainContainer);
     PromptsBrowser.styles.init(mainContainer);
     PromptsBrowser.promptScribe.init(mainContainer);
 
@@ -758,24 +849,27 @@ PromptsBrowser.db.updateMixedList = () => {
     PromptsBrowser.data.unitedList = unitedList;
 }
 
-PromptsBrowser.db.getAPIurl = (endpoint) => {
-    const DEV_SERVER = "http://127.0.0.1:3000/";
-    const USER_SERVER = window.location.origin + "/promptBrowser/";
-
-    //@TODO - add some kind of quick switch between servers
-    const server = USER_SERVER;
+PromptsBrowser.db.getAPIurl = (endpoint, root = false) => {
+    const server = root ? window.location.origin + "/" : window.location.origin + "/promptBrowser/";
 
     return server + endpoint;
 }
 
-PromptsBrowser.db.loadDatabase = () => {
+PromptsBrowser.db.loadDatabase = async () => {
+    const {state} = PromptsBrowser;
     const url = PromptsBrowser.db.getAPIurl("getPrompts")
     
-    fetch(url, {
+    await fetch(url, {
         method: 'GET',
     }).then(data => data.json()).then(res => {
         if(!res || !res.prompts) return; //TODO: process server error here
         const {prompts, styles, readonly = false} = res;
+
+        if(res.config) {
+            for(const i in res.config) {
+                state.config[i] = res.config[i];
+            }
+        }
 
         PromptsBrowser.data.styles = styles;
         PromptsBrowser.data.original = prompts;
@@ -785,8 +879,10 @@ PromptsBrowser.db.loadDatabase = () => {
     });
 }
 
+PromptsBrowser.loadConfig();
+
 document.addEventListener('DOMContentLoaded', function() {
-    PromptsBrowser.loadConfig();
+    PromptsBrowser.loadUIConfig();
 
     PromptsBrowser.db.loadDatabase();
     

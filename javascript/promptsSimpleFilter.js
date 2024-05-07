@@ -50,7 +50,7 @@ PromptsBrowser.promptsSimpleFilter.show = (wrapper, filters = {}, callback) => {
     if(!wrapper || !callback) return;
     const {state, data, makeElement, makeSelect} = PromptsBrowser;
     const {categories} = data;
-    const {collection = "", category = "", tags = [], name = ""} = filters;
+    const {collection = "", category = "", tags = [], name = "", sorting = "", sortingOptions} = filters;
 
     const filtersContainer = makeElement({element: "div", className: "PBE_filtersContainer"});
 
@@ -125,6 +125,23 @@ PromptsBrowser.promptsSimpleFilter.show = (wrapper, filters = {}, callback) => {
     filtersContainer.appendChild(categorySelector);
     filtersContainer.appendChild(tagsInput);
     filtersContainer.appendChild(nameInput);
+
+    //sorting selector
+    if(sortingOptions) {
+        const sortingSelector = makeSelect({
+            className: "PBE_generalInput PBE_select",
+            value: sorting,
+            options: sortingOptions,
+            onChange: e => {
+                filters.sorting = e.currentTarget.value;
+                callback();
+            }
+        });
+
+        filtersContainer.appendChild(sortingSelector);
+    }
+
+    
 
     wrapper.appendChild(filtersContainer);
 }

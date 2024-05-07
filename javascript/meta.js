@@ -1,7 +1,7 @@
 
 if(!window.PromptsBrowser) window.PromptsBrowser = {};
 PromptsBrowser.meta = {
-    version: "1.1.0.002",
+    version: "1.2.0",
     readonly: false,
 };
 

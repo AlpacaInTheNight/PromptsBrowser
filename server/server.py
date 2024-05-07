@@ -82,6 +82,7 @@ def initExtension():
 
 initExtension()
 
+#Old server. Not used anymore. See FastAPI one in the scripts/init.py
 class RESTServer(http.server.SimpleHTTPRequestHandler):
 
     def do_OPTIONS(self):

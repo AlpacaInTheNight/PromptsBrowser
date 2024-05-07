@@ -24,7 +24,7 @@
 
 .PBE_toolsHeader {
     z-index: 5;
-    flex-wrap: nowrap;
+    flex-direction: column !important;
 }
 
 .PBE_toolsSetup {

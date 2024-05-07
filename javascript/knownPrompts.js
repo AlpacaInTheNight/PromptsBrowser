@@ -386,9 +386,10 @@ PromptsBrowser.knownPrompts.update = (params) => {
     const {readonly} = PromptsBrowser.meta;
     const {united} = PromptsBrowser.data;
     const {state, makeElement} = PromptsBrowser;
-    const {showPromptIndex = false} = state.config;
+    const {cardWidth = 50, cardHeight = 100, showPromptIndex = false, rowsInKnownCards = 3, maxCardsShown = 1000} = state.config;
     const wrapper = PromptsBrowser.DOMCache.containers[state.currentContainer].promptsCatalogue;
     let scrollState = 0;
+    let shownItems = 0;
 
     if(wrapper) {
         let prevPromptContainer = wrapper.querySelector(".PBE_promptsCatalogueContent");
@@ -400,9 +401,6 @@ PromptsBrowser.knownPrompts.update = (params) => {
 
     wrapper.innerHTML = "";
 
-    const MAX_ITEMS_TO_DISPLAY = 1000;
-    let shownItems = 0;
-
     if(!united) {
         PromptsBrowser.utils.log("No prompt data to show");
         return;
@@ -412,6 +410,7 @@ PromptsBrowser.knownPrompts.update = (params) => {
 
     const proptsContainer = document.createElement("div");
     proptsContainer.className = "PBE_promptsCatalogueContent PBE_Scrollbar";
+    proptsContainer.style.maxHeight = `${cardHeight * rowsInKnownCards}px`;
 
     let dataArr = [];
 
@@ -456,28 +455,19 @@ PromptsBrowser.knownPrompts.update = (params) => {
         });
 
         addRandom.addEventListener("click", PromptsBrowser.knownPrompts.onAddRandom);
+        addRandom.style.width = `${cardWidth}px`;
+        addRandom.style.height = `${cardHeight}px`;
 
         proptsContainer.appendChild(addRandom);
     }
 
     for(const index in dataArr) {
         const prompt = dataArr[index];
-        const {id} = prompt;
-        if(shownItems > MAX_ITEMS_TO_DISPLAY) break;
+        if(shownItems > maxCardsShown) break;
 
         if(!PromptsBrowser.knownPrompts.checkFilter(prompt)) continue;
-        
-        const promptElement = document.createElement("div");
-        promptElement.className = "PBE_promptElement";
-        promptElement.style.backgroundImage = PromptsBrowser.utils.getPromptPreviewURL(id, state.filterCollection);
-        promptElement.dataset.prompt = id;
-        promptElement.draggable = "true";
-        if(prompt.isExternalNetwork) promptElement.classList.add("PBE_externalNetwork");
 
-        const splashElement = document.createElement("div");
-        splashElement.className = "PBE_promptElementSplash";
-        splashElement.style.backgroundImage = PromptsBrowser.utils.getPromptPreviewURL(id, state.filterCollection);
-        splashElement.innerText = id;
+        const promptElement = PromptsBrowser.showPromptItem(prompt);
 
         if(showPromptIndex && state.filterCollection) {
             promptElement.appendChild(makeElement({
@@ -492,9 +482,6 @@ PromptsBrowser.knownPrompts.update = (params) => {
             }));
         }
 
-        promptElement.appendChild(splashElement);
-        promptElement.innerHTML += id;
-
         if(!readonly) {
             promptElement.addEventListener("dragstart", PromptsBrowser.knownPrompts.onDragStart);
             promptElement.addEventListener("dragover", PromptsBrowser.knownPrompts.onDragOver);
@@ -504,7 +491,6 @@ PromptsBrowser.knownPrompts.update = (params) => {
         }
 
         promptElement.addEventListener("click", PromptsBrowser.knownPrompts.onPromptClick);
-        promptElement.addEventListener("mouseover", PromptsBrowser.onPromptCardHover);
 
         proptsContainer.appendChild(promptElement);
         shownItems++;
