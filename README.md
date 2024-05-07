@@ -10,9 +10,10 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 1. [Styles](#styles)
 1. [Collection editor](#collection-editor)
 1. [Prompt editor](#prompt-editor)
-1. [Setup window](#setup-window)
+1. [New Collection window](#new-collection-window)
 1. [Autocomplete](#autocomplete)
 1. [Normalize](#normalize)
+1. [Setup window](#setup-window)
 1. [Collections database](#collections-database)
 1. [Credits](#credits)
 
@@ -127,7 +128,7 @@ This extension modifies the DOM directly, without working through any API for su
 
 4. Prompts will be sorted by their similarity to the selected prompt according to the selected parameters (tags, categories and name).
 
-5. If `Replace mode` is active, than clicking on a promt from the list of similar promts will replace the selected promt with the target one. If it is not active - will add the target promt to the active promts (keeping the selected promt).
+5. If `Replace mode` is active, than clicking on a prompt from the list of similar prompts will replace the selected prompt with the target one. If it is not active - will add the target prompt to the active promts (keeping the selected prompt).
 
 6. `Shift + click`: opens prompt edition window.
 
@@ -226,11 +227,13 @@ This extension modifies the DOM directly, without working through any API for su
 1. Press `Save` to save your changes and close window or `cancel` to close window without saving.
 
 
-### Setup window
+### New Collection window
 
 ![](img/setup.jpg)
 
-1. Click on `Setup` button at the top menu to open Setup window.
+1. Click on `New Collection` button at the top menu to open New Collection window.
+
+1. Previously, the extension settings window was also located here. But now all extension settings are located in the `Prompts Browser` category of WebUI settings.
 
 1. `New prompts collections` - will open creation of the new prompts collection.
 
@@ -240,6 +243,30 @@ This extension modifies the DOM directly, without working through any API for su
 
 1. `Store format` - the way prompts/styles are stored. In the `short` format all prompts/styles data will be saved in the file `data.json`. In the `expanded` format a directory `prompts`/`styles` will be added to the collection directory and every prompt/style will be stored as a separate file. The expanded format makes it easier to work with the collection when using version control systems like Git.
 
+### Autocomplete
+
+1. When you manually type prompts, a menu with similar prompts from the database of known prompts will be displayed. You can finish a prompt from the autocomplete menu by clicking on it or by selecting it with the up and down arrows and pressing Enter.
+
+1. You can also enter style names to quickly add them. Since styles do not necessarily have to consist of positive prompts, you can use this to quickly switch between a set of negative prompts, change the resolution or generation quality settings.
+
+1. Autocomplete can be turned off in the settings. It can also be enabled only for prompts or only for styles.
+
+### Normalize
+
+1. The `normalize` button is displayed above the positive prompt field. It activates the function of normalization of the entered prompts according to the settings of normalization of prompts set in the [Setup window](#setup-window). Useful when inserting prompts from external sources.
+
+1. If the prompt in its current form is already known and stored in the collection in the same form, it will not be changed even if it does not satisfy the normalization settings.
+
+### Setup window
+
+1. You can customize the extension by going to the `Settings` section of the WebUI. The extension settings are located in the `Prompts Browser` section.
+
+1. `Autocomplete mode` - defines the behavior of the autocomplete function.
+
+1. `Show prompt index in database` - will display the ordinal id of the prompt in the collection if the collection is selected in the collection filter. Useful when manually sorting prompts within a collection.
+
+1. `Extended syntax support` - enables support for displaying some extended syntax elements for prompts that can be used by some other extensions. 
+
 1. `Below 1 scroll weight` - how much weight one mouse wheel movement will change when below weight 1.
 
 1. `Above 1 scroll weight` - how much weight one mouse wheel movement will change when above weight 1.
@@ -248,15 +275,25 @@ This extension modifies the DOM directly, without working through any API for su
 
 1. `Spaces in prompts transform` - changes the handling of spaces in multiword prompts. Can be `Do nothing`, `To space` and `To underscore`.
 
-1. `Show prompt index in database` - will display the ordinal id of the prompt in the collection if the collection is selected in the collection filter. Useful when manually sorting prompts within a collection.
+1. `Card width` - small card preview width.
 
-### Autocomplete
+1. `Card height` - small card preview height.
 
-1. When you manually type prompts, a menu with similar prompts from the database of known prompts will be displayed. You can finish a prompt from the autocomplete menu by clicking on it or by selecting it with the up and down arrows and pressing Enter.
+1. `Splash card width` - large card preview width.
 
-### Normalize
+1. `Splash card height` - large card preview height.
 
-1. The `normalize` button is displayed above the positive prompt field. It activates the function of normalization of the entered prompts according to the settings of normalization of prompts set in the [Setup window](#setup-window). Useful when inserting prompts from external sources.
+1. `Rows in cards list` - number of displayed rows in the list of known prompts. The size of the known prompts area will be adjusted to display no more than this number of rows. The height of the known prompts area will be calculated based on this parameter and the height of the small card.
+
+1. `Max shown cards in a list` - when displaying a list of prompts, this will be the maximum ceiling above which prompts will no longer be displayed. It may be useful when working with very large collections, so as not to overload the page with a large number of elements.
+
+1. `Resize thumbnails` - if this option is enabled, when you save the preview, it will be resized to the desired size and format. The size of the resized image will not exceed the specified maximum height or width ceiling with preserved aspect ratio.
+
+1. `Resize thumbnails: max width` - maximum width of the resized image.
+
+1. `Resize thumbnails: max height` - maximum height of the resized image.
+
+1. `Resize thumbnails: file format` - resized image format.
 
 ### Collections database
 
