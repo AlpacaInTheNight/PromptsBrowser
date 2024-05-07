@@ -44,7 +44,7 @@ The old extension settings will need to be set again. In addition, a number of n
 
 ## Installation:
 
-1. Make sure you have the latest AUTOMATIC1111/stable-diffusion-webui version instaled. Prompt Browser 1.2.0 was tested and adapted for WebUI versions 1.6.0.
+1. Make sure you have the latest AUTOMATIC1111/stable-diffusion-webui version instaled. Prompt Browser 1.2.0 was tested and adapted for WebUI versions 1.8.0.
 
 2. Unzip/clone the plugin into the extensions directory. Or install it using WebUI Extensions -> Install from URL tab.
 
@@ -88,6 +88,8 @@ This extension modifies the DOM directly, without working through any API for su
 
 5. `Double click`: opens the Prompt Tools.
 
+6. `shift` + click: opens Prompt Editor.
+
 
 ### Adding new prompts to the collection
 
@@ -97,6 +99,7 @@ This extension modifies the DOM directly, without working through any API for su
 2. The `Add unknown` button above the Prompts entry field opens a window for adding new prompts. In this window you can select new prompts and a collection of prompts, where you can add them with the `Add new prompts` button. The `Toggle all` button selects or deselects all new proppts. The `All collections` toggle switches on or off the check for all possible collections (by default, it is on and only those prompts that are not in any of the possible collections will be displayed).
 ![](img/addNew.jpg)
 
+3. You can add a new prompt to the desired collection by copying it or moving it from another collection. A collection is a directory that can be moved between installations, thus presenting the possibility of sharing prompts and styles.
 
 ### Generating previews for prompts
 
@@ -107,7 +110,7 @@ This extension modifies the DOM directly, without working through any API for su
 3. You can select additional styles to be used during autogeneration.
 
 	1. `Prompt only` - only prompt itself will be used for generating preview.
-	1. `With current prompt` - target prompt will be added to the current prompts in the positive prompts textbox..
+	1. `With current prompt` - target prompt will be added to the current prompts in the positive prompts textbox.
 	1. `With prompt autogen style` - If a prompt has a style assigned for autogeneration, it will use that prompt and the assigned style. If the prompt does not have an autogenerate-style, only the prompt itself will be used.
 	1. `With selected autogen style` - the currently selected style in the `Autogenerate style` field will be used as the style for autogeneration.
 
@@ -124,22 +127,26 @@ This extension modifies the DOM directly, without working through any API for su
 
 4. Prompts will be sorted by their similarity to the selected prompt according to the selected parameters (tags, categories and name).
 
-5. Clicking on a promt from the list of similar promts will replace the selected promt with the target one.
+5. If `Replace mode` is active, than clicking on a promt from the list of similar promts will replace the selected promt with the target one. If it is not active - will add the target promt to the active promts (keeping the selected promt).
 
-6. `Shift + click` on a promt from the list will add the target promt to the active promts (keeping the selected promt).
+6. `Shift + click`: opens prompt edition window.
 
 
 ### Styles
 
-![](img/styles.jpg)
+![](img/saveStyle.jpg)
 
-1. Above the text box there is a `styles` button which opens the Styles window.
+1. Above the text box there is a `Save style` button which opens the Save Style window.
 
 1. A list of active prompts will be displayed at the top.
 
 1. The current prompts can be saved as a style by typing in the text box above the name of the style and clicking the `Save as style` button next to it.
 
 1. In the list of style collections, you can select the collection where the style will be saved. You can also select the current generation parameters that will be saved along with the style's prompts (such as negative prompts, size, sampler, etc).
+
+![](img/styles.jpg)
+
+1. Above the text box there is a `styles` button which opens the Styles window.
 
 1. "Simple mode" switch changes styles view mode from the simple to the detailed mode.
 
@@ -151,9 +158,13 @@ This extension modifies the DOM directly, without working through any API for su
 
 1. The `update` button will replace the style's prompts with the current active prompts.
 
+1. Like with saving of a style you can choose what meta information must be stored in the updated style.
+
 1. The `Update preview` button will add/replace preview for the style using the currently generated and selected image.
 
 1. In simple mode you can also click with `shift` key to add style. You can click and hold `ctrl/meta` key to delete style.
+
+1. To rename a style, select it and enter the desired new name in the bottom panel of the window, then click `Rename`. The name of the style must be unique in the collection.
 
 
 ### Collection editor
