@@ -2,44 +2,29 @@ import PromptsBrowser from "client/index";
 import Database from "client/Database/index";
 import KnownPrompts from "client/KnownPrompts/index";
 import CurrentPrompts from "client/CurrentPrompts/index";
-import PromptEdit from "client/PromptEdit/index";
-import PreviewSave from "client/PreviewSave/index";
 import PromptsFilter from "client/PromptsFilter/index";
 import TagTooltip from "client/TagTooltip/index";
-import { makeElement, makeSelect } from "client/dom";
+import { makeElement, makeDiv, makeSelect } from "client/dom";
 import checkFilter from "client/checkFilter";
-import applyStyle from "client/applyStyle";
-
-import {
-    log,
-} from "client/utils";
-
-type Autogen = {
-    collection: string;
-    style: string;
-}
-
-type GenerateRequest = {
-    id: string;
-    autogen?: Partial<Autogen>;
-    addPrompts?: string;
-}
+import CollectionToolsEvent from "./event";
+import generateNextPreview from "./generateNextPreview";
+import { Autogen, GenerateRequest } from "./type";
 
 class CollectionTools {
 
-    private static autogen: Autogen = {
+    public static autogen: Autogen = {
         collection: "",
         style: "",
     }
     
-    private static autogenStyleSelector: HTMLSelectElement | undefined = undefined;
+    public static autogenStyleSelector: HTMLSelectElement | undefined = undefined;
     
     /**
      * Auto generate previews timer.
      */
-    private static generateNextTimer: any = 0;
+    public static generateNextTimer: any = 0;
     
-    private static generateQueue: GenerateRequest[] = [];
+    public static generateQueue: GenerateRequest[] = [];
     
     public static init(wrapper: HTMLElement) {
         const collectionTools = document.createElement("div");
@@ -52,23 +37,23 @@ class CollectionTools {
         clearTimeout(CollectionTools.generateNextTimer);
         wrapper.appendChild(collectionTools);
     
-        PromptsBrowser.onCloseActiveWindow = CollectionTools.onCloseWindow;
+        PromptsBrowser.onCloseActiveWindow = CollectionToolsEvent.onCloseWindow;
     
         collectionTools.addEventListener("click", () => {
-            PromptsBrowser.onCloseActiveWindow = CollectionTools.onCloseWindow;
+            PromptsBrowser.onCloseActiveWindow = CollectionToolsEvent.onCloseWindow;
         });
     }
     
     /**
      * Updates UI components that shows existing prompts
      */
-    private static updateViews() {
+    public static updateViews() {
         KnownPrompts.update();
         CollectionTools.update();
         CurrentPrompts.update(true);
     }
     
-    private static updateCurrentCollection() {
+    public static updateCurrentCollection() {
         const {state} = PromptsBrowser;
         const {data} = Database;
         const {promptsFilter} = PromptsBrowser.state;
@@ -99,69 +84,7 @@ class CollectionTools {
         CollectionTools.updateViews();
     }
     
-    private static async generateNextPreview() {
-        const {state} = PromptsBrowser;
-        const {data} = Database;
-        const {collectionToolsId} = state;
-        const {generateQueue} = CollectionTools;
-        const textArea = PromptsBrowser.DOMCache.containers[state.currentContainer].textArea;
-        const generateButton = PromptsBrowser.DOMCache.containers[state.currentContainer].generateButton;
-        if(!textArea || !generateButton) return;
-    
-        const nextItem = generateQueue.shift();
-        if(!nextItem) {
-            log("Finished generating prompt previews.");
-    
-            state.selectedPrompt = undefined;
-            state.filesIteration++;
-            Database.updateMixedList();
-            
-            PreviewSave.update();
-            KnownPrompts.update();
-            CurrentPrompts.update(true);
-            CollectionTools.update(true);
-            return;
-        }
-    
-        const message = `Generating preview for "${nextItem.id}". ${generateQueue.length} items in queue left. `;
-        log(message);
-        CollectionTools.updateAutogenInfo(message);
-    
-        state.selectedPrompt = nextItem.id;
-        state.savePreviewCollection = collectionToolsId;
-    
-        if(nextItem.autogen && nextItem.autogen.collection && nextItem.autogen.style) {
-            const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
-    
-            const targetCollection = data.styles[nextItem.autogen.collection];
-            if(targetCollection) {
-                const targetStyle = targetCollection.find(item => item.name === nextItem.autogen.style);
-                if(targetStyle) {
-                    applyStyle(targetStyle, true, true);
-                    await delay(600); //need a pause due to a hacky nature of changing APP state
-    
-                    textArea.value = `((${nextItem.id})), ${textArea.value}`;
-                }
-            }
-    
-        } else if(nextItem.addPrompts) {
-            textArea.value = `((${nextItem.id})), ${nextItem.addPrompts}`;
-    
-        } else textArea.value = nextItem.id;
-    
-        textArea.dispatchEvent(new Event('focus'));
-        textArea.dispatchEvent(new Event('input'));
-        textArea.dispatchEvent(new KeyboardEvent('keyup'));
-        textArea.dispatchEvent(new KeyboardEvent('keypress'));
-        textArea.dispatchEvent(new Event('blur'));
-    
-        generateButton.dispatchEvent(new Event('click'));
-    
-        clearTimeout(CollectionTools.generateNextTimer);
-        CollectionTools.generateNextTimer = setTimeout(CollectionTools.checkProgressState, 100);
-    }
-    
-    private static checkProgressState() {
+    public static checkProgressState() {
         const {state} = PromptsBrowser;
         const resultsContainer = PromptsBrowser.DOMCache.containers[state.currentContainer].resultsContainer;
         if(!resultsContainer) return;
@@ -174,366 +97,13 @@ class CollectionTools {
     
         if(!progressBar) {
             Database.savePromptPreview(false);
-            CollectionTools.generateNextPreview();
+            generateNextPreview();
     
             return;
         }
     
         clearTimeout(CollectionTools.generateNextTimer);
         CollectionTools.generateNextTimer = setTimeout(CollectionTools.checkProgressState, 500);
-    }
-    
-    private static onCloseWindow() {
-        const wrapper = PromptsBrowser.DOMCache.collectionTools;
-        if(!wrapper) return;
-    
-        clearTimeout(CollectionTools.generateNextTimer);
-        wrapper.style.display = "none";
-    }
-    
-    private static onChangeAutogenerateType(e: Event) {
-        const {state} = PromptsBrowser;
-        const target = e.currentTarget as HTMLSelectElement;
-        const value = target.value;
-        if(!value) return;
-    
-        state.autoGenerateType = value as any;
-    }
-    
-    private static onGeneratePreviews(e: MouseEvent) {
-        const {state} = PromptsBrowser;
-        const {data} = Database;
-        const {autogen} = CollectionTools;
-        const {selectedCollectionPrompts, collectionToolsId, autoGenerateType} = state;
-        const textArea = PromptsBrowser.DOMCache.containers[state.currentContainer].textArea;
-        const targetCollection = data.original[collectionToolsId];
-        let currentPrompt = "";
-    
-        if(!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection) return;
-    
-        CollectionTools.generateQueue = [];
-    
-        if(autoGenerateType === "current" && textArea) {
-            currentPrompt = textArea.value;
-        }
-    
-        for(const promptId of selectedCollectionPrompts) {
-            const prompt = targetCollection.find(item => item.id === promptId);
-            if(!prompt) continue;
-    
-            const generateItem: Partial<GenerateRequest> = {
-                id: promptId,
-            };
-    
-            if(autoGenerateType === "current") {
-                generateItem.addPrompts = currentPrompt;
-    
-            } else if(autoGenerateType === "autogen") {
-                if(prompt.autogen) generateItem.autogen = {...prompt.autogen};
-    
-            } else if(autoGenerateType === "selected") {
-                if(prompt.autogen) generateItem.autogen = {...autogen};
-            }
-    
-            CollectionTools.generateQueue.push(generateItem as GenerateRequest);
-        }
-    
-        CollectionTools.generateNextPreview();
-    }
-    
-    private static onAssignAutogenStyle(e: MouseEvent) {
-        const {state} = PromptsBrowser;
-        const {data} = Database;
-        const {collection, style} = CollectionTools.autogen;
-        const {selectedCollectionPrompts, collectionToolsId} = state;
-        const targetCollection = data.original[collectionToolsId];
-    
-        if(!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection) return;
-    
-        for(const promptId of selectedCollectionPrompts) {
-            const prompt = targetCollection.find(item => item.id === promptId);
-            if(!prompt) continue;
-    
-            if(collection && style) prompt.autogen = {collection, style};
-            else delete prompt.autogen;
-        }
-    
-        CollectionTools.updateCurrentCollection();
-    }
-    
-    private static onAddCategory(e: MouseEvent) {
-        const {state} = PromptsBrowser;
-        const {data} = Database;
-        const target = e.currentTarget as HTMLElement;
-        const parent = target.parentElement;
-        const {selectedCollectionPrompts, collectionToolsId} = state;
-        const targetCollection = data.original[collectionToolsId];
-        const categorySelect = parent.querySelector(".PBE_categoryAction") as HTMLSelectElement;
-        if(!categorySelect) return;
-        const categoryId = categorySelect.value;
-    
-        if(!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection) return;
-    
-        for(const promptId of selectedCollectionPrompts) {
-            const prompt = targetCollection.find(item => item.id === promptId);
-            if(!prompt) continue;
-    
-            if(!prompt.category) prompt.category = [];
-            if(!prompt.category.includes(categoryId)) prompt.category.push(categoryId);
-        }
-    
-        CollectionTools.updateCurrentCollection();
-    }
-    
-    private static onRemoveCategory(e: MouseEvent) {
-        const {state} = PromptsBrowser;
-        const {data} = Database;
-        const target = e.currentTarget as HTMLElement;
-        const parent = target.parentElement;
-        const {selectedCollectionPrompts, collectionToolsId} = state;
-        const targetCollection = data.original[collectionToolsId];
-        const categorySelect = parent.querySelector(".PBE_categoryAction") as HTMLSelectElement;
-        if(!categorySelect) return;
-        const categoryId = categorySelect.value;
-    
-        if(!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection) return;
-    
-        for(const promptId of selectedCollectionPrompts) {
-            const prompt = targetCollection.find(item => item.id === promptId);
-            if(!prompt) continue;
-    
-            if(!prompt.category) continue;
-            if(prompt.category.includes(categoryId)) prompt.category = prompt.category.filter(id => id !== categoryId);
-        }
-    
-        CollectionTools.updateCurrentCollection();
-    }
-    
-    private static onAddTags(e: MouseEvent) {
-        const {state} = PromptsBrowser;
-        const {data} = Database;
-        const target = e.currentTarget as HTMLElement;
-        const parent = target.parentElement;
-        const {selectedCollectionPrompts, collectionToolsId} = state;
-        const targetCollection = data.original[collectionToolsId];
-        const tagsInput = parent.querySelector(".PBE_tagsAction") as HTMLSelectElement;
-        if(!tagsInput) return;
-        const tagsValue = tagsInput.value;
-    
-        if(!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection) return;
-    
-        const tagsArr = tagsValue.split(",");
-        for(let i = 0; i < tagsArr.length; i++) tagsArr[i] = tagsArr[i].trim();
-    
-        for(const promptId of selectedCollectionPrompts) {
-            const prompt = targetCollection.find(item => item.id === promptId);
-            if(!prompt) continue;
-    
-            if(!prompt.tags) prompt.tags = [];
-    
-            for(const tagItem of tagsArr) {
-                if(!prompt.tags.includes(tagItem)) prompt.tags.push(tagItem);
-            }
-        }
-    
-        CollectionTools.updateCurrentCollection();
-    }
-    
-    private static onRemoveTags(e: MouseEvent) {
-        const {state} = PromptsBrowser;
-        const {data} = Database;
-        const {selectedCollectionPrompts, collectionToolsId} = state;
-        const targetCollection = data.original[collectionToolsId];
-        const target = e.currentTarget as HTMLElement;
-        const parent = target.parentElement;
-        const tagsInput = parent.querySelector(".PBE_tagsAction") as HTMLInputElement;
-        if(!tagsInput) return;
-        const tagsValue = tagsInput.value;
-    
-        if(!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection) return;
-    
-        const tagsArr = tagsValue.split(",");
-        for(let i = 0; i < tagsArr.length; i++) tagsArr[i] = tagsArr[i].trim();
-    
-        for(const promptId of selectedCollectionPrompts) {
-            const prompt = targetCollection.find(item => item.id === promptId);
-            if(!prompt || !prompt.tags) continue;
-    
-            prompt.tags = prompt.tags.filter(id => !tagsArr.includes(id));
-        }
-    
-        CollectionTools.updateCurrentCollection();
-    }
-    
-    private static onSelectItem(e: MouseEvent) {
-        const target = e.currentTarget as HTMLElement;
-        const parent = target.parentElement;
-        const {state} = PromptsBrowser;
-        const id = target.dataset.id;
-        if(!id) return;
-    
-        if(e.shiftKey) {
-            state.editingPrompt = id;
-            PromptEdit.update();
-    
-            return;
-        }
-    
-        if(!state.selectedCollectionPrompts.includes(id)) {
-            state.selectedCollectionPrompts.push(id);
-            parent.classList.add("selected");
-        } else {
-            state.selectedCollectionPrompts = state.selectedCollectionPrompts.filter(promptId => promptId !== id);
-            parent.classList.remove("selected");
-        }
-    
-        CollectionTools.updateSelectedInfo();
-    }
-    
-    private static onToggleSelected(e: MouseEvent) {
-        const {promptsFilter} = PromptsBrowser.state;
-        const {state} = PromptsBrowser;
-        const {data} = Database;
-        const {collectionToolsId} = state;
-        const filterSetup = promptsFilter["collectionTools"];
-        const targetCollection = data.original[collectionToolsId];
-        if(!targetCollection) return;
-    
-        if(state.selectedCollectionPrompts.length) {
-            state.selectedCollectionPrompts = [];
-            CollectionTools.update();
-            return;
-        }
-    
-        state.selectedCollectionPrompts = [];
-    
-        for(const item of targetCollection) {
-            if(checkFilter(item, filterSetup)) state.selectedCollectionPrompts.push(item.id);
-        }
-    
-        CollectionTools.update();
-    }
-    
-    /**
-     * Deletes selected prompts after a user confirmation
-     */
-    private static onDeleteSelected(e: MouseEvent) {
-        const {state} = PromptsBrowser;
-        const {data} = Database;
-        const {selectedCollectionPrompts, collectionToolsId} = state;
-        const targetCollection = data.original[collectionToolsId];
-    
-        if(!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection) return;
-    
-        if( confirm(`Remove ${selectedCollectionPrompts.length} prompts from catalogue "${collectionToolsId}"?`) ) {
-            data.original[collectionToolsId] = targetCollection.filter(prompt => !selectedCollectionPrompts.includes(prompt.id));
-    
-            for(const deletedPromptId of selectedCollectionPrompts) {
-                Database.movePreviewImage(deletedPromptId, collectionToolsId, collectionToolsId, "delete");
-            }
-            Database.saveJSONData(collectionToolsId);
-            Database.updateMixedList();
-    
-            state.selectedCollectionPrompts = [];
-            CollectionTools.updateViews();
-        }
-    }
-    
-    /**
-     * Moves or copies the selected prompts to the selected collection.
-     * By default moves prompts.
-     * @param {*} e - mouse event object.
-     * @param {*} isCopy if copy actions is required instead of move action.
-     */
-    private static onMoveSelected(e: MouseEvent, isCopy: boolean = false) {
-        const {state} = PromptsBrowser;
-        const {data} = Database;
-        const {selectedCollectionPrompts, collectionToolsId, copyOrMoveTo} = state;
-        const targetCollection = data.original[collectionToolsId];
-    
-        if(!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection || !copyOrMoveTo) return;
-    
-        const to = state.copyOrMoveTo;
-        const from = state.collectionToolsId;
-        if(!to || !from) return;
-        if(!data.original[to] || !data.original[from]) return;
-    
-        let message = `${isCopy ? "Copy" : "Move"} ${selectedCollectionPrompts.length} prompts`;
-        message += ` from catalogue "${collectionToolsId}" to catalogue "${copyOrMoveTo}"?`;
-    
-        if( confirm(message) ) {
-    
-            for(const promptId of selectedCollectionPrompts) {
-                const originalItem = data.original[from].find(item => item.id === promptId);
-                if(!originalItem) continue;
-    
-                if(isCopy) {
-                    if(data.original[to].some(item => item.id === promptId)) continue;
-    
-                    data.original[to].push(JSON.parse(JSON.stringify(originalItem)));
-    
-                    Database.movePreviewImage(promptId, from, to, "copy");
-    
-                } else {
-                    if(!data.original[to].some(item => item.id === promptId)) {
-                        data.original[to].push(JSON.parse(JSON.stringify(originalItem)));
-                    }
-                    
-                    data.original[from] = data.original[from].filter(item => item.id !== promptId);
-    
-                    Database.movePreviewImage(promptId, from, to, "move");
-                }
-            }
-    
-            if(isCopy) {
-                Database.saveJSONData(to, true);
-    
-            } else {
-                Database.saveJSONData(to, true);
-                Database.saveJSONData(from, true);
-            }
-            Database.updateMixedList();
-    
-            state.selectedCollectionPrompts = [];
-            CollectionTools.updateViews();
-        }
-    }
-    
-    private static onCopySelected = (e: MouseEvent) => CollectionTools.onMoveSelected(e, true);
-    
-    
-    private static onChangeAutogenCollection(e: Event) {
-        const {data} = Database;
-        const target = e.currentTarget as HTMLSelectElement;
-        const collection = target.value;
-        let setFirst = false;
-    
-        CollectionTools.autogen.collection = collection;
-    
-        if(collection && CollectionTools.autogenStyleSelector) {
-            let styleOptions = "";
-    
-            const targetCollection = data.styles[collection];
-            if(targetCollection) {
-                for(const styleItem of targetCollection) {
-                    if(!setFirst) {
-                        CollectionTools.autogen.style = styleItem.name;
-                        CollectionTools.autogenStyleSelector.value = styleItem.name;
-                        setFirst = true;
-                    }
-                    styleOptions += `<option value="${styleItem.name}">${styleItem.name}</option>`;
-                }
-            }
-    
-            CollectionTools.autogenStyleSelector.innerHTML = styleOptions;
-        }
-    }
-    
-    private static onChangeAutogenStyle(e: Event) {
-        const target = e.currentTarget as HTMLSelectElement;
-        const style = target.value;
-    
-        CollectionTools.autogen.style = style;
     }
     
     private static showHeader(wrapper: HTMLElement) {
@@ -615,7 +185,7 @@ class CollectionTools {
             promptContainer.appendChild(selectArea);
             promptContainer.appendChild(contentArea);
     
-            selectArea.addEventListener("click", CollectionTools.onSelectItem);
+            selectArea.addEventListener("click", CollectionToolsEvent.onSelectItem);
     
             if(selectedCollectionPrompts.includes(id)) promptContainer.classList.add("selected");
     
@@ -639,13 +209,13 @@ class CollectionTools {
         moveButton.innerText = "Move";
         moveButton.className = "PBE_button";
         moveButton.title = "Move selected prompts to the target collection";
-        moveButton.addEventListener("click", CollectionTools.onMoveSelected);
+        moveButton.addEventListener("click", CollectionToolsEvent.onMoveSelected);
     
         const copyButton = document.createElement("div")
         copyButton.innerText = "Copy";
         copyButton.className = "PBE_button";
         copyButton.title = "Copy selected prompts to the target collection";
-        copyButton.addEventListener("click", CollectionTools.onCopySelected);
+        copyButton.addEventListener("click", CollectionToolsEvent.onCopySelected);
     
         let options = "";
         for(const collectionId in data.original) {
@@ -700,8 +270,8 @@ class CollectionTools {
         }
         categorySelect.innerHTML = options;
     
-        addButton.addEventListener("click", CollectionTools.onAddCategory);
-        removeButton.addEventListener("click", CollectionTools.onRemoveCategory);
+        addButton.addEventListener("click", CollectionToolsEvent.onAddCategory);
+        removeButton.addEventListener("click", CollectionToolsEvent.onRemoveCategory);
     
         const container = document.createElement("fieldset");
         container.className = "PBE_fieldset";
@@ -733,8 +303,8 @@ class CollectionTools {
         addButton.innerText = "Add";
         removeButton.innerText = "Remove";
     
-        addButton.addEventListener("click", CollectionTools.onAddTags);
-        removeButton.addEventListener("click", CollectionTools.onRemoveTags);
+        addButton.addEventListener("click", CollectionToolsEvent.onAddTags);
+        removeButton.addEventListener("click", CollectionToolsEvent.onRemoveTags);
     
         const container = document.createElement("fieldset");
         container.className = "PBE_fieldset";
@@ -764,7 +334,7 @@ class CollectionTools {
         for(const colId in data.styles) colOptions.push({id: colId, name: colId});
         const stylesCollectionsSelect = makeSelect({
             className: "PBE_generalInput PBE_select", value: collection, options: colOptions,
-            onChange: CollectionTools.onChangeAutogenCollection
+            onChange: CollectionToolsEvent.onChangeAutogenCollection
         });
     
         container.appendChild(stylesCollectionsSelect);
@@ -781,7 +351,7 @@ class CollectionTools {
         
         const styleSelect = makeSelect({
             className: "PBE_generalInput PBE_select", value: style || "", options: styleOptions,
-            onChange: CollectionTools.onChangeAutogenStyle
+            onChange: CollectionToolsEvent.onChangeAutogenStyle
         });
     
         container.appendChild(styleSelect);
@@ -789,7 +359,7 @@ class CollectionTools {
     
         //assign button
         const assignButton = makeElement<HTMLDivElement>({element: "div", className: "PBE_button", content: "Assign"});
-        assignButton.addEventListener("click", CollectionTools.onAssignAutogenStyle);
+        assignButton.addEventListener("click", CollectionToolsEvent.onAssignAutogenStyle);
         container.appendChild(assignButton);
     
         //append to wrapper
@@ -801,7 +371,7 @@ class CollectionTools {
         const {state} = PromptsBrowser;
     
         const generateButton = makeElement<HTMLDivElement>({element: "div", className: "PBE_button", content: "Generate"});
-        generateButton.addEventListener("click", CollectionTools.onGeneratePreviews);
+        generateButton.addEventListener("click", CollectionToolsEvent.onGeneratePreviews);
     
         const generateTypeSelect = makeSelect({
             className: "PBE_generalInput PBE_select", value: state.autoGenerateType,
@@ -811,7 +381,7 @@ class CollectionTools {
                 {id: "autogen", name: "With prompt autogen style"},
                 {id: "selected", name: "With selected autogen style"},
             ],
-            onChange: CollectionTools.onChangeAutogenerateType
+            onChange: CollectionToolsEvent.onChangeAutogenerateType
         });
     
         const container = document.createElement("fieldset");
@@ -833,13 +403,13 @@ class CollectionTools {
         toggleAllButton.innerText = "Toggle all";
         toggleAllButton.className = "PBE_button";
         toggleAllButton.title = "Select and unselect all visible prompts";
-        toggleAllButton.addEventListener("click", CollectionTools.onToggleSelected);
+        toggleAllButton.addEventListener("click", CollectionToolsEvent.onToggleSelected);
     
         const deleteButton = document.createElement("div");
         deleteButton.innerText = "Delete selected";
         deleteButton.className = "PBE_button PBE_buttonCancel";
         deleteButton.title = "Delete selected prompts";
-        deleteButton.addEventListener("click", CollectionTools.onDeleteSelected);
+        deleteButton.addEventListener("click", CollectionToolsEvent.onDeleteSelected);
     
         const container = document.createElement("fieldset");
         container.className = "PBE_fieldset";
@@ -859,14 +429,14 @@ class CollectionTools {
         CollectionTools.showAutogenerate(wrapper);
     }
     
-    private static updateAutogenInfo(status: string, wrapper?: HTMLElement) {
+    public static updateAutogenInfo(status: string, wrapper?: HTMLElement) {
         if(!wrapper) wrapper = document.querySelector(".PBE_collectionToolsAutogenInfo");
         if(!wrapper) return;
     
         wrapper.innerText = status;
     }
     
-    private static updateSelectedInfo(wrapper?: HTMLElement) {
+    public static updateSelectedInfo(wrapper?: HTMLElement) {
         if(!wrapper) wrapper = document.querySelector(".PBE_collectionToolsSelectedInfo");
         if(!wrapper) return;
         
@@ -896,8 +466,8 @@ class CollectionTools {
     }
     
     private static showStatus(wrapper: HTMLElement) {
-        const autogenStatus = makeElement<HTMLDivElement>({element: "div", className: "PBE_collectionToolsAutogenInfo"});
-        const selectedStatus = makeElement<HTMLDivElement>({element: "div", className: "PBE_collectionToolsSelectedInfo"});
+        const autogenStatus = makeDiv({className: "PBE_collectionToolsAutogenInfo"});
+        const selectedStatus = makeDiv({className: "PBE_collectionToolsSelectedInfo"});
     
         CollectionTools.updateAutogenInfo("", autogenStatus);
         CollectionTools.updateSelectedInfo(selectedStatus);
@@ -924,28 +494,22 @@ class CollectionTools {
     
         if(!state.collectionToolsId) return;
     
-        PromptsBrowser.onCloseActiveWindow = CollectionTools.onCloseWindow;
+        PromptsBrowser.onCloseActiveWindow = CollectionToolsEvent.onCloseWindow;
         wrapper.innerHTML = "";
         wrapper.style.display = "flex";
-    
-        const footerBlock = document.createElement("div");
+
+        const footerBlock = makeDiv({className: "PBE_rowBlock PBE_rowBlock_wide PBE_toolsFooter"});
+
         const closeButton = document.createElement("button");
-        footerBlock.className = "PBE_rowBlock PBE_rowBlock_wide PBE_toolsFooter";
         closeButton.innerText = "Close";
         closeButton.className = "PBE_button";
     
-        closeButton.addEventListener("click", CollectionTools.onCloseWindow);
+        closeButton.addEventListener("click", CollectionToolsEvent.onCloseWindow);
     
-        const headerBlock = document.createElement("div");
-        headerBlock.className = "PBE_collectionToolsHeader";
-    
-        const contentBlock = document.createElement("div");
-        contentBlock.className = "PBE_dataBlock PBE_Scrollbar PBE_windowContent";
-    
-        const statusBlock = makeElement<HTMLDivElement>({element: "div", className: "PBE_collectionToolsStatus PBE_row"});
-    
-        const actionsBlock = document.createElement("div");
-        actionsBlock.className = "PBE_collectionToolsActions PBE_row";
+        const headerBlock   = makeDiv({className: "PBE_collectionToolsHeader"});
+        const contentBlock  = makeDiv({className: "PBE_dataBlock PBE_Scrollbar PBE_windowContent"});
+        const statusBlock   = makeDiv({className: "PBE_collectionToolsStatus PBE_row"});
+        const actionsBlock  = makeDiv({className: "PBE_collectionToolsActions PBE_row"});
     
         CollectionTools.showHeader(headerBlock);
         CollectionTools.showPromptsDetailed(contentBlock);

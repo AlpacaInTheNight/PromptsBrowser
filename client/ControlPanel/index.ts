@@ -1,5 +1,6 @@
 import PromptsBrowser from "client/index";
 import SetupWindow from "client/SetupWindow/index";
+import { makeDiv } from "client/dom";
 
 class ControlPanel {
 
@@ -60,26 +61,17 @@ class ControlPanel {
         if(state.showControlPanel) controlPanel.classList.remove("PBE_controlPanelHidden");
         else controlPanel.classList.add("PBE_controlPanelHidden");
     
-        const togglePanelButton = document.createElement("div");
-        togglePanelButton.className = "PBE_toggleControlPanel";
-    
-        togglePanelButton.innerText = state.showControlPanel ? "◀" : "▶";
-    
+        const togglePanelButton = makeDiv({content: state.showControlPanel ? "◀" : "▶", className: "PBE_toggleControlPanel"});
         togglePanelButton.addEventListener("click", ControlPanel.onTogglePanel);
     
         controlPanel.appendChild(togglePanelButton);
     
         if(!state.showControlPanel) return;
     
-        const iconKnownPrompts = document.createElement("div");
-        const iconCurrentPrompts = document.createElement("div");
-        const iconPositiveTextArea = document.createElement("div");
-        const iconNegativeTextArea = document.createElement("div");
-    
-        iconKnownPrompts.className = "PBE_controlIcon";
-        iconCurrentPrompts.className = "PBE_controlIcon";
-        iconPositiveTextArea.className = "PBE_controlIcon";
-        iconNegativeTextArea.className = "PBE_controlIcon";
+        const iconKnownPrompts      = makeDiv({content: "K", title: "Known prompts", className: "PBE_controlIcon"});
+        const iconCurrentPrompts    = makeDiv({content: "C", title: "Current prompts", className: "PBE_controlIcon"});
+        const iconPositiveTextArea  = makeDiv({content: "P", title: "Positive prompts textarea", className: "PBE_controlIcon"});
+        const iconNegativeTextArea  = makeDiv({content: "N", title: "Negative prompts textarea", className: "PBE_controlIcon"});
     
         if(state.showViews.includes("known")) iconKnownPrompts.classList.add("PBE_activeControlIcon");
         if(state.showViews.includes("current")) iconCurrentPrompts.classList.add("PBE_activeControlIcon");
@@ -90,16 +82,6 @@ class ControlPanel {
         iconCurrentPrompts.dataset.id = "current";
         iconPositiveTextArea.dataset.id = "positive";
         iconNegativeTextArea.dataset.id = "negative";
-    
-        iconKnownPrompts.innerText = "K";
-        iconCurrentPrompts.innerText = "C";
-        iconPositiveTextArea.innerText = "P";
-        iconNegativeTextArea.innerText = "N";
-    
-        iconKnownPrompts.title = "Known prompts";
-        iconCurrentPrompts.title = "Current prompts";
-        iconPositiveTextArea.title = "Positive prompts textarea";
-        iconNegativeTextArea.title = "Negative prompts textarea";
     
         iconKnownPrompts.addEventListener("click", ControlPanel.onToggleVisibility);
         iconCurrentPrompts.addEventListener("click", ControlPanel.onToggleVisibility);

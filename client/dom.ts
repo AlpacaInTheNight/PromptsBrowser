@@ -94,8 +94,13 @@ function makeSelect(params: Partial<MakeElementParams>) {
     return selectElement;
 }
 
+function makeDiv(params: Partial<MakeElementParams>): HTMLDivElement {
+    return makeElement<HTMLDivElement>({...params, element: "div"});
+}
+
 export {
     makeElement,
+    makeDiv,
     makeCheckbox,
     makeSelect,
 }
