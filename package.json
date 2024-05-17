@@ -1,27 +1,27 @@
 {
-  "name": "promptsbrowser",
-  "version": "1.2.0",
-  "description": "Prompts Browser extension",
-  "main": "client/index.ts",
-  "scripts": {
-	"start": "webpack --config webpack/webpack.config.dev.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AlpacaInTheNight/PromptsBrowser.git"
-  },
-  "author": "",
-  "license": "AGPL-3.0 license",
-  "bugs": {
-    "url": "https://github.com/AlpacaInTheNight/PromptsBrowser/issues"
-  },
-  "homepage": "https://github.com/AlpacaInTheNight/PromptsBrowser#readme",
-  "devDependencies": {
-	"@types/webpack-env": "^1.18.4",
-	"webpack": "^5.90.3",
-	"webpack-cli": "^5.1.4",
-	"ts-loader": "^9.5.1",
-    "typescript": "^4.3.5"
-  }
+    "name": "promptsbrowser",
+    "version": "1.2.0",
+    "description": "Prompts Browser extension",
+    "main": "client/index.ts",
+    "scripts": {
+        "start": "webpack --config webpack/webpack.config.dev.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/AlpacaInTheNight/PromptsBrowser.git"
+    },
+    "author": "",
+    "license": "AGPL-3.0 license",
+    "bugs": {
+        "url": "https://github.com/AlpacaInTheNight/PromptsBrowser/issues"
+    },
+    "homepage": "https://github.com/AlpacaInTheNight/PromptsBrowser#readme",
+    "devDependencies": {
+        "@types/webpack-env": "^1.18.4",
+        "webpack": "^5.90.3",
+        "webpack-cli": "^5.1.4",
+        "ts-loader": "^9.5.1",
+        "typescript": "^4.3.5"
+    }
 }
