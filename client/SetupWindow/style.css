@@ -1,0 +1,45 @@
+/* Setup window */
+
+.PBE_setupWindow {
+    z-index: 600;
+    padding: 10px;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    color: var(--body-text-color);
+    text-shadow: 1px 1px 1px black;
+    /* font-weight: bold; */
+    font-size: 18px;
+
+    width: 600px;
+    height: 500px;
+    top: calc(50% - 250px);
+    left: calc(50% - 300px);
+
+    font-family: var(--font);
+}
+
+.PBE_setupWindowTopBlock {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 5px;
+    width: 100%;
+}
+
+.PBE_setupWindowStatus {
+    font-family: sans-serif;
+    color: var(--block-info-text-color);
+    text-shadow: 1px 1px 1px black;
+    font-size: 16px;
+    padding: 0px 10px;
+}
+
+.PBE_setupWindowStatus a {
+    /* color: var(--button-secondary-text-color); */
+    color: var(--link-text-color);
+    margin: 0 10px;
+}
+
+/* Setup window end */

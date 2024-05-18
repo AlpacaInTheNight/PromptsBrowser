@@ -1,0 +1,121 @@
+/* Collection tools */
+
+.PBE_collectionToolsWindow {
+    width: 90vw;
+    height: 90vh;
+    top: 5vh;
+    left: 5vw;
+}
+
+.PBE_collectionToolsHeader {
+    padding: 10px;
+}
+
+.PBE_detailedItemContainer {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.PBE_detailedItem {
+    width: 40%;
+    min-height: 60px;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    flex-grow: 1;
+    /* background-color: white; */
+    /* border: 4px solid white; */
+    margin: 2px;
+    color: black;
+    text-shadow: 1px 1px 1px black;
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 5000px;
+}
+
+.PBE_detailedItem:hover {
+    background-color: rgba(100, 100, 100, 0.4);
+}
+
+.PBE_detailedItem.selected {
+    background: var(--primary-300);
+}
+
+.PBE_detailedItem.selected .PBE_detailedItemName {
+    color: var(--body-text-color);
+}
+
+.PBE_detailedItem:hover .PBE_detailedItemSelector,
+.PBE_detailedItem.selected .PBE_detailedItemSelector {
+    opacity: 1;
+}
+
+.PBE_detailedItemSelector {
+    cursor: pointer;
+    width: 60px;
+    background: var(--primary-500);
+    margin-right: 10px;
+    max-height: 200px;
+    flex-shrink: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.5;
+    user-select: none;
+}
+
+.PBE_detailedItemContent {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    flex-grow: 1;
+    padding: 10px;
+}
+
+.PBE_detailedItemTop {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+}
+
+.PBE_detailedItemBottom {
+    flex-grow: 0;
+    display: flex;
+    flex-direction: row;
+}
+
+.PBE_detailedItemName {
+    font-size: 18px;
+    color: var(--body-text-color);
+    text-transform: capitalize;
+}
+
+.PBE_detailedItemComment {
+    padding: 0 10px;
+    color: var(--body-text-color);
+    max-height: 200px;
+    overflow: auto;
+}
+
+.PBE_detailedItemTags,
+.PBE_detailedItemCategories {
+    width: 50%;
+    background-color: var(--primary-500);
+    color: var(--body-text-color);
+    padding: 4px;
+}
+
+.PBE_collectionToolsStatus {
+    font-family: var(--font);
+    color: var(--block-info-text-color);
+    /* text-shadow: 1px 1px 1px black; */
+    font-size: 16px;
+    padding: 0px 10px;
+}
+
+.PBE_collectionToolsActions {
+    flex-wrap: wrap;
+    padding: 5px;
+}
+
+/* Collection tools end*/

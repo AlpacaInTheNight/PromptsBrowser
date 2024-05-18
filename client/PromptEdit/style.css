@@ -1,0 +1,43 @@
+/* Prompt Edit */
+
+.PBE_promptEdit {
+    z-index: 700;
+    padding: 10px;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    color: var(--body-text-color);
+    text-shadow: 1px 1px 1px black;
+    /* font-weight: bold; */
+    font-size: 18px;
+
+    width: 600px;
+    height: 700px;
+    top: calc(50% - 350px);
+    left: calc(50% - 300px);
+}
+
+.PBE_promptEditTitle {
+    font-size: 22px;
+    text-transform: capitalize;
+    font-weight: bold;
+    color: var(--link-text-color);
+}
+
+.PBE_promptEditSingleCollection {
+    padding: 0 10px;
+}
+
+.PBE_promptEditInfoItem {
+    cursor: pointer;
+}
+
+.PBE_promptEditInfoItem:hover {
+    /* background-color: rgba(255, 0, 0, 0.2); */
+    background: var(--button-cancel-background-fill) !important;
+    color: var(--button-cancel-text-color) !important;
+}
+
+/* Prompt Edit End */
