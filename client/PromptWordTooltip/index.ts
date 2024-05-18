@@ -1,8 +1,6 @@
 import PromptsBrowser from "client/index";
 import Database from "client/Database/index";
-import { promptStringToObject } from "client/utils";
-import synchroniseCurrentPrompts from "client/synchroniseCurrentPrompts";
-import applyStyle from "client/applyStyle";
+import PromptWordTooltipEvent from "./event";
 
 /**
  * Function from getCaretPos.js.
@@ -31,213 +29,10 @@ class PromptWordTooltip {
         positivePrompts.appendChild(autocompliteWindow);
         PromptsBrowser.DOMCache.containers[containerId].autocompliteWindow = autocompliteWindow;
     
-        textArea.addEventListener("keydown", PromptWordTooltip.onKeyDown);
-        textArea.addEventListener("blur", PromptWordTooltip.onUnfocus);
+        textArea.addEventListener("keydown", PromptWordTooltipEvent.onKeyDown);
+        textArea.addEventListener("blur", PromptWordTooltipEvent.onUnfocus);
         textArea.addEventListener("keyup", PromptWordTooltip.processCarretPosition);
         textArea.addEventListener("click", PromptWordTooltip.processCarretPosition);
-    }
-    
-    public static onKeyDown(e: KeyboardEvent) {
-        const {autocomplitePromptMode = "prompts"} = PromptsBrowser.state.config;
-        if(autocomplitePromptMode === "off") return;
-    
-        const {state} = PromptsBrowser;
-        const autoCompleteBox = PromptsBrowser.DOMCache.containers[state.currentContainer].autocompliteWindow;
-        if(!autoCompleteBox) return;
-        if(autoCompleteBox.style.display === "none") return;
-        if(e.keyCode != 38 && e.keyCode != 40 && e.keyCode != 13) return;
-        const hintElements = autoCompleteBox.querySelectorAll(".PBE_hintItem");
-        if(!hintElements || !hintElements.length) return;
-    
-        e.stopPropagation();
-        e.preventDefault();
-        e.stopImmediatePropagation();
-    }
-    
-    public static onUnfocus(e: FocusEvent) {
-        const {autocomplitePromptMode = "prompts"} = PromptsBrowser.state.config;
-        if(autocomplitePromptMode === "off") return;
-    
-        const {state} = PromptsBrowser;
-        const autoCompleteBox = PromptsBrowser.DOMCache.containers[state.currentContainer].autocompliteWindow;
-        if(!autoCompleteBox) return;
-        if(autoCompleteBox.style.display === "none") return;
-        
-        clearTimeout(PromptWordTooltip.unfocusTimeout);
-        PromptWordTooltip.unfocusTimeout = setTimeout(() => {
-            autoCompleteBox.style.display = "none";
-            autoCompleteBox.innerHTML = "";
-        }, 400);
-    }
-    
-    public static onHintWindowKey(e: KeyboardEvent) {
-        const {state} = PromptsBrowser;
-        const autoCompleteBox = PromptsBrowser.DOMCache.containers[state.currentContainer].autocompliteWindow;
-        if(!autoCompleteBox) return false;
-        if(autoCompleteBox.style.display === "none") return false;
-        if(e.keyCode != 38 && e.keyCode != 40 && e.keyCode != 13) return false;
-        const hintElements = autoCompleteBox.querySelectorAll(".PBE_hintItem");
-        if(!hintElements || !hintElements.length) return false;
-    
-        if(e.keyCode === 13) {
-            const selectedHint = autoCompleteBox.querySelector(".PBE_hintItemSelected") as HTMLElement;
-            if(!selectedHint) return false;
-    
-            const start = Number(selectedHint.dataset.start);
-            const end = Number(selectedHint.dataset.end);
-            const newPrompt = selectedHint.innerText;
-            const collection = selectedHint.dataset.collection;
-            const style = selectedHint.dataset.style;
-        
-            if(Number.isNaN(start) || Number.isNaN(end)) return;
-        
-            if(style) PromptWordTooltip.onApplyStyleHint(start, end, style, collection);
-            else PromptWordTooltip.onApplyHint(start, end, newPrompt);
-    
-            return true;
-        }
-    
-        const isDown = e.keyCode == 40;
-    
-        if(isDown) PromptWordTooltip.selectedIndex++;
-        else PromptWordTooltip.selectedIndex--;
-    
-        if(PromptWordTooltip.selectedIndex < 0) PromptWordTooltip.selectedIndex = hintElements.length - 1;
-        else if(PromptWordTooltip.selectedIndex > hintElements.length - 1) PromptWordTooltip.selectedIndex = 0;
-    
-        for(let i = 0; i < hintElements.length; i++) {
-            const element = hintElements[i];
-    
-            if(i === PromptWordTooltip.selectedIndex) element.classList.add("PBE_hintItemSelected");
-            else element.classList.remove("PBE_hintItemSelected");
-        }
-    
-        return true;
-    }
-    
-    public static onClickHint(e: MouseEvent) {
-        const {state} = PromptsBrowser;
-        const autoCompleteBox = PromptsBrowser.DOMCache.containers[state.currentContainer].autocompliteWindow;
-        const textArea = PromptsBrowser.DOMCache.containers[state.currentContainer].textArea;
-        if(!textArea || !autoCompleteBox) return;
-    
-        const target = e.currentTarget as HTMLElement;
-        if(!target) return;
-    
-        const start = Number(target.dataset.start);
-        const end = Number(target.dataset.end);
-        const collection = target.dataset.collection;
-        const style = target.dataset.style;
-        const newPrompt = target.innerText;
-    
-        if(Number.isNaN(start) || Number.isNaN(end)) return;
-    
-        if(style) PromptWordTooltip.onApplyStyleHint(start, end, style, collection);
-        else PromptWordTooltip.onApplyHint(start, end, newPrompt);
-    }
-    
-    public static filterNewPromptsOnly(str: string) {
-        if(!str) return "";
-    
-        const newStrPromptsArr = [];
-        const activePrompts = PromptsBrowser.getCurrentPrompts();
-        const newArr = str.split(",");
-    
-        for(let prompt of newArr) {
-            const newPrompt = promptStringToObject({prompt});
-            if(activePrompts.some(item => item.id === newPrompt.id)) continue;
-            
-            newStrPromptsArr.push(prompt);
-        }
-    
-        return newStrPromptsArr.join(", ");
-    }
-    
-    public static onApplyStyleHint(start: number, end: number, style: string, collection: string) {
-        const {state} = PromptsBrowser;
-        const {data} = Database;
-        const autoCompleteBox = PromptsBrowser.DOMCache.containers[state.currentContainer].autocompliteWindow;
-        const textArea = PromptsBrowser.DOMCache.containers[state.currentContainer].textArea;
-    
-        if(!textArea || !autoCompleteBox) return;
-        if(!style || !collection) return;
-    
-        const targetCollection = data.styles[collection];
-        if(!targetCollection) return;
-    
-        const targetStyle = targetCollection.find(item => item.name === style);
-        if(!targetStyle) return;
-    
-        autoCompleteBox.style.display = "none";
-        let newValue = "";
-    
-        const prefix = textArea.value.substring(0, start);
-        const postfix = textArea.value.substring(end);
-    
-        newValue += prefix;
-        newValue += postfix;
-    
-        textArea.value = newValue;
-    
-        PromptWordTooltip.selectedIndex = 0;
-        synchroniseCurrentPrompts(false);
-    
-        applyStyle(targetStyle, true, false);
-    }
-    
-    public static onApplyHint(start: number, end: number, newPrompt: string) {
-        const {filterNewPromptsOnly} = PromptWordTooltip;
-        const {united} = Database.data;
-        const {state} = PromptsBrowser;
-        const autoCompleteBox = PromptsBrowser.DOMCache.containers[state.currentContainer].autocompliteWindow;
-        const textArea = PromptsBrowser.DOMCache.containers[state.currentContainer].textArea;
-        if(!textArea || !autoCompleteBox) return;
-        const targetItem = united.find(item => item.id === newPrompt);
-        autoCompleteBox.style.display = "none";
-        let newValue = "";
-    
-        const addAfter = targetItem && targetItem.addAfter ? filterNewPromptsOnly(targetItem.addAfter) : "";
-        const addStart = targetItem && targetItem.addStart ? filterNewPromptsOnly(targetItem.addStart) : "";
-        const addEnd = targetItem && targetItem.addEnd ? filterNewPromptsOnly(targetItem.addEnd) : "";
-    
-        if(targetItem && targetItem.addAtStart) {
-            const oldValue = textArea.value.substring(0, start) + textArea.value.substring(end);
-            if(targetItem.isExternalNetwork) newPrompt = `<${newPrompt}>`;
-            if(addAfter) newPrompt += ", " + addAfter + ", ";
-    
-            newValue += newPrompt;
-    
-            if(addStart) newValue += addStart + ", ";
-            newValue += oldValue;
-    
-            if(addEnd) newValue += addEnd;
-    
-        } else {
-            const prefix = textArea.value.substring(0, start);
-            const postfix = textArea.value.substring(end);
-    
-            if(addStart) newValue += addStart + ", ";
-            
-            if(prefix) newValue += prefix + " ";
-        
-            if(targetItem) {
-                if(targetItem.isExternalNetwork) newPrompt = `<${newPrompt}>`;
-                if(addAfter) newPrompt += ", " + addAfter;
-        
-                newValue += newPrompt;
-        
-            } else newValue += newPrompt;
-        
-            if(postfix) newValue += postfix;
-            else newValue += ", ";
-    
-            if(addEnd) newValue += addEnd;
-        }
-    
-        textArea.value = newValue;
-    
-        PromptWordTooltip.selectedIndex = 0;
-        synchroniseCurrentPrompts(false);
     }
     
     public static getPossiblePrompts(word: string) {
@@ -301,7 +96,7 @@ class PromptWordTooltip {
         clearTimeout(PromptWordTooltip.unfocusTimeout);
     
         if(e.keyCode === 38 || e.keyCode === 40 || e.keyCode === 13) {
-            const block = PromptWordTooltip.onHintWindowKey(e);
+            const block = PromptWordTooltipEvent.onHintWindowKey(e);
     
             if(block) {
                 e.stopPropagation();
@@ -377,7 +172,7 @@ class PromptWordTooltip {
             hintItem.dataset.end = wordEnd + "";
             if(currHints === selectedIndex) hintItem.classList.add("PBE_hintItemSelected");
     
-            hintItem.addEventListener("click", PromptWordTooltip.onClickHint);
+            hintItem.addEventListener("click", PromptWordTooltipEvent.onClickHint);
     
             autoCompleteBox.appendChild(hintItem);
     
@@ -395,7 +190,7 @@ class PromptWordTooltip {
             hintItem.dataset.end = wordEnd + "";
             if(currHints === selectedIndex) hintItem.classList.add("PBE_hintItemSelected");
     
-            hintItem.addEventListener("click", PromptWordTooltip.onClickHint);
+            hintItem.addEventListener("click", PromptWordTooltipEvent.onClickHint);
     
             autoCompleteBox.appendChild(hintItem);
     

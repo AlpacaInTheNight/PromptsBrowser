@@ -1,10 +1,8 @@
 import PromptsBrowser from "client/index";
 import Database from "client/Database/index";
-import KnownPrompts from "client/KnownPrompts/index";
-import CurrentPrompts from "client/CurrentPrompts/index";
 import synchroniseCurrentPrompts from "client/synchroniseCurrentPrompts";
-import Prompt from "clientTypes/prompt";
 import showPromptItem from "client/showPromptItem";
+import PromptScribeEvent from "./event";
 
 class PromptScribe {
     
@@ -17,10 +15,10 @@ class PromptScribe {
 
         wrapper.appendChild(promptScribe);
 
-        PromptsBrowser.onCloseActiveWindow = PromptScribe.onCloseWindow;
+        PromptsBrowser.onCloseActiveWindow = PromptScribeEvent.onCloseWindow;
 
         promptScribe.addEventListener("click", () => {
-            PromptsBrowser.onCloseActiveWindow = PromptScribe.onCloseWindow;
+            PromptsBrowser.onCloseActiveWindow = PromptScribeEvent.onCloseWindow;
         });
     }
 
@@ -37,84 +35,12 @@ class PromptScribe {
         positiveWrapper.appendChild(addUnknownButton);
     }
 
-    private static onCloseWindow() {
-        const {state} = PromptsBrowser;
-        const wrapper = PromptsBrowser.DOMCache.promptScribe;
-
-        if(!wrapper) return;
-
-        state.showScriberWindow = undefined;
-        wrapper.style.display = "none";
-    }
-
     public static onOpenScriber() {
         const {state} = PromptsBrowser;
         synchroniseCurrentPrompts();
 
         state.showScriberWindow = true;
         PromptScribe.update(true);
-    }
-
-    private static onAddUnknownPrompts() {
-        const {data} = Database;
-        const {state} = PromptsBrowser;
-        let {selectedNewPrompts = []} = state;
-        const activePrompts = PromptsBrowser.getCurrentPrompts();
-        if(!state.savePreviewCollection) return;
-        const targetCollection = data.original[state.savePreviewCollection];
-        if(!targetCollection) return;
-        let newPrompts = false;
-
-        for(const prompt of activePrompts) {
-            if(!selectedNewPrompts.includes(prompt.id)) continue;
-
-            const known = targetCollection.some(item => item.id === prompt.id);
-            if(!known) {
-                if(!newPrompts) newPrompts = true;
-                const targetItem: Prompt = {id: prompt.id, tags: [], category: []};
-                if(prompt.isExternalNetwork) targetItem.isExternalNetwork = true;
-                targetCollection.push(targetItem);
-
-                //removing from the selected
-                selectedNewPrompts = selectedNewPrompts.filter(item => item !== prompt.id);
-            }
-        }
-
-        if(!newPrompts) return;
-        state.selectedNewPrompts = selectedNewPrompts;
-
-        Database.saveJSONData(state.savePreviewCollection);
-        Database.updateMixedList();
-        KnownPrompts.update();
-        CurrentPrompts.update();
-        PromptScribe.update();
-    }
-
-    private static onToggleOnlyNew(e: MouseEvent) {
-        const {state} = PromptsBrowser;
-        const id = "new_in_all_collections";
-
-        if(state.toggledButtons.includes(id)) {
-            state.toggledButtons = state.toggledButtons.filter(item => item !== id);
-        } else {
-            state.toggledButtons.push(id);
-        }
-        
-        PromptScribe.update();
-    }
-
-    private static onToggleAll(e: MouseEvent) {
-        const {state} = PromptsBrowser;
-        let {selectedNewPrompts = []} = state;
-
-        if(!selectedNewPrompts.length) {
-            PromptScribe.update(true);
-            return;
-        }
-
-        state.selectedNewPrompts = [];
-        
-        PromptScribe.update();
     }
 
     private static showHeader(wrapper: HTMLElement) {
@@ -131,20 +57,20 @@ class PromptScribe {
         if(state.toggledButtons.includes("new_in_all_collections")) toggleOnlyNew.classList.add("PBE_toggledButton");
         toggleOnlyNew.style.height = "24px";
 
-        toggleOnlyNew.addEventListener("click", PromptScribe.onToggleOnlyNew);
+        toggleOnlyNew.addEventListener("click", PromptScribeEvent.onToggleOnlyNew);
 
         const saveButton = document.createElement("button");
         saveButton.innerText = "Add new prompts";
         saveButton.className = "PBE_button";
 
-        saveButton.addEventListener("click", PromptScribe.onAddUnknownPrompts);
+        saveButton.addEventListener("click", PromptScribeEvent.onAddUnknownPrompts);
 
         const toggleAll = document.createElement("button");
         toggleAll.innerText = "Toggle all";
         toggleAll.className = "PBE_button";
         toggleAll.style.marginRight = "10px";
 
-        toggleAll.addEventListener("click", PromptScribe.onToggleAll);
+        toggleAll.addEventListener("click", PromptScribeEvent.onToggleAll);
 
         const collectionSelect = document.createElement("select");
         collectionSelect.className = "PBE_generalInput PBE_select";
@@ -244,7 +170,7 @@ class PromptScribe {
         const wrapper = PromptsBrowser.DOMCache.promptScribe;
 
         if(!wrapper) return;
-        PromptsBrowser.onCloseActiveWindow = PromptScribe.onCloseWindow;
+        PromptsBrowser.onCloseActiveWindow = PromptScribeEvent.onCloseWindow;
         wrapper.innerHTML = "";
         wrapper.style.display = "flex";
 

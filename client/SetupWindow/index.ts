@@ -1,14 +1,14 @@
 import PromptsBrowser from "client/index";
 import Database from "client/Database/index";
 import { makeElement, makeSelect } from "client/dom";
-import { makeFileNameSafe } from "client/utils";
+import SetupWindowEvent from "./event";
 
 class SetupWindow {
     
     /**
      * Shown Setup window tab
      */
-    private static viewMode = "normal";
+    public static viewMode = "normal";
 
     /**
      * Inits Setup window HTML on page, loads config data.
@@ -29,70 +29,11 @@ class SetupWindow {
         PromptsBrowser.DOMCache.setupWindow = setupWindow;
         wrapper.appendChild(setupWindow);
 
-        PromptsBrowser.onCloseActiveWindow = SetupWindow.onCloseWindow;
+        PromptsBrowser.onCloseActiveWindow = SetupWindowEvent.onCloseWindow;
 
         setupWindow.addEventListener("click", () => {
-            PromptsBrowser.onCloseActiveWindow = SetupWindow.onCloseWindow;
+            PromptsBrowser.onCloseActiveWindow = SetupWindowEvent.onCloseWindow;
         });
-    }
-
-    /**
-     * Closes Setup window
-     * @returns 
-     */
-    private static onCloseWindow = () => {
-        const {viewMode} = SetupWindow;
-        const wrapper = PromptsBrowser.DOMCache.setupWindow;
-        if(!wrapper) return;
-
-        if(viewMode === "newCollection" || viewMode === "newStylesCollection") {
-            SetupWindow.viewMode = "normal";
-            SetupWindow.update();
-            return true;
-
-        } else wrapper.style.display = "none";
-    }
-
-    private static onUpdateDirName = (e: Event) => {
-        const target = e.currentTarget as HTMLInputElement;
-        let value = target.value;
-        if(!value) return;
-
-        value = makeFileNameSafe(value);
-        target.value = value;
-    }
-
-    private static onCreate = (e: MouseEvent) => {
-        const target = e.currentTarget as HTMLButtonElement;
-        const {viewMode} = SetupWindow;
-        if(!target.parentNode) return;
-        const setupWindow = target.parentNode.parentNode;
-        if(!setupWindow) return;
-
-        if(viewMode === "newCollection") {
-            const newNameInput = setupWindow.querySelector(".PBE_newCollectionName") as HTMLInputElement;
-            const formatSelect = setupWindow.querySelector(".PBE_newCollectionFormat") as HTMLSelectElement;
-            if(!newNameInput || !formatSelect) return;
-            const newName = makeFileNameSafe(newNameInput.value);
-            const format = formatSelect.value;
-            if(!newName || !format) return;
-
-            Database.createNewCollection(newName, format);
-            
-        } else if(viewMode === "newStylesCollection") {
-            const newNameInput = setupWindow.querySelector(".PBE_newCollectionName") as HTMLInputElement;
-            const formatSelect = setupWindow.querySelector(".PBE_newStyleCollectionFormat") as HTMLSelectElement;
-            if(!newNameInput || !formatSelect) return;
-            const newName = makeFileNameSafe(newNameInput.value);
-            const format = formatSelect.value;
-            if(!newName || !format) return;
-            
-            Database.createNewStylesCollection(newName, format);
-
-        }
-
-        SetupWindow.viewMode = "normal";
-        SetupWindow.update();
     }
 
     /**
@@ -134,7 +75,7 @@ class SetupWindow {
 
         newNameLabel.innerText = "New prompts collection name";
 
-        newNameInput.addEventListener("change", SetupWindow.onUpdateDirName);
+        newNameInput.addEventListener("change", SetupWindowEvent.onUpdateDirName);
 
         newName.appendChild(newNameLabel);
         newName.appendChild(newNameInput);
@@ -172,7 +113,7 @@ class SetupWindow {
         const formatLabel = makeElement<HTMLDivElement>({element: "div", content: "Store format"});
 
         const newNameInput = makeElement<HTMLInputElement>({element: "input", className: "PBE_generalInput PBE_input PBE_newCollectionName"});
-        newNameInput.addEventListener("change", SetupWindow.onUpdateDirName);
+        newNameInput.addEventListener("change", SetupWindowEvent.onUpdateDirName);
 
         newName.appendChild(newNameLabel);
         newName.appendChild(newNameInput);
@@ -199,7 +140,7 @@ class SetupWindow {
         const wrapper = PromptsBrowser.DOMCache.setupWindow;
         if(!wrapper) return;
         
-        PromptsBrowser.onCloseActiveWindow = SetupWindow.onCloseWindow;
+        PromptsBrowser.onCloseActiveWindow = SetupWindowEvent.onCloseWindow;
         wrapper.style.display = "flex";
 
         if(viewMode === "newCollection") wrapper.innerHTML = "New prompts collection";
@@ -241,14 +182,14 @@ class SetupWindow {
         closeButton.className = "PBE_button";
         if(viewMode !== "normal") closeButton.classList.add("PBE_buttonCancel");
 
-        closeButton.addEventListener("click", SetupWindow.onCloseWindow);
+        closeButton.addEventListener("click", SetupWindowEvent.onCloseWindow);
 
         if(viewMode === "newCollection" || viewMode === "newStylesCollection") {
             const createButton = document.createElement("button");
             createButton.innerText = "Create";
             createButton.className = "PBE_button";
 
-            createButton.addEventListener("click", SetupWindow.onCreate);
+            createButton.addEventListener("click", SetupWindowEvent.onCreate);
 
             footerBlock.appendChild(createButton);
         }

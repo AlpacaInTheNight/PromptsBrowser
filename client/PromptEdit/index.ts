@@ -5,6 +5,7 @@ import CollectionTools from "client/CollectionTools/index";
 import Prompt from "clientTypes/prompt";
 import TagTooltip from "client/TagTooltip/index";
 import { makeElement, makeSelect } from "client/dom";
+import PromptEditEvent from "./event";
 
 class PromptEdit {
 
@@ -15,68 +16,11 @@ class PromptEdit {
         PromptsBrowser.DOMCache.promptEdit = promptEdit;
         wrapper.appendChild(promptEdit);
 
-        PromptsBrowser.onCloseActiveWindow = PromptEdit.onCloseWindow;
+        PromptsBrowser.onCloseActiveWindow = PromptEditEvent.onCloseWindow;
 
         promptEdit.addEventListener("click", () => {
-            PromptsBrowser.onCloseActiveWindow = PromptEdit.onCloseWindow;
+            PromptsBrowser.onCloseActiveWindow = PromptEditEvent.onCloseWindow;
         });
-    }
-
-    private static onCloseWindow() {
-        const {state} = PromptsBrowser;
-        const wrapper = PromptsBrowser.DOMCache.promptEdit;
-        if(!wrapper || !state.editingPrompt) return;
-
-        state.editingPrompt = undefined;
-        wrapper.style.display = "none";
-    }
-
-    private static onAddTags(targetItem: Prompt, inputElement: HTMLInputElement) {
-        if(!inputElement || !targetItem) return;
-        const value = inputElement.value;
-
-        let tags = value.split(",").map(item => item.trim());
-
-        //removing empty tags
-        tags = tags.filter(item => item);
-
-        for(const tag of tags) {
-            if(targetItem.tags.includes(tag)) continue;
-            targetItem.tags.push(tag);
-        }
-
-        PromptEdit.update(targetItem);
-    }
-
-    private static onChangeAutogenCollection(value: string, prompt: Prompt) {
-        if(!prompt) return;
-        const {data} = Database;
-
-        if(!prompt.autogen) prompt.autogen = {};
-        if(!value || value === "__none") delete prompt.autogen.collection;
-        else {
-            prompt.autogen.collection = value;
-
-            const targetCollection = data.styles[value];
-            if(!targetCollection) return;
-            prompt.autogen.style = "";
-
-            for(const styleItem of targetCollection) {
-                prompt.autogen.style = styleItem.name;
-                break;
-            }
-        }
-
-        PromptEdit.update(prompt);
-    }
-
-    private static onChangeAutogenStyle(value: string, prompt: Prompt) {
-        if(!prompt || !value) return;
-
-        if(!prompt.autogen) prompt.autogen = {};
-        prompt.autogen.style = value;
-
-        PromptEdit.update(prompt);
     }
 
     private static addCollectionSelector(wrapper: HTMLElement) {
@@ -401,7 +345,7 @@ class PromptEdit {
             className: "PBE_generalInput",
             value: collection,
             options: colOptions,
-            onChange: (e) => PromptEdit.onChangeAutogenCollection((e.currentTarget as any).value, prompt)
+            onChange: (e) => PromptEditEvent.onChangeAutogenCollection((e.currentTarget as any).value, prompt)
         });
 
         autoGenBlock.appendChild(stylesCollectionsSelect);
@@ -418,7 +362,7 @@ class PromptEdit {
                     className: "PBE_generalInput",
                     value: autogen.style || "",
                     options: styleOptions,
-                    onChange: (e) => PromptEdit.onChangeAutogenStyle((e.currentTarget as any).value, prompt)
+                    onChange: (e) => PromptEditEvent.onChangeAutogenStyle((e.currentTarget as any).value, prompt)
                 });
 
                 autoGenBlock.appendChild(styleSelect);
@@ -435,7 +379,7 @@ class PromptEdit {
         if(!wrapper || !state.editingPrompt) return;
         if(!targetItem) targetItem = PromptEdit.getTargetItem() || undefined;
         if(!targetItem) return;
-        PromptsBrowser.onCloseActiveWindow = PromptEdit.onCloseWindow;
+        PromptsBrowser.onCloseActiveWindow = PromptEditEvent.onCloseWindow;
         wrapper.innerHTML = "";
 
         const headerBlock = makeElement<HTMLDivElement>({element: "div", className: "PBE_rowBlock"});
@@ -518,14 +462,14 @@ class PromptEdit {
             if(e.keyCode !== 13) return;
             if(target.dataset.hint) return;
 
-            PromptEdit.onAddTags(targetItem, tagInput);
+            PromptEditEvent.onAddTags(targetItem, tagInput);
         });
 
         addTagButton.addEventListener("click", (e) => {
             const inputElement = wrapper.querySelector("#PBE_addTagInput") as HTMLInputElement;
             if(!inputElement) return;
 
-            PromptEdit.onAddTags(targetItem, inputElement);
+            PromptEditEvent.onAddTags(targetItem, inputElement);
         });
 
         addCategoryButton.addEventListener("click", (e) => {
@@ -541,7 +485,7 @@ class PromptEdit {
 
         commentArea.addEventListener("change", (e) => targetItem.comment = (e.currentTarget as any).value);
 
-        cancelButton.addEventListener("click", PromptEdit.onCloseWindow);
+        cancelButton.addEventListener("click", PromptEditEvent.onCloseWindow);
 
         saveButton.addEventListener("click", PromptEdit.saveEdit);
 

@@ -1,10 +1,10 @@
 import PromptsBrowser from "client/index";
-import Style from "clientTypes/style";
 import Database from "client/Database/index";
 import CurrentPrompts from "client/CurrentPrompts/index";
 import LoadStyle from "client/LoadStyle/index";
 import { makeElement } from "client/dom";
 import showPromptItem from "client/showPromptItem";
+import SaveStyleEvent from "./event";
 
 class SaveStyle {
 
@@ -16,10 +16,10 @@ class SaveStyle {
     
         PromptsBrowser.DOMCache.saveStyleWindow = saveStyleWindow;
         mainWrapper.appendChild(saveStyleWindow);
-        PromptsBrowser.onCloseActiveWindow = SaveStyle.onCloseWindow;
+        PromptsBrowser.onCloseActiveWindow = SaveStyleEvent.onCloseWindow;
     
         saveStyleWindow.addEventListener("click", () => {
-            PromptsBrowser.onCloseActiveWindow = SaveStyle.onCloseWindow;
+            PromptsBrowser.onCloseActiveWindow = SaveStyleEvent.onCloseWindow;
         });
     }
     
@@ -29,57 +29,9 @@ class SaveStyle {
         addStylesButton.className = "PBE_actionButton PBE_saveStylesButton";
         addStylesButton.innerText = "Save style";
     
-        addStylesButton.addEventListener("click", SaveStyle.onOpenStyles);
+        addStylesButton.addEventListener("click", SaveStyleEvent.onOpenStyles);
     
         positiveWrapper.appendChild(addStylesButton);
-    }
-    
-    private static onOpenStyles() {
-        const {state} = PromptsBrowser;
-    
-        state.showSaveStyleWindow = true;
-        SaveStyle.update();
-    }
-    
-    private static onCloseWindow() {
-        const {state} = PromptsBrowser;
-        const wrapper = PromptsBrowser.DOMCache.saveStyleWindow;
-        if(!wrapper || !state.showSaveStyleWindow) return;
-    
-        state.showSaveStyleWindow = undefined;
-        wrapper.style.display = "none";
-    }
-    
-    private static onSaveStyle() {
-        const {data} = Database;
-        const {state} = PromptsBrowser;
-        const collectionId = state.newStyleCollection;
-        if(!collectionId) return;
-    
-        const targetCollection = data.styles[collectionId];
-        if(!targetCollection) return;
-    
-        const styleNameInput = PromptsBrowser.DOMCache.saveStyleWindow.querySelector("#PBE_newStyleName") as HTMLInputElement;
-    
-        const name = styleNameInput.value;
-        if(!name || !data.styles) return;
-    
-        const newStyle = LoadStyle.grabCurrentStyle(name, collectionId);
-        if(!newStyle) return;
-    
-        targetCollection.push(newStyle as Style);
-    
-        Database.updateStyles(collectionId);
-        SaveStyle.update();
-    }
-    
-    private static onChangeNewCollection(e: Event) {
-        const target = e.currentTarget as HTMLSelectElement;
-        const {state} = PromptsBrowser;
-        const value = target.value;
-        if(!value) return;
-    
-        state.newStyleCollection = value;
     }
     
     private static showCurrentPrompts(wrapper: HTMLElement) {
@@ -140,7 +92,7 @@ class SaveStyle {
         styleNameInput.className = "PBE_generalInput PBE_newStyleName";
         styleNameInput.id = "PBE_newStyleName";
     
-        saveButton.addEventListener("click", SaveStyle.onSaveStyle);
+        saveButton.addEventListener("click", SaveStyleEvent.onSaveStyle);
     
         const collectionSelect = document.createElement("select");
         collectionSelect.className = "PBE_generalInput PBE_select";
@@ -157,7 +109,7 @@ class SaveStyle {
         collectionSelect.innerHTML = options;
         collectionSelect.value = state.newStyleCollection;
     
-        collectionSelect.addEventListener("change", SaveStyle.onChangeNewCollection);
+        collectionSelect.addEventListener("change", SaveStyleEvent.onChangeNewCollection);
     
         const saveRow = makeElement<HTMLDivElement>({element: "div", className: "PBE_row"});
     
@@ -176,7 +128,7 @@ class SaveStyle {
         const {state} = PromptsBrowser;
         const wrapper = PromptsBrowser.DOMCache.saveStyleWindow;
         if(!wrapper || !state.showSaveStyleWindow) return;
-        PromptsBrowser.onCloseActiveWindow = SaveStyle.onCloseWindow;
+        PromptsBrowser.onCloseActiveWindow = SaveStyleEvent.onCloseWindow;
         wrapper.innerHTML = "";
         wrapper.style.display = "flex";
     
@@ -196,7 +148,7 @@ class SaveStyle {
             SaveStyle.showAddStyle(addNewContainer);
         }
     
-        closeButton.addEventListener("click", SaveStyle.onCloseWindow);
+        closeButton.addEventListener("click", SaveStyleEvent.onCloseWindow);
     
         footerBlock.appendChild(closeButton);
     

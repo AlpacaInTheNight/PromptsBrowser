@@ -1,13 +1,11 @@
 import PromptsBrowser from "client/index";
 import Prompt from "clientTypes/prompt";
 import Database from "client/Database/index";
-import CurrentPrompts from "client/CurrentPrompts/index";
-import PromptEdit from "client/PromptEdit/index";
 import { makeElement } from "client/dom";
 import showPromptItem from "client/showPromptItem";
 import { replaceAllRegex } from "client/utils";
-import { DEFAULT_PROMPT_WEIGHT } from "client/const";
 import PromptsSimpleFilter from "client/PromptsFilter/simple";
+import PromptToolsEvent from "./event";
 
 class PromptTools {
     
@@ -50,114 +48,11 @@ class PromptTools {
 
         wrapper.appendChild(promptTools);
 
-        PromptsBrowser.onCloseActiveWindow = PromptTools.onCloseWindow;
+        PromptsBrowser.onCloseActiveWindow = PromptToolsEvent.onCloseWindow;
 
         promptTools.addEventListener("click", () => {
-            PromptsBrowser.onCloseActiveWindow = PromptTools.onCloseWindow;
+            PromptsBrowser.onCloseActiveWindow = PromptToolsEvent.onCloseWindow;
         });
-    }
-
-    private static onCloseWindow() {
-        const {state} = PromptsBrowser;
-        const wrapper = PromptsBrowser.DOMCache.promptTools;
-
-        if(!wrapper) return;
-
-        state.promptToolsId = undefined;
-        wrapper.style.display = "none";
-    }
-
-    private static onToggleButton(e: MouseEvent) {
-        const target = e.currentTarget as HTMLElement;
-        const {state} = PromptsBrowser;
-
-        const id = target.dataset.id;
-        if(!id) return;
-
-        if(state.toggledButtons.includes(id)) {
-            state.toggledButtons = state.toggledButtons.filter(item => item !== id);
-        } else {
-            state.toggledButtons.push(id);
-        }
-        
-        PromptTools.update();
-    }
-
-    private static onElementClick(e: MouseEvent) {
-        const target = e.currentTarget as HTMLElement;
-        const {data} = Database;
-        const {united} = data;
-        const {state} = PromptsBrowser;
-        const currPrompt = state.promptToolsId;
-        const clickPrompt = target.dataset.prompt;
-        if(!currPrompt || !clickPrompt) return;
-        const replaceMode = state.toggledButtons.includes("tools_replaceMode");
-        let activePrompts = PromptsBrowser.getCurrentPrompts();
-        let activePrompt: Prompt | undefined = undefined;
-
-        let selectedPrompt = activePrompts.find(item => item.id === clickPrompt);
-        if(!selectedPrompt) {
-            selectedPrompt = united.find(item => item.id === clickPrompt);
-        }
-        if(!selectedPrompt) return;
-
-        const currTargetIndex = activePrompts.findIndex(item => {
-            if(item.id === currPrompt) {
-                activePrompt = item;
-                return true;
-            }
-        });
-        const clickTargetIndex = activePrompts.findIndex(item => item.id === clickPrompt);
-        if(currTargetIndex === -1) return;
-
-        if(clickTargetIndex !== -1) {
-
-            if(e.metaKey || e.ctrlKey) {
-                activePrompts = activePrompts.filter(item => item.id !== clickPrompt);
-                PromptsBrowser.setCurrentPrompts(activePrompts);
-
-            } else if(e.shiftKey) {
-                state.editingPrompt = clickPrompt;
-                PromptEdit.update();
-
-            } else {
-                state.promptToolsId = clickPrompt;
-                
-            }
-
-            PromptTools.update();
-            CurrentPrompts.update();
-            return;
-        }
-
-        const newItem = {
-            id: clickPrompt,
-            weight: DEFAULT_PROMPT_WEIGHT,
-            isExternalNetwork: selectedPrompt.isExternalNetwork
-        };
-
-        let action = "";
-
-        if(e.shiftKey) {
-            state.editingPrompt = clickPrompt;
-            PromptEdit.update();
-
-        } else {
-            if(replaceMode) action = e.altKey ? "add" : "replace";
-            else action = e.altKey ? "replace" : "add";
-
-        }
-
-        if(action === "add") activePrompts.splice(currTargetIndex, 0, newItem);
-        else if (action === "replace") {
-            if(activePrompt && activePrompt.weight !== undefined) newItem.weight = activePrompt.weight;
-
-            activePrompts[currTargetIndex] = newItem;
-            state.promptToolsId = clickPrompt;
-        }
-
-        PromptTools.update();
-        CurrentPrompts.update();
     }
 
     private static showCurrentPrompts(wrapper: HTMLElement) {
@@ -184,8 +79,8 @@ class PromptTools {
 
         if(state.toggledButtons.includes("tools_showAll")) showAll.classList.add("PBE_toggledButton");
         if(state.toggledButtons.includes("tools_replaceMode")) replaceMode.classList.add("PBE_toggledButton");
-        showAll.addEventListener("click", PromptTools.onToggleButton);
-        replaceMode.addEventListener("click", PromptTools.onToggleButton);
+        showAll.addEventListener("click", PromptToolsEvent.onToggleButton);
+        replaceMode.addEventListener("click", PromptToolsEvent.onToggleButton);
 
         setupField.appendChild(setupLegend);
         setupField.appendChild(showAll);
@@ -213,9 +108,9 @@ class PromptTools {
         if(state.toggledButtons.includes("tools_name")) showName.classList.add("PBE_toggledButton");
         
 
-        showTags.addEventListener("click", PromptTools.onToggleButton);
-        showCategory.addEventListener("click", PromptTools.onToggleButton);
-        showName.addEventListener("click", PromptTools.onToggleButton);
+        showTags.addEventListener("click", PromptToolsEvent.onToggleButton);
+        showCategory.addEventListener("click", PromptToolsEvent.onToggleButton);
+        showName.addEventListener("click", PromptToolsEvent.onToggleButton);
 
         switch(sorting) {
 
@@ -260,7 +155,7 @@ class PromptTools {
                 options: {isShadowed},
             });
             
-            promptElement.addEventListener("click", PromptTools.onElementClick);
+            promptElement.addEventListener("click", PromptToolsEvent.onElementClick);
             currentPromptsContainer.appendChild(promptElement);
         }
 
@@ -420,7 +315,7 @@ class PromptTools {
 
             addedIds.push(item.id);
             const promptElement = showPromptItem({prompt: item, options: {isShadowed}});
-            promptElement.addEventListener("click", PromptTools.onElementClick);
+            promptElement.addEventListener("click", PromptToolsEvent.onElementClick);
             wrapper.appendChild(promptElement);
         }
 
@@ -432,7 +327,7 @@ class PromptTools {
         const wrapper = PromptsBrowser.DOMCache.promptTools;
 
         if(!wrapper || !state.promptToolsId) return;
-        PromptsBrowser.onCloseActiveWindow = PromptTools.onCloseWindow;
+        PromptsBrowser.onCloseActiveWindow = PromptToolsEvent.onCloseWindow;
 
         let currScrollState = 0;
 
@@ -470,7 +365,7 @@ class PromptTools {
         PromptsSimpleFilter.show(possibleFilterBlock, PromptTools.possibleFilters, PromptTools.update);
         PromptTools.showPossiblePromptswrapper(possiblePromptsBlock);
 
-        closeButton.addEventListener("click", PromptTools.onCloseWindow);
+        closeButton.addEventListener("click", PromptToolsEvent.onCloseWindow);
 
         footerBlock.appendChild(closeButton);
 

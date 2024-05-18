@@ -3,9 +3,9 @@ import Database from "client/Database/index";
 import Style from "clientTypes/style";
 import { makeElement, makeCheckbox } from "client/dom";
 import showPromptItem from "client/showPromptItem";
-import applyStyle from "client/applyStyle";
 import { EMPTY_CARD_GRADIENT } from "client/const";
-import { Config, ConfigTrackStyleMeta } from "clientTypes/state";
+import { ConfigTrackStyleMeta } from "clientTypes/state";
+import LoadStyleEvent from "./event";
 
 class LoadStyle {
 
@@ -23,10 +23,10 @@ class LoadStyle {
     
         PromptsBrowser.DOMCache.stylesWindow = stylesWindow;
         mainWrapper.appendChild(stylesWindow);
-        PromptsBrowser.onCloseActiveWindow = LoadStyle.onCloseWindow;
+        PromptsBrowser.onCloseActiveWindow = LoadStyleEvent.onCloseWindow;
     
         stylesWindow.addEventListener("click", () => {
-            PromptsBrowser.onCloseActiveWindow = LoadStyle.onCloseWindow;
+            PromptsBrowser.onCloseActiveWindow = LoadStyleEvent.onCloseWindow;
         });
     }
     
@@ -36,86 +36,9 @@ class LoadStyle {
         addStylesButton.className = "PBE_actionButton PBE_stylesButton";
         addStylesButton.innerText = "Styles";
     
-        addStylesButton.addEventListener("click", LoadStyle.onOpenStyles);
+        addStylesButton.addEventListener("click", LoadStyleEvent.onOpenStyles);
     
         positiveWrapper.appendChild(addStylesButton);
-    }
-
-    private static onCloseWindow() {
-        const {state} = PromptsBrowser;
-        const wrapper = PromptsBrowser.DOMCache.stylesWindow;
-        if(!wrapper || !state.showStylesWindow) return;
-    
-        state.showStylesWindow = undefined;
-        wrapper.style.display = "none";
-    }
-    
-    private static onCardClick(e: MouseEvent) {
-        const isShift = e.shiftKey;
-        const isCtrl = e.metaKey || e.ctrlKey;
-    
-        if(isShift) LoadStyle.applyStyle(e, false);
-        else if(isCtrl) LoadStyle.removeStyle(e);
-        else LoadStyle.onSelectStyle(e);
-    }
-    
-    private static onChangeFilterCollection(e: Event) {
-        const target = e.currentTarget as HTMLSelectElement;
-        const {state} = PromptsBrowser;
-        const value = target.value;
-    
-        state.filterStyleCollection = value;
-        LoadStyle.update();
-    }
-    
-    private static onChangeFilterName(e: Event) {
-        const target = e.currentTarget as HTMLInputElement;
-        const {state} = PromptsBrowser;
-        const value = target.value;
-    
-        state.filterStyleName = value.toLowerCase();
-        LoadStyle.update();
-    }
-    
-    private static onToggleShortMode(e: MouseEvent) {
-        const {state} = PromptsBrowser;
-        const id = "styles_simplified_view";
-    
-        if(state.toggledButtons.includes(id)) {
-            state.toggledButtons = state.toggledButtons.filter(item => item !== id);
-        } else {
-            state.toggledButtons.push(id);
-        }
-        
-        LoadStyle.update();
-    }
-    
-    private static onChangeSaveMeta(e: Event) {
-        const target = e.currentTarget as HTMLInputElement;
-        const {state} = PromptsBrowser;
-        const checked = target.checked;
-        const id = target.dataset.id;
-        if(!id) return;
-    
-        if(!state.config) state.config = {} as Config;
-        if(!state.config.saveStyleMeta) state.config.saveStyleMeta = {} as ConfigTrackStyleMeta;
-    
-        (state.config.saveStyleMeta as any)[id] = checked;
-        localStorage.setItem("PBE_config", JSON.stringify(state.config));
-    }
-    
-    private static onChangeUpdateMeta(e: Event) {
-        const target = e.currentTarget as HTMLInputElement;
-        const {state} = PromptsBrowser;
-        const checked = target.checked;
-        const id = target.dataset.id;
-        if(!id) return;
-    
-        if(!state.config) state.config = {} as Config;
-        if(!state.config.updateStyleMeta) state.config.updateStyleMeta = {} as ConfigTrackStyleMeta;
-    
-        (state.config.updateStyleMeta as any)[id] = checked;
-        localStorage.setItem("PBE_config", JSON.stringify(state.config));
     }
     
     public static showMetaCheckboxes(wrapper: HTMLElement, isUpdate = false) {
@@ -126,7 +49,7 @@ class LoadStyle {
         const paramsRow = makeElement<HTMLFieldSetElement>({element: "fieldset", className: "PBE_fieldset PBE_styleMetaCheckboxes"});
         const paramsRowLegend = makeElement<HTMLLegendElement>({element: "legend", content: "Save meta:"});
     
-        const onChange = isUpdate ? LoadStyle.onChangeUpdateMeta : LoadStyle.onChangeSaveMeta;
+        const onChange = isUpdate ? LoadStyleEvent.onChangeUpdateMeta : LoadStyleEvent.onChangeSaveMeta;
         const prefix = isUpdate ? "Update" : "Save";
     
         const keepSeed =
@@ -235,231 +158,6 @@ class LoadStyle {
         return newStyle;
     }
     
-    private static removeStyle(e: MouseEvent) {
-        const target = e.currentTarget as HTMLElement;
-        const {readonly} = Database.meta;
-        const {data} = Database;
-        if(readonly || !data.styles) return;
-    
-        let collectionId = undefined;
-        let index = undefined;
-    
-        if(target.dataset.action) {
-            const {selectedItem} = LoadStyle;
-            collectionId = selectedItem.collection;
-            index = selectedItem.index;
-    
-        } else {
-            collectionId = target.dataset.id;
-            index = Number(target.dataset.index);
-        }
-    
-        if(!collectionId || Number.isNaN(index)) return;
-    
-        const targetCollection = data.styles[collectionId];
-        if(!targetCollection) return;
-    
-        const targetStyle = data.styles[collectionId][index];
-        if(!targetStyle) return;
-    
-        if( confirm(`Remove style "${targetStyle.name}" from catalogue "${collectionId}"?`) ) {
-            targetCollection.splice(index, 1);
-    
-            Database.updateStyles(collectionId);
-            LoadStyle.update();
-        }
-    }
-    
-    private static onRenameStyle(e: MouseEvent) {
-        const target = e.currentTarget as HTMLElement;
-        const {data} = Database;
-        if(!data.styles) return;
-    
-        let collectionId = undefined;
-        let index = undefined;
-    
-        if(target.dataset.action) {
-            const {selectedItem} = LoadStyle;
-            collectionId = selectedItem.collection;
-            index = selectedItem.index;
-    
-        } else {
-            collectionId = target.dataset.id;
-            index = Number(target.dataset.index);
-        }
-    
-        if(!collectionId || Number.isNaN(index)) return;
-    
-        const targetCollection = data.styles[collectionId];
-        if(!targetCollection) return;
-    
-        const targetStyle = data.styles[collectionId][index];
-        if(!targetStyle) return;
-    
-        const nameInputField = document.querySelector("#PBE_stylesWindow .PBE_nameAction") as HTMLInputElement;
-        if(!nameInputField || !nameInputField.value) return;
-    
-        for(const styleItem of targetCollection) {
-            if(styleItem.name === nameInputField.value) {
-                alert("Style name already used");
-                return;
-            }
-        }
-    
-        if( confirm(`Rename style "${targetStyle.name}" to "${nameInputField.value}"?`) ) {
-            Database.onRenameStyle(collectionId, targetStyle.name, nameInputField.value);
-        }
-    }
-    
-    private static updateStyle(e: MouseEvent) {
-        const target = e.currentTarget as HTMLElement;
-        const {data} = Database;
-        if(!data.styles) return;
-    
-        let collectionId = undefined;
-        let index = undefined;
-    
-        if(target.dataset.action) {
-            const {selectedItem} = LoadStyle;
-            collectionId = selectedItem.collection;
-            index = selectedItem.index;
-    
-        } else {
-            collectionId = target.dataset.id;
-            index = Number(target.dataset.index);
-        }
-    
-        if(!collectionId || Number.isNaN(index)) return;
-    
-        const targetCollection = data.styles[collectionId];
-        if(!targetCollection) return;
-    
-        const targetStyle = data.styles[collectionId][index];
-        if(!targetStyle) return;
-    
-        if( confirm(`Replace style "${targetStyle.name}" params to the currently selected?`) ) {
-            const newStyle = LoadStyle.grabCurrentStyle(undefined, collectionId, true);
-            if(!newStyle) return;
-    
-            for(const i in newStyle) {
-                (targetStyle as any)[i] = (newStyle as any)[i];
-            }
-    
-            /**
-             * Removing fields that are not part of the style anymore.
-             * Some fields like name or previewImage must be kept in the object.
-             * TODO: I probably should check dictionary of fields that can be added/removed
-             * instead of hardcoding check for things like a name
-             */
-            for(const i in targetStyle) {
-                if(i === "name") continue;
-                if(i === "previewImage") continue;
-    
-                if(!(newStyle as any)[i]) delete (targetStyle as any)[i];
-            }
-    
-            Database.updateStyles(collectionId);
-            LoadStyle.update();
-        }
-    }
-    
-    private static onSelectStyle(e: MouseEvent) {
-        const target = e.currentTarget as HTMLElement;
-        const {data} = Database;
-        const {state} = PromptsBrowser;
-        const {updateStyleMeta = {} as ConfigTrackStyleMeta} = state.config || {};
-    
-        const collection = target.dataset.id;
-        const styleId = target.dataset.name;
-        const index = Number(target.dataset.index);
-        if(!data || !data.styles || !collection || Number.isNaN(index)) return;
-    
-        if(target.classList.contains("PBE_selectedCurrentElement")) {
-            LoadStyle.selectedItem = {collection: "", styleId: "", index: 0};
-            target.classList.remove("PBE_selectedCurrentElement");
-    
-        } else {
-            LoadStyle.selectedItem = {collection, styleId, index};
-    
-            const prevSelected = target.parentNode.querySelector(".PBE_selectedCurrentElement");
-            if(prevSelected) prevSelected.classList.remove("PBE_selectedCurrentElement");
-    
-            const targetCollection =  data.styles[collection];
-            if(targetCollection) {
-                const targetStyle = targetCollection[index];
-                const checkBoxesWrapper = document.querySelector("#PBE_stylesWindow .PBE_styleMetaCheckboxes") as HTMLElement;
-                const nameInputField = document.querySelector("#PBE_stylesWindow .PBE_nameAction") as HTMLInputElement;
-                
-                if(targetStyle && checkBoxesWrapper) {
-    
-                    const checkStatus: {[key: string]: {id: string, checked: boolean}} = {
-                        positive: {id: "#PBE_UpdatekeepPositive", checked: targetStyle.positive !== undefined},
-                        negative: {id: "#PBE_UpdatekeepNegative", checked: targetStyle.negative !== undefined},
-                        size: {id: "#PBE_UpdatekeepSize", checked: targetStyle.height !== undefined},
-                        sampler: {id: "#PBE_UpdatekeepSampler", checked: targetStyle.sampling !== undefined},
-                        quality: {id: "#PBE_UpdatekeepQuality", checked: targetStyle.steps !== undefined},
-                        seed: {id: "#PBE_UpdatekeepSeed", checked: targetStyle.seed !== undefined},
-                    };
-    
-                    for(const fieldId in checkStatus) {
-                        const field = checkStatus[fieldId];
-                        
-                        const targetElement = checkBoxesWrapper.querySelector(field.id) as HTMLInputElement;
-                        targetElement.checked = field.checked;
-                        (updateStyleMeta as any)[fieldId] = field.checked;
-                    }
-    
-                    if(state.config) state.config.updateStyleMeta = updateStyleMeta;
-                }
-    
-                if(targetStyle?.name && nameInputField) {
-                    nameInputField.value = targetStyle.name;
-                }
-    
-            }
-    
-            target.classList.add("PBE_selectedCurrentElement");
-        }
-        
-    }
-    
-    private static applyStyle(e: MouseEvent, isAfter?: boolean) {
-        const target = e.currentTarget as HTMLElement;
-        const {data} = Database;
-        if(!data.styles) return;
-        if(isAfter === undefined) isAfter = target.dataset.isafter ? true : false;
-        
-        let collectionId = undefined;
-        let index = undefined;
-    
-        if(target.dataset.action) {
-            const {selectedItem} = LoadStyle;
-            collectionId = selectedItem.collection;
-            index = selectedItem.index;
-    
-        } else {
-            collectionId = target.dataset.id;
-            index = Number(target.dataset.index);
-        }
-    
-        if(!collectionId || Number.isNaN(index)) return;
-    
-        const targetCollection = data.styles[collectionId];
-        if(!targetCollection) return;
-    
-        const targetStyle = data.styles[collectionId][index];
-        if(!targetStyle) return;
-    
-        applyStyle(targetStyle, isAfter);
-    }
-    
-    private static onOpenStyles() {
-        const {state} = PromptsBrowser;
-    
-        state.showStylesWindow = true;
-        LoadStyle.update();
-    }
-    
     private static showFilters(wrapper: HTMLElement) {
         const {data} = Database;
         const {state} = PromptsBrowser;
@@ -471,7 +169,7 @@ class LoadStyle {
         if(state.toggledButtons.includes("styles_simplified_view")) toggleShortMode.classList.add("PBE_toggledButton");
         toggleShortMode.style.height = "16px";
     
-        toggleShortMode.addEventListener("click", LoadStyle.onToggleShortMode);
+        toggleShortMode.addEventListener("click", LoadStyleEvent.onToggleShortMode);
     
         const collectionSelect = document.createElement("select");
         collectionSelect.className = "PBE_generalInput PBE_select";
@@ -483,14 +181,14 @@ class LoadStyle {
         collectionSelect.innerHTML = options;
         collectionSelect.value = state.filterStyleCollection || "";
     
-        collectionSelect.addEventListener("change", LoadStyle.onChangeFilterCollection);
+        collectionSelect.addEventListener("change", LoadStyleEvent.onChangeFilterCollection);
     
         const nameFilter = document.createElement("input");
         nameFilter.placeholder = "Search name";
         nameFilter.className = "PBE_generalInput PBE_input";
         nameFilter.value = state.filterStyleName || "";
     
-        nameFilter.addEventListener("change", LoadStyle.onChangeFilterName);
+        nameFilter.addEventListener("change", LoadStyleEvent.onChangeFilterName);
     
         wrapper.appendChild(toggleShortMode);
         wrapper.appendChild(collectionSelect);
@@ -539,7 +237,7 @@ class LoadStyle {
                 element.classList.add("PBE_selectedCurrentElement");
             }
     
-            element.addEventListener("click", LoadStyle.onCardClick);
+            element.addEventListener("click", LoadStyleEvent.onCardClick);
     
             wrapper.appendChild(element);
         }
@@ -554,7 +252,7 @@ class LoadStyle {
         nameField.placeholder = "Style name";
         const renameButton = makeElement<HTMLDivElement>({element: "div", className: "PBE_button", content: "Rename", title: "Rename selected style"});
         renameButton.dataset.action = "true";
-        renameButton.addEventListener("click", LoadStyle.onRenameStyle);
+        renameButton.addEventListener("click", LoadStyleEvent.onRenameStyle);
     
         nameContainer.appendChild(nameLegend);
         nameContainer.appendChild(nameField);
@@ -579,7 +277,7 @@ class LoadStyle {
         addBeforeButton.className = "PBE_button";
         addBeforeButton.title = "Add style prompts at the start of current prompts";
         addBeforeButton.dataset.action = "true";
-        addBeforeButton.addEventListener("click", LoadStyle.applyStyle);
+        addBeforeButton.addEventListener("click", LoadStyleEvent.onApplyStyle);
     
         const addAfterButton = document.createElement("div");
         addAfterButton.innerText = "Add after";
@@ -587,7 +285,7 @@ class LoadStyle {
         addAfterButton.title = "Add style prompts at the end of current prompts";
         addAfterButton.dataset.action = "true";
         addAfterButton.dataset.isafter = "true";
-        addAfterButton.addEventListener("click", LoadStyle.applyStyle);
+        addAfterButton.addEventListener("click", LoadStyleEvent.onApplyStyle);
     
         actionContainer.appendChild(actionLegend);
         actionContainer.appendChild(addBeforeButton);
@@ -603,7 +301,7 @@ class LoadStyle {
         updateButton.className = "PBE_button";
         updateButton.title = "Update selected style";
         updateButton.dataset.action = "true";
-        updateButton.addEventListener("click", LoadStyle.updateStyle);
+        updateButton.addEventListener("click", LoadStyleEvent.onUpdateStyle);
     
         const updatePreviewButton = document.createElement("div");
         updatePreviewButton.innerText = "Update preview";
@@ -626,7 +324,7 @@ class LoadStyle {
         deleteButton.className = "PBE_button PBE_buttonCancel";
         deleteButton.title = "Delete selected style";
         deleteButton.dataset.action = "true";
-        deleteButton.addEventListener("click", LoadStyle.removeStyle);
+        deleteButton.addEventListener("click", LoadStyleEvent.onRemoveStyle);
     
         systemContainer.appendChild(systemLegend);
         systemContainer.appendChild(deleteButton);
@@ -747,10 +445,10 @@ class LoadStyle {
             removeButton.dataset.index = index + "";
             updateButton.dataset.index = index + "";
     
-            addBeforeButton.addEventListener("click", LoadStyle.applyStyle);
-            addAfterButton.addEventListener("click", LoadStyle.applyStyle);
-            removeButton.addEventListener("click", LoadStyle.removeStyle);
-            updateButton.addEventListener("click", LoadStyle.updateStyle);
+            addBeforeButton.addEventListener("click", LoadStyleEvent.onApplyStyle);
+            addAfterButton.addEventListener("click", LoadStyleEvent.onApplyStyle);
+            removeButton.addEventListener("click", LoadStyleEvent.onRemoveStyle);
+            updateButton.addEventListener("click", LoadStyleEvent.onUpdateStyle);
             updatePreview.addEventListener("click", Database.onUpdateStylePreview);
     
             actionsContainer.appendChild(addBeforeButton);
@@ -783,7 +481,7 @@ class LoadStyle {
             stylesItem.appendChild(contentContainer);
             stylesItem.appendChild(metaInfoContainer);
     
-            stylesItem.addEventListener("click", LoadStyle.onSelectStyle);
+            stylesItem.addEventListener("click", LoadStyleEvent.onSelectStyle);
     
             wrapper.appendChild(stylesItem);
         }
@@ -794,7 +492,7 @@ class LoadStyle {
         const {state} = PromptsBrowser;
         const wrapper = PromptsBrowser.DOMCache.stylesWindow;
         if(!wrapper || !state.showStylesWindow) return;
-        PromptsBrowser.onCloseActiveWindow = LoadStyle.onCloseWindow;
+        PromptsBrowser.onCloseActiveWindow = LoadStyleEvent.onCloseWindow;
         wrapper.innerHTML = "";
         wrapper.style.display = "flex";
         const isShort = state.toggledButtons.includes("styles_simplified_view");
@@ -816,7 +514,7 @@ class LoadStyle {
             LoadStyle.showStyles(possibleStylesBlock);
         }
     
-        closeButton.addEventListener("click", LoadStyle.onCloseWindow);
+        closeButton.addEventListener("click", LoadStyleEvent.onCloseWindow);
     
         footerBlock.appendChild(closeButton);
     
