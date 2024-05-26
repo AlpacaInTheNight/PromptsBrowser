@@ -309,18 +309,18 @@ Some existing collections:
 ### Development
 
 1. Project structure
-    1. `client` - extension typescript source code.
-    1. `javascript` - compiled javascript and javascript libraries.
-    1. `server` - python fastAPI server methods.
-    1. `scripts` - python extension code.
+    * `client` - extension typescript source code.
+    * `javascript` - compiled javascript and javascript libraries.
+    * `server` - python fastAPI server methods.
+    * `scripts` - python extension code.
 
 1. Extension styles are located in the style.css file, as well as in the exported style files in the client folder for the corresponding extension component.
 
 1. Typescript code requires a compiler that requires Node.js.
-    1. Install [Node.js](https://nodejs.org/en/download/).
-    1. Run `npm install` to install the required dependencies.
-    1. Run command `npm run start` to start typescript compiler.
-    1. Webpack will track changes to the typescript source and compile the javascript bundle for the browser.
+    * Install [Node.js](https://nodejs.org/en/download/).
+    * Run `npm install` to install the required dependencies.
+    * Run command `npm run start` to start typescript compiler.
+    * Webpack will track changes to the typescript source and compile the javascript bundle for the browser.
 
 1. `promptBrowser.js` in the `javascript` is a compiled file and should not be changed manually.
 
