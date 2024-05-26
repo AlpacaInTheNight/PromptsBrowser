@@ -1,6 +1,8 @@
 # Prompts Browser Extension 1.2.0
 Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui).
 
+## Table of Contents
+
 1. [Installation](#installation)
 1. [Known Prompts Browser](#known-prompts-browser)
 1. [Active Prompts](#active-prompts)
@@ -15,6 +17,7 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 1. [Normalize](#normalize)
 1. [Setup window](#setup-window)
 1. [Collections database](#collections-database)
+1. [Development](#development)
 1. [Credits](#credits)
 
 ![](img/preview.jpg)
@@ -303,6 +306,25 @@ Some existing collections:
 
 1. [prompts_portrait](https://github.com/AlpacaInTheNight/prompts_portrait) - A proof of concept collection for generating character portraits. Comes with tags and categories tagged in.
 
+### Development
+
+1. Project structure
+    * `client` - extension typescript source code.
+    * `javascript` - compiled javascript and javascript libraries.
+    * `server` - python fastAPI server methods.
+    * `scripts` - python extension code.
+
+1. Extension styles are located in the style.css file, as well as in the exported style files in the client folder for the corresponding extension component.
+
+1. Typescript code requires a compiler that requires Node.js.
+    * Install [Node.js](https://nodejs.org/en/download/).
+    * Run `npm install` to install the required dependencies.
+    * Run command `npm run start` to start typescript compiler.
+    * Webpack will track changes to the typescript source and compile the javascript bundle for the browser.
+
+1. `promptBrowser.js` in the `javascript` is a compiled file and should not be changed manually.
+
+1. It is not necessary to add the `promptBrowser.js` file to commits.
 
 ### Credits
 

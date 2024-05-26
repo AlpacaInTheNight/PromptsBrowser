@@ -1,0 +1,18 @@
+{
+	"compilerOptions": {
+		"module": "amd",
+		"target": "es6",
+		"noImplicitAny": true,
+		"strictNullChecks": false,
+
+		"lib": ["es5", "es6", "es2021", "dom"],
+
+        "baseUrl": "./",
+		"paths": {
+			"client/*": [ "client/*" ],
+			"clientTypes/*": [ "client/types/*" ],
+		}
+	},
+	"include": ["client/"],
+	"exclude": ["node_modules"]
+}
