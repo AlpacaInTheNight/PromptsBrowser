@@ -22,7 +22,7 @@ function synchroniseCurrentPrompts(noTextAreaUpdate: boolean = true, normalize: 
     //trying to fix LORAs/Hypernetworks added without a preceding comma
     value = value.replace(/([^,])\ </g, "$1,\ <");
 
-    const newPBE_currentPrompts = [];
+    const newActivePrompts = [];
     let prompts = [];
 
     if(supportExtendedSyntax) {
@@ -82,7 +82,7 @@ function synchroniseCurrentPrompts(noTextAreaUpdate: boolean = true, normalize: 
         if(isExternalNetwork) targetItem.isExternalNetwork = true;
 
         /**
-         * If it is a syntax token - also checking if it needs delimiters on its sides in string.
+         * If it is a syntax token - also checking if it needs delimiters on its sides in a string.
          */
         if(isSyntax) {
             const prevItem = i > 0 ? prompts[i - 1] : "";
@@ -96,11 +96,11 @@ function synchroniseCurrentPrompts(noTextAreaUpdate: boolean = true, normalize: 
             else if(nextItem === DELIMITER_CHAR) targetItem.delimiter = "next";
         }
 
-        newPBE_currentPrompts.push(targetItem);
+        newActivePrompts.push(targetItem);
         index++;
     }
 
-    activePrompts = newPBE_currentPrompts;
+    activePrompts = newActivePrompts;
 
     PromptsBrowser.setCurrentPrompts(activePrompts);
     CurrentPrompts.update(noTextAreaUpdate);

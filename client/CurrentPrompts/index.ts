@@ -1,6 +1,7 @@
 import PromptsBrowser from "client/index";
 import Database from "client/Database/index";
 import showPromptItem from "client/showPromptItem";
+import Prompt from "clientTypes/prompt";
 import { DEFAULT_PROMPT_WEIGHT } from "client/const";
 import CurrentPromptsEvent from "./event";
 
@@ -37,7 +38,7 @@ class CurrentPrompts {
     
         if(!wrapper || !textArea) return;
         wrapper.innerHTML = "";
-        const prompts = [];
+        const prompts: {text: string; src: Prompt; }[] = [];
     
         for(let index = 0; index < activePrompts.length; index++) {
             const promptItem = activePrompts[index];

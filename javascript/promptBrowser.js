@@ -1,10 +1,343 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./client/CollectionTools/index.ts":
+/***/ "./client/CollectionTools/event.ts":
 /*!*****************************************!*\
-  !*** ./client/CollectionTools/index.ts ***!
+  !*** ./client/CollectionTools/event.ts ***!
   \*****************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./index */ "./client/CollectionTools/index.ts"), __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/PromptEdit/index */ "./client/PromptEdit/index.ts"), __webpack_require__(/*! client/checkFilter */ "./client/checkFilter.ts"), __webpack_require__(/*! ./generateNextPreview */ "./client/CollectionTools/generateNextPreview.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, checkFilter_1, generateNextPreview_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    class CollectionToolsEvent {
+        static onCloseWindow() {
+            const wrapper = index_2.default.DOMCache.collectionTools;
+            if (!wrapper)
+                return;
+            clearTimeout(index_1.default.generateNextTimer);
+            wrapper.style.display = "none";
+        }
+        static onChangeAutogenerateType(e) {
+            const { state } = index_2.default;
+            const target = e.currentTarget;
+            const value = target.value;
+            if (!value)
+                return;
+            state.autoGenerateType = value;
+        }
+        static onGeneratePreviews(e) {
+            const { state } = index_2.default;
+            const { data } = index_3.default;
+            const { autogen } = index_1.default;
+            const { selectedCollectionPrompts, collectionToolsId, autoGenerateType } = state;
+            const textArea = index_2.default.DOMCache.containers[state.currentContainer].textArea;
+            const targetCollection = data.original[collectionToolsId];
+            let currentPrompt = "";
+            if (!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection)
+                return;
+            index_1.default.generateQueue = [];
+            if (autoGenerateType === "current" && textArea) {
+                currentPrompt = textArea.value;
+            }
+            for (const promptId of selectedCollectionPrompts) {
+                const prompt = targetCollection.find(item => item.id === promptId);
+                if (!prompt)
+                    continue;
+                const generateItem = {
+                    id: promptId,
+                };
+                if (autoGenerateType === "current") {
+                    generateItem.addPrompts = currentPrompt;
+                }
+                else if (autoGenerateType === "autogen") {
+                    if (prompt.autogen)
+                        generateItem.autogen = Object.assign({}, prompt.autogen);
+                }
+                else if (autoGenerateType === "selected") {
+                    if (prompt.autogen)
+                        generateItem.autogen = Object.assign({}, autogen);
+                }
+                index_1.default.generateQueue.push(generateItem);
+            }
+            (0, generateNextPreview_1.default)();
+        }
+        static onAssignAutogenStyle(e) {
+            const { state } = index_2.default;
+            const { data } = index_3.default;
+            const { collection, style } = index_1.default.autogen;
+            const { selectedCollectionPrompts, collectionToolsId } = state;
+            const targetCollection = data.original[collectionToolsId];
+            if (!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection)
+                return;
+            for (const promptId of selectedCollectionPrompts) {
+                const prompt = targetCollection.find(item => item.id === promptId);
+                if (!prompt)
+                    continue;
+                if (collection && style)
+                    prompt.autogen = { collection, style };
+                else
+                    delete prompt.autogen;
+            }
+            index_1.default.updateCurrentCollection();
+        }
+        static onAddCategory(e) {
+            const { state } = index_2.default;
+            const { data } = index_3.default;
+            const target = e.currentTarget;
+            const parent = target.parentElement;
+            const { selectedCollectionPrompts, collectionToolsId } = state;
+            const targetCollection = data.original[collectionToolsId];
+            const categorySelect = parent.querySelector(".PBE_categoryAction");
+            if (!categorySelect)
+                return;
+            const categoryId = categorySelect.value;
+            if (!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection)
+                return;
+            for (const promptId of selectedCollectionPrompts) {
+                const prompt = targetCollection.find(item => item.id === promptId);
+                if (!prompt)
+                    continue;
+                if (!prompt.category)
+                    prompt.category = [];
+                if (!prompt.category.includes(categoryId))
+                    prompt.category.push(categoryId);
+            }
+            index_1.default.updateCurrentCollection();
+        }
+        static onRemoveCategory(e) {
+            const { state } = index_2.default;
+            const { data } = index_3.default;
+            const target = e.currentTarget;
+            const parent = target.parentElement;
+            const { selectedCollectionPrompts, collectionToolsId } = state;
+            const targetCollection = data.original[collectionToolsId];
+            const categorySelect = parent.querySelector(".PBE_categoryAction");
+            if (!categorySelect)
+                return;
+            const categoryId = categorySelect.value;
+            if (!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection)
+                return;
+            for (const promptId of selectedCollectionPrompts) {
+                const prompt = targetCollection.find(item => item.id === promptId);
+                if (!prompt)
+                    continue;
+                if (!prompt.category)
+                    continue;
+                if (prompt.category.includes(categoryId))
+                    prompt.category = prompt.category.filter(id => id !== categoryId);
+            }
+            index_1.default.updateCurrentCollection();
+        }
+        static onAddTags(e) {
+            const { state } = index_2.default;
+            const { data } = index_3.default;
+            const target = e.currentTarget;
+            const parent = target.parentElement;
+            const { selectedCollectionPrompts, collectionToolsId } = state;
+            const targetCollection = data.original[collectionToolsId];
+            const tagsInput = parent.querySelector(".PBE_tagsAction");
+            if (!tagsInput)
+                return;
+            const tagsValue = tagsInput.value;
+            if (!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection)
+                return;
+            const tagsArr = tagsValue.split(",");
+            for (let i = 0; i < tagsArr.length; i++)
+                tagsArr[i] = tagsArr[i].trim();
+            for (const promptId of selectedCollectionPrompts) {
+                const prompt = targetCollection.find(item => item.id === promptId);
+                if (!prompt)
+                    continue;
+                if (!prompt.tags)
+                    prompt.tags = [];
+                for (const tagItem of tagsArr) {
+                    if (!prompt.tags.includes(tagItem))
+                        prompt.tags.push(tagItem);
+                }
+            }
+            index_1.default.updateCurrentCollection();
+        }
+        static onRemoveTags(e) {
+            const { state } = index_2.default;
+            const { data } = index_3.default;
+            const { selectedCollectionPrompts, collectionToolsId } = state;
+            const targetCollection = data.original[collectionToolsId];
+            const target = e.currentTarget;
+            const parent = target.parentElement;
+            const tagsInput = parent.querySelector(".PBE_tagsAction");
+            if (!tagsInput)
+                return;
+            const tagsValue = tagsInput.value;
+            if (!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection)
+                return;
+            const tagsArr = tagsValue.split(",");
+            for (let i = 0; i < tagsArr.length; i++)
+                tagsArr[i] = tagsArr[i].trim();
+            for (const promptId of selectedCollectionPrompts) {
+                const prompt = targetCollection.find(item => item.id === promptId);
+                if (!prompt || !prompt.tags)
+                    continue;
+                prompt.tags = prompt.tags.filter(id => !tagsArr.includes(id));
+            }
+            index_1.default.updateCurrentCollection();
+        }
+        static onSelectItem(e) {
+            const target = e.currentTarget;
+            const parent = target.parentElement;
+            const { state } = index_2.default;
+            const id = target.dataset.id;
+            if (!id)
+                return;
+            if (e.shiftKey) {
+                state.editingPrompt = id;
+                index_4.default.update();
+                return;
+            }
+            if (!state.selectedCollectionPrompts.includes(id)) {
+                state.selectedCollectionPrompts.push(id);
+                parent.classList.add("selected");
+            }
+            else {
+                state.selectedCollectionPrompts = state.selectedCollectionPrompts.filter(promptId => promptId !== id);
+                parent.classList.remove("selected");
+            }
+            index_1.default.updateSelectedInfo();
+        }
+        static onToggleSelected(e) {
+            const { promptsFilter } = index_2.default.state;
+            const { state } = index_2.default;
+            const { data } = index_3.default;
+            const { collectionToolsId } = state;
+            const filterSetup = promptsFilter["collectionTools"];
+            const targetCollection = data.original[collectionToolsId];
+            if (!targetCollection)
+                return;
+            if (state.selectedCollectionPrompts.length) {
+                state.selectedCollectionPrompts = [];
+                index_1.default.update();
+                return;
+            }
+            state.selectedCollectionPrompts = [];
+            for (const item of targetCollection) {
+                if ((0, checkFilter_1.default)(item, filterSetup))
+                    state.selectedCollectionPrompts.push(item.id);
+            }
+            index_1.default.update();
+        }
+        /**
+         * Deletes selected prompts after a user confirmation
+         */
+        static onDeleteSelected(e) {
+            const { state } = index_2.default;
+            const { data } = index_3.default;
+            const { selectedCollectionPrompts, collectionToolsId } = state;
+            const targetCollection = data.original[collectionToolsId];
+            if (!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection)
+                return;
+            if (confirm(`Remove ${selectedCollectionPrompts.length} prompts from catalogue "${collectionToolsId}"?`)) {
+                data.original[collectionToolsId] = targetCollection.filter(prompt => !selectedCollectionPrompts.includes(prompt.id));
+                for (const deletedPromptId of selectedCollectionPrompts) {
+                    index_3.default.movePreviewImage(deletedPromptId, collectionToolsId, collectionToolsId, "delete");
+                }
+                index_3.default.saveJSONData(collectionToolsId);
+                index_3.default.updateMixedList();
+                state.selectedCollectionPrompts = [];
+                index_1.default.updateViews();
+            }
+        }
+        /**
+         * Moves or copies the selected prompts to the selected collection.
+         * By default moves prompts.
+         * @param {*} e - mouse event object.
+         * @param {*} isCopy if copy actions is required instead of move action.
+         */
+        static onMoveSelected(e, isCopy = false) {
+            const { state } = index_2.default;
+            const { data } = index_3.default;
+            const { selectedCollectionPrompts, collectionToolsId, copyOrMoveTo } = state;
+            const targetCollection = data.original[collectionToolsId];
+            if (!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection || !copyOrMoveTo)
+                return;
+            const to = state.copyOrMoveTo;
+            const from = state.collectionToolsId;
+            if (!to || !from)
+                return;
+            if (!data.original[to] || !data.original[from])
+                return;
+            let message = `${isCopy ? "Copy" : "Move"} ${selectedCollectionPrompts.length} prompts`;
+            message += ` from catalogue "${collectionToolsId}" to catalogue "${copyOrMoveTo}"?`;
+            if (confirm(message)) {
+                for (const promptId of selectedCollectionPrompts) {
+                    const originalItem = data.original[from].find(item => item.id === promptId);
+                    if (!originalItem)
+                        continue;
+                    if (isCopy) {
+                        if (data.original[to].some(item => item.id === promptId))
+                            continue;
+                        data.original[to].push(JSON.parse(JSON.stringify(originalItem)));
+                        index_3.default.movePreviewImage(promptId, from, to, "copy");
+                    }
+                    else {
+                        if (!data.original[to].some(item => item.id === promptId)) {
+                            data.original[to].push(JSON.parse(JSON.stringify(originalItem)));
+                        }
+                        data.original[from] = data.original[from].filter(item => item.id !== promptId);
+                        index_3.default.movePreviewImage(promptId, from, to, "move");
+                    }
+                }
+                if (isCopy) {
+                    index_3.default.saveJSONData(to, true);
+                }
+                else {
+                    index_3.default.saveJSONData(to, true);
+                    index_3.default.saveJSONData(from, true);
+                }
+                index_3.default.updateMixedList();
+                state.selectedCollectionPrompts = [];
+                index_1.default.updateViews();
+            }
+        }
+        static onChangeAutogenCollection(e) {
+            const { data } = index_3.default;
+            const target = e.currentTarget;
+            const collection = target.value;
+            let setFirst = false;
+            index_1.default.autogen.collection = collection;
+            if (collection && index_1.default.autogenStyleSelector) {
+                let styleOptions = "";
+                const targetCollection = data.styles[collection];
+                if (targetCollection) {
+                    for (const styleItem of targetCollection) {
+                        if (!setFirst) {
+                            index_1.default.autogen.style = styleItem.name;
+                            index_1.default.autogenStyleSelector.value = styleItem.name;
+                            setFirst = true;
+                        }
+                        styleOptions += `<option value="${styleItem.name}">${styleItem.name}</option>`;
+                    }
+                }
+                index_1.default.autogenStyleSelector.innerHTML = styleOptions;
+            }
+        }
+        static onChangeAutogenStyle(e) {
+            const target = e.currentTarget;
+            const style = target.value;
+            index_1.default.autogen.style = style;
+        }
+    }
+    CollectionToolsEvent.onCopySelected = (e) => CollectionToolsEvent.onMoveSelected(e, true);
+    exports["default"] = CollectionToolsEvent;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/CollectionTools/generateNextPreview.ts":
+/*!*******************************************************!*\
+  !*** ./client/CollectionTools/generateNextPreview.ts ***!
+  \*******************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -16,7 +349,77 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/KnownPrompts/index */ "./client/KnownPrompts/index.ts"), __webpack_require__(/*! client/CurrentPrompts/index */ "./client/CurrentPrompts/index.ts"), __webpack_require__(/*! client/PromptEdit/index */ "./client/PromptEdit/index.ts"), __webpack_require__(/*! client/PreviewSave/index */ "./client/PreviewSave/index.ts"), __webpack_require__(/*! client/PromptsFilter/index */ "./client/PromptsFilter/index.ts"), __webpack_require__(/*! client/TagTooltip/index */ "./client/TagTooltip/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! client/checkFilter */ "./client/checkFilter.ts"), __webpack_require__(/*! client/applyStyle */ "./client/applyStyle.ts"), __webpack_require__(/*! client/utils */ "./client/utils.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, index_5, index_6, index_7, index_8, dom_1, checkFilter_1, applyStyle_1, utils_1) {
+!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./index */ "./client/CollectionTools/index.ts"), __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/KnownPrompts/index */ "./client/KnownPrompts/index.ts"), __webpack_require__(/*! client/CurrentPrompts/index */ "./client/CurrentPrompts/index.ts"), __webpack_require__(/*! client/PreviewSave/index */ "./client/PreviewSave/index.ts"), __webpack_require__(/*! client/applyStyle */ "./client/applyStyle.ts"), __webpack_require__(/*! client/utils */ "./client/utils.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, index_5, index_6, applyStyle_1, utils_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function generateNextPreview() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { state } = index_2.default;
+            const { data } = index_3.default;
+            const { collectionToolsId } = state;
+            const { generateQueue } = index_1.default;
+            const textArea = index_2.default.DOMCache.containers[state.currentContainer].textArea;
+            const generateButton = index_2.default.DOMCache.containers[state.currentContainer].generateButton;
+            if (!textArea || !generateButton)
+                return;
+            const nextItem = generateQueue.shift();
+            if (!nextItem) {
+                (0, utils_1.log)("Finished generating prompt previews.");
+                state.selectedPrompt = undefined;
+                state.filesIteration++;
+                index_3.default.updateMixedList();
+                index_6.default.update();
+                index_4.default.update();
+                index_5.default.update(true);
+                index_1.default.update(true);
+                return;
+            }
+            const message = `Generating preview for "${nextItem.id}". ${generateQueue.length} items in queue left. `;
+            (0, utils_1.log)(message);
+            index_1.default.updateAutogenInfo(message);
+            state.selectedPrompt = nextItem.id;
+            state.savePreviewCollection = collectionToolsId;
+            if (nextItem.autogen && nextItem.autogen.collection && nextItem.autogen.style) {
+                const delay = (ms) => new Promise(res => setTimeout(res, ms));
+                const targetCollection = data.styles[nextItem.autogen.collection];
+                if (targetCollection) {
+                    const targetStyle = targetCollection.find(item => item.name === nextItem.autogen.style);
+                    if (targetStyle) {
+                        (0, applyStyle_1.default)(targetStyle, true, true);
+                        yield delay(600); //need a pause due to a hacky nature of changing APP state
+                        textArea.value = `((${nextItem.id})), ${textArea.value}`;
+                    }
+                }
+            }
+            else if (nextItem.addPrompts) {
+                textArea.value = `((${nextItem.id})), ${nextItem.addPrompts}`;
+            }
+            else
+                textArea.value = nextItem.id;
+            textArea.dispatchEvent(new Event('focus'));
+            textArea.dispatchEvent(new Event('input'));
+            textArea.dispatchEvent(new KeyboardEvent('keyup'));
+            textArea.dispatchEvent(new KeyboardEvent('keypress'));
+            textArea.dispatchEvent(new Event('blur'));
+            generateButton.dispatchEvent(new Event('click'));
+            clearTimeout(index_1.default.generateNextTimer);
+            index_1.default.generateNextTimer = setTimeout(index_1.default.checkProgressState, 100);
+        });
+    }
+    exports["default"] = generateNextPreview;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/CollectionTools/index.ts":
+/*!*****************************************!*\
+  !*** ./client/CollectionTools/index.ts ***!
+  \*****************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/KnownPrompts/index */ "./client/KnownPrompts/index.ts"), __webpack_require__(/*! client/CurrentPrompts/index */ "./client/CurrentPrompts/index.ts"), __webpack_require__(/*! client/PromptsFilter/index */ "./client/PromptsFilter/index.ts"), __webpack_require__(/*! client/TagTooltip/index */ "./client/TagTooltip/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! client/checkFilter */ "./client/checkFilter.ts"), __webpack_require__(/*! ./event */ "./client/CollectionTools/event.ts"), __webpack_require__(/*! ./generateNextPreview */ "./client/CollectionTools/generateNextPreview.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, index_5, index_6, dom_1, checkFilter_1, event_1, generateNextPreview_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     class CollectionTools {
@@ -28,9 +431,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
             CollectionTools.generateQueue = [];
             clearTimeout(CollectionTools.generateNextTimer);
             wrapper.appendChild(collectionTools);
-            index_1.default.onCloseActiveWindow = CollectionTools.onCloseWindow;
+            index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
             collectionTools.addEventListener("click", () => {
-                index_1.default.onCloseActiveWindow = CollectionTools.onCloseWindow;
+                index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
             });
         }
         /**
@@ -70,60 +473,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
             index_2.default.updateMixedList();
             CollectionTools.updateViews();
         }
-        static generateNextPreview() {
-            return __awaiter(this, void 0, void 0, function* () {
-                const { state } = index_1.default;
-                const { data } = index_2.default;
-                const { collectionToolsId } = state;
-                const { generateQueue } = CollectionTools;
-                const textArea = index_1.default.DOMCache.containers[state.currentContainer].textArea;
-                const generateButton = index_1.default.DOMCache.containers[state.currentContainer].generateButton;
-                if (!textArea || !generateButton)
-                    return;
-                const nextItem = generateQueue.shift();
-                if (!nextItem) {
-                    (0, utils_1.log)("Finished generating prompt previews.");
-                    state.selectedPrompt = undefined;
-                    state.filesIteration++;
-                    index_2.default.updateMixedList();
-                    index_6.default.update();
-                    index_3.default.update();
-                    index_4.default.update(true);
-                    CollectionTools.update(true);
-                    return;
-                }
-                const message = `Generating preview for "${nextItem.id}". ${generateQueue.length} items in queue left. `;
-                (0, utils_1.log)(message);
-                CollectionTools.updateAutogenInfo(message);
-                state.selectedPrompt = nextItem.id;
-                state.savePreviewCollection = collectionToolsId;
-                if (nextItem.autogen && nextItem.autogen.collection && nextItem.autogen.style) {
-                    const delay = (ms) => new Promise(res => setTimeout(res, ms));
-                    const targetCollection = data.styles[nextItem.autogen.collection];
-                    if (targetCollection) {
-                        const targetStyle = targetCollection.find(item => item.name === nextItem.autogen.style);
-                        if (targetStyle) {
-                            (0, applyStyle_1.default)(targetStyle, true, true);
-                            yield delay(600); //need a pause due to a hacky nature of changing APP state
-                            textArea.value = `((${nextItem.id})), ${textArea.value}`;
-                        }
-                    }
-                }
-                else if (nextItem.addPrompts) {
-                    textArea.value = `((${nextItem.id})), ${nextItem.addPrompts}`;
-                }
-                else
-                    textArea.value = nextItem.id;
-                textArea.dispatchEvent(new Event('focus'));
-                textArea.dispatchEvent(new Event('input'));
-                textArea.dispatchEvent(new KeyboardEvent('keyup'));
-                textArea.dispatchEvent(new KeyboardEvent('keypress'));
-                textArea.dispatchEvent(new Event('blur'));
-                generateButton.dispatchEvent(new Event('click'));
-                clearTimeout(CollectionTools.generateNextTimer);
-                CollectionTools.generateNextTimer = setTimeout(CollectionTools.checkProgressState, 100);
-            });
-        }
         static checkProgressState() {
             const { state } = index_1.default;
             const resultsContainer = index_1.default.DOMCache.containers[state.currentContainer].resultsContainer;
@@ -136,328 +485,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
             const progressBar = resultsContainer.querySelector(".progressDiv");
             if (!progressBar) {
                 index_2.default.savePromptPreview(false);
-                CollectionTools.generateNextPreview();
+                (0, generateNextPreview_1.default)();
                 return;
             }
             clearTimeout(CollectionTools.generateNextTimer);
             CollectionTools.generateNextTimer = setTimeout(CollectionTools.checkProgressState, 500);
         }
-        static onCloseWindow() {
-            const wrapper = index_1.default.DOMCache.collectionTools;
-            if (!wrapper)
-                return;
-            clearTimeout(CollectionTools.generateNextTimer);
-            wrapper.style.display = "none";
-        }
-        static onChangeAutogenerateType(e) {
-            const { state } = index_1.default;
-            const target = e.currentTarget;
-            const value = target.value;
-            if (!value)
-                return;
-            state.autoGenerateType = value;
-        }
-        static onGeneratePreviews(e) {
-            const { state } = index_1.default;
-            const { data } = index_2.default;
-            const { autogen } = CollectionTools;
-            const { selectedCollectionPrompts, collectionToolsId, autoGenerateType } = state;
-            const textArea = index_1.default.DOMCache.containers[state.currentContainer].textArea;
-            const targetCollection = data.original[collectionToolsId];
-            let currentPrompt = "";
-            if (!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection)
-                return;
-            CollectionTools.generateQueue = [];
-            if (autoGenerateType === "current" && textArea) {
-                currentPrompt = textArea.value;
-            }
-            for (const promptId of selectedCollectionPrompts) {
-                const prompt = targetCollection.find(item => item.id === promptId);
-                if (!prompt)
-                    continue;
-                const generateItem = {
-                    id: promptId,
-                };
-                if (autoGenerateType === "current") {
-                    generateItem.addPrompts = currentPrompt;
-                }
-                else if (autoGenerateType === "autogen") {
-                    if (prompt.autogen)
-                        generateItem.autogen = Object.assign({}, prompt.autogen);
-                }
-                else if (autoGenerateType === "selected") {
-                    if (prompt.autogen)
-                        generateItem.autogen = Object.assign({}, autogen);
-                }
-                CollectionTools.generateQueue.push(generateItem);
-            }
-            CollectionTools.generateNextPreview();
-        }
-        static onAssignAutogenStyle(e) {
-            const { state } = index_1.default;
-            const { data } = index_2.default;
-            const { collection, style } = CollectionTools.autogen;
-            const { selectedCollectionPrompts, collectionToolsId } = state;
-            const targetCollection = data.original[collectionToolsId];
-            if (!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection)
-                return;
-            for (const promptId of selectedCollectionPrompts) {
-                const prompt = targetCollection.find(item => item.id === promptId);
-                if (!prompt)
-                    continue;
-                if (collection && style)
-                    prompt.autogen = { collection, style };
-                else
-                    delete prompt.autogen;
-            }
-            CollectionTools.updateCurrentCollection();
-        }
-        static onAddCategory(e) {
-            const { state } = index_1.default;
-            const { data } = index_2.default;
-            const target = e.currentTarget;
-            const parent = target.parentElement;
-            const { selectedCollectionPrompts, collectionToolsId } = state;
-            const targetCollection = data.original[collectionToolsId];
-            const categorySelect = parent.querySelector(".PBE_categoryAction");
-            if (!categorySelect)
-                return;
-            const categoryId = categorySelect.value;
-            if (!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection)
-                return;
-            for (const promptId of selectedCollectionPrompts) {
-                const prompt = targetCollection.find(item => item.id === promptId);
-                if (!prompt)
-                    continue;
-                if (!prompt.category)
-                    prompt.category = [];
-                if (!prompt.category.includes(categoryId))
-                    prompt.category.push(categoryId);
-            }
-            CollectionTools.updateCurrentCollection();
-        }
-        static onRemoveCategory(e) {
-            const { state } = index_1.default;
-            const { data } = index_2.default;
-            const target = e.currentTarget;
-            const parent = target.parentElement;
-            const { selectedCollectionPrompts, collectionToolsId } = state;
-            const targetCollection = data.original[collectionToolsId];
-            const categorySelect = parent.querySelector(".PBE_categoryAction");
-            if (!categorySelect)
-                return;
-            const categoryId = categorySelect.value;
-            if (!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection)
-                return;
-            for (const promptId of selectedCollectionPrompts) {
-                const prompt = targetCollection.find(item => item.id === promptId);
-                if (!prompt)
-                    continue;
-                if (!prompt.category)
-                    continue;
-                if (prompt.category.includes(categoryId))
-                    prompt.category = prompt.category.filter(id => id !== categoryId);
-            }
-            CollectionTools.updateCurrentCollection();
-        }
-        static onAddTags(e) {
-            const { state } = index_1.default;
-            const { data } = index_2.default;
-            const target = e.currentTarget;
-            const parent = target.parentElement;
-            const { selectedCollectionPrompts, collectionToolsId } = state;
-            const targetCollection = data.original[collectionToolsId];
-            const tagsInput = parent.querySelector(".PBE_tagsAction");
-            if (!tagsInput)
-                return;
-            const tagsValue = tagsInput.value;
-            if (!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection)
-                return;
-            const tagsArr = tagsValue.split(",");
-            for (let i = 0; i < tagsArr.length; i++)
-                tagsArr[i] = tagsArr[i].trim();
-            for (const promptId of selectedCollectionPrompts) {
-                const prompt = targetCollection.find(item => item.id === promptId);
-                if (!prompt)
-                    continue;
-                if (!prompt.tags)
-                    prompt.tags = [];
-                for (const tagItem of tagsArr) {
-                    if (!prompt.tags.includes(tagItem))
-                        prompt.tags.push(tagItem);
-                }
-            }
-            CollectionTools.updateCurrentCollection();
-        }
-        static onRemoveTags(e) {
-            const { state } = index_1.default;
-            const { data } = index_2.default;
-            const { selectedCollectionPrompts, collectionToolsId } = state;
-            const targetCollection = data.original[collectionToolsId];
-            const target = e.currentTarget;
-            const parent = target.parentElement;
-            const tagsInput = parent.querySelector(".PBE_tagsAction");
-            if (!tagsInput)
-                return;
-            const tagsValue = tagsInput.value;
-            if (!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection)
-                return;
-            const tagsArr = tagsValue.split(",");
-            for (let i = 0; i < tagsArr.length; i++)
-                tagsArr[i] = tagsArr[i].trim();
-            for (const promptId of selectedCollectionPrompts) {
-                const prompt = targetCollection.find(item => item.id === promptId);
-                if (!prompt || !prompt.tags)
-                    continue;
-                prompt.tags = prompt.tags.filter(id => !tagsArr.includes(id));
-            }
-            CollectionTools.updateCurrentCollection();
-        }
-        static onSelectItem(e) {
-            const target = e.currentTarget;
-            const parent = target.parentElement;
-            const { state } = index_1.default;
-            const id = target.dataset.id;
-            if (!id)
-                return;
-            if (e.shiftKey) {
-                state.editingPrompt = id;
-                index_5.default.update();
-                return;
-            }
-            if (!state.selectedCollectionPrompts.includes(id)) {
-                state.selectedCollectionPrompts.push(id);
-                parent.classList.add("selected");
-            }
-            else {
-                state.selectedCollectionPrompts = state.selectedCollectionPrompts.filter(promptId => promptId !== id);
-                parent.classList.remove("selected");
-            }
-            CollectionTools.updateSelectedInfo();
-        }
-        static onToggleSelected(e) {
-            const { promptsFilter } = index_1.default.state;
-            const { state } = index_1.default;
-            const { data } = index_2.default;
-            const { collectionToolsId } = state;
-            const filterSetup = promptsFilter["collectionTools"];
-            const targetCollection = data.original[collectionToolsId];
-            if (!targetCollection)
-                return;
-            if (state.selectedCollectionPrompts.length) {
-                state.selectedCollectionPrompts = [];
-                CollectionTools.update();
-                return;
-            }
-            state.selectedCollectionPrompts = [];
-            for (const item of targetCollection) {
-                if ((0, checkFilter_1.default)(item, filterSetup))
-                    state.selectedCollectionPrompts.push(item.id);
-            }
-            CollectionTools.update();
-        }
-        /**
-         * Deletes selected prompts after a user confirmation
-         */
-        static onDeleteSelected(e) {
-            const { state } = index_1.default;
-            const { data } = index_2.default;
-            const { selectedCollectionPrompts, collectionToolsId } = state;
-            const targetCollection = data.original[collectionToolsId];
-            if (!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection)
-                return;
-            if (confirm(`Remove ${selectedCollectionPrompts.length} prompts from catalogue "${collectionToolsId}"?`)) {
-                data.original[collectionToolsId] = targetCollection.filter(prompt => !selectedCollectionPrompts.includes(prompt.id));
-                for (const deletedPromptId of selectedCollectionPrompts) {
-                    index_2.default.movePreviewImage(deletedPromptId, collectionToolsId, collectionToolsId, "delete");
-                }
-                index_2.default.saveJSONData(collectionToolsId);
-                index_2.default.updateMixedList();
-                state.selectedCollectionPrompts = [];
-                CollectionTools.updateViews();
-            }
-        }
-        /**
-         * Moves or copies the selected prompts to the selected collection.
-         * By default moves prompts.
-         * @param {*} e - mouse event object.
-         * @param {*} isCopy if copy actions is required instead of move action.
-         */
-        static onMoveSelected(e, isCopy = false) {
-            const { state } = index_1.default;
-            const { data } = index_2.default;
-            const { selectedCollectionPrompts, collectionToolsId, copyOrMoveTo } = state;
-            const targetCollection = data.original[collectionToolsId];
-            if (!selectedCollectionPrompts || !selectedCollectionPrompts.length || !targetCollection || !copyOrMoveTo)
-                return;
-            const to = state.copyOrMoveTo;
-            const from = state.collectionToolsId;
-            if (!to || !from)
-                return;
-            if (!data.original[to] || !data.original[from])
-                return;
-            let message = `${isCopy ? "Copy" : "Move"} ${selectedCollectionPrompts.length} prompts`;
-            message += ` from catalogue "${collectionToolsId}" to catalogue "${copyOrMoveTo}"?`;
-            if (confirm(message)) {
-                for (const promptId of selectedCollectionPrompts) {
-                    const originalItem = data.original[from].find(item => item.id === promptId);
-                    if (!originalItem)
-                        continue;
-                    if (isCopy) {
-                        if (data.original[to].some(item => item.id === promptId))
-                            continue;
-                        data.original[to].push(JSON.parse(JSON.stringify(originalItem)));
-                        index_2.default.movePreviewImage(promptId, from, to, "copy");
-                    }
-                    else {
-                        if (!data.original[to].some(item => item.id === promptId)) {
-                            data.original[to].push(JSON.parse(JSON.stringify(originalItem)));
-                        }
-                        data.original[from] = data.original[from].filter(item => item.id !== promptId);
-                        index_2.default.movePreviewImage(promptId, from, to, "move");
-                    }
-                }
-                if (isCopy) {
-                    index_2.default.saveJSONData(to, true);
-                }
-                else {
-                    index_2.default.saveJSONData(to, true);
-                    index_2.default.saveJSONData(from, true);
-                }
-                index_2.default.updateMixedList();
-                state.selectedCollectionPrompts = [];
-                CollectionTools.updateViews();
-            }
-        }
-        static onChangeAutogenCollection(e) {
-            const { data } = index_2.default;
-            const target = e.currentTarget;
-            const collection = target.value;
-            let setFirst = false;
-            CollectionTools.autogen.collection = collection;
-            if (collection && CollectionTools.autogenStyleSelector) {
-                let styleOptions = "";
-                const targetCollection = data.styles[collection];
-                if (targetCollection) {
-                    for (const styleItem of targetCollection) {
-                        if (!setFirst) {
-                            CollectionTools.autogen.style = styleItem.name;
-                            CollectionTools.autogenStyleSelector.value = styleItem.name;
-                            setFirst = true;
-                        }
-                        styleOptions += `<option value="${styleItem.name}">${styleItem.name}</option>`;
-                    }
-                }
-                CollectionTools.autogenStyleSelector.innerHTML = styleOptions;
-            }
-        }
-        static onChangeAutogenStyle(e) {
-            const target = e.currentTarget;
-            const style = target.value;
-            CollectionTools.autogen.style = style;
-        }
         static showHeader(wrapper) {
-            index_7.default.update(wrapper, "collectionTools");
+            index_5.default.update(wrapper, "collectionTools");
         }
         static showPromptsDetailed(wrapper) {
             const { promptsFilter } = index_1.default.state;
@@ -516,7 +551,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
                 contentArea.appendChild(bottomContainer);
                 promptContainer.appendChild(selectArea);
                 promptContainer.appendChild(contentArea);
-                selectArea.addEventListener("click", CollectionTools.onSelectItem);
+                selectArea.addEventListener("click", event_1.default.onSelectItem);
                 if (selectedCollectionPrompts.includes(id))
                     promptContainer.classList.add("selected");
                 wrapper.appendChild(promptContainer);
@@ -534,12 +569,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
             moveButton.innerText = "Move";
             moveButton.className = "PBE_button";
             moveButton.title = "Move selected prompts to the target collection";
-            moveButton.addEventListener("click", CollectionTools.onMoveSelected);
+            moveButton.addEventListener("click", event_1.default.onMoveSelected);
             const copyButton = document.createElement("div");
             copyButton.innerText = "Copy";
             copyButton.className = "PBE_button";
             copyButton.title = "Copy selected prompts to the target collection";
-            copyButton.addEventListener("click", CollectionTools.onCopySelected);
+            copyButton.addEventListener("click", event_1.default.onCopySelected);
             let options = "";
             for (const collectionId in data.original) {
                 if (collectionId === collectionToolsId)
@@ -584,8 +619,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
                 options += `<option value="${categoryItem}">${categoryItem}</option>`;
             }
             categorySelect.innerHTML = options;
-            addButton.addEventListener("click", CollectionTools.onAddCategory);
-            removeButton.addEventListener("click", CollectionTools.onRemoveCategory);
+            addButton.addEventListener("click", event_1.default.onAddCategory);
+            removeButton.addEventListener("click", event_1.default.onRemoveCategory);
             const container = document.createElement("fieldset");
             container.className = "PBE_fieldset";
             const legend = document.createElement("legend");
@@ -608,8 +643,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
             removeButton.title = "Remove target tags from all selected prompts";
             addButton.innerText = "Add";
             removeButton.innerText = "Remove";
-            addButton.addEventListener("click", CollectionTools.onAddTags);
-            removeButton.addEventListener("click", CollectionTools.onRemoveTags);
+            addButton.addEventListener("click", event_1.default.onAddTags);
+            removeButton.addEventListener("click", event_1.default.onRemoveTags);
             const container = document.createElement("fieldset");
             container.className = "PBE_fieldset";
             const legend = document.createElement("legend");
@@ -619,7 +654,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
             container.appendChild(addButton);
             container.appendChild(removeButton);
             wrapper.appendChild(container);
-            index_8.default.add(tagsInput, true);
+            index_6.default.add(tagsInput, true);
         }
         static showAutogenStyle(wrapper) {
             const { data } = index_2.default;
@@ -632,7 +667,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
                 colOptions.push({ id: colId, name: colId });
             const stylesCollectionsSelect = (0, dom_1.makeSelect)({
                 className: "PBE_generalInput PBE_select", value: collection, options: colOptions,
-                onChange: CollectionTools.onChangeAutogenCollection
+                onChange: event_1.default.onChangeAutogenCollection
             });
             container.appendChild(stylesCollectionsSelect);
             //style select
@@ -646,13 +681,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
             }
             const styleSelect = (0, dom_1.makeSelect)({
                 className: "PBE_generalInput PBE_select", value: style || "", options: styleOptions,
-                onChange: CollectionTools.onChangeAutogenStyle
+                onChange: event_1.default.onChangeAutogenStyle
             });
             container.appendChild(styleSelect);
             CollectionTools.autogenStyleSelector = styleSelect;
             //assign button
             const assignButton = (0, dom_1.makeElement)({ element: "div", className: "PBE_button", content: "Assign" });
-            assignButton.addEventListener("click", CollectionTools.onAssignAutogenStyle);
+            assignButton.addEventListener("click", event_1.default.onAssignAutogenStyle);
             container.appendChild(assignButton);
             //append to wrapper
             container.appendChild(legend);
@@ -661,7 +696,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
         static showAutogenerate(wrapper) {
             const { state } = index_1.default;
             const generateButton = (0, dom_1.makeElement)({ element: "div", className: "PBE_button", content: "Generate" });
-            generateButton.addEventListener("click", CollectionTools.onGeneratePreviews);
+            generateButton.addEventListener("click", event_1.default.onGeneratePreviews);
             const generateTypeSelect = (0, dom_1.makeSelect)({
                 className: "PBE_generalInput PBE_select", value: state.autoGenerateType,
                 options: [
@@ -670,7 +705,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
                     { id: "autogen", name: "With prompt autogen style" },
                     { id: "selected", name: "With selected autogen style" },
                 ],
-                onChange: CollectionTools.onChangeAutogenerateType
+                onChange: event_1.default.onChangeAutogenerateType
             });
             const container = document.createElement("fieldset");
             container.className = "PBE_fieldset";
@@ -687,12 +722,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
             toggleAllButton.innerText = "Toggle all";
             toggleAllButton.className = "PBE_button";
             toggleAllButton.title = "Select and unselect all visible prompts";
-            toggleAllButton.addEventListener("click", CollectionTools.onToggleSelected);
+            toggleAllButton.addEventListener("click", event_1.default.onToggleSelected);
             const deleteButton = document.createElement("div");
             deleteButton.innerText = "Delete selected";
             deleteButton.className = "PBE_button PBE_buttonCancel";
             deleteButton.title = "Delete selected prompts";
-            deleteButton.addEventListener("click", CollectionTools.onDeleteSelected);
+            deleteButton.addEventListener("click", event_1.default.onDeleteSelected);
             const container = document.createElement("fieldset");
             container.className = "PBE_fieldset";
             const legend = document.createElement("legend");
@@ -742,8 +777,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
             wrapper.innerText = text;
         }
         static showStatus(wrapper) {
-            const autogenStatus = (0, dom_1.makeElement)({ element: "div", className: "PBE_collectionToolsAutogenInfo" });
-            const selectedStatus = (0, dom_1.makeElement)({ element: "div", className: "PBE_collectionToolsSelectedInfo" });
+            const autogenStatus = (0, dom_1.makeDiv)({ className: "PBE_collectionToolsAutogenInfo" });
+            const selectedStatus = (0, dom_1.makeDiv)({ className: "PBE_collectionToolsSelectedInfo" });
             CollectionTools.updateAutogenInfo("", autogenStatus);
             CollectionTools.updateSelectedInfo(selectedStatus);
             wrapper.appendChild(autogenStatus);
@@ -766,22 +801,18 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
             }
             if (!state.collectionToolsId)
                 return;
-            index_1.default.onCloseActiveWindow = CollectionTools.onCloseWindow;
+            index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
             wrapper.innerHTML = "";
             wrapper.style.display = "flex";
-            const footerBlock = document.createElement("div");
+            const footerBlock = (0, dom_1.makeDiv)({ className: "PBE_rowBlock PBE_rowBlock_wide PBE_toolsFooter" });
             const closeButton = document.createElement("button");
-            footerBlock.className = "PBE_rowBlock PBE_rowBlock_wide PBE_toolsFooter";
             closeButton.innerText = "Close";
             closeButton.className = "PBE_button";
-            closeButton.addEventListener("click", CollectionTools.onCloseWindow);
-            const headerBlock = document.createElement("div");
-            headerBlock.className = "PBE_collectionToolsHeader";
-            const contentBlock = document.createElement("div");
-            contentBlock.className = "PBE_dataBlock PBE_Scrollbar PBE_windowContent";
-            const statusBlock = (0, dom_1.makeElement)({ element: "div", className: "PBE_collectionToolsStatus PBE_row" });
-            const actionsBlock = document.createElement("div");
-            actionsBlock.className = "PBE_collectionToolsActions PBE_row";
+            closeButton.addEventListener("click", event_1.default.onCloseWindow);
+            const headerBlock = (0, dom_1.makeDiv)({ className: "PBE_collectionToolsHeader" });
+            const contentBlock = (0, dom_1.makeDiv)({ className: "PBE_dataBlock PBE_Scrollbar PBE_windowContent" });
+            const statusBlock = (0, dom_1.makeDiv)({ className: "PBE_collectionToolsStatus PBE_row" });
+            const actionsBlock = (0, dom_1.makeDiv)({ className: "PBE_collectionToolsActions PBE_row" });
             CollectionTools.showHeader(headerBlock);
             CollectionTools.showPromptsDetailed(contentBlock);
             footerBlock.appendChild(closeButton);
@@ -804,7 +835,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
      */
     CollectionTools.generateNextTimer = 0;
     CollectionTools.generateQueue = [];
-    CollectionTools.onCopySelected = (e) => CollectionTools.onMoveSelected(e, true);
     exports["default"] = CollectionTools;
 }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
 		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
@@ -818,7 +848,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
   \**************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/SetupWindow/index */ "./client/SetupWindow/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/SetupWindow/index */ "./client/SetupWindow/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, dom_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     class ControlPanel {
@@ -873,21 +903,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 controlPanel.classList.remove("PBE_controlPanelHidden");
             else
                 controlPanel.classList.add("PBE_controlPanelHidden");
-            const togglePanelButton = document.createElement("div");
-            togglePanelButton.className = "PBE_toggleControlPanel";
-            togglePanelButton.innerText = state.showControlPanel ? "◀" : "▶";
+            const togglePanelButton = (0, dom_1.makeDiv)({ content: state.showControlPanel ? "◀" : "▶", className: "PBE_toggleControlPanel" });
             togglePanelButton.addEventListener("click", ControlPanel.onTogglePanel);
             controlPanel.appendChild(togglePanelButton);
             if (!state.showControlPanel)
                 return;
-            const iconKnownPrompts = document.createElement("div");
-            const iconCurrentPrompts = document.createElement("div");
-            const iconPositiveTextArea = document.createElement("div");
-            const iconNegativeTextArea = document.createElement("div");
-            iconKnownPrompts.className = "PBE_controlIcon";
-            iconCurrentPrompts.className = "PBE_controlIcon";
-            iconPositiveTextArea.className = "PBE_controlIcon";
-            iconNegativeTextArea.className = "PBE_controlIcon";
+            const iconKnownPrompts = (0, dom_1.makeDiv)({ content: "K", title: "Known prompts", className: "PBE_controlIcon" });
+            const iconCurrentPrompts = (0, dom_1.makeDiv)({ content: "C", title: "Current prompts", className: "PBE_controlIcon" });
+            const iconPositiveTextArea = (0, dom_1.makeDiv)({ content: "P", title: "Positive prompts textarea", className: "PBE_controlIcon" });
+            const iconNegativeTextArea = (0, dom_1.makeDiv)({ content: "N", title: "Negative prompts textarea", className: "PBE_controlIcon" });
             if (state.showViews.includes("known"))
                 iconKnownPrompts.classList.add("PBE_activeControlIcon");
             if (state.showViews.includes("current"))
@@ -900,14 +924,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             iconCurrentPrompts.dataset.id = "current";
             iconPositiveTextArea.dataset.id = "positive";
             iconNegativeTextArea.dataset.id = "negative";
-            iconKnownPrompts.innerText = "K";
-            iconCurrentPrompts.innerText = "C";
-            iconPositiveTextArea.innerText = "P";
-            iconNegativeTextArea.innerText = "N";
-            iconKnownPrompts.title = "Known prompts";
-            iconCurrentPrompts.title = "Current prompts";
-            iconPositiveTextArea.title = "Positive prompts textarea";
-            iconNegativeTextArea.title = "Negative prompts textarea";
             iconKnownPrompts.addEventListener("click", ControlPanel.onToggleVisibility);
             iconCurrentPrompts.addEventListener("click", ControlPanel.onToggleVisibility);
             iconPositiveTextArea.addEventListener("click", ControlPanel.onToggleVisibility);
@@ -931,40 +947,34 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 
 /***/ }),
 
-/***/ "./client/CurrentPrompts/index.ts":
+/***/ "./client/CurrentPrompts/event.ts":
 /*!****************************************!*\
-  !*** ./client/CurrentPrompts/index.ts ***!
+  !*** ./client/CurrentPrompts/event.ts ***!
   \****************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/PreviewSave/index */ "./client/PreviewSave/index.ts"), __webpack_require__(/*! client/PromptEdit/index */ "./client/PromptEdit/index.ts"), __webpack_require__(/*! client/PromptScribe/index */ "./client/PromptScribe/index.ts"), __webpack_require__(/*! client/PromptTools/index */ "./client/PromptTools/index.ts"), __webpack_require__(/*! client/synchroniseCurrentPrompts */ "./client/synchroniseCurrentPrompts.ts"), __webpack_require__(/*! client/showPromptItem */ "./client/showPromptItem.ts"), __webpack_require__(/*! client/const */ "./client/const.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, index_5, index_6, synchroniseCurrentPrompts_1, showPromptItem_1, const_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./index */ "./client/CurrentPrompts/index.ts"), __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/PreviewSave/index */ "./client/PreviewSave/index.ts"), __webpack_require__(/*! client/PromptEdit/index */ "./client/PromptEdit/index.ts"), __webpack_require__(/*! client/PromptScribe/index */ "./client/PromptScribe/index.ts"), __webpack_require__(/*! client/PromptTools/index */ "./client/PromptTools/index.ts"), __webpack_require__(/*! client/synchroniseCurrentPrompts */ "./client/synchroniseCurrentPrompts.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, index_5, index_6, index_7, synchroniseCurrentPrompts_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
-    class CurrentPrompts {
+    class CurrentPromptsEvent {
     }
-    CurrentPrompts.init = (wrapper, containerId) => {
-        const currentPrompts = document.createElement("div");
-        currentPrompts.className = "PBE_currentPrompts";
-        index_1.default.DOMCache.containers[containerId].currentPrompts = currentPrompts;
-        wrapper.appendChild(currentPrompts);
-    };
-    CurrentPrompts.onDragStart = (e) => {
+    CurrentPromptsEvent.onDragStart = (e) => {
         const target = e.currentTarget;
-        const { state } = index_1.default;
+        const { state } = index_2.default;
         const index = target.dataset.index;
         state.dragCurrentIndex = index;
         e.dataTransfer.setData("text", index);
     };
-    CurrentPrompts.onDragOver = (e) => {
+    CurrentPromptsEvent.onDragOver = (e) => {
         e.preventDefault();
     };
-    CurrentPrompts.onDragLeave = (e) => {
+    CurrentPromptsEvent.onDragLeave = (e) => {
         const target = e.currentTarget;
         target.classList.remove("PBE_swap");
     };
-    CurrentPrompts.onDragEnter = (e) => {
+    CurrentPromptsEvent.onDragEnter = (e) => {
         const target = e.currentTarget;
-        const { state } = index_1.default;
+        const { state } = index_2.default;
         e.preventDefault();
         const dragIndex = Number(target.dataset.index);
         const dropIndex = Number(state.dragCurrentIndex);
@@ -976,10 +986,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             return;
         target.classList.add("PBE_swap");
     };
-    CurrentPrompts.onDrop = (e) => {
+    CurrentPromptsEvent.onDrop = (e) => {
         const target = e.currentTarget;
-        const { state } = index_1.default;
-        const activePrompts = index_1.default.getCurrentPrompts();
+        const { state } = index_2.default;
+        const activePrompts = index_2.default.getCurrentPrompts();
         const dragIndex = Number(target.dataset.index);
         const dropIndex = Number(state.dragCurrentIndex);
         target.classList.remove("PBE_swap");
@@ -988,66 +998,56 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         e.stopPropagation();
         const element = activePrompts.splice(dropIndex, 1)[0];
         activePrompts.splice(dragIndex, 0, element);
-        CurrentPrompts.update();
+        index_1.default.update();
     };
-    CurrentPrompts.onDblClick = (e) => {
+    CurrentPromptsEvent.onDblClick = (e) => {
         const target = e.currentTarget;
-        const { state } = index_1.default;
+        const { state } = index_2.default;
         const currentId = target.dataset.prompt;
         if (!currentId)
             return;
         state.promptToolsId = currentId;
-        index_6.default.update();
+        index_7.default.update();
     };
-    CurrentPrompts.initButton = (positiveWrapper) => {
-        const { readonly } = index_2.default.meta;
-        const normalizeButton = document.createElement("button");
-        normalizeButton.className = "PBE_actionButton PBE_normalizeButton";
-        normalizeButton.innerText = "Normalize";
-        if (readonly)
-            normalizeButton.className = "PBE_actionButton PBE_normalizeButton_readonly";
-        normalizeButton.addEventListener("click", CurrentPrompts.onNormalizePrompts);
-        positiveWrapper.appendChild(normalizeButton);
-    };
-    CurrentPrompts.onPromptSelected = (e) => {
+    CurrentPromptsEvent.onPromptSelected = (e) => {
         const target = e.currentTarget;
-        const { readonly } = index_2.default.meta;
-        const { united } = index_2.default.data;
-        const { state } = index_1.default;
+        const { readonly } = index_3.default.meta;
+        const { united } = index_3.default.data;
+        const { state } = index_2.default;
         const currentId = target.dataset.prompt;
         let index = target.dataset.index;
         const isSyntax = target.dataset.issyntax ? true : false;
-        const activePrompts = index_1.default.getCurrentPrompts();
-        const wrapper = index_1.default.DOMCache.containers[state.currentContainer].currentPrompts;
+        const activePrompts = index_2.default.getCurrentPrompts();
+        const wrapper = index_2.default.DOMCache.containers[state.currentContainer].currentPrompts;
         if (!wrapper || !currentId)
             return;
         if (index !== undefined)
             index = Number(index);
         if (isSyntax && index !== undefined && (e.ctrlKey || e.metaKey)) {
             activePrompts.splice(index, 1);
-            index_1.default.setCurrentPrompts(activePrompts);
-            CurrentPrompts.update();
+            index_2.default.setCurrentPrompts(activePrompts);
+            index_1.default.update();
             return;
         }
         const targetPrompt = united.find(item => item.id.toLowerCase() === currentId.toLowerCase());
         if (targetPrompt && targetPrompt.collections && targetPrompt.collections[0]) {
             if (!state.savePreviewCollection || !targetPrompt.collections.includes(state.savePreviewCollection)) {
                 state.savePreviewCollection = targetPrompt.collections[0];
-                index_3.default.update();
+                index_4.default.update();
             }
         }
         if (e.ctrlKey || e.metaKey) {
-            index_1.default.setCurrentPrompts(activePrompts.filter(item => item.id !== currentId));
-            CurrentPrompts.update();
+            index_2.default.setCurrentPrompts(activePrompts.filter(item => item.id !== currentId));
+            index_1.default.update();
             return;
         }
         if (!readonly && e.shiftKey) {
             if (targetPrompt) {
                 state.editingPrompt = currentId;
-                index_4.default.update();
+                index_5.default.update();
             }
             else {
-                index_5.default.onOpenScriber();
+                index_6.default.onOpenScriber();
             }
             return;
         }
@@ -1062,19 +1062,19 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         else {
             state.selectedPrompt = undefined;
         }
-        index_3.default.update();
+        index_4.default.update();
     };
     /**
      * Handles the mouse wheel event and changes the weight of the prompt
      */
-    CurrentPrompts.scrollWeight = (e) => {
+    CurrentPromptsEvent.scrollWeight = (e) => {
         const target = e.currentTarget;
-        const { state } = index_1.default;
+        const { state } = index_2.default;
         const { belowOneWeight = 0.05, aboveOneWeight = 0.01 } = state.config;
         if (!e.shiftKey)
             return;
         const currentId = target.dataset.prompt;
-        const activePrompts = index_1.default.getCurrentPrompts();
+        const activePrompts = index_2.default.getCurrentPrompts();
         const targetItem = activePrompts.find(item => item.id === currentId);
         if (!currentId || !targetItem)
             return;
@@ -1109,11 +1109,45 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         if (targetItem.weight < 0)
             targetItem.weight = 0;
         targetItem.weight = Number(targetItem.weight.toFixed(2));
-        CurrentPrompts.update();
+        index_1.default.update();
     };
-    CurrentPrompts.onNormalizePrompts = () => {
+    CurrentPromptsEvent.onNormalizePrompts = () => {
         (0, synchroniseCurrentPrompts_1.default)(true, true);
-        CurrentPrompts.update();
+        index_1.default.update();
+    };
+    exports["default"] = CurrentPromptsEvent;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/CurrentPrompts/index.ts":
+/*!****************************************!*\
+  !*** ./client/CurrentPrompts/index.ts ***!
+  \****************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/showPromptItem */ "./client/showPromptItem.ts"), __webpack_require__(/*! client/const */ "./client/const.ts"), __webpack_require__(/*! ./event */ "./client/CurrentPrompts/event.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, showPromptItem_1, const_1, event_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    class CurrentPrompts {
+    }
+    CurrentPrompts.init = (wrapper, containerId) => {
+        const currentPrompts = document.createElement("div");
+        currentPrompts.className = "PBE_currentPrompts";
+        index_1.default.DOMCache.containers[containerId].currentPrompts = currentPrompts;
+        wrapper.appendChild(currentPrompts);
+    };
+    CurrentPrompts.initButton = (positiveWrapper) => {
+        const { readonly } = index_2.default.meta;
+        const normalizeButton = document.createElement("button");
+        normalizeButton.className = "PBE_actionButton PBE_normalizeButton";
+        normalizeButton.innerText = "Normalize";
+        if (readonly)
+            normalizeButton.className = "PBE_actionButton PBE_normalizeButton_readonly";
+        normalizeButton.addEventListener("click", event_1.default.onNormalizePrompts);
+        positiveWrapper.appendChild(normalizeButton);
     };
     CurrentPrompts.update = (noTextAreaUpdate = false) => {
         const { state } = index_1.default;
@@ -1143,15 +1177,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             }
             else if (state.selectedPrompt === id)
                 promptElement.classList.add("PBE_selectedCurrentElement");
-            promptElement.addEventListener("dragstart", CurrentPrompts.onDragStart);
-            promptElement.addEventListener("dragover", CurrentPrompts.onDragOver);
-            promptElement.addEventListener("dragenter", CurrentPrompts.onDragEnter);
-            promptElement.addEventListener("dragleave", CurrentPrompts.onDragLeave);
-            promptElement.addEventListener("drop", CurrentPrompts.onDrop);
-            promptElement.addEventListener("click", CurrentPrompts.onPromptSelected);
+            promptElement.addEventListener("dragstart", event_1.default.onDragStart);
+            promptElement.addEventListener("dragover", event_1.default.onDragOver);
+            promptElement.addEventListener("dragenter", event_1.default.onDragEnter);
+            promptElement.addEventListener("dragleave", event_1.default.onDragLeave);
+            promptElement.addEventListener("drop", event_1.default.onDrop);
+            promptElement.addEventListener("click", event_1.default.onPromptSelected);
             if (!promptItem.isSyntax) {
-                promptElement.addEventListener("dblclick", CurrentPrompts.onDblClick);
-                promptElement.addEventListener("wheel", CurrentPrompts.scrollWeight);
+                promptElement.addEventListener("dblclick", event_1.default.onDblClick);
+                promptElement.addEventListener("wheel", event_1.default.scrollWeight);
             }
             wrapper.appendChild(promptElement);
         }
@@ -1652,30 +1686,20 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
 
 /***/ }),
 
-/***/ "./client/KnownPrompts/index.ts":
+/***/ "./client/KnownPrompts/event.ts":
 /*!**************************************!*\
-  !*** ./client/KnownPrompts/index.ts ***!
+  !*** ./client/KnownPrompts/event.ts ***!
   \**************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/CurrentPrompts/index */ "./client/CurrentPrompts/index.ts"), __webpack_require__(/*! client/PromptEdit/index */ "./client/PromptEdit/index.ts"), __webpack_require__(/*! client/CollectionTools/index */ "./client/CollectionTools/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! client/showPromptItem */ "./client/showPromptItem.ts"), __webpack_require__(/*! client/TagTooltip/index */ "./client/TagTooltip/index.ts"), __webpack_require__(/*! client/utils */ "./client/utils.ts"), __webpack_require__(/*! client/const */ "./client/const.ts"), __webpack_require__(/*! client/synchroniseCurrentPrompts */ "./client/synchroniseCurrentPrompts.ts"), __webpack_require__(/*! client/utils */ "./client/utils.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, index_5, dom_1, showPromptItem_1, index_6, utils_1, const_1, synchroniseCurrentPrompts_1, utils_2) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./index */ "./client/KnownPrompts/index.ts"), __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/CurrentPrompts/index */ "./client/CurrentPrompts/index.ts"), __webpack_require__(/*! client/PromptEdit/index */ "./client/PromptEdit/index.ts"), __webpack_require__(/*! client/utils */ "./client/utils.ts"), __webpack_require__(/*! client/const */ "./client/const.ts"), __webpack_require__(/*! client/synchroniseCurrentPrompts */ "./client/synchroniseCurrentPrompts.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, index_5, utils_1, const_1, synchroniseCurrentPrompts_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
-    class KnownPrompts {
-        static init(promptContainer, positivePrompts, containerId) {
-            const promptBrowser = document.createElement("div");
-            promptBrowser.className = "PBE_promptsWrapper";
-            const promptsCatalogue = document.createElement("div");
-            promptsCatalogue.className = "PBE_promptsCatalogue";
-            promptBrowser.appendChild(promptsCatalogue);
-            index_1.default.DOMCache.containers[containerId].promptBrowser = promptBrowser;
-            index_1.default.DOMCache.containers[containerId].promptsCatalogue = promptsCatalogue;
-            promptContainer.insertBefore(promptBrowser, positivePrompts);
-        }
+    class KnownPromptsEvent {
         static addPromptItem(targetItem) {
             if (!targetItem)
                 return;
-            const activePrompts = index_1.default.getCurrentPrompts();
+            const activePrompts = index_2.default.getCurrentPrompts();
             const { id, addAtStart, addAfter, addStart, addEnd } = targetItem;
             if (activePrompts.some(item => item.id === id))
                 return;
@@ -1705,10 +1729,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
          * Adds a random prompt from the prompts corresponding to the current filter settings.
          */
         static onAddRandom() {
-            const { data } = index_2.default;
-            const { state } = index_1.default;
+            const { data } = index_3.default;
+            const { state } = index_2.default;
             const { united } = data;
-            const activePrompts = index_1.default.getCurrentPrompts();
+            const activePrompts = index_2.default.getCurrentPrompts();
             let dataArr = [];
             if (state.filterCollection) {
                 const targetCategory = data.original[state.filterCollection];
@@ -1716,25 +1740,25 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                     for (const id in targetCategory) {
                         const targetOriginalItem = targetCategory[id];
                         const targetMixedItem = united.find(item => item.id === targetOriginalItem.id);
-                        if (targetMixedItem && KnownPrompts.checkFilter(targetMixedItem))
+                        if (targetMixedItem && index_1.default.checkFilter(targetMixedItem))
                             dataArr.push(Object.assign({}, targetMixedItem));
                     }
                 }
             }
             else {
                 for (const id in united) {
-                    if (KnownPrompts.checkFilter(united[id]))
+                    if (index_1.default.checkFilter(united[id]))
                         dataArr.push(Object.assign({}, united[id]));
                 }
             }
             dataArr = dataArr.filter(dataItem => !activePrompts.some(item => item.id === dataItem.id));
             const randomPrompt = dataArr[Math.floor(Math.random() * dataArr.length)];
-            KnownPrompts.addPromptItem(randomPrompt);
-            index_3.default.update();
+            KnownPromptsEvent.addPromptItem(randomPrompt);
+            index_4.default.update();
         }
         static onDragStart(e) {
             const target = e.currentTarget;
-            const { state } = index_1.default;
+            const { state } = index_2.default;
             const splash = target.querySelector(".PBE_promptElementSplash");
             splash.style.display = "none";
             const promptItem = target.dataset.prompt;
@@ -1746,7 +1770,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         }
         static onDragEnter(e) {
             const target = e.currentTarget;
-            const { state } = index_1.default;
+            const { state } = index_2.default;
             e.preventDefault();
             const dragItem = target.dataset.prompt;
             const dropItem = state.dragItemId;
@@ -1763,7 +1787,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         }
         static onDrop(e) {
             const target = e.currentTarget;
-            const { state } = index_1.default;
+            const { state } = index_2.default;
             const dragItem = target.dataset.prompt;
             const dropItem = e.dataTransfer.getData("text");
             target.classList.remove("PBE_swap");
@@ -1771,8 +1795,76 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             e.preventDefault();
             e.stopPropagation();
             if ((0, utils_1.isInSameCollection)(dragItem, dropItem)) {
-                index_2.default.movePrompt(dragItem, dropItem);
+                index_3.default.movePrompt(dragItem, dropItem);
             }
+        }
+    }
+    KnownPromptsEvent.onPromptClick = (e) => {
+        const target = e.currentTarget;
+        const { readonly } = index_3.default.meta;
+        const { united } = index_3.default.data;
+        const { state } = index_2.default;
+        (0, synchroniseCurrentPrompts_1.default)();
+        const promptItem = target.dataset.prompt;
+        const targetItem = united.find(item => item.id === promptItem);
+        if (!targetItem)
+            return;
+        if (!readonly && e.shiftKey) {
+            state.editingPrompt = promptItem;
+            index_5.default.update();
+            return;
+        }
+        if (!readonly && (e.metaKey || e.ctrlKey)) {
+            let targetCollection = state.filterCollection;
+            if (!targetCollection) {
+                if (!targetItem.collections)
+                    return;
+                const firstCollection = targetItem.collections[0];
+                if (!firstCollection)
+                    return;
+                targetCollection = targetItem.collections[0];
+            }
+            if (confirm(`Remove prompt "${promptItem}" from catalogue "${targetCollection}"?`)) {
+                if (!index_3.default.data.original[targetCollection])
+                    return;
+                index_3.default.data.original[targetCollection] = index_3.default.data.original[targetCollection].filter(item => item.id !== promptItem);
+                index_3.default.movePreviewImage(promptItem, targetCollection, targetCollection, "delete");
+                index_3.default.saveJSONData(targetCollection);
+                index_3.default.updateMixedList();
+                index_5.default.update();
+                index_4.default.update();
+            }
+            return;
+        }
+        KnownPromptsEvent.addPromptItem(targetItem);
+        index_4.default.update();
+    };
+    exports["default"] = KnownPromptsEvent;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/KnownPrompts/index.ts":
+/*!**************************************!*\
+  !*** ./client/KnownPrompts/index.ts ***!
+  \**************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/CurrentPrompts/index */ "./client/CurrentPrompts/index.ts"), __webpack_require__(/*! client/CollectionTools/index */ "./client/CollectionTools/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! client/showPromptItem */ "./client/showPromptItem.ts"), __webpack_require__(/*! client/TagTooltip/index */ "./client/TagTooltip/index.ts"), __webpack_require__(/*! client/utils */ "./client/utils.ts"), __webpack_require__(/*! ./event */ "./client/KnownPrompts/event.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, dom_1, showPromptItem_1, index_5, utils_1, event_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    class KnownPrompts {
+        static init(promptContainer, positivePrompts, containerId) {
+            const promptBrowser = document.createElement("div");
+            promptBrowser.className = "PBE_promptsWrapper";
+            const promptsCatalogue = document.createElement("div");
+            promptsCatalogue.className = "PBE_promptsCatalogue";
+            promptBrowser.appendChild(promptsCatalogue);
+            index_1.default.DOMCache.containers[containerId].promptBrowser = promptBrowser;
+            index_1.default.DOMCache.containers[containerId].promptsCatalogue = promptsCatalogue;
+            promptContainer.insertBefore(promptBrowser, positivePrompts);
         }
         static checkFilter(prompt) {
             const { state } = index_1.default;
@@ -1852,7 +1944,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             }
             wrapper.innerHTML = "";
             if (!united) {
-                (0, utils_2.log)("No prompt data to show");
+                (0, utils_1.log)("No prompt data to show");
                 return;
             }
             KnownPrompts.showHeader(wrapper, params);
@@ -1902,7 +1994,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                     className: "PBE_promptElement PBE_promptElement_random",
                     content: "Add random"
                 });
-                addRandom.addEventListener("click", KnownPrompts.onAddRandom);
+                addRandom.addEventListener("click", event_1.default.onAddRandom);
                 addRandom.style.width = `${cardWidth}px`;
                 addRandom.style.height = `${cardHeight}px`;
                 proptsContainer.appendChild(addRandom);
@@ -1927,13 +2019,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                     })); */
                 }
                 if (!readonly) {
-                    promptElement.addEventListener("dragstart", KnownPrompts.onDragStart);
-                    promptElement.addEventListener("dragover", KnownPrompts.onDragOver);
-                    promptElement.addEventListener("dragenter", KnownPrompts.onDragEnter);
-                    promptElement.addEventListener("dragleave", KnownPrompts.onDragLeave);
-                    promptElement.addEventListener("drop", KnownPrompts.onDrop);
+                    promptElement.addEventListener("dragstart", event_1.default.onDragStart);
+                    promptElement.addEventListener("dragover", event_1.default.onDragOver);
+                    promptElement.addEventListener("dragenter", event_1.default.onDragEnter);
+                    promptElement.addEventListener("dragleave", event_1.default.onDragLeave);
+                    promptElement.addEventListener("drop", event_1.default.onDrop);
                 }
-                promptElement.addEventListener("click", KnownPrompts.onPromptClick);
+                promptElement.addEventListener("click", event_1.default.onPromptClick);
                 proptsContainer.appendChild(promptElement);
                 shownItems++;
             }
@@ -1941,46 +2033,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             proptsContainer.scrollTo(0, scrollState);
         }
     }
-    KnownPrompts.onPromptClick = (e) => {
-        const target = e.currentTarget;
-        const { readonly } = index_2.default.meta;
-        const { united } = index_2.default.data;
-        const { state } = index_1.default;
-        (0, synchroniseCurrentPrompts_1.default)();
-        const promptItem = target.dataset.prompt;
-        const targetItem = united.find(item => item.id === promptItem);
-        if (!targetItem)
-            return;
-        if (!readonly && e.shiftKey) {
-            state.editingPrompt = promptItem;
-            index_4.default.update();
-            return;
-        }
-        if (!readonly && (e.metaKey || e.ctrlKey)) {
-            let targetCollection = state.filterCollection;
-            if (!targetCollection) {
-                if (!targetItem.collections)
-                    return;
-                const firstCollection = targetItem.collections[0];
-                if (!firstCollection)
-                    return;
-                targetCollection = targetItem.collections[0];
-            }
-            if (confirm(`Remove prompt "${promptItem}" from catalogue "${targetCollection}"?`)) {
-                if (!index_2.default.data.original[targetCollection])
-                    return;
-                index_2.default.data.original[targetCollection] = index_2.default.data.original[targetCollection].filter(item => item.id !== promptItem);
-                index_2.default.movePreviewImage(promptItem, targetCollection, targetCollection, "delete");
-                index_2.default.saveJSONData(targetCollection);
-                index_2.default.updateMixedList();
-                index_4.default.update();
-                index_3.default.update();
-            }
-            return;
-        }
-        KnownPrompts.addPromptItem(targetItem);
-        index_3.default.update();
-    };
     KnownPrompts.showHeader = (wrapper, params = {}) => {
         const { readonly } = index_2.default.meta;
         const { holdTagsInput = false } = params;
@@ -2096,7 +2148,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             collectionToolsButton.addEventListener("click", (e) => {
                 if (state.filterCollection)
                     state.collectionToolsId = state.filterCollection;
-                index_5.default.update();
+                index_4.default.update();
             });
             headerContainer.appendChild(collectionToolsButton);
         }
@@ -2106,7 +2158,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         headerContainer.appendChild(nameInput);
         headerContainer.appendChild(sortingSelector);
         wrapper.appendChild(headerContainer);
-        index_6.default.add(tagsInput);
+        index_5.default.add(tagsInput);
         if (holdTagsInput)
             tagsInput.focus();
     };
@@ -2117,37 +2169,19 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 
 /***/ }),
 
-/***/ "./client/LoadStyle/index.ts":
+/***/ "./client/LoadStyle/event.ts":
 /*!***********************************!*\
-  !*** ./client/LoadStyle/index.ts ***!
+  !*** ./client/LoadStyle/event.ts ***!
   \***********************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! client/showPromptItem */ "./client/showPromptItem.ts"), __webpack_require__(/*! client/applyStyle */ "./client/applyStyle.ts"), __webpack_require__(/*! client/const */ "./client/const.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, dom_1, showPromptItem_1, applyStyle_1, const_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./index */ "./client/LoadStyle/index.ts"), __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/applyStyle */ "./client/applyStyle.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, applyStyle_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
-    class LoadStyle {
-        static init(mainWrapper) {
-            const stylesWindow = document.createElement("div");
-            stylesWindow.className = "PBE_generalWindow PBE_stylesWindow";
-            stylesWindow.id = "PBE_stylesWindow";
-            index_1.default.DOMCache.stylesWindow = stylesWindow;
-            mainWrapper.appendChild(stylesWindow);
-            index_1.default.onCloseActiveWindow = LoadStyle.onCloseWindow;
-            stylesWindow.addEventListener("click", () => {
-                index_1.default.onCloseActiveWindow = LoadStyle.onCloseWindow;
-            });
-        }
-        static initButton(positiveWrapper) {
-            const addStylesButton = document.createElement("button");
-            addStylesButton.className = "PBE_actionButton PBE_stylesButton";
-            addStylesButton.innerText = "Styles";
-            addStylesButton.addEventListener("click", LoadStyle.onOpenStyles);
-            positiveWrapper.appendChild(addStylesButton);
-        }
+    class LoadStyleEvent {
         static onCloseWindow() {
-            const { state } = index_1.default;
-            const wrapper = index_1.default.DOMCache.stylesWindow;
+            const { state } = index_2.default;
+            const wrapper = index_2.default.DOMCache.stylesWindow;
             if (!wrapper || !state.showStylesWindow)
                 return;
             state.showStylesWindow = undefined;
@@ -2157,28 +2191,28 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             const isShift = e.shiftKey;
             const isCtrl = e.metaKey || e.ctrlKey;
             if (isShift)
-                LoadStyle.applyStyle(e, false);
+                LoadStyleEvent.onApplyStyle(e, false);
             else if (isCtrl)
-                LoadStyle.removeStyle(e);
+                LoadStyleEvent.onRemoveStyle(e);
             else
-                LoadStyle.onSelectStyle(e);
+                LoadStyleEvent.onSelectStyle(e);
         }
         static onChangeFilterCollection(e) {
             const target = e.currentTarget;
-            const { state } = index_1.default;
+            const { state } = index_2.default;
             const value = target.value;
             state.filterStyleCollection = value;
-            LoadStyle.update();
+            index_1.default.update();
         }
         static onChangeFilterName(e) {
             const target = e.currentTarget;
-            const { state } = index_1.default;
+            const { state } = index_2.default;
             const value = target.value;
             state.filterStyleName = value.toLowerCase();
-            LoadStyle.update();
+            index_1.default.update();
         }
         static onToggleShortMode(e) {
-            const { state } = index_1.default;
+            const { state } = index_2.default;
             const id = "styles_simplified_view";
             if (state.toggledButtons.includes(id)) {
                 state.toggledButtons = state.toggledButtons.filter(item => item !== id);
@@ -2186,11 +2220,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             else {
                 state.toggledButtons.push(id);
             }
-            LoadStyle.update();
+            index_1.default.update();
         }
         static onChangeSaveMeta(e) {
             const target = e.currentTarget;
-            const { state } = index_1.default;
+            const { state } = index_2.default;
             const checked = target.checked;
             const id = target.dataset.id;
             if (!id)
@@ -2204,7 +2238,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         }
         static onChangeUpdateMeta(e) {
             const target = e.currentTarget;
-            const { state } = index_1.default;
+            const { state } = index_2.default;
             const checked = target.checked;
             const id = target.dataset.id;
             if (!id)
@@ -2216,13 +2250,248 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             state.config.updateStyleMeta[id] = checked;
             localStorage.setItem("PBE_config", JSON.stringify(state.config));
         }
+        static onRemoveStyle(e) {
+            const target = e.currentTarget;
+            const { readonly } = index_3.default.meta;
+            const { data } = index_3.default;
+            if (readonly || !data.styles)
+                return;
+            let collectionId = undefined;
+            let index = undefined;
+            if (target.dataset.action) {
+                const { selectedItem } = index_1.default;
+                collectionId = selectedItem.collection;
+                index = selectedItem.index;
+            }
+            else {
+                collectionId = target.dataset.id;
+                index = Number(target.dataset.index);
+            }
+            if (!collectionId || Number.isNaN(index))
+                return;
+            const targetCollection = data.styles[collectionId];
+            if (!targetCollection)
+                return;
+            const targetStyle = data.styles[collectionId][index];
+            if (!targetStyle)
+                return;
+            if (confirm(`Remove style "${targetStyle.name}" from catalogue "${collectionId}"?`)) {
+                targetCollection.splice(index, 1);
+                index_3.default.updateStyles(collectionId);
+                index_1.default.update();
+            }
+        }
+        static onRenameStyle(e) {
+            const target = e.currentTarget;
+            const { data } = index_3.default;
+            if (!data.styles)
+                return;
+            let collectionId = undefined;
+            let index = undefined;
+            if (target.dataset.action) {
+                const { selectedItem } = index_1.default;
+                collectionId = selectedItem.collection;
+                index = selectedItem.index;
+            }
+            else {
+                collectionId = target.dataset.id;
+                index = Number(target.dataset.index);
+            }
+            if (!collectionId || Number.isNaN(index))
+                return;
+            const targetCollection = data.styles[collectionId];
+            if (!targetCollection)
+                return;
+            const targetStyle = data.styles[collectionId][index];
+            if (!targetStyle)
+                return;
+            const nameInputField = document.querySelector("#PBE_stylesWindow .PBE_nameAction");
+            if (!nameInputField || !nameInputField.value)
+                return;
+            for (const styleItem of targetCollection) {
+                if (styleItem.name === nameInputField.value) {
+                    alert("Style name already used");
+                    return;
+                }
+            }
+            if (confirm(`Rename style "${targetStyle.name}" to "${nameInputField.value}"?`)) {
+                index_3.default.onRenameStyle(collectionId, targetStyle.name, nameInputField.value);
+            }
+        }
+        static onUpdateStyle(e) {
+            const target = e.currentTarget;
+            const { data } = index_3.default;
+            if (!data.styles)
+                return;
+            let collectionId = undefined;
+            let index = undefined;
+            if (target.dataset.action) {
+                const { selectedItem } = index_1.default;
+                collectionId = selectedItem.collection;
+                index = selectedItem.index;
+            }
+            else {
+                collectionId = target.dataset.id;
+                index = Number(target.dataset.index);
+            }
+            if (!collectionId || Number.isNaN(index))
+                return;
+            const targetCollection = data.styles[collectionId];
+            if (!targetCollection)
+                return;
+            const targetStyle = data.styles[collectionId][index];
+            if (!targetStyle)
+                return;
+            if (confirm(`Replace style "${targetStyle.name}" params to the currently selected?`)) {
+                const newStyle = index_1.default.grabCurrentStyle(undefined, collectionId, true);
+                if (!newStyle)
+                    return;
+                for (const i in newStyle) {
+                    targetStyle[i] = newStyle[i];
+                }
+                /**
+                 * Removing fields that are not part of the style anymore.
+                 * Some fields like name or previewImage must be kept in the object.
+                 * TODO: I probably should check dictionary of fields that can be added/removed
+                 * instead of hardcoding check for things like a name
+                 */
+                for (const i in targetStyle) {
+                    if (i === "name")
+                        continue;
+                    if (i === "previewImage")
+                        continue;
+                    if (!newStyle[i])
+                        delete targetStyle[i];
+                }
+                index_3.default.updateStyles(collectionId);
+                index_1.default.update();
+            }
+        }
+        static onSelectStyle(e) {
+            const target = e.currentTarget;
+            const { data } = index_3.default;
+            const { state } = index_2.default;
+            const { updateStyleMeta = {} } = state.config || {};
+            const collection = target.dataset.id;
+            const styleId = target.dataset.name;
+            const index = Number(target.dataset.index);
+            if (!data || !data.styles || !collection || Number.isNaN(index))
+                return;
+            if (target.classList.contains("PBE_selectedCurrentElement")) {
+                index_1.default.selectedItem = { collection: "", styleId: "", index: 0 };
+                target.classList.remove("PBE_selectedCurrentElement");
+            }
+            else {
+                index_1.default.selectedItem = { collection, styleId, index };
+                const prevSelected = target.parentNode.querySelector(".PBE_selectedCurrentElement");
+                if (prevSelected)
+                    prevSelected.classList.remove("PBE_selectedCurrentElement");
+                const targetCollection = data.styles[collection];
+                if (targetCollection) {
+                    const targetStyle = targetCollection[index];
+                    const checkBoxesWrapper = document.querySelector("#PBE_stylesWindow .PBE_styleMetaCheckboxes");
+                    const nameInputField = document.querySelector("#PBE_stylesWindow .PBE_nameAction");
+                    if (targetStyle && checkBoxesWrapper) {
+                        const checkStatus = {
+                            positive: { id: "#PBE_UpdatekeepPositive", checked: targetStyle.positive !== undefined },
+                            negative: { id: "#PBE_UpdatekeepNegative", checked: targetStyle.negative !== undefined },
+                            size: { id: "#PBE_UpdatekeepSize", checked: targetStyle.height !== undefined },
+                            sampler: { id: "#PBE_UpdatekeepSampler", checked: targetStyle.sampling !== undefined },
+                            quality: { id: "#PBE_UpdatekeepQuality", checked: targetStyle.steps !== undefined },
+                            seed: { id: "#PBE_UpdatekeepSeed", checked: targetStyle.seed !== undefined },
+                        };
+                        for (const fieldId in checkStatus) {
+                            const field = checkStatus[fieldId];
+                            const targetElement = checkBoxesWrapper.querySelector(field.id);
+                            targetElement.checked = field.checked;
+                            updateStyleMeta[fieldId] = field.checked;
+                        }
+                        if (state.config)
+                            state.config.updateStyleMeta = updateStyleMeta;
+                    }
+                    if ((targetStyle === null || targetStyle === void 0 ? void 0 : targetStyle.name) && nameInputField) {
+                        nameInputField.value = targetStyle.name;
+                    }
+                }
+                target.classList.add("PBE_selectedCurrentElement");
+            }
+        }
+        static onApplyStyle(e, isAfter) {
+            const target = e.currentTarget;
+            const { data } = index_3.default;
+            if (!data.styles)
+                return;
+            if (isAfter === undefined)
+                isAfter = target.dataset.isafter ? true : false;
+            let collectionId = undefined;
+            let index = undefined;
+            if (target.dataset.action) {
+                const { selectedItem } = index_1.default;
+                collectionId = selectedItem.collection;
+                index = selectedItem.index;
+            }
+            else {
+                collectionId = target.dataset.id;
+                index = Number(target.dataset.index);
+            }
+            if (!collectionId || Number.isNaN(index))
+                return;
+            const targetCollection = data.styles[collectionId];
+            if (!targetCollection)
+                return;
+            const targetStyle = data.styles[collectionId][index];
+            if (!targetStyle)
+                return;
+            (0, applyStyle_1.default)(targetStyle, isAfter);
+        }
+        static onOpenStyles() {
+            const { state } = index_2.default;
+            state.showStylesWindow = true;
+            index_1.default.update();
+        }
+    }
+    exports["default"] = LoadStyleEvent;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/LoadStyle/index.ts":
+/*!***********************************!*\
+  !*** ./client/LoadStyle/index.ts ***!
+  \***********************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! client/showPromptItem */ "./client/showPromptItem.ts"), __webpack_require__(/*! client/const */ "./client/const.ts"), __webpack_require__(/*! ./event */ "./client/LoadStyle/event.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, dom_1, showPromptItem_1, const_1, event_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    class LoadStyle {
+        static init(mainWrapper) {
+            const stylesWindow = document.createElement("div");
+            stylesWindow.className = "PBE_generalWindow PBE_stylesWindow";
+            stylesWindow.id = "PBE_stylesWindow";
+            index_1.default.DOMCache.stylesWindow = stylesWindow;
+            mainWrapper.appendChild(stylesWindow);
+            index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
+            stylesWindow.addEventListener("click", () => {
+                index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
+            });
+        }
+        static initButton(positiveWrapper) {
+            const addStylesButton = document.createElement("button");
+            addStylesButton.className = "PBE_actionButton PBE_stylesButton";
+            addStylesButton.innerText = "Styles";
+            addStylesButton.addEventListener("click", event_1.default.onOpenStyles);
+            positiveWrapper.appendChild(addStylesButton);
+        }
         static showMetaCheckboxes(wrapper, isUpdate = false) {
             const { state } = index_1.default;
             const { saveStyleMeta = {}, updateStyleMeta = {} } = state.config || {};
             const targetMeta = isUpdate ? updateStyleMeta : saveStyleMeta;
             const paramsRow = (0, dom_1.makeElement)({ element: "fieldset", className: "PBE_fieldset PBE_styleMetaCheckboxes" });
             const paramsRowLegend = (0, dom_1.makeElement)({ element: "legend", content: "Save meta:" });
-            const onChange = isUpdate ? LoadStyle.onChangeUpdateMeta : LoadStyle.onChangeSaveMeta;
+            const onChange = isUpdate ? event_1.default.onChangeUpdateMeta : event_1.default.onChangeSaveMeta;
             const prefix = isUpdate ? "Update" : "Save";
             const keepSeed = (0, dom_1.makeCheckbox)({ onChange, checked: targetMeta.seed, name: "Seed", id: `PBE_${prefix}keepSeed`, data: "seed" });
             const keepPositive = (0, dom_1.makeCheckbox)({ onChange, checked: targetMeta.positive, name: "Positive", id: `PBE_${prefix}keepPositive`, data: "positive" });
@@ -2321,205 +2590,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 newStyle.sampling = sampling;
             return newStyle;
         }
-        static removeStyle(e) {
-            const target = e.currentTarget;
-            const { readonly } = index_2.default.meta;
-            const { data } = index_2.default;
-            if (readonly || !data.styles)
-                return;
-            let collectionId = undefined;
-            let index = undefined;
-            if (target.dataset.action) {
-                const { selectedItem } = LoadStyle;
-                collectionId = selectedItem.collection;
-                index = selectedItem.index;
-            }
-            else {
-                collectionId = target.dataset.id;
-                index = Number(target.dataset.index);
-            }
-            if (!collectionId || Number.isNaN(index))
-                return;
-            const targetCollection = data.styles[collectionId];
-            if (!targetCollection)
-                return;
-            const targetStyle = data.styles[collectionId][index];
-            if (!targetStyle)
-                return;
-            if (confirm(`Remove style "${targetStyle.name}" from catalogue "${collectionId}"?`)) {
-                targetCollection.splice(index, 1);
-                index_2.default.updateStyles(collectionId);
-                LoadStyle.update();
-            }
-        }
-        static onRenameStyle(e) {
-            const target = e.currentTarget;
-            const { data } = index_2.default;
-            if (!data.styles)
-                return;
-            let collectionId = undefined;
-            let index = undefined;
-            if (target.dataset.action) {
-                const { selectedItem } = LoadStyle;
-                collectionId = selectedItem.collection;
-                index = selectedItem.index;
-            }
-            else {
-                collectionId = target.dataset.id;
-                index = Number(target.dataset.index);
-            }
-            if (!collectionId || Number.isNaN(index))
-                return;
-            const targetCollection = data.styles[collectionId];
-            if (!targetCollection)
-                return;
-            const targetStyle = data.styles[collectionId][index];
-            if (!targetStyle)
-                return;
-            const nameInputField = document.querySelector("#PBE_stylesWindow .PBE_nameAction");
-            if (!nameInputField || !nameInputField.value)
-                return;
-            for (const styleItem of targetCollection) {
-                if (styleItem.name === nameInputField.value) {
-                    alert("Style name already used");
-                    return;
-                }
-            }
-            if (confirm(`Rename style "${targetStyle.name}" to "${nameInputField.value}"?`)) {
-                index_2.default.onRenameStyle(collectionId, targetStyle.name, nameInputField.value);
-            }
-        }
-        static updateStyle(e) {
-            const target = e.currentTarget;
-            const { data } = index_2.default;
-            if (!data.styles)
-                return;
-            let collectionId = undefined;
-            let index = undefined;
-            if (target.dataset.action) {
-                const { selectedItem } = LoadStyle;
-                collectionId = selectedItem.collection;
-                index = selectedItem.index;
-            }
-            else {
-                collectionId = target.dataset.id;
-                index = Number(target.dataset.index);
-            }
-            if (!collectionId || Number.isNaN(index))
-                return;
-            const targetCollection = data.styles[collectionId];
-            if (!targetCollection)
-                return;
-            const targetStyle = data.styles[collectionId][index];
-            if (!targetStyle)
-                return;
-            if (confirm(`Replace style "${targetStyle.name}" params to the currently selected?`)) {
-                const newStyle = LoadStyle.grabCurrentStyle(undefined, collectionId, true);
-                if (!newStyle)
-                    return;
-                for (const i in newStyle) {
-                    targetStyle[i] = newStyle[i];
-                }
-                /**
-                 * Removing fields that are not part of the style anymore.
-                 * Some fields like name or previewImage must be kept in the object.
-                 * TODO: I probably should check dictionary of fields that can be added/removed
-                 * instead of hardcoding check for things like a name
-                 */
-                for (const i in targetStyle) {
-                    if (i === "name")
-                        continue;
-                    if (i === "previewImage")
-                        continue;
-                    if (!newStyle[i])
-                        delete targetStyle[i];
-                }
-                index_2.default.updateStyles(collectionId);
-                LoadStyle.update();
-            }
-        }
-        static onSelectStyle(e) {
-            const target = e.currentTarget;
-            const { data } = index_2.default;
-            const { state } = index_1.default;
-            const { updateStyleMeta = {} } = state.config || {};
-            const collection = target.dataset.id;
-            const styleId = target.dataset.name;
-            const index = Number(target.dataset.index);
-            if (!data || !data.styles || !collection || Number.isNaN(index))
-                return;
-            if (target.classList.contains("PBE_selectedCurrentElement")) {
-                LoadStyle.selectedItem = { collection: "", styleId: "", index: 0 };
-                target.classList.remove("PBE_selectedCurrentElement");
-            }
-            else {
-                LoadStyle.selectedItem = { collection, styleId, index };
-                const prevSelected = target.parentNode.querySelector(".PBE_selectedCurrentElement");
-                if (prevSelected)
-                    prevSelected.classList.remove("PBE_selectedCurrentElement");
-                const targetCollection = data.styles[collection];
-                if (targetCollection) {
-                    const targetStyle = targetCollection[index];
-                    const checkBoxesWrapper = document.querySelector("#PBE_stylesWindow .PBE_styleMetaCheckboxes");
-                    const nameInputField = document.querySelector("#PBE_stylesWindow .PBE_nameAction");
-                    if (targetStyle && checkBoxesWrapper) {
-                        const checkStatus = {
-                            positive: { id: "#PBE_UpdatekeepPositive", checked: targetStyle.positive !== undefined },
-                            negative: { id: "#PBE_UpdatekeepNegative", checked: targetStyle.negative !== undefined },
-                            size: { id: "#PBE_UpdatekeepSize", checked: targetStyle.height !== undefined },
-                            sampler: { id: "#PBE_UpdatekeepSampler", checked: targetStyle.sampling !== undefined },
-                            quality: { id: "#PBE_UpdatekeepQuality", checked: targetStyle.steps !== undefined },
-                            seed: { id: "#PBE_UpdatekeepSeed", checked: targetStyle.seed !== undefined },
-                        };
-                        for (const fieldId in checkStatus) {
-                            const field = checkStatus[fieldId];
-                            const targetElement = checkBoxesWrapper.querySelector(field.id);
-                            targetElement.checked = field.checked;
-                            updateStyleMeta[fieldId] = field.checked;
-                        }
-                        if (state.config)
-                            state.config.updateStyleMeta = updateStyleMeta;
-                    }
-                    if ((targetStyle === null || targetStyle === void 0 ? void 0 : targetStyle.name) && nameInputField) {
-                        nameInputField.value = targetStyle.name;
-                    }
-                }
-                target.classList.add("PBE_selectedCurrentElement");
-            }
-        }
-        static applyStyle(e, isAfter) {
-            const target = e.currentTarget;
-            const { data } = index_2.default;
-            if (!data.styles)
-                return;
-            if (isAfter === undefined)
-                isAfter = target.dataset.isafter ? true : false;
-            let collectionId = undefined;
-            let index = undefined;
-            if (target.dataset.action) {
-                const { selectedItem } = LoadStyle;
-                collectionId = selectedItem.collection;
-                index = selectedItem.index;
-            }
-            else {
-                collectionId = target.dataset.id;
-                index = Number(target.dataset.index);
-            }
-            if (!collectionId || Number.isNaN(index))
-                return;
-            const targetCollection = data.styles[collectionId];
-            if (!targetCollection)
-                return;
-            const targetStyle = data.styles[collectionId][index];
-            if (!targetStyle)
-                return;
-            (0, applyStyle_1.default)(targetStyle, isAfter);
-        }
-        static onOpenStyles() {
-            const { state } = index_1.default;
-            state.showStylesWindow = true;
-            LoadStyle.update();
-        }
         static showFilters(wrapper) {
             const { data } = index_2.default;
             const { state } = index_1.default;
@@ -2530,7 +2600,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             if (state.toggledButtons.includes("styles_simplified_view"))
                 toggleShortMode.classList.add("PBE_toggledButton");
             toggleShortMode.style.height = "16px";
-            toggleShortMode.addEventListener("click", LoadStyle.onToggleShortMode);
+            toggleShortMode.addEventListener("click", event_1.default.onToggleShortMode);
             const collectionSelect = document.createElement("select");
             collectionSelect.className = "PBE_generalInput PBE_select";
             let options = "<option value=''>Any</option>";
@@ -2539,12 +2609,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             }
             collectionSelect.innerHTML = options;
             collectionSelect.value = state.filterStyleCollection || "";
-            collectionSelect.addEventListener("change", LoadStyle.onChangeFilterCollection);
+            collectionSelect.addEventListener("change", event_1.default.onChangeFilterCollection);
             const nameFilter = document.createElement("input");
             nameFilter.placeholder = "Search name";
             nameFilter.className = "PBE_generalInput PBE_input";
             nameFilter.value = state.filterStyleName || "";
-            nameFilter.addEventListener("change", LoadStyle.onChangeFilterName);
+            nameFilter.addEventListener("change", event_1.default.onChangeFilterName);
             wrapper.appendChild(toggleShortMode);
             wrapper.appendChild(collectionSelect);
             wrapper.appendChild(nameFilter);
@@ -2587,7 +2657,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 if (LoadStyle.selectedItem.collection === id && LoadStyle.selectedItem.index === index) {
                     element.classList.add("PBE_selectedCurrentElement");
                 }
-                element.addEventListener("click", LoadStyle.onCardClick);
+                element.addEventListener("click", event_1.default.onCardClick);
                 wrapper.appendChild(element);
             }
         }
@@ -2599,7 +2669,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             nameField.placeholder = "Style name";
             const renameButton = (0, dom_1.makeElement)({ element: "div", className: "PBE_button", content: "Rename", title: "Rename selected style" });
             renameButton.dataset.action = "true";
-            renameButton.addEventListener("click", LoadStyle.onRenameStyle);
+            renameButton.addEventListener("click", event_1.default.onRenameStyle);
             nameContainer.appendChild(nameLegend);
             nameContainer.appendChild(nameField);
             nameContainer.appendChild(renameButton);
@@ -2619,14 +2689,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             addBeforeButton.className = "PBE_button";
             addBeforeButton.title = "Add style prompts at the start of current prompts";
             addBeforeButton.dataset.action = "true";
-            addBeforeButton.addEventListener("click", LoadStyle.applyStyle);
+            addBeforeButton.addEventListener("click", event_1.default.onApplyStyle);
             const addAfterButton = document.createElement("div");
             addAfterButton.innerText = "Add after";
             addAfterButton.className = "PBE_button";
             addAfterButton.title = "Add style prompts at the end of current prompts";
             addAfterButton.dataset.action = "true";
             addAfterButton.dataset.isafter = "true";
-            addAfterButton.addEventListener("click", LoadStyle.applyStyle);
+            addAfterButton.addEventListener("click", event_1.default.onApplyStyle);
             actionContainer.appendChild(actionLegend);
             actionContainer.appendChild(addBeforeButton);
             actionContainer.appendChild(addAfterButton);
@@ -2639,7 +2709,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             updateButton.className = "PBE_button";
             updateButton.title = "Update selected style";
             updateButton.dataset.action = "true";
-            updateButton.addEventListener("click", LoadStyle.updateStyle);
+            updateButton.addEventListener("click", event_1.default.onUpdateStyle);
             const updatePreviewButton = document.createElement("div");
             updatePreviewButton.innerText = "Update preview";
             updatePreviewButton.className = "PBE_button";
@@ -2658,7 +2728,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             deleteButton.className = "PBE_button PBE_buttonCancel";
             deleteButton.title = "Delete selected style";
             deleteButton.dataset.action = "true";
-            deleteButton.addEventListener("click", LoadStyle.removeStyle);
+            deleteButton.addEventListener("click", event_1.default.onRemoveStyle);
             systemContainer.appendChild(systemLegend);
             systemContainer.appendChild(deleteButton);
             wrapper.appendChild(actionContainer);
@@ -2758,10 +2828,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 addBeforeButton.dataset.index = index + "";
                 removeButton.dataset.index = index + "";
                 updateButton.dataset.index = index + "";
-                addBeforeButton.addEventListener("click", LoadStyle.applyStyle);
-                addAfterButton.addEventListener("click", LoadStyle.applyStyle);
-                removeButton.addEventListener("click", LoadStyle.removeStyle);
-                updateButton.addEventListener("click", LoadStyle.updateStyle);
+                addBeforeButton.addEventListener("click", event_1.default.onApplyStyle);
+                addAfterButton.addEventListener("click", event_1.default.onApplyStyle);
+                removeButton.addEventListener("click", event_1.default.onRemoveStyle);
+                updateButton.addEventListener("click", event_1.default.onUpdateStyle);
                 updatePreview.addEventListener("click", index_2.default.onUpdateStylePreview);
                 actionsContainer.appendChild(addBeforeButton);
                 if (activePrompts && activePrompts.length)
@@ -2793,7 +2863,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 stylesItem.appendChild(styleHeader);
                 stylesItem.appendChild(contentContainer);
                 stylesItem.appendChild(metaInfoContainer);
-                stylesItem.addEventListener("click", LoadStyle.onSelectStyle);
+                stylesItem.addEventListener("click", event_1.default.onSelectStyle);
                 wrapper.appendChild(stylesItem);
             }
         }
@@ -2802,7 +2872,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             const wrapper = index_1.default.DOMCache.stylesWindow;
             if (!wrapper || !state.showStylesWindow)
                 return;
-            index_1.default.onCloseActiveWindow = LoadStyle.onCloseWindow;
+            index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
             wrapper.innerHTML = "";
             wrapper.style.display = "flex";
             const isShort = state.toggledButtons.includes("styles_simplified_view");
@@ -2820,7 +2890,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 possibleStylesBlock.className = "PBE_dataColumn PBE_Scrollbar PBE_windowContent";
                 LoadStyle.showStyles(possibleStylesBlock);
             }
-            closeButton.addEventListener("click", LoadStyle.onCloseWindow);
+            closeButton.addEventListener("click", event_1.default.onCloseWindow);
             footerBlock.appendChild(closeButton);
             const filterBlock = document.createElement("div");
             filterBlock.className = "PBE_row PBE_stylesFilter";
@@ -2907,29 +2977,19 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 
 /***/ }),
 
-/***/ "./client/PromptEdit/index.ts":
+/***/ "./client/PromptEdit/event.ts":
 /*!************************************!*\
-  !*** ./client/PromptEdit/index.ts ***!
+  !*** ./client/PromptEdit/event.ts ***!
   \************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/KnownPrompts/index */ "./client/KnownPrompts/index.ts"), __webpack_require__(/*! client/CollectionTools/index */ "./client/CollectionTools/index.ts"), __webpack_require__(/*! client/TagTooltip/index */ "./client/TagTooltip/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, index_5, dom_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./index */ "./client/PromptEdit/index.ts"), __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
-    class PromptEdit {
-        static init(wrapper) {
-            const promptEdit = document.createElement("div");
-            promptEdit.className = "PBE_promptEdit PBE_generalWindow";
-            index_1.default.DOMCache.promptEdit = promptEdit;
-            wrapper.appendChild(promptEdit);
-            index_1.default.onCloseActiveWindow = PromptEdit.onCloseWindow;
-            promptEdit.addEventListener("click", () => {
-                index_1.default.onCloseActiveWindow = PromptEdit.onCloseWindow;
-            });
-        }
+    class PromptEditEvent {
         static onCloseWindow() {
-            const { state } = index_1.default;
-            const wrapper = index_1.default.DOMCache.promptEdit;
+            const { state } = index_2.default;
+            const wrapper = index_2.default.DOMCache.promptEdit;
             if (!wrapper || !state.editingPrompt)
                 return;
             state.editingPrompt = undefined;
@@ -2947,12 +3007,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                     continue;
                 targetItem.tags.push(tag);
             }
-            PromptEdit.update(targetItem);
+            index_1.default.update(targetItem);
         }
         static onChangeAutogenCollection(value, prompt) {
             if (!prompt)
                 return;
-            const { data } = index_2.default;
+            const { data } = index_3.default;
             if (!prompt.autogen)
                 prompt.autogen = {};
             if (!value || value === "__none")
@@ -2968,7 +3028,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                     break;
                 }
             }
-            PromptEdit.update(prompt);
+            index_1.default.update(prompt);
         }
         static onChangeAutogenStyle(value, prompt) {
             if (!prompt || !value)
@@ -2976,7 +3036,35 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             if (!prompt.autogen)
                 prompt.autogen = {};
             prompt.autogen.style = value;
-            PromptEdit.update(prompt);
+            index_1.default.update(prompt);
+        }
+    }
+    exports["default"] = PromptEditEvent;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/PromptEdit/index.ts":
+/*!************************************!*\
+  !*** ./client/PromptEdit/index.ts ***!
+  \************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/KnownPrompts/index */ "./client/KnownPrompts/index.ts"), __webpack_require__(/*! client/CollectionTools/index */ "./client/CollectionTools/index.ts"), __webpack_require__(/*! client/TagTooltip/index */ "./client/TagTooltip/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! ./event */ "./client/PromptEdit/event.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, index_5, dom_1, event_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    class PromptEdit {
+        static init(wrapper) {
+            const promptEdit = document.createElement("div");
+            promptEdit.className = "PBE_promptEdit PBE_generalWindow";
+            index_1.default.DOMCache.promptEdit = promptEdit;
+            wrapper.appendChild(promptEdit);
+            index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
+            promptEdit.addEventListener("click", () => {
+                index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
+            });
         }
         static addCollectionSelector(wrapper) {
             const { state } = index_1.default;
@@ -3267,7 +3355,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 className: "PBE_generalInput",
                 value: collection,
                 options: colOptions,
-                onChange: (e) => PromptEdit.onChangeAutogenCollection(e.currentTarget.value, prompt)
+                onChange: (e) => event_1.default.onChangeAutogenCollection(e.currentTarget.value, prompt)
             });
             autoGenBlock.appendChild(stylesCollectionsSelect);
             if (autogen.collection) {
@@ -3281,7 +3369,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                         className: "PBE_generalInput",
                         value: autogen.style || "",
                         options: styleOptions,
-                        onChange: (e) => PromptEdit.onChangeAutogenStyle(e.currentTarget.value, prompt)
+                        onChange: (e) => event_1.default.onChangeAutogenStyle(e.currentTarget.value, prompt)
                     });
                     autoGenBlock.appendChild(styleSelect);
                 }
@@ -3298,7 +3386,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 targetItem = PromptEdit.getTargetItem() || undefined;
             if (!targetItem)
                 return;
-            index_1.default.onCloseActiveWindow = PromptEdit.onCloseWindow;
+            index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
             wrapper.innerHTML = "";
             const headerBlock = (0, dom_1.makeElement)({ element: "div", className: "PBE_rowBlock" });
             const headerTitle = (0, dom_1.makeElement)({ element: "div", className: "PBE_promptEditTitle", content: state.editingPrompt });
@@ -3367,13 +3455,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                     return;
                 if (target.dataset.hint)
                     return;
-                PromptEdit.onAddTags(targetItem, tagInput);
+                event_1.default.onAddTags(targetItem, tagInput);
             });
             addTagButton.addEventListener("click", (e) => {
                 const inputElement = wrapper.querySelector("#PBE_addTagInput");
                 if (!inputElement)
                     return;
-                PromptEdit.onAddTags(targetItem, inputElement);
+                event_1.default.onAddTags(targetItem, inputElement);
             });
             addCategoryButton.addEventListener("click", (e) => {
                 const selectElement = wrapper.querySelector("#PBE_addCategorySelect");
@@ -3386,7 +3474,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 PromptEdit.update(targetItem);
             });
             commentArea.addEventListener("change", (e) => targetItem.comment = e.currentTarget.value);
-            cancelButton.addEventListener("click", PromptEdit.onCloseWindow);
+            cancelButton.addEventListener("click", event_1.default.onCloseWindow);
             saveButton.addEventListener("click", PromptEdit.saveEdit);
             currentTagsBlock.appendChild(tagsTitle);
             currentTagsBlock.appendChild(tagsList);
@@ -3421,56 +3509,29 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 
 /***/ }),
 
-/***/ "./client/PromptScribe/index.ts":
+/***/ "./client/PromptScribe/event.ts":
 /*!**************************************!*\
-  !*** ./client/PromptScribe/index.ts ***!
+  !*** ./client/PromptScribe/event.ts ***!
   \**************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/KnownPrompts/index */ "./client/KnownPrompts/index.ts"), __webpack_require__(/*! client/CurrentPrompts/index */ "./client/CurrentPrompts/index.ts"), __webpack_require__(/*! client/synchroniseCurrentPrompts */ "./client/synchroniseCurrentPrompts.ts"), __webpack_require__(/*! client/showPromptItem */ "./client/showPromptItem.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, synchroniseCurrentPrompts_1, showPromptItem_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./index */ "./client/PromptScribe/index.ts"), __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/KnownPrompts/index */ "./client/KnownPrompts/index.ts"), __webpack_require__(/*! client/CurrentPrompts/index */ "./client/CurrentPrompts/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, index_5) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
-    class PromptScribe {
-        static init(wrapper) {
-            const promptScribe = document.createElement("div");
-            promptScribe.className = "PBE_generalWindow PBE_promptScribe";
-            promptScribe.id = "PBE_promptScribe";
-            index_1.default.DOMCache.promptScribe = promptScribe;
-            wrapper.appendChild(promptScribe);
-            index_1.default.onCloseActiveWindow = PromptScribe.onCloseWindow;
-            promptScribe.addEventListener("click", () => {
-                index_1.default.onCloseActiveWindow = PromptScribe.onCloseWindow;
-            });
-        }
-        static initButton(positiveWrapper) {
-            const { readonly } = index_2.default.meta;
-            if (readonly)
-                return;
-            const addUnknownButton = document.createElement("button");
-            addUnknownButton.className = "PBE_actionButton PBE_addUnknownButton";
-            addUnknownButton.innerText = "Add Unknown";
-            addUnknownButton.addEventListener("click", PromptScribe.onOpenScriber);
-            positiveWrapper.appendChild(addUnknownButton);
-        }
+    class PromptScribeEvent {
         static onCloseWindow() {
-            const { state } = index_1.default;
-            const wrapper = index_1.default.DOMCache.promptScribe;
+            const { state } = index_2.default;
+            const wrapper = index_2.default.DOMCache.promptScribe;
             if (!wrapper)
                 return;
             state.showScriberWindow = undefined;
             wrapper.style.display = "none";
         }
-        static onOpenScriber() {
-            const { state } = index_1.default;
-            (0, synchroniseCurrentPrompts_1.default)();
-            state.showScriberWindow = true;
-            PromptScribe.update(true);
-        }
         static onAddUnknownPrompts() {
-            const { data } = index_2.default;
-            const { state } = index_1.default;
+            const { data } = index_3.default;
+            const { state } = index_2.default;
             let { selectedNewPrompts = [] } = state;
-            const activePrompts = index_1.default.getCurrentPrompts();
+            const activePrompts = index_2.default.getCurrentPrompts();
             if (!state.savePreviewCollection)
                 return;
             const targetCollection = data.original[state.savePreviewCollection];
@@ -3495,14 +3556,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             if (!newPrompts)
                 return;
             state.selectedNewPrompts = selectedNewPrompts;
-            index_2.default.saveJSONData(state.savePreviewCollection);
-            index_2.default.updateMixedList();
-            index_3.default.update();
+            index_3.default.saveJSONData(state.savePreviewCollection);
+            index_3.default.updateMixedList();
             index_4.default.update();
-            PromptScribe.update();
+            index_5.default.update();
+            index_1.default.update();
         }
         static onToggleOnlyNew(e) {
-            const { state } = index_1.default;
+            const { state } = index_2.default;
             const id = "new_in_all_collections";
             if (state.toggledButtons.includes(id)) {
                 state.toggledButtons = state.toggledButtons.filter(item => item !== id);
@@ -3510,17 +3571,62 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             else {
                 state.toggledButtons.push(id);
             }
-            PromptScribe.update();
+            index_1.default.update();
         }
         static onToggleAll(e) {
-            const { state } = index_1.default;
+            const { state } = index_2.default;
             let { selectedNewPrompts = [] } = state;
             if (!selectedNewPrompts.length) {
-                PromptScribe.update(true);
+                index_1.default.update(true);
                 return;
             }
             state.selectedNewPrompts = [];
-            PromptScribe.update();
+            index_1.default.update();
+        }
+    }
+    exports["default"] = PromptScribeEvent;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/PromptScribe/index.ts":
+/*!**************************************!*\
+  !*** ./client/PromptScribe/index.ts ***!
+  \**************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/synchroniseCurrentPrompts */ "./client/synchroniseCurrentPrompts.ts"), __webpack_require__(/*! client/showPromptItem */ "./client/showPromptItem.ts"), __webpack_require__(/*! ./event */ "./client/PromptScribe/event.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, synchroniseCurrentPrompts_1, showPromptItem_1, event_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    class PromptScribe {
+        static init(wrapper) {
+            const promptScribe = document.createElement("div");
+            promptScribe.className = "PBE_generalWindow PBE_promptScribe";
+            promptScribe.id = "PBE_promptScribe";
+            index_1.default.DOMCache.promptScribe = promptScribe;
+            wrapper.appendChild(promptScribe);
+            index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
+            promptScribe.addEventListener("click", () => {
+                index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
+            });
+        }
+        static initButton(positiveWrapper) {
+            const { readonly } = index_2.default.meta;
+            if (readonly)
+                return;
+            const addUnknownButton = document.createElement("button");
+            addUnknownButton.className = "PBE_actionButton PBE_addUnknownButton";
+            addUnknownButton.innerText = "Add Unknown";
+            addUnknownButton.addEventListener("click", PromptScribe.onOpenScriber);
+            positiveWrapper.appendChild(addUnknownButton);
+        }
+        static onOpenScriber() {
+            const { state } = index_1.default;
+            (0, synchroniseCurrentPrompts_1.default)();
+            state.showScriberWindow = true;
+            PromptScribe.update(true);
         }
         static showHeader(wrapper) {
             const { data } = index_2.default;
@@ -3534,16 +3640,16 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             if (state.toggledButtons.includes("new_in_all_collections"))
                 toggleOnlyNew.classList.add("PBE_toggledButton");
             toggleOnlyNew.style.height = "24px";
-            toggleOnlyNew.addEventListener("click", PromptScribe.onToggleOnlyNew);
+            toggleOnlyNew.addEventListener("click", event_1.default.onToggleOnlyNew);
             const saveButton = document.createElement("button");
             saveButton.innerText = "Add new prompts";
             saveButton.className = "PBE_button";
-            saveButton.addEventListener("click", PromptScribe.onAddUnknownPrompts);
+            saveButton.addEventListener("click", event_1.default.onAddUnknownPrompts);
             const toggleAll = document.createElement("button");
             toggleAll.innerText = "Toggle all";
             toggleAll.className = "PBE_button";
             toggleAll.style.marginRight = "10px";
-            toggleAll.addEventListener("click", PromptScribe.onToggleAll);
+            toggleAll.addEventListener("click", event_1.default.onToggleAll);
             const collectionSelect = document.createElement("select");
             collectionSelect.className = "PBE_generalInput PBE_select";
             collectionSelect.style.margin = "0 10px";
@@ -3631,7 +3737,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             const wrapper = index_1.default.DOMCache.promptScribe;
             if (!wrapper)
                 return;
-            index_1.default.onCloseActiveWindow = PromptScribe.onCloseWindow;
+            index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
             wrapper.innerHTML = "";
             wrapper.style.display = "flex";
             const footerBlock = document.createElement("div");
@@ -3656,30 +3762,19 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 
 /***/ }),
 
-/***/ "./client/PromptTools/index.ts":
+/***/ "./client/PromptTools/event.ts":
 /*!*************************************!*\
-  !*** ./client/PromptTools/index.ts ***!
+  !*** ./client/PromptTools/event.ts ***!
   \*************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/CurrentPrompts/index */ "./client/CurrentPrompts/index.ts"), __webpack_require__(/*! client/PromptEdit/index */ "./client/PromptEdit/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! client/showPromptItem */ "./client/showPromptItem.ts"), __webpack_require__(/*! client/utils */ "./client/utils.ts"), __webpack_require__(/*! client/const */ "./client/const.ts"), __webpack_require__(/*! client/PromptsFilter/simple */ "./client/PromptsFilter/simple.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, dom_1, showPromptItem_1, utils_1, const_1, simple_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./index */ "./client/PromptTools/index.ts"), __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/CurrentPrompts/index */ "./client/CurrentPrompts/index.ts"), __webpack_require__(/*! client/PromptEdit/index */ "./client/PromptEdit/index.ts"), __webpack_require__(/*! client/const */ "./client/const.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, index_5, const_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
-    class PromptTools {
-        static init(wrapper) {
-            const promptTools = document.createElement("div");
-            promptTools.className = "PBE_generalWindow PBE_promptTools";
-            promptTools.id = "PBE_promptTools";
-            index_1.default.DOMCache.promptTools = promptTools;
-            wrapper.appendChild(promptTools);
-            index_1.default.onCloseActiveWindow = PromptTools.onCloseWindow;
-            promptTools.addEventListener("click", () => {
-                index_1.default.onCloseActiveWindow = PromptTools.onCloseWindow;
-            });
-        }
+    class PromptToolsEvent {
         static onCloseWindow() {
-            const { state } = index_1.default;
-            const wrapper = index_1.default.DOMCache.promptTools;
+            const { state } = index_2.default;
+            const wrapper = index_2.default.DOMCache.promptTools;
             if (!wrapper)
                 return;
             state.promptToolsId = undefined;
@@ -3687,7 +3782,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         }
         static onToggleButton(e) {
             const target = e.currentTarget;
-            const { state } = index_1.default;
+            const { state } = index_2.default;
             const id = target.dataset.id;
             if (!id)
                 return;
@@ -3697,19 +3792,19 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             else {
                 state.toggledButtons.push(id);
             }
-            PromptTools.update();
+            index_1.default.update();
         }
         static onElementClick(e) {
             const target = e.currentTarget;
-            const { data } = index_2.default;
+            const { data } = index_3.default;
             const { united } = data;
-            const { state } = index_1.default;
+            const { state } = index_2.default;
             const currPrompt = state.promptToolsId;
             const clickPrompt = target.dataset.prompt;
             if (!currPrompt || !clickPrompt)
                 return;
             const replaceMode = state.toggledButtons.includes("tools_replaceMode");
-            let activePrompts = index_1.default.getCurrentPrompts();
+            let activePrompts = index_2.default.getCurrentPrompts();
             let activePrompt = undefined;
             let selectedPrompt = activePrompts.find(item => item.id === clickPrompt);
             if (!selectedPrompt) {
@@ -3729,17 +3824,17 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             if (clickTargetIndex !== -1) {
                 if (e.metaKey || e.ctrlKey) {
                     activePrompts = activePrompts.filter(item => item.id !== clickPrompt);
-                    index_1.default.setCurrentPrompts(activePrompts);
+                    index_2.default.setCurrentPrompts(activePrompts);
                 }
                 else if (e.shiftKey) {
                     state.editingPrompt = clickPrompt;
-                    index_4.default.update();
+                    index_5.default.update();
                 }
                 else {
                     state.promptToolsId = clickPrompt;
                 }
-                PromptTools.update();
-                index_3.default.update();
+                index_1.default.update();
+                index_4.default.update();
                 return;
             }
             const newItem = {
@@ -3750,7 +3845,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             let action = "";
             if (e.shiftKey) {
                 state.editingPrompt = clickPrompt;
-                index_4.default.update();
+                index_5.default.update();
             }
             else {
                 if (replaceMode)
@@ -3766,8 +3861,37 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 activePrompts[currTargetIndex] = newItem;
                 state.promptToolsId = clickPrompt;
             }
-            PromptTools.update();
-            index_3.default.update();
+            index_1.default.update();
+            index_4.default.update();
+        }
+    }
+    exports["default"] = PromptToolsEvent;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/PromptTools/index.ts":
+/*!*************************************!*\
+  !*** ./client/PromptTools/index.ts ***!
+  \*************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! client/showPromptItem */ "./client/showPromptItem.ts"), __webpack_require__(/*! client/utils */ "./client/utils.ts"), __webpack_require__(/*! client/PromptsFilter/simple */ "./client/PromptsFilter/simple.ts"), __webpack_require__(/*! ./event */ "./client/PromptTools/event.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, dom_1, showPromptItem_1, utils_1, simple_1, event_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    class PromptTools {
+        static init(wrapper) {
+            const promptTools = document.createElement("div");
+            promptTools.className = "PBE_generalWindow PBE_promptTools";
+            promptTools.id = "PBE_promptTools";
+            index_1.default.DOMCache.promptTools = promptTools;
+            wrapper.appendChild(promptTools);
+            index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
+            promptTools.addEventListener("click", () => {
+                index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
+            });
         }
         static showCurrentPrompts(wrapper) {
             const { data } = index_2.default;
@@ -3792,8 +3916,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 showAll.classList.add("PBE_toggledButton");
             if (state.toggledButtons.includes("tools_replaceMode"))
                 replaceMode.classList.add("PBE_toggledButton");
-            showAll.addEventListener("click", PromptTools.onToggleButton);
-            replaceMode.addEventListener("click", PromptTools.onToggleButton);
+            showAll.addEventListener("click", event_1.default.onToggleButton);
+            replaceMode.addEventListener("click", event_1.default.onToggleButton);
             setupField.appendChild(setupLegend);
             setupField.appendChild(showAll);
             setupField.appendChild(replaceMode);
@@ -3816,9 +3940,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 showCategory.classList.add("PBE_toggledButton");
             if (state.toggledButtons.includes("tools_name"))
                 showName.classList.add("PBE_toggledButton");
-            showTags.addEventListener("click", PromptTools.onToggleButton);
-            showCategory.addEventListener("click", PromptTools.onToggleButton);
-            showName.addEventListener("click", PromptTools.onToggleButton);
+            showTags.addEventListener("click", event_1.default.onToggleButton);
+            showCategory.addEventListener("click", event_1.default.onToggleButton);
+            showName.addEventListener("click", event_1.default.onToggleButton);
             switch (sorting) {
                 case "alph":
                     //sorting prompts alphabetically
@@ -3861,7 +3985,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                     prompt: { id: currPrompt.id, isExternalNetwork: currPrompt.isExternalNetwork },
                     options: { isShadowed },
                 });
-                promptElement.addEventListener("click", PromptTools.onElementClick);
+                promptElement.addEventListener("click", event_1.default.onElementClick);
                 currentPromptsContainer.appendChild(promptElement);
             }
             currentPromptsContainer.addEventListener("wheel", (e) => {
@@ -4002,7 +4126,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 const isShadowed = activePrompts.some(currItem => currItem.id === item.id);
                 addedIds.push(item.id);
                 const promptElement = (0, showPromptItem_1.default)({ prompt: item, options: { isShadowed } });
-                promptElement.addEventListener("click", PromptTools.onElementClick);
+                promptElement.addEventListener("click", event_1.default.onElementClick);
                 wrapper.appendChild(promptElement);
             }
             for (const item of possiblePrompts)
@@ -4013,7 +4137,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             const wrapper = index_1.default.DOMCache.promptTools;
             if (!wrapper || !state.promptToolsId)
                 return;
-            index_1.default.onCloseActiveWindow = PromptTools.onCloseWindow;
+            index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
             let currScrollState = 0;
             let prevPromptContainer = wrapper.querySelector(".PBE_windowCurrentList");
             if (prevPromptContainer) {
@@ -4042,7 +4166,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             PromptTools.showCurrentPrompts(currentPromptsBlock);
             simple_1.default.show(possibleFilterBlock, PromptTools.possibleFilters, PromptTools.update);
             PromptTools.showPossiblePromptswrapper(possiblePromptsBlock);
-            closeButton.addEventListener("click", PromptTools.onCloseWindow);
+            closeButton.addEventListener("click", event_1.default.onCloseWindow);
             footerBlock.appendChild(closeButton);
             wrapper.appendChild(backImage);
             wrapper.appendChild(currentFilterBlock);
@@ -4090,41 +4214,36 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 
 /***/ }),
 
-/***/ "./client/PromptWordTooltip/index.ts":
+/***/ "./client/PromptWordTooltip/event.ts":
 /*!*******************************************!*\
-  !*** ./client/PromptWordTooltip/index.ts ***!
+  !*** ./client/PromptWordTooltip/event.ts ***!
   \*******************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/utils */ "./client/utils.ts"), __webpack_require__(/*! client/synchroniseCurrentPrompts */ "./client/synchroniseCurrentPrompts.ts"), __webpack_require__(/*! client/applyStyle */ "./client/applyStyle.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, utils_1, synchroniseCurrentPrompts_1, applyStyle_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./index */ "./client/PromptWordTooltip/index.ts"), __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/utils */ "./client/utils.ts"), __webpack_require__(/*! client/synchroniseCurrentPrompts */ "./client/synchroniseCurrentPrompts.ts"), __webpack_require__(/*! client/applyStyle */ "./client/applyStyle.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, utils_1, synchroniseCurrentPrompts_1, applyStyle_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
-    /**
-     * Prompt autocomplite tooltip window
-     */
-    class PromptWordTooltip {
-        static init(positivePrompts, containerId) {
-            if (!positivePrompts)
-                return;
-            const textArea = positivePrompts.querySelector("textarea");
-            if (!textArea)
-                return;
-            const autocompliteWindow = document.createElement("div");
-            autocompliteWindow.className = "PBE_autocompliteBox";
-            positivePrompts.style.position = "relative";
-            positivePrompts.appendChild(autocompliteWindow);
-            index_1.default.DOMCache.containers[containerId].autocompliteWindow = autocompliteWindow;
-            textArea.addEventListener("keydown", PromptWordTooltip.onKeyDown);
-            textArea.addEventListener("blur", PromptWordTooltip.onUnfocus);
-            textArea.addEventListener("keyup", PromptWordTooltip.processCarretPosition);
-            textArea.addEventListener("click", PromptWordTooltip.processCarretPosition);
+    class PromptWordTooltipEvent {
+        static filterNewPromptsOnly(str) {
+            if (!str)
+                return "";
+            const newStrPromptsArr = [];
+            const activePrompts = index_2.default.getCurrentPrompts();
+            const newArr = str.split(",");
+            for (let prompt of newArr) {
+                const newPrompt = (0, utils_1.promptStringToObject)({ prompt });
+                if (activePrompts.some(item => item.id === newPrompt.id))
+                    continue;
+                newStrPromptsArr.push(prompt);
+            }
+            return newStrPromptsArr.join(", ");
         }
         static onKeyDown(e) {
-            const { autocomplitePromptMode = "prompts" } = index_1.default.state.config;
+            const { autocomplitePromptMode = "prompts" } = index_2.default.state.config;
             if (autocomplitePromptMode === "off")
                 return;
-            const { state } = index_1.default;
-            const autoCompleteBox = index_1.default.DOMCache.containers[state.currentContainer].autocompliteWindow;
+            const { state } = index_2.default;
+            const autoCompleteBox = index_2.default.DOMCache.containers[state.currentContainer].autocompliteWindow;
             if (!autoCompleteBox)
                 return;
             if (autoCompleteBox.style.display === "none")
@@ -4139,24 +4258,24 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             e.stopImmediatePropagation();
         }
         static onUnfocus(e) {
-            const { autocomplitePromptMode = "prompts" } = index_1.default.state.config;
+            const { autocomplitePromptMode = "prompts" } = index_2.default.state.config;
             if (autocomplitePromptMode === "off")
                 return;
-            const { state } = index_1.default;
-            const autoCompleteBox = index_1.default.DOMCache.containers[state.currentContainer].autocompliteWindow;
+            const { state } = index_2.default;
+            const autoCompleteBox = index_2.default.DOMCache.containers[state.currentContainer].autocompliteWindow;
             if (!autoCompleteBox)
                 return;
             if (autoCompleteBox.style.display === "none")
                 return;
-            clearTimeout(PromptWordTooltip.unfocusTimeout);
-            PromptWordTooltip.unfocusTimeout = setTimeout(() => {
+            clearTimeout(index_1.default.unfocusTimeout);
+            index_1.default.unfocusTimeout = setTimeout(() => {
                 autoCompleteBox.style.display = "none";
                 autoCompleteBox.innerHTML = "";
             }, 400);
         }
         static onHintWindowKey(e) {
-            const { state } = index_1.default;
-            const autoCompleteBox = index_1.default.DOMCache.containers[state.currentContainer].autocompliteWindow;
+            const { state } = index_2.default;
+            const autoCompleteBox = index_2.default.DOMCache.containers[state.currentContainer].autocompliteWindow;
             if (!autoCompleteBox)
                 return false;
             if (autoCompleteBox.style.display === "none")
@@ -4178,23 +4297,23 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 if (Number.isNaN(start) || Number.isNaN(end))
                     return;
                 if (style)
-                    PromptWordTooltip.onApplyStyleHint(start, end, style, collection);
+                    PromptWordTooltipEvent.onApplyStyleHint(start, end, style, collection);
                 else
-                    PromptWordTooltip.onApplyHint(start, end, newPrompt);
+                    PromptWordTooltipEvent.onApplyHint(start, end, newPrompt);
                 return true;
             }
             const isDown = e.keyCode == 40;
             if (isDown)
-                PromptWordTooltip.selectedIndex++;
+                index_1.default.selectedIndex++;
             else
-                PromptWordTooltip.selectedIndex--;
-            if (PromptWordTooltip.selectedIndex < 0)
-                PromptWordTooltip.selectedIndex = hintElements.length - 1;
-            else if (PromptWordTooltip.selectedIndex > hintElements.length - 1)
-                PromptWordTooltip.selectedIndex = 0;
+                index_1.default.selectedIndex--;
+            if (index_1.default.selectedIndex < 0)
+                index_1.default.selectedIndex = hintElements.length - 1;
+            else if (index_1.default.selectedIndex > hintElements.length - 1)
+                index_1.default.selectedIndex = 0;
             for (let i = 0; i < hintElements.length; i++) {
                 const element = hintElements[i];
-                if (i === PromptWordTooltip.selectedIndex)
+                if (i === index_1.default.selectedIndex)
                     element.classList.add("PBE_hintItemSelected");
                 else
                     element.classList.remove("PBE_hintItemSelected");
@@ -4202,9 +4321,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             return true;
         }
         static onClickHint(e) {
-            const { state } = index_1.default;
-            const autoCompleteBox = index_1.default.DOMCache.containers[state.currentContainer].autocompliteWindow;
-            const textArea = index_1.default.DOMCache.containers[state.currentContainer].textArea;
+            const { state } = index_2.default;
+            const autoCompleteBox = index_2.default.DOMCache.containers[state.currentContainer].autocompliteWindow;
+            const textArea = index_2.default.DOMCache.containers[state.currentContainer].textArea;
             if (!textArea || !autoCompleteBox)
                 return;
             const target = e.currentTarget;
@@ -4218,29 +4337,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             if (Number.isNaN(start) || Number.isNaN(end))
                 return;
             if (style)
-                PromptWordTooltip.onApplyStyleHint(start, end, style, collection);
+                PromptWordTooltipEvent.onApplyStyleHint(start, end, style, collection);
             else
-                PromptWordTooltip.onApplyHint(start, end, newPrompt);
-        }
-        static filterNewPromptsOnly(str) {
-            if (!str)
-                return "";
-            const newStrPromptsArr = [];
-            const activePrompts = index_1.default.getCurrentPrompts();
-            const newArr = str.split(",");
-            for (let prompt of newArr) {
-                const newPrompt = (0, utils_1.promptStringToObject)({ prompt });
-                if (activePrompts.some(item => item.id === newPrompt.id))
-                    continue;
-                newStrPromptsArr.push(prompt);
-            }
-            return newStrPromptsArr.join(", ");
+                PromptWordTooltipEvent.onApplyHint(start, end, newPrompt);
         }
         static onApplyStyleHint(start, end, style, collection) {
-            const { state } = index_1.default;
-            const { data } = index_2.default;
-            const autoCompleteBox = index_1.default.DOMCache.containers[state.currentContainer].autocompliteWindow;
-            const textArea = index_1.default.DOMCache.containers[state.currentContainer].textArea;
+            const { state } = index_2.default;
+            const { data } = index_3.default;
+            const autoCompleteBox = index_2.default.DOMCache.containers[state.currentContainer].autocompliteWindow;
+            const textArea = index_2.default.DOMCache.containers[state.currentContainer].textArea;
             if (!textArea || !autoCompleteBox)
                 return;
             if (!style || !collection)
@@ -4258,16 +4363,16 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             newValue += prefix;
             newValue += postfix;
             textArea.value = newValue;
-            PromptWordTooltip.selectedIndex = 0;
+            index_1.default.selectedIndex = 0;
             (0, synchroniseCurrentPrompts_1.default)(false);
             (0, applyStyle_1.default)(targetStyle, true, false);
         }
         static onApplyHint(start, end, newPrompt) {
-            const { filterNewPromptsOnly } = PromptWordTooltip;
-            const { united } = index_2.default.data;
-            const { state } = index_1.default;
-            const autoCompleteBox = index_1.default.DOMCache.containers[state.currentContainer].autocompliteWindow;
-            const textArea = index_1.default.DOMCache.containers[state.currentContainer].textArea;
+            const { filterNewPromptsOnly } = PromptWordTooltipEvent;
+            const { united } = index_3.default.data;
+            const { state } = index_2.default;
+            const autoCompleteBox = index_2.default.DOMCache.containers[state.currentContainer].autocompliteWindow;
+            const textArea = index_2.default.DOMCache.containers[state.currentContainer].textArea;
             if (!textArea || !autoCompleteBox)
                 return;
             const targetItem = united.find(item => item.id === newPrompt);
@@ -4313,8 +4418,45 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                     newValue += addEnd;
             }
             textArea.value = newValue;
-            PromptWordTooltip.selectedIndex = 0;
+            index_1.default.selectedIndex = 0;
             (0, synchroniseCurrentPrompts_1.default)(false);
+        }
+    }
+    exports["default"] = PromptWordTooltipEvent;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/PromptWordTooltip/index.ts":
+/*!*******************************************!*\
+  !*** ./client/PromptWordTooltip/index.ts ***!
+  \*******************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! ./event */ "./client/PromptWordTooltip/event.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, event_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    /**
+     * Prompt autocomplite tooltip window
+     */
+    class PromptWordTooltip {
+        static init(positivePrompts, containerId) {
+            if (!positivePrompts)
+                return;
+            const textArea = positivePrompts.querySelector("textarea");
+            if (!textArea)
+                return;
+            const autocompliteWindow = document.createElement("div");
+            autocompliteWindow.className = "PBE_autocompliteBox";
+            positivePrompts.style.position = "relative";
+            positivePrompts.appendChild(autocompliteWindow);
+            index_1.default.DOMCache.containers[containerId].autocompliteWindow = autocompliteWindow;
+            textArea.addEventListener("keydown", event_1.default.onKeyDown);
+            textArea.addEventListener("blur", event_1.default.onUnfocus);
+            textArea.addEventListener("keyup", PromptWordTooltip.processCarretPosition);
+            textArea.addEventListener("click", PromptWordTooltip.processCarretPosition);
         }
         static getPossiblePrompts(word) {
             const promptsList = index_2.default.data.united;
@@ -4371,7 +4513,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 return;
             clearTimeout(PromptWordTooltip.unfocusTimeout);
             if (e.keyCode === 38 || e.keyCode === 40 || e.keyCode === 13) {
-                const block = PromptWordTooltip.onHintWindowKey(e);
+                const block = event_1.default.onHintWindowKey(e);
                 if (block) {
                     e.stopPropagation();
                     e.preventDefault();
@@ -4442,7 +4584,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                     hintItem.dataset.end = wordEnd + "";
                     if (currHints === selectedIndex)
                         hintItem.classList.add("PBE_hintItemSelected");
-                    hintItem.addEventListener("click", PromptWordTooltip.onClickHint);
+                    hintItem.addEventListener("click", event_1.default.onClickHint);
                     autoCompleteBox.appendChild(hintItem);
                     currHints++;
                 }
@@ -4459,7 +4601,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                     hintItem.dataset.end = wordEnd + "";
                     if (currHints === selectedIndex)
                         hintItem.classList.add("PBE_hintItemSelected");
-                    hintItem.addEventListener("click", PromptWordTooltip.onClickHint);
+                    hintItem.addEventListener("click", event_1.default.onClickHint);
                     autoCompleteBox.appendChild(hintItem);
                     currHints++;
                 }
@@ -4858,13 +5000,72 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 
 /***/ }),
 
+/***/ "./client/SaveStyle/event.ts":
+/*!***********************************!*\
+  !*** ./client/SaveStyle/event.ts ***!
+  \***********************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./index */ "./client/SaveStyle/index.ts"), __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/LoadStyle/index */ "./client/LoadStyle/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    class SaveStyleEvent {
+        static onOpenStyles() {
+            const { state } = index_2.default;
+            state.showSaveStyleWindow = true;
+            index_1.default.update();
+        }
+        static onCloseWindow() {
+            const { state } = index_2.default;
+            const wrapper = index_2.default.DOMCache.saveStyleWindow;
+            if (!wrapper || !state.showSaveStyleWindow)
+                return;
+            state.showSaveStyleWindow = undefined;
+            wrapper.style.display = "none";
+        }
+        static onSaveStyle() {
+            const { data } = index_3.default;
+            const { state } = index_2.default;
+            const collectionId = state.newStyleCollection;
+            if (!collectionId)
+                return;
+            const targetCollection = data.styles[collectionId];
+            if (!targetCollection)
+                return;
+            const styleNameInput = index_2.default.DOMCache.saveStyleWindow.querySelector("#PBE_newStyleName");
+            const name = styleNameInput.value;
+            if (!name || !data.styles)
+                return;
+            const newStyle = index_4.default.grabCurrentStyle(name, collectionId);
+            if (!newStyle)
+                return;
+            targetCollection.push(newStyle);
+            index_3.default.updateStyles(collectionId);
+            index_1.default.update();
+        }
+        static onChangeNewCollection(e) {
+            const target = e.currentTarget;
+            const { state } = index_2.default;
+            const value = target.value;
+            if (!value)
+                return;
+            state.newStyleCollection = value;
+        }
+    }
+    exports["default"] = SaveStyleEvent;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
 /***/ "./client/SaveStyle/index.ts":
 /*!***********************************!*\
   !*** ./client/SaveStyle/index.ts ***!
   \***********************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/CurrentPrompts/index */ "./client/CurrentPrompts/index.ts"), __webpack_require__(/*! client/LoadStyle/index */ "./client/LoadStyle/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! client/showPromptItem */ "./client/showPromptItem.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, dom_1, showPromptItem_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/CurrentPrompts/index */ "./client/CurrentPrompts/index.ts"), __webpack_require__(/*! client/LoadStyle/index */ "./client/LoadStyle/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! client/showPromptItem */ "./client/showPromptItem.ts"), __webpack_require__(/*! ./event */ "./client/SaveStyle/event.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, dom_1, showPromptItem_1, event_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     class SaveStyle {
@@ -4874,58 +5075,17 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             saveStyleWindow.id = "PBE_saveStyleWindow";
             index_1.default.DOMCache.saveStyleWindow = saveStyleWindow;
             mainWrapper.appendChild(saveStyleWindow);
-            index_1.default.onCloseActiveWindow = SaveStyle.onCloseWindow;
+            index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
             saveStyleWindow.addEventListener("click", () => {
-                index_1.default.onCloseActiveWindow = SaveStyle.onCloseWindow;
+                index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
             });
         }
         static initButton(positiveWrapper) {
             const addStylesButton = document.createElement("button");
             addStylesButton.className = "PBE_actionButton PBE_saveStylesButton";
             addStylesButton.innerText = "Save style";
-            addStylesButton.addEventListener("click", SaveStyle.onOpenStyles);
+            addStylesButton.addEventListener("click", event_1.default.onOpenStyles);
             positiveWrapper.appendChild(addStylesButton);
-        }
-        static onOpenStyles() {
-            const { state } = index_1.default;
-            state.showSaveStyleWindow = true;
-            SaveStyle.update();
-        }
-        static onCloseWindow() {
-            const { state } = index_1.default;
-            const wrapper = index_1.default.DOMCache.saveStyleWindow;
-            if (!wrapper || !state.showSaveStyleWindow)
-                return;
-            state.showSaveStyleWindow = undefined;
-            wrapper.style.display = "none";
-        }
-        static onSaveStyle() {
-            const { data } = index_2.default;
-            const { state } = index_1.default;
-            const collectionId = state.newStyleCollection;
-            if (!collectionId)
-                return;
-            const targetCollection = data.styles[collectionId];
-            if (!targetCollection)
-                return;
-            const styleNameInput = index_1.default.DOMCache.saveStyleWindow.querySelector("#PBE_newStyleName");
-            const name = styleNameInput.value;
-            if (!name || !data.styles)
-                return;
-            const newStyle = index_4.default.grabCurrentStyle(name, collectionId);
-            if (!newStyle)
-                return;
-            targetCollection.push(newStyle);
-            index_2.default.updateStyles(collectionId);
-            SaveStyle.update();
-        }
-        static onChangeNewCollection(e) {
-            const target = e.currentTarget;
-            const { state } = index_1.default;
-            const value = target.value;
-            if (!value)
-                return;
-            state.newStyleCollection = value;
         }
         static showCurrentPrompts(wrapper) {
             let activePrompts = index_1.default.getCurrentPrompts();
@@ -4974,7 +5134,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             styleNameInput.placeholder = "Style name";
             styleNameInput.className = "PBE_generalInput PBE_newStyleName";
             styleNameInput.id = "PBE_newStyleName";
-            saveButton.addEventListener("click", SaveStyle.onSaveStyle);
+            saveButton.addEventListener("click", event_1.default.onSaveStyle);
             const collectionSelect = document.createElement("select");
             collectionSelect.className = "PBE_generalInput PBE_select";
             collectionSelect.style.height = "30px";
@@ -4987,7 +5147,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             }
             collectionSelect.innerHTML = options;
             collectionSelect.value = state.newStyleCollection;
-            collectionSelect.addEventListener("change", SaveStyle.onChangeNewCollection);
+            collectionSelect.addEventListener("change", event_1.default.onChangeNewCollection);
             const saveRow = (0, dom_1.makeElement)({ element: "div", className: "PBE_row" });
             saveRow.appendChild(collectionSelect);
             saveRow.appendChild(saveButton);
@@ -5002,7 +5162,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             const wrapper = index_1.default.DOMCache.saveStyleWindow;
             if (!wrapper || !state.showSaveStyleWindow)
                 return;
-            index_1.default.onCloseActiveWindow = SaveStyle.onCloseWindow;
+            index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
             wrapper.innerHTML = "";
             wrapper.style.display = "flex";
             const currentPromptsBlock = document.createElement("div");
@@ -5017,7 +5177,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 SaveStyle.showCurrentPrompts(currentPromptsBlock);
                 SaveStyle.showAddStyle(addNewContainer);
             }
-            closeButton.addEventListener("click", SaveStyle.onCloseWindow);
+            closeButton.addEventListener("click", event_1.default.onCloseWindow);
             footerBlock.appendChild(closeButton);
             if (!readonly) {
                 wrapper.appendChild(addNewContainer);
@@ -5034,13 +5194,89 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 
 /***/ }),
 
+/***/ "./client/SetupWindow/event.ts":
+/*!*************************************!*\
+  !*** ./client/SetupWindow/event.ts ***!
+  \*************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./index */ "./client/SetupWindow/index.ts"), __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/utils */ "./client/utils.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, utils_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    class SetupWindowEvent {
+    }
+    /**
+     * Closes Setup window
+     * @returns
+     */
+    SetupWindowEvent.onCloseWindow = () => {
+        const { viewMode } = index_1.default;
+        const wrapper = index_2.default.DOMCache.setupWindow;
+        if (!wrapper)
+            return;
+        if (viewMode === "newCollection" || viewMode === "newStylesCollection") {
+            index_1.default.viewMode = "normal";
+            index_1.default.update();
+            return true;
+        }
+        else
+            wrapper.style.display = "none";
+    };
+    SetupWindowEvent.onUpdateDirName = (e) => {
+        const target = e.currentTarget;
+        let value = target.value;
+        if (!value)
+            return;
+        value = (0, utils_1.makeFileNameSafe)(value);
+        target.value = value;
+    };
+    SetupWindowEvent.onCreate = (e) => {
+        const target = e.currentTarget;
+        const { viewMode } = index_1.default;
+        if (!target.parentNode)
+            return;
+        const setupWindow = target.parentNode.parentNode;
+        if (!setupWindow)
+            return;
+        if (viewMode === "newCollection") {
+            const newNameInput = setupWindow.querySelector(".PBE_newCollectionName");
+            const formatSelect = setupWindow.querySelector(".PBE_newCollectionFormat");
+            if (!newNameInput || !formatSelect)
+                return;
+            const newName = (0, utils_1.makeFileNameSafe)(newNameInput.value);
+            const format = formatSelect.value;
+            if (!newName || !format)
+                return;
+            index_3.default.createNewCollection(newName, format);
+        }
+        else if (viewMode === "newStylesCollection") {
+            const newNameInput = setupWindow.querySelector(".PBE_newCollectionName");
+            const formatSelect = setupWindow.querySelector(".PBE_newStyleCollectionFormat");
+            if (!newNameInput || !formatSelect)
+                return;
+            const newName = (0, utils_1.makeFileNameSafe)(newNameInput.value);
+            const format = formatSelect.value;
+            if (!newName || !format)
+                return;
+            index_3.default.createNewStylesCollection(newName, format);
+        }
+        index_1.default.viewMode = "normal";
+        index_1.default.update();
+    };
+    exports["default"] = SetupWindowEvent;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
 /***/ "./client/SetupWindow/index.ts":
 /*!*************************************!*\
   !*** ./client/SetupWindow/index.ts ***!
   \*************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! client/utils */ "./client/utils.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, dom_1, utils_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! ./event */ "./client/SetupWindow/event.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, dom_1, event_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     class SetupWindow {
@@ -5065,68 +5301,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         setupWindow.className = "PBE_setupWindow PBE_generalWindow";
         index_1.default.DOMCache.setupWindow = setupWindow;
         wrapper.appendChild(setupWindow);
-        index_1.default.onCloseActiveWindow = SetupWindow.onCloseWindow;
+        index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
         setupWindow.addEventListener("click", () => {
-            index_1.default.onCloseActiveWindow = SetupWindow.onCloseWindow;
+            index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
         });
-    };
-    /**
-     * Closes Setup window
-     * @returns
-     */
-    SetupWindow.onCloseWindow = () => {
-        const { viewMode } = SetupWindow;
-        const wrapper = index_1.default.DOMCache.setupWindow;
-        if (!wrapper)
-            return;
-        if (viewMode === "newCollection" || viewMode === "newStylesCollection") {
-            SetupWindow.viewMode = "normal";
-            SetupWindow.update();
-            return true;
-        }
-        else
-            wrapper.style.display = "none";
-    };
-    SetupWindow.onUpdateDirName = (e) => {
-        const target = e.currentTarget;
-        let value = target.value;
-        if (!value)
-            return;
-        value = (0, utils_1.makeFileNameSafe)(value);
-        target.value = value;
-    };
-    SetupWindow.onCreate = (e) => {
-        const target = e.currentTarget;
-        const { viewMode } = SetupWindow;
-        if (!target.parentNode)
-            return;
-        const setupWindow = target.parentNode.parentNode;
-        if (!setupWindow)
-            return;
-        if (viewMode === "newCollection") {
-            const newNameInput = setupWindow.querySelector(".PBE_newCollectionName");
-            const formatSelect = setupWindow.querySelector(".PBE_newCollectionFormat");
-            if (!newNameInput || !formatSelect)
-                return;
-            const newName = (0, utils_1.makeFileNameSafe)(newNameInput.value);
-            const format = formatSelect.value;
-            if (!newName || !format)
-                return;
-            index_2.default.createNewCollection(newName, format);
-        }
-        else if (viewMode === "newStylesCollection") {
-            const newNameInput = setupWindow.querySelector(".PBE_newCollectionName");
-            const formatSelect = setupWindow.querySelector(".PBE_newStyleCollectionFormat");
-            if (!newNameInput || !formatSelect)
-                return;
-            const newName = (0, utils_1.makeFileNameSafe)(newNameInput.value);
-            const format = formatSelect.value;
-            if (!newName || !format)
-                return;
-            index_2.default.createNewStylesCollection(newName, format);
-        }
-        SetupWindow.viewMode = "normal";
-        SetupWindow.update();
     };
     /**
      * Shows block with create new collection buttons
@@ -5159,7 +5337,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         newName.style.maxWidth = "none";
         newNameInput.className = "PBE_generalInput PBE_input PBE_newCollectionName";
         newNameLabel.innerText = "New prompts collection name";
-        newNameInput.addEventListener("change", SetupWindow.onUpdateDirName);
+        newNameInput.addEventListener("change", event_1.default.onUpdateDirName);
         newName.appendChild(newNameLabel);
         newName.appendChild(newNameInput);
         const format = document.createElement("div");
@@ -5187,7 +5365,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         const newNameLabel = (0, dom_1.makeElement)({ element: "div", content: "New styles collection name" });
         const formatLabel = (0, dom_1.makeElement)({ element: "div", content: "Store format" });
         const newNameInput = (0, dom_1.makeElement)({ element: "input", className: "PBE_generalInput PBE_input PBE_newCollectionName" });
-        newNameInput.addEventListener("change", SetupWindow.onUpdateDirName);
+        newNameInput.addEventListener("change", event_1.default.onUpdateDirName);
         newName.appendChild(newNameLabel);
         newName.appendChild(newNameInput);
         const formatSelect = (0, dom_1.makeSelect)({
@@ -5209,7 +5387,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         const wrapper = index_1.default.DOMCache.setupWindow;
         if (!wrapper)
             return;
-        index_1.default.onCloseActiveWindow = SetupWindow.onCloseWindow;
+        index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
         wrapper.style.display = "flex";
         if (viewMode === "newCollection")
             wrapper.innerHTML = "New prompts collection";
@@ -5248,12 +5426,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         closeButton.className = "PBE_button";
         if (viewMode !== "normal")
             closeButton.classList.add("PBE_buttonCancel");
-        closeButton.addEventListener("click", SetupWindow.onCloseWindow);
+        closeButton.addEventListener("click", event_1.default.onCloseWindow);
         if (viewMode === "newCollection" || viewMode === "newStylesCollection") {
             const createButton = document.createElement("button");
             createButton.innerText = "Create";
             createButton.className = "PBE_button";
-            createButton.addEventListener("click", SetupWindow.onCreate);
+            createButton.addEventListener("click", event_1.default.onCreate);
             footerBlock.appendChild(createButton);
         }
         footerBlock.appendChild(closeButton);
@@ -5269,13 +5447,136 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 
 /***/ }),
 
+/***/ "./client/TagTooltip/event.ts":
+/*!************************************!*\
+  !*** ./client/TagTooltip/event.ts ***!
+  \************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./index */ "./client/TagTooltip/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    class TagTooltipEvent {
+        static onUnfocus(e) {
+            const inputElement = e;
+            const autoCompleteBox = index_1.default.container;
+            if (!autoCompleteBox || !inputElement)
+                return;
+            if (autoCompleteBox.style.display === "none")
+                return;
+            clearTimeout(index_1.default.unfocusTimeout);
+            index_1.default.unfocusTimeout = setTimeout(() => {
+                autoCompleteBox.style.display = "none";
+                autoCompleteBox.innerHTML = "";
+            }, 400);
+        }
+        static onKeyDown(e) {
+            const inputElement = e;
+            const autoCompleteBox = index_1.default.container;
+            if (!autoCompleteBox || !inputElement)
+                return;
+            if (autoCompleteBox.style.display === "none")
+                return;
+            if (e.keyCode != 38 && e.keyCode != 40 && e.keyCode != 13)
+                return;
+            const hintElements = autoCompleteBox.querySelectorAll(".PBE_hintItem");
+            if (!hintElements || !hintElements.length)
+                return;
+            e.stopPropagation();
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        }
+        static onClickHint(e) {
+            const inputElement = index_1.default.input;
+            const autoCompleteBox = index_1.default.container;
+            if (!autoCompleteBox || !inputElement)
+                return;
+            const target = e.currentTarget;
+            if (!target)
+                return;
+            const start = Number(target.dataset.start);
+            const end = Number(target.dataset.end);
+            const newPrompt = target.innerText;
+            if (Number.isNaN(start) || Number.isNaN(end))
+                return;
+            TagTooltipEvent.onApplyHint(start, end, newPrompt);
+        }
+        static onHintWindowKey(e) {
+            const inputElement = index_1.default.input;
+            const autoCompleteBox = index_1.default.container;
+            if (!autoCompleteBox || !inputElement)
+                return false;
+            if (autoCompleteBox.style.display === "none")
+                return false;
+            if (e.keyCode != 38 && e.keyCode != 40 && e.keyCode != 13)
+                return false;
+            const hintElements = autoCompleteBox.querySelectorAll(".PBE_hintItem");
+            if (!hintElements || !hintElements.length)
+                return false;
+            if (e.keyCode === 13) {
+                const selectedHint = autoCompleteBox.querySelector(".PBE_hintItemSelected");
+                if (!selectedHint)
+                    return false;
+                const start = Number(selectedHint.dataset.start);
+                const end = Number(selectedHint.dataset.end);
+                const newPrompt = selectedHint.innerText;
+                if (Number.isNaN(start) || Number.isNaN(end))
+                    return false;
+                TagTooltipEvent.onApplyHint(start, end, newPrompt);
+                return true;
+            }
+            const isDown = e.keyCode == 40;
+            if (isDown)
+                index_1.default.selectedIndex++;
+            else
+                index_1.default.selectedIndex--;
+            if (index_1.default.selectedIndex < 0)
+                index_1.default.selectedIndex = hintElements.length - 1;
+            else if (index_1.default.selectedIndex > hintElements.length - 1)
+                index_1.default.selectedIndex = 0;
+            for (let i = 0; i < hintElements.length; i++) {
+                const element = hintElements[i];
+                if (i === index_1.default.selectedIndex)
+                    element.classList.add("PBE_hintItemSelected");
+                else
+                    element.classList.remove("PBE_hintItemSelected");
+            }
+            return true;
+        }
+        static onApplyHint(start, end, newTag) {
+            const inputElement = index_1.default.input;
+            const autoCompleteBox = index_1.default.container;
+            if (!autoCompleteBox || !inputElement)
+                return;
+            autoCompleteBox.style.display = "none";
+            inputElement.dataset.hint = "";
+            let newValue = "";
+            const prefix = inputElement.value.substring(0, start);
+            const postfix = inputElement.value.substring(end);
+            if (prefix)
+                newValue += prefix + " ";
+            newValue += newTag;
+            if (postfix)
+                newValue += postfix;
+            inputElement.value = newValue;
+            index_1.default.selectedIndex = 0;
+            inputElement.dispatchEvent(new Event("change"));
+        }
+    }
+    exports["default"] = TagTooltipEvent;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
 /***/ "./client/TagTooltip/index.ts":
 /*!************************************!*\
   !*** ./client/TagTooltip/index.ts ***!
   \************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! ./event */ "./client/TagTooltip/event.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, event_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     class TagTooltip {
@@ -5297,8 +5598,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             autocompliteWindow.innerText = "";
             TagTooltip.container = autocompliteWindow;
             TagTooltip.input = inputContainer;
-            inputContainer.addEventListener("keydown", TagTooltip.onKeyDown);
-            inputContainer.addEventListener("blur", TagTooltip.onUnfocus);
+            inputContainer.addEventListener("keydown", event_1.default.onKeyDown);
+            inputContainer.addEventListener("blur", event_1.default.onUnfocus);
             inputContainer.addEventListener("keyup", TagTooltip.processCarretPosition);
             inputContainer.addEventListener("click", TagTooltip.processCarretPosition);
         }
@@ -5325,118 +5626,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             knownTags.sort();
             TagTooltip.knownTags = knownTags;
         }
-        static onUnfocus(e) {
-            const inputElement = e;
-            const autoCompleteBox = TagTooltip.container;
-            if (!autoCompleteBox || !inputElement)
-                return;
-            if (autoCompleteBox.style.display === "none")
-                return;
-            clearTimeout(TagTooltip.unfocusTimeout);
-            TagTooltip.unfocusTimeout = setTimeout(() => {
-                autoCompleteBox.style.display = "none";
-                autoCompleteBox.innerHTML = "";
-            }, 400);
-        }
-        static onKeyDown(e) {
-            const inputElement = e;
-            const autoCompleteBox = TagTooltip.container;
-            if (!autoCompleteBox || !inputElement)
-                return;
-            if (autoCompleteBox.style.display === "none")
-                return;
-            if (e.keyCode != 38 && e.keyCode != 40 && e.keyCode != 13)
-                return;
-            const hintElements = autoCompleteBox.querySelectorAll(".PBE_hintItem");
-            if (!hintElements || !hintElements.length)
-                return;
-            e.stopPropagation();
-            e.preventDefault();
-            e.stopImmediatePropagation();
-        }
-        static onClickHint(e) {
-            const inputElement = TagTooltip.input;
-            const autoCompleteBox = TagTooltip.container;
-            if (!autoCompleteBox || !inputElement)
-                return;
-            const target = e.currentTarget;
-            if (!target)
-                return;
-            const start = Number(target.dataset.start);
-            const end = Number(target.dataset.end);
-            const newPrompt = target.innerText;
-            if (Number.isNaN(start) || Number.isNaN(end))
-                return;
-            TagTooltip.onApplyHint(start, end, newPrompt);
-        }
-        static onHintWindowKey(e) {
-            const inputElement = TagTooltip.input;
-            const autoCompleteBox = TagTooltip.container;
-            if (!autoCompleteBox || !inputElement)
-                return false;
-            if (autoCompleteBox.style.display === "none")
-                return false;
-            if (e.keyCode != 38 && e.keyCode != 40 && e.keyCode != 13)
-                return false;
-            const hintElements = autoCompleteBox.querySelectorAll(".PBE_hintItem");
-            if (!hintElements || !hintElements.length)
-                return false;
-            if (e.keyCode === 13) {
-                const selectedHint = autoCompleteBox.querySelector(".PBE_hintItemSelected");
-                if (!selectedHint)
-                    return false;
-                const start = Number(selectedHint.dataset.start);
-                const end = Number(selectedHint.dataset.end);
-                const newPrompt = selectedHint.innerText;
-                if (Number.isNaN(start) || Number.isNaN(end))
-                    return false;
-                TagTooltip.onApplyHint(start, end, newPrompt);
-                return true;
-            }
-            const isDown = e.keyCode == 40;
-            if (isDown)
-                TagTooltip.selectedIndex++;
-            else
-                TagTooltip.selectedIndex--;
-            if (TagTooltip.selectedIndex < 0)
-                TagTooltip.selectedIndex = hintElements.length - 1;
-            else if (TagTooltip.selectedIndex > hintElements.length - 1)
-                TagTooltip.selectedIndex = 0;
-            for (let i = 0; i < hintElements.length; i++) {
-                const element = hintElements[i];
-                if (i === TagTooltip.selectedIndex)
-                    element.classList.add("PBE_hintItemSelected");
-                else
-                    element.classList.remove("PBE_hintItemSelected");
-            }
-            return true;
-        }
-        static onApplyHint(start, end, newTag) {
-            const inputElement = TagTooltip.input;
-            const autoCompleteBox = TagTooltip.container;
-            if (!autoCompleteBox || !inputElement)
-                return;
-            autoCompleteBox.style.display = "none";
-            inputElement.dataset.hint = "";
-            let newValue = "";
-            const prefix = inputElement.value.substring(0, start);
-            const postfix = inputElement.value.substring(end);
-            if (prefix)
-                newValue += prefix + " ";
-            newValue += newTag;
-            if (postfix)
-                newValue += postfix;
-            inputElement.value = newValue;
-            TagTooltip.selectedIndex = 0;
-            inputElement.dispatchEvent(new Event("change"));
-        }
         static processCarretPosition(e) {
             const target = e.currentTarget;
             TagTooltip.input = target;
             const elementPosition = target.dataset.position || "";
             clearTimeout(TagTooltip.unfocusTimeout);
             if (e.keyCode === 38 || e.keyCode === 40 || e.keyCode === 13) {
-                const block = TagTooltip.onHintWindowKey(e);
+                const block = event_1.default.onHintWindowKey(e);
                 if (block) {
                     e.stopPropagation();
                     e.preventDefault();
@@ -5506,7 +5702,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 hintItem.dataset.end = wordEnd + "";
                 if (currHints === selectedIndex)
                     hintItem.classList.add("PBE_hintItemSelected");
-                hintItem.addEventListener("click", TagTooltip.onClickHint);
+                hintItem.addEventListener("click", event_1.default.onClickHint);
                 autoCompleteBox.appendChild(hintItem);
                 currHints++;
             }
@@ -5559,18 +5755,16 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         if (positive && positive.length) {
             if (isAfter) {
                 for (const prompt of positive) {
-                    const { id } = prompt;
-                    if (activePrompts.some(item => item.id === id))
-                        continue;
+                    //const {id, isSyntax} = prompt;
+                    //if(!isSyntax && activePrompts.some(item => item.id === id) ) continue;
                     activePrompts.push(Object.assign({}, prompt));
                 }
             }
             else {
                 for (let i = positive.length - 1; i >= 0; i--) {
                     const prompt = positive[i];
-                    const { id } = prompt;
-                    if (activePrompts.some(item => item.id === id))
-                        continue;
+                    //const {id, isSyntax} = prompt;
+                    //if(!isSyntax && activePrompts.some(item => item.id === id) ) continue;
                     activePrompts.unshift(Object.assign({}, prompt));
                 }
             }
@@ -5801,7 +5995,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
-    exports.makeSelect = exports.makeCheckbox = exports.makeElement = void 0;
+    exports.makeSelect = exports.makeCheckbox = exports.makeDiv = exports.makeElement = void 0;
     function makeElement(params) {
         if (!params)
             return;
@@ -5878,6 +6072,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         return selectElement;
     }
     exports.makeSelect = makeSelect;
+    function makeDiv(params) {
+        return makeElement(Object.assign(Object.assign({}, params), { element: "div" }));
+    }
+    exports.makeDiv = makeDiv;
 }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
 		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
@@ -6380,7 +6578,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         let value = textArea.value;
         //trying to fix LORAs/Hypernetworks added without a preceding comma
         value = value.replace(/([^,])\ </g, "$1,\ <");
-        const newPBE_currentPrompts = [];
+        const newActivePrompts = [];
         let prompts = [];
         if (supportExtendedSyntax) {
             prompts = value.split(/([,{}|])/g);
@@ -6431,7 +6629,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             if (isExternalNetwork)
                 targetItem.isExternalNetwork = true;
             /**
-             * If it is a syntax token - also checking if it needs delimiters on its sides in string.
+             * If it is a syntax token - also checking if it needs delimiters on its sides in a string.
              */
             if (isSyntax) {
                 const prevItem = i > 0 ? prompts[i - 1] : "";
@@ -6445,10 +6643,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 else if (nextItem === DELIMITER_CHAR)
                     targetItem.delimiter = "next";
             }
-            newPBE_currentPrompts.push(targetItem);
+            newActivePrompts.push(targetItem);
             index++;
         }
-        activePrompts = newPBE_currentPrompts;
+        activePrompts = newActivePrompts;
         index_2.default.setCurrentPrompts(activePrompts);
         index_3.default.update(noTextAreaUpdate);
     }

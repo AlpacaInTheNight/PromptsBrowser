@@ -31,8 +31,8 @@ function applyStyle(style: Style, isAfter: boolean, override: boolean = false) {
     if(positive && positive.length) {
         if(isAfter) {
             for(const prompt of positive) {
-                const {id} = prompt;
-                if( activePrompts.some(item => item.id === id) ) continue;
+                //const {id, isSyntax} = prompt;
+                //if(!isSyntax && activePrompts.some(item => item.id === id) ) continue;
         
                 activePrompts.push({...prompt});
             }
@@ -40,8 +40,8 @@ function applyStyle(style: Style, isAfter: boolean, override: boolean = false) {
         } else {
             for(let i = positive.length - 1; i >= 0; i--) {
                 const prompt = positive[i];
-                const {id} = prompt;
-                if( activePrompts.some(item => item.id === id) ) continue;
+                //const {id, isSyntax} = prompt;
+                //if(!isSyntax && activePrompts.some(item => item.id === id) ) continue;
 
                 activePrompts.unshift({...prompt});
             }
