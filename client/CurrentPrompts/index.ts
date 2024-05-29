@@ -1,9 +1,11 @@
 import PromptsBrowser from "client/index";
 import Database from "client/Database/index";
 import showPromptItem from "client/showPromptItem";
-import Prompt from "clientTypes/prompt";
+import Prompt, { PromptEntity, PromptGroup } from "clientTypes/prompt";
 import { DEFAULT_PROMPT_WEIGHT } from "client/const";
 import CurrentPromptsEvent from "./event";
+import { synchroniseListToTextarea } from "client/synchroniseCurrentPrompts";
+import { makeElement, makeDiv, makeSelect } from "client/dom";
 
 class CurrentPrompts {
 
@@ -28,36 +30,39 @@ class CurrentPrompts {
     
         positiveWrapper.appendChild(normalizeButton);
     }
-    
-    public static update = (noTextAreaUpdate = false) => {
+
+    private static showPromptsGroup(promptsGroup: PromptEntity[] = [], wrapper: HTMLElement) {
         const {state} = PromptsBrowser;
-        const activePrompts = PromptsBrowser.getCurrentPrompts();
-    
-        const wrapper = PromptsBrowser.DOMCache.containers[state.currentContainer].currentPrompts;
-        const textArea = PromptsBrowser.DOMCache.containers[state.currentContainer].textArea;
-    
-        if(!wrapper || !textArea) return;
-        wrapper.innerHTML = "";
-        const prompts: {text: string; src: Prompt; }[] = [];
-    
-        for(let index = 0; index < activePrompts.length; index++) {
-            const promptItem = activePrompts[index];
-            const id = promptItem.id;
-    
-            if(promptItem.isExternalNetwork) {
-                prompts.push({text: `<${id}:${promptItem.weight}>`, src: promptItem});
+        const {cardHeight = 100} = state.config;
+
+        for(const promptItem of promptsGroup) {
+            if("groupId" in promptItem) {
+                const groupContainer = makeDiv({className: "PBE_promptsGroup"});
+                const groupHead = makeDiv({className: "PBE_groupHead"});
+                groupHead.style.height = cardHeight + "px";
+                groupContainer.appendChild(groupHead);
+                wrapper.appendChild(groupContainer);
+                if(promptItem.weight) groupHead.innerText = promptItem.weight + "";
+
+                CurrentPrompts.showPromptsGroup(promptItem.prompts, groupContainer);
+                continue;
+            }
+
+            const {id, isExternalNetwork = false, weight, parentGroup = false, index} = promptItem;
+
+            /* if(isExternalNetwork) {
+                prompts.push({text: `<${id}:${weight}>`, src: promptItem});
     
             } else {
-                if(promptItem.weight !== undefined && promptItem.weight !== DEFAULT_PROMPT_WEIGHT) {
-                    prompts.push({text: `(${id}: ${promptItem.weight})`, src: promptItem});
+                if(weight !== undefined && weight !== DEFAULT_PROMPT_WEIGHT) {
+                    prompts.push({text: `(${id}: ${weight})`, src: promptItem});
                 } else prompts.push({text: id, src: promptItem});
-            }
+            } */
     
-            const promptElement = showPromptItem({prompt: promptItem, options: {index}});
+            const promptElement = showPromptItem({prompt: promptItem, options: {index, parentGroup}});
     
-            if(promptItem.isSyntax) {
-                promptElement.dataset.issyntax = "true";
-            } else if(state.selectedPrompt === id) promptElement.classList.add("PBE_selectedCurrentElement");
+            if(promptItem.isSyntax) promptElement.dataset.issyntax = "true";
+            else if(state.selectedPrompt === id) promptElement.classList.add("PBE_selectedCurrentElement");
     
             promptElement.addEventListener("dragstart", CurrentPromptsEvent.onDragStart);
             promptElement.addEventListener("dragover", CurrentPromptsEvent.onDragOver);
@@ -73,37 +78,23 @@ class CurrentPrompts {
     
             wrapper.appendChild(promptElement);
         }
-        
+
+    }
+    
+    public static update = (noTextAreaUpdate = false) => {
+        const {state} = PromptsBrowser;
+        const activePrompts = PromptsBrowser.getCurrentPrompts();
+    
+        const wrapper = PromptsBrowser.DOMCache.containers[state.currentContainer].currentPrompts;
+        const textArea = PromptsBrowser.DOMCache.containers[state.currentContainer].textArea;
+    
+        if(!wrapper || !textArea) return;
+        wrapper.innerHTML = "";
+
+        CurrentPrompts.showPromptsGroup(activePrompts, wrapper);
         if(noTextAreaUpdate) return;
-    
-        let newTextValue = "";
-        for(let i = 0; i < prompts.length; i++) {
-            const {text, src} = prompts[i];
-            const nextPromptSrc = prompts[i+1] ? prompts[i+1].src : undefined;
-            newTextValue += text;
-    
-            let addDelimiter = true;
-    
-            if(!nextPromptSrc) addDelimiter = false;
-            else if(src.delimiter) {
-                if(src.delimiter === "prev" || src.delimiter === "none") addDelimiter = false;
-    
-            } else if(nextPromptSrc.delimiter) {
-                if(nextPromptSrc.delimiter === "next" || nextPromptSrc.delimiter === "none") addDelimiter = false;
-    
-            }
-    
-            if(addDelimiter) newTextValue += ", ";
-        }
-    
-        textArea.value = newTextValue;
-    
-        //Just to be sure every api listening to changes in textarea done their job
-        textArea.dispatchEvent(new Event('focus'));
-        textArea.dispatchEvent(new Event('input'));
-        textArea.dispatchEvent(new KeyboardEvent('keyup'));
-        textArea.dispatchEvent(new KeyboardEvent('keypress'));
-        textArea.dispatchEvent(new Event('blur'));
+        
+        synchroniseListToTextarea(activePrompts);
     }
 
 }

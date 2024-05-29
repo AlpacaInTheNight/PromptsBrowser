@@ -3,7 +3,7 @@ import Prompt from "clientTypes/prompt";
 import Database from "client/Database/index";
 import { makeElement } from "client/dom";
 import showPromptItem from "client/showPromptItem";
-import { replaceAllRegex } from "client/utils";
+import { replaceAllRegex } from "client/utils/index";
 import PromptsSimpleFilter from "client/PromptsFilter/simple";
 import PromptToolsEvent from "./event";
 

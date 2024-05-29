@@ -6,7 +6,7 @@ import Prompt from "clientTypes/prompt";
 import { makeElement } from "client/dom";
 import showPromptItem from "client/showPromptItem";
 import TagTooltip from "client/TagTooltip/index";
-import { log } from "client/utils";
+import { log } from "client/utils/index";
 import KnownPromptsEvent from "./event";
 
 type UpdateOptions = {

@@ -1,7 +1,7 @@
 import SetupWindow from "./index";
 import PromptsBrowser from "client/index";
 import Database from "client/Database/index";
-import { makeFileNameSafe } from "client/utils";
+import { makeFileNameSafe } from "client/utils/index";
 
 class SetupWindowEvent {
 

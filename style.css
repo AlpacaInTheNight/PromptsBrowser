@@ -311,6 +311,8 @@ select.PBE_generalInput {
     flex-wrap: wrap;
     padding: 5px 15px 15px 15px;
     z-index: 502;
+    justify-content: flex-start;
+    align-items: flex-end;
 }
 
 .PBE_promptElement {
@@ -546,4 +548,38 @@ select.PBE_generalInput {
     top: -14px;
     left: 120px;
     z-index: 500;
+}
+
+.PBE_promptsGroup {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    flex-shrink: 0;
+    border: 2px solid rgba(200, 200, 200, 0.5);
+    background-color: rgba(200, 200, 200, 0.2);
+    border-radius: 52px 10px 10px 52px;
+    margin: 0 4px;
+    overflow: hidden;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+.PBE_promptsGroup:hover {
+    top: -4px;
+    z-index: 10;
+    box-shadow: 5px 5px 5px black;
+}
+
+.PBE_groupHead {
+    width: 40px !important;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: none !important;
+    background-color: grey !important;
+    background: linear-gradient(to left, #b5bdc8 0%,#828c95 36%,#28343b 100%) !important;
+    border-radius: 50px 0 0 50px;
 }

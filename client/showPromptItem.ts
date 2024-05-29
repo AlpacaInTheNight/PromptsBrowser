@@ -1,7 +1,7 @@
 import Prompt from "clientTypes/prompt";
 import PromptsBrowser from "client/index";
 import Database from "client/Database/index";
-import { replaceAllRegex } from "client/utils";
+import { replaceAllRegex } from "client/utils/index";
 import { DEFAULT_PROMPT_WEIGHT } from "client/const";
 
 function onPromptCardHover(e: Event) {
@@ -30,12 +30,13 @@ function showPromptItem({prompt, options = {}}: {
     options?: {
         url?: string;
         index?: number;
+        parentGroup?: number | false;
         isShadowed?: boolean;
         noSplash?: boolean;
     };
 }) {
     const {cardWidth = 50, cardHeight = 100, splashCardWidth = 200, splashCardHeight = 300} = PromptsBrowser.state.config;
-    const {index = 0, isShadowed = false, noSplash = false, url} = options;
+    const {index = 0, parentGroup = false, isShadowed = false, noSplash = false, url} = options;
     const {id = "", weight = DEFAULT_PROMPT_WEIGHT, isExternalNetwork = false, isSyntax = false} = prompt;
     const imageSrc = url || Database.getPromptPreviewURL(id, undefined);
 
@@ -45,6 +46,7 @@ function showPromptItem({prompt, options = {}}: {
     promptElement.style.backgroundImage = imageSrc;
     promptElement.dataset.prompt = id;
     promptElement.dataset.index = index + "";
+    if(parentGroup !== false) promptElement.dataset.group = parentGroup + "";
     promptElement.draggable = true;
     if(isExternalNetwork) promptElement.classList.add("PBE_externalNetwork");
     if(isShadowed) promptElement.classList.add("PBE_shadowedElement");

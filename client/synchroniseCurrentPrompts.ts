@@ -2,28 +2,25 @@ import Database from "client/Database/index";
 import PromptsBrowser from "client/index";
 import CurrentPrompts from "client/CurrentPrompts/index";
 import { DEFAULT_PROMPT_WEIGHT } from "client/const";
-import { normalizePrompt, promptStringToObject } from "client/utils";
+import { normalizePrompt, promptStringToObject} from "client/utils/index";
+import { parseGroups, PromptStringEntity, PromptStringGroup } from 'client/utils/parseGroups';
+import Prompt, { PromptEntity, PromptGroup } from "clientTypes/prompt";
 
-/**
- * Synchronises text content of the textarea with the array of active prompts used by the extension.
- */
-function synchroniseCurrentPrompts(noTextAreaUpdate: boolean = true, normalize: boolean = false) {
+function createPromptObjects({value, activePrompts, groupId, nestingLevel = 0, normalize = false}: {
+    value: string;
+    activePrompts: PromptEntity[];
+    normalize?: boolean;
+    groupId: number | false;
+    nestingLevel: number;
+}) {
     const {state} = PromptsBrowser;
     const {data} = Database;
     const {supportExtendedSyntax = true} = state.config;
-    const textArea = PromptsBrowser.DOMCache.containers[state.currentContainer].textArea;
     const KEEP_SYNTAX_SYMBOLS = ["{", "}", "|"];
     const DELIMITER_CHAR = ",";
     const SPACE_CHAR = " ";
-    if(!textArea) return;
-    let activePrompts = PromptsBrowser.getCurrentPrompts();
-    let value = textArea.value;
-
-    //trying to fix LORAs/Hypernetworks added without a preceding comma
-    value = value.replace(/([^,])\ </g, "$1,\ <");
-
-    const newActivePrompts = [];
-    let prompts = [];
+    let prompts: string[] = [];
+    let index = 0;
 
     if(supportExtendedSyntax) {
         prompts = value.split(/([,{}|])/g);
@@ -52,21 +49,24 @@ function synchroniseCurrentPrompts(noTextAreaUpdate: boolean = true, normalize: 
         
     }
 
-    let currNestedWeight = 0;
-    let index = 0;
+    //let currNestedWeight = 0;
 
     for(let i = 0; i < prompts.length; i++) {
         let promptItem = prompts[i];
+        if(!promptItem) continue;
+
+        //promptItem = promptItem.trim();
         if(!promptItem || promptItem === ",") continue;
 
-        const {id, weight, isExternalNetwork, isSyntax = false, nestedWeight} = promptStringToObject({prompt: promptItem, nestedWeight: currNestedWeight});
+        const {id, weight, isExternalNetwork, isSyntax = false, nestedWeight} = promptStringToObject({prompt: promptItem, nestedWeight: 0});
+        if(!id) continue;
 
-        currNestedWeight = nestedWeight;
+        //currNestedWeight = nestedWeight;
         promptItem = id;
 
         if(normalize && !isExternalNetwork && !isSyntax) promptItem = normalizePrompt({prompt: promptItem, state, data});
 
-        let targetItem = !isSyntax ? activePrompts.find(item => item.id === promptItem) : undefined;
+        let targetItem = !isSyntax ? PromptsBrowser.getPromptById({id: promptItem, groupId}) : undefined;
         
         if(targetItem) {
             if(targetItem.weight !== weight) targetItem.weight = weight;
@@ -75,6 +75,7 @@ function synchroniseCurrentPrompts(noTextAreaUpdate: boolean = true, normalize: 
             targetItem = {
                 id: promptItem,
                 index,
+                parentGroup: groupId,
                 weight: weight !== undefined ? weight : DEFAULT_PROMPT_WEIGHT
             }
         }
@@ -96,14 +97,142 @@ function synchroniseCurrentPrompts(noTextAreaUpdate: boolean = true, normalize: 
             else if(nextItem === DELIMITER_CHAR) targetItem.delimiter = "next";
         }
 
-        newActivePrompts.push(targetItem);
+        activePrompts.push(targetItem);
         index++;
     }
+}
 
-    activePrompts = newActivePrompts;
+function processGroup({entityArray, activePrompts, normalize = false, nestingLevel = 0, groupId = false}:{
+    entityArray: PromptStringEntity[];
+    activePrompts: PromptEntity[];
+    normalize: boolean;
+    nestingLevel?: number;
+    groupId?: number | false;
+}) {
+    for(const entity of entityArray) {
+        if(typeof entity === "string") {
+            createPromptObjects({
+                value: entity,
+                normalize,
+                activePrompts,
+                nestingLevel,
+                groupId,
+            });
 
-    PromptsBrowser.setCurrentPrompts(activePrompts);
+        } else if("id" in entity) {
+            const {id, weight, body} = entity;
+
+            const newGroup: PromptGroup = {
+                groupId: id,
+                weight: weight,
+                prompts: [],
+            }
+
+            activePrompts.push(newGroup);
+            processGroup({
+                entityArray: body,
+                activePrompts: newGroup.prompts,
+                normalize,
+                nestingLevel: nestingLevel + 1,
+                groupId: id,
+            });
+        }
+    }
+}
+
+/**
+ * Synchronises text content of the textarea with the array of active prompts used by the extension.
+ */
+function syncCurrentPrompts(noTextAreaUpdate: boolean = true, normalize: boolean = false) {
+    const {state} = PromptsBrowser;
+    const textArea = PromptsBrowser.DOMCache.containers[state.currentContainer].textArea;
+    if(!textArea) return;
+    let value = textArea.value;
+
+    //trying to fix LORAs/Hypernetworks added without a preceding comma
+    value = value.replace(/([^,])\ </g, "$1,\ <");
+
+    const newActivePrompts: PromptEntity[] = [];
+    processGroup({
+        entityArray: parseGroups(value),
+        activePrompts: newActivePrompts,
+        normalize,
+    });
+
+    PromptsBrowser.setCurrentPrompts(newActivePrompts);
     CurrentPrompts.update(noTextAreaUpdate);
 }
 
-export default synchroniseCurrentPrompts;
+function syncListToTextareaBranch(activePrompts: PromptEntity[], prompts: {text: string; src: Prompt; }[] = []) {
+    for(const entity of activePrompts) {
+        if("groupId" in entity) {
+            prompts.push({text: "(", src: {id: "(", isSyntax: true, delimiter: "prev"}});
+            syncListToTextareaBranch(entity.prompts, prompts);
+
+            if(entity.weight) prompts.push({text: `: ${entity.weight}`, src: {id: "", isSyntax: true, delimiter: "none"}});
+            prompts.push({text: ")", src: {id: ")", isSyntax: true, delimiter: "next"}});
+
+            continue;
+        }
+
+        const {id, weight, isExternalNetwork} = entity;
+
+        if(isExternalNetwork) {
+            prompts.push({text: `<${id}:${weight}>`, src: entity});
+
+        } else {
+            if(weight !== undefined && weight !== DEFAULT_PROMPT_WEIGHT)
+                prompts.push({text: `(${id}: ${weight})`, src: entity});
+            else
+                prompts.push({text: id, src: entity});
+        }
+    }
+}
+
+function syncListToTextarea(activePrompts: PromptEntity[]) {
+    const {state, DOMCache} = PromptsBrowser;
+    const textArea = DOMCache.containers[state.currentContainer].textArea;
+    if(!textArea) return;
+    const prompts: {text: string; src: Prompt; }[] = [];
+
+    textArea.value = "";
+
+    syncListToTextareaBranch(activePrompts, prompts);
+
+    let addTextValue = "";
+    for(let i = 0; i < prompts.length; i++) {
+        const {text, src} = prompts[i];
+        const nextPromptSrc = prompts[i+1] ? prompts[i+1].src : undefined;
+        addTextValue += text;
+
+        let addDelimiter = true;
+
+        if(!nextPromptSrc) addDelimiter = false;
+        else if(src.delimiter) {
+            if(src.delimiter === "prev" || src.delimiter === "none") addDelimiter = false;
+
+        } else if(nextPromptSrc.delimiter) {
+            if(nextPromptSrc.delimiter === "next" || nextPromptSrc.delimiter === "none") addDelimiter = false;
+
+        }
+
+        if(nextPromptSrc && text === ")" && nextPromptSrc.id === ")") addDelimiter = false;
+
+        if(addDelimiter) addTextValue += ", ";
+    }
+
+    textArea.value = addTextValue;
+
+    //Just to be sure every api listening to changes in textarea done their job
+    textArea.dispatchEvent(new Event('focus'));
+    textArea.dispatchEvent(new Event('input'));
+    textArea.dispatchEvent(new KeyboardEvent('keyup'));
+    textArea.dispatchEvent(new KeyboardEvent('keypress'));
+    textArea.dispatchEvent(new Event('blur'));
+}
+
+export {
+    syncListToTextarea as synchroniseListToTextarea,
+}
+
+export default syncCurrentPrompts;

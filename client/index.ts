@@ -1,4 +1,4 @@
-import Prompt from "clientTypes/prompt";
+import Prompt, { PromptEntity, PromptGroup } from "clientTypes/prompt";
 import State from "clientTypes/state";
 import Database from "client/Database/index";
 import SetupWindow from "client/SetupWindow/index";
@@ -13,11 +13,8 @@ import LoadStyle from "client/LoadStyle/index";
 import PromptScribe from "client/PromptScribe/index";
 import PreviewSave from "client/PreviewSave/index";
 import PromptWordTooltip from "client/PromptWordTooltip/index";
-import synchroniseCurrentPrompts from "client/synchroniseCurrentPrompts";
-
-import {
-    log,
-} from "client/utils";
+import syncCurrentPrompts from "client/synchroniseCurrentPrompts";
+import { log } from "client/utils/index";
 
 import initialState from "client/initialState";
 import supportedContainers from "client/supportedContainers";
@@ -73,7 +70,7 @@ class PromptsBrowser {
 
     public static supportedContainers = supportedContainers;
 
-    private static textAreaSynchronise = () => synchroniseCurrentPrompts(true, false);
+    private static textAreaSynchronise = () => syncCurrentPrompts(true, false);
 
     public static getCurrentPrompts = () => {
         const {state} = PromptsBrowser;
@@ -85,11 +82,68 @@ class PromptsBrowser {
         return state.currentPromptsList[state.currentContainer];
     }
 
-    public static setCurrentPrompts = (currentPrompts: Prompt[] = []) => {
+    public static setCurrentPrompts = (currentPrompts: PromptEntity[] = []) => {
         const {state} = PromptsBrowser;
         const {currentPromptsList, currentContainer} = state;
     
         currentPromptsList[currentContainer] = currentPrompts;
+    }
+
+    public static getPromptById({id, groupId = false, currentGroupId = false, branch, terminator = 0}: {
+        id: string;
+        groupId?: number | false;
+        currentGroupId?: number | false;
+        branch?: PromptEntity[];
+        terminator?: number;
+    }): Prompt | false {
+        if(terminator > 100) return false;
+        if(!branch) branch = PromptsBrowser.getCurrentPrompts();
+
+        for(const branchItem of branch) {
+            if("id" in branchItem && branchItem.id === id && groupId === currentGroupId) return branchItem;
+
+            if(groupId !== false && "groupId" in branchItem) {
+                const {prompts} = branchItem as PromptGroup;
+
+                const result = PromptsBrowser.getPromptById({
+                    id,
+                    branch: prompts,
+                    terminator: terminator + 1
+                });
+                if(result && result.id === id) return result;
+            }
+        }
+
+        return false;
+    }
+
+    public static removePrompt(id: string, branch?: PromptEntity[], terminator: number = 0) {
+        if(terminator > 100) return false;
+        let isRoot: boolean = false;
+        if(!branch) {
+            branch = PromptsBrowser.getCurrentPrompts();
+            isRoot = true;
+        }
+
+        branch = branch.filter(item => "id" in item && item.id !== id);
+
+        for(const index in branch) {
+            const branchItem = branch[index];
+
+            if("groupId" in branchItem) {
+                const traversedBranch = PromptsBrowser.removePrompt(id, (branchItem as PromptGroup).prompts, terminator + 1);
+                if(traversedBranch) (branchItem as PromptGroup).prompts = traversedBranch;
+            }
+        }
+
+        //removing empty branches
+        branch = branch.filter(item => {
+            if("groupId" in item && (item as PromptGroup).prompts.length !== 0) return false;
+            return true;
+        });
+
+        if(isRoot) PromptsBrowser.setCurrentPrompts(branch);
+        return branch;
     }
 
     public static loadUIConfig = () => {

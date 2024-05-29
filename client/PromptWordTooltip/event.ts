@@ -1,8 +1,8 @@
 import PromptWordTooltip from "./index";
 import PromptsBrowser from "client/index";
 import Database from "client/Database/index";
-import { promptStringToObject } from "client/utils";
-import synchroniseCurrentPrompts from "client/synchroniseCurrentPrompts";
+import { promptStringToObject } from "client/utils/index";
+import syncCurrentPrompts from "client/synchroniseCurrentPrompts";
 import applyStyle from "client/applyStyle";
 
 class PromptWordTooltipEvent {
@@ -150,7 +150,7 @@ class PromptWordTooltipEvent {
         textArea.value = newValue;
     
         PromptWordTooltip.selectedIndex = 0;
-        synchroniseCurrentPrompts(false);
+        syncCurrentPrompts(false);
     
         applyStyle(targetStyle, true, false);
     }
@@ -207,7 +207,7 @@ class PromptWordTooltipEvent {
         textArea.value = newValue;
     
         PromptWordTooltip.selectedIndex = 0;
-        synchroniseCurrentPrompts(false);
+        syncCurrentPrompts(false);
     }
 }
 

@@ -1,6 +1,6 @@
 import PromptsBrowser from "client/index";
 import Database from "client/Database/index";
-import synchroniseCurrentPrompts from "client/synchroniseCurrentPrompts";
+import syncCurrentPrompts from "client/synchroniseCurrentPrompts";
 import showPromptItem from "client/showPromptItem";
 import PromptScribeEvent from "./event";
 
@@ -37,7 +37,7 @@ class PromptScribe {
 
     public static onOpenScriber() {
         const {state} = PromptsBrowser;
-        synchroniseCurrentPrompts();
+        syncCurrentPrompts();
 
         state.showScriberWindow = true;
         PromptScribe.update(true);

@@ -55,8 +55,9 @@ class SaveStyle {
                 if(!currentId) return;
     
                 if(e.ctrlKey || e.metaKey) {
-                    activePrompts = activePrompts.filter(item => item.id !== currentId);
-                    PromptsBrowser.setCurrentPrompts(activePrompts);
+                    //activePrompts = activePrompts.filter(item => item.id !== currentId);
+                    //PromptsBrowser.setCurrentPrompts(activePrompts);
+                    PromptsBrowser.removePrompt(currentId);
                     SaveStyle.update();
                     CurrentPrompts.update();
     

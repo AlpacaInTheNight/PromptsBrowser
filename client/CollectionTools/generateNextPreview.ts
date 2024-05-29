@@ -5,7 +5,7 @@ import KnownPrompts from "client/KnownPrompts/index";
 import CurrentPrompts from "client/CurrentPrompts/index";
 import PreviewSave from "client/PreviewSave/index";
 import applyStyle from "client/applyStyle";
-import { log } from "client/utils";
+import { log } from "client/utils/index";
 
 async function generateNextPreview() {
     const {state} = PromptsBrowser;

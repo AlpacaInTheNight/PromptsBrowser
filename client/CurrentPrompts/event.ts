@@ -5,7 +5,7 @@ import PreviewSave from "client/PreviewSave/index";
 import PromptEdit from "client/PromptEdit/index";
 import PromptScribe from "client/PromptScribe/index";
 import PromptTools from "client/PromptTools/index";
-import synchroniseCurrentPrompts from "client/synchroniseCurrentPrompts";
+import syncCurrentPrompts from "client/synchroniseCurrentPrompts";
 
 class CurrentPromptsEvent {
 
@@ -104,7 +104,8 @@ class CurrentPromptsEvent {
         }
     
         if(e.ctrlKey || e.metaKey) {
-            PromptsBrowser.setCurrentPrompts(activePrompts.filter(item => item.id !== currentId));
+            //PromptsBrowser.setCurrentPrompts(activePrompts.filter(item => item.id !== currentId));
+            PromptsBrowser.removePrompt(currentId);
             CurrentPrompts.update();
     
             return;
@@ -149,8 +150,9 @@ class CurrentPromptsEvent {
         const {belowOneWeight = 0.05, aboveOneWeight = 0.01} = state.config;
         if(!e.shiftKey) return;
         const currentId = target.dataset.prompt;
-        const activePrompts = PromptsBrowser.getCurrentPrompts();
-        const targetItem = activePrompts.find(item => item.id === currentId);
+        //const activePrompts = PromptsBrowser.getCurrentPrompts();
+        //const targetItem = activePrompts.find(item => item.id === currentId);
+        const targetItem = PromptsBrowser.getPromptById({id: currentId});
         if(!currentId || !targetItem) return;
         if(targetItem.isSyntax) return;
     
@@ -189,7 +191,7 @@ class CurrentPromptsEvent {
     }
     
     public static onNormalizePrompts = () => {
-        synchroniseCurrentPrompts(true, true);
+        syncCurrentPrompts(true, true);
         CurrentPrompts.update();
     }
 }

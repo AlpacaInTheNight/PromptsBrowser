@@ -1,4 +1,4 @@
-import Prompt from "clientTypes/prompt";
+import Prompt, { PromptEntity } from "clientTypes/prompt";
 import Filter from "clientTypes/filter";
 
 type Config = {
@@ -49,7 +49,7 @@ type State = {
     showControlPanel: boolean;
     showViews: string[];
     currentContainer: string;
-    currentPromptsList: {[key: string]: Prompt[]};
+    currentPromptsList: {[key: string]: PromptEntity[]};
     selectedPrompt: string | undefined;
     editingPrompt: string | undefined;
     filesIteration: number; //to avoid getting old image cache

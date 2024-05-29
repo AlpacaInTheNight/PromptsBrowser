@@ -38,6 +38,31 @@ type PromptBase = {
  * Additional properties used only on client.
  */
 type PromptClient = {
+
+    /**
+     * In mixed list stores collection that have a preview for the target prompt.
+     */
+    knownPreviews?: {
+        [key: string]: "png" | "jpg";
+    }
+
+    /**
+     * In mixed list stores collections that have the target prompt.
+     */
+    collections?: string[];
+    
+}
+
+/**
+ * Additional properties related to prompts list. Like list of current active prompts or a saved prompts style.
+ */
+type PromptListItem = {
+
+    /**
+     * Id of the parent prompts group.
+     */
+    parentGroup?: number | false;
+
     /**
      * Index in the array of some prompts.
      */
@@ -49,23 +74,25 @@ type PromptClient = {
     nestedWeight?: number;
 
     /**
-     * In mixed list stores collection that have a preview for the target prompt.
-     */
-    knownPreviews?: {
-        [key: string]: "png" | "jpg";
-    }
-
-    /**
-     * In mixed list stores collection that have the target prompt.
-     */
-    collections?: string[];
-
-    /**
      * For syntax elements.
      */
     delimiter?: "none" | "prev" | "next" | "both";
+
 }
 
-type Prompt = PromptBase & PromptClient;
+type Prompt = PromptBase & PromptClient & PromptListItem;
+
+type PromptGroup = {
+    groupId: number;
+    weight: number;
+    prompts: PromptEntity[];
+}
+
+type PromptEntity = PromptGroup | Prompt;
+
+export {
+    PromptEntity,
+    PromptGroup,
+}
 
 export default Prompt;

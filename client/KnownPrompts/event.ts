@@ -4,9 +4,9 @@ import Database from "client/Database/index";
 import CurrentPrompts from "client/CurrentPrompts/index";
 import PromptEdit from "client/PromptEdit/index";
 import Prompt from "clientTypes/prompt";
-import { isInSameCollection, addStrToActive } from "client/utils";
+import { isInSameCollection, addStrToActive } from "client/utils/index";
 import { DEFAULT_PROMPT_WEIGHT } from "client/const";
-import synchroniseCurrentPrompts from "client/synchroniseCurrentPrompts";
+import syncCurrentPrompts from "client/synchroniseCurrentPrompts";
 
 class KnownPromptsEvent {
 
@@ -129,7 +129,7 @@ class KnownPromptsEvent {
         const {united} = Database.data;
         const {state} = PromptsBrowser;
     
-        synchroniseCurrentPrompts();
+        syncCurrentPrompts();
     
         const promptItem = target.dataset.prompt;
         const targetItem = united.find(item => item.id === promptItem);

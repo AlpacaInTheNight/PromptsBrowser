@@ -6,7 +6,7 @@ import Prompt from "clientTypes/prompt";
 import Style from "clientTypes/style";
 import Data from "clientTypes/data";
 import categories from "client/categories";
-import { makeFileNameSafe, normalizePrompt } from "client/utils";
+import { makeFileNameSafe, normalizePrompt } from "client/utils/index";
 import { EMPTY_CARD_GRADIENT, NEW_CARD_GRADIENT } from "client/const";
 import KnownPrompts from "client/KnownPrompts/index";
 
@@ -271,7 +271,8 @@ class Database {
     
         if(!data.original[savePreviewCollection]) return;
     
-        const targetCurrentPrompt = activePrompts.find(item => item.id === state.selectedPrompt);
+        //const targetCurrentPrompt = activePrompts.find(item => item.id === state.selectedPrompt);
+        const targetCurrentPrompt = PromptsBrowser.getPromptById({id: state.selectedPrompt});
         if(targetCurrentPrompt && targetCurrentPrompt.isExternalNetwork) isExternalNetwork = true;
     
         const saveData = {src, prompt: selectedPrompt, collection: savePreviewCollection};

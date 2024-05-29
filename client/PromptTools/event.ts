@@ -46,7 +46,8 @@ class PromptToolsEvent {
         let activePrompts = PromptsBrowser.getCurrentPrompts();
         let activePrompt: Prompt | undefined = undefined;
 
-        let selectedPrompt = activePrompts.find(item => item.id === clickPrompt);
+        //let selectedPrompt = activePrompts.find(item => item.id === clickPrompt);
+        let selectedPrompt = PromptsBrowser.getPromptById({id: clickPrompt});
         if(!selectedPrompt) {
             selectedPrompt = united.find(item => item.id === clickPrompt);
         }
@@ -64,8 +65,9 @@ class PromptToolsEvent {
         if(clickTargetIndex !== -1) {
 
             if(e.metaKey || e.ctrlKey) {
-                activePrompts = activePrompts.filter(item => item.id !== clickPrompt);
-                PromptsBrowser.setCurrentPrompts(activePrompts);
+                //activePrompts = activePrompts.filter(item => item.id !== clickPrompt);
+                //PromptsBrowser.setCurrentPrompts(activePrompts);
+                PromptsBrowser.removePrompt(clickPrompt);
 
             } else if(e.shiftKey) {
                 state.editingPrompt = clickPrompt;
