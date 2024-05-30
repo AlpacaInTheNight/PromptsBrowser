@@ -8,9 +8,9 @@
     height: 6px;
 }
 
-.PBE_Scrollbar::-webkit-scrollbar-track {
+/* .PBE_Scrollbar::-webkit-scrollbar-track {
     
-}
+} */
 
 .PBE_Scrollbar::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.5);
@@ -232,7 +232,8 @@ select.PBE_generalInput {
 }
 
 .PBE_toggledButton {
-    background: var(--checkbox-label-background-fill-selected);
+    /* background: var(--checkbox-label-background-fill-selected); */
+    background: var(--button-primary-background-fill);
     color: var(--checkbox-label-text-color-selected);
 }
 
@@ -269,7 +270,7 @@ select.PBE_generalInput {
 }
 
 .PBE_windowContent {
-    z-index: 3;
+    z-index: 5;
     overflow: auto;
     overscroll-behavior: contain;
     padding: 10px;
