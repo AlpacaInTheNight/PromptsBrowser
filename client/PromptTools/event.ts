@@ -1,7 +1,6 @@
 import PromptTools from "./index";
 import PromptsBrowser from "client/index";
 import ActivePrompts from "client/ActivePrompts/index";
-import Prompt from "clientTypes/prompt";
 import Database from "client/Database/index";
 import CurrentPrompts from "client/CurrentPrompts/index";
 import PromptEdit from "client/PromptEdit/index";
@@ -15,7 +14,7 @@ class PromptToolsEvent {
 
         if(!wrapper) return;
 
-        state.promptToolsId = undefined;
+        state.promptTools = undefined;
         wrapper.style.display = "none";
     }
 
@@ -35,84 +34,77 @@ class PromptToolsEvent {
         PromptTools.update();
     }
 
-    public static onElementClick(e: MouseEvent) {
+    public static onChangeSelected(e: MouseEvent) {
+        const target = e.currentTarget as HTMLElement;
+        const {state} = PromptsBrowser;
+        const {index, groupId} = state.promptTools;
+        if(index === undefined) return;
+
+        const clickPrompt = target.dataset.prompt;
+        const newIndex = Number(target.dataset.index);
+        let newGroup: number | false = Number(target.dataset.group);
+        if(Number.isNaN(newGroup)) newGroup = false;
+
+        if(e.shiftKey && clickPrompt) {
+            state.editingPrompt = clickPrompt;
+
+            PromptEdit.update();
+            return;
+        }
+
+        if(e.metaKey || e.ctrlKey) {
+            ActivePrompts.removePrompt(newIndex, newGroup);
+
+        } else {
+            //same element
+            if(index === newIndex && groupId === newGroup) return;
+
+            state.promptTools.index = newIndex;
+            state.promptTools.groupId = newGroup;
+        }
+
+        PromptTools.update();
+        CurrentPrompts.update();
+    }
+
+    public static onSelectNew(e: MouseEvent) {
         const target = e.currentTarget as HTMLElement;
         const {data} = Database;
         const {united} = data;
         const {state} = PromptsBrowser;
-        const currPrompt = state.promptToolsId;
+        const {index, groupId} = state.promptTools;
         const clickPrompt = target.dataset.prompt;
-        if(!currPrompt || !clickPrompt) return;
         const replaceMode = state.toggledButtons.includes("tools_replaceMode");
-        let activePrompts = ActivePrompts.getCurrentPrompts();
-        let activePrompt: Prompt | undefined = undefined;
+        if(index === undefined || !clickPrompt) return;
 
-        //let selectedPrompt = activePrompts.find(item => item.id === clickPrompt);
-        let selectedPrompt = ActivePrompts.getPromptById({id: clickPrompt});
-        if(!selectedPrompt) {
-            selectedPrompt = united.find(item => item.id === clickPrompt);
-        }
+        const selectedPrompt = united.find(item => item.id === clickPrompt);
         if(!selectedPrompt) return;
 
-        const currTargetIndex = activePrompts.findIndex(item => {
-            if(item.id === currPrompt) {
-                activePrompt = item;
-                return true;
-            }
-        });
-        const clickTargetIndex = activePrompts.findIndex(item => item.id === clickPrompt);
-        if(currTargetIndex === -1) return;
-
-        if(clickTargetIndex !== -1) {
-
-            if(e.metaKey || e.ctrlKey) {
-                //activePrompts = activePrompts.filter(item => item.id !== clickPrompt);
-                //PromptsBrowser.setCurrentPrompts(activePrompts);
-                ActivePrompts.removePrompt(clickPrompt);
-
-            } else if(e.shiftKey) {
-                state.editingPrompt = clickPrompt;
-                PromptEdit.update();
-
-            } else {
-                state.promptToolsId = clickPrompt;
-                
-            }
-
-            PromptTools.update();
-            CurrentPrompts.update();
+        if(e.shiftKey) {
+            state.editingPrompt = clickPrompt;
+            PromptEdit.update();
+            
             return;
         }
 
         const newItem = {
             id: clickPrompt,
             weight: DEFAULT_PROMPT_WEIGHT,
-            isExternalNetwork: selectedPrompt.isExternalNetwork
+            isExternalNetwork: selectedPrompt.isExternalNetwork,
         };
 
-        let action = "";
+        let action: "add" | "replace" = "add";
 
-        if(e.shiftKey) {
-            state.editingPrompt = clickPrompt;
-            PromptEdit.update();
+        if(replaceMode) action = e.altKey ? "add" : "replace";
+        else action = e.altKey ? "replace" : "add";
 
-        } else {
-            if(replaceMode) action = e.altKey ? "add" : "replace";
-            else action = e.altKey ? "replace" : "add";
-
-        }
-
-        if(action === "add") activePrompts.splice(currTargetIndex, 0, newItem);
-        else if (action === "replace") {
-            if(activePrompt && activePrompt.weight !== undefined) newItem.weight = activePrompt.weight;
-
-            activePrompts[currTargetIndex] = newItem;
-            state.promptToolsId = clickPrompt;
-        }
+        if(action === "add") ActivePrompts.insertPrompt(newItem, index + 1, groupId);
+        else ActivePrompts.replacePrompt(newItem, index, groupId);
 
         PromptTools.update();
         CurrentPrompts.update();
     }
+
 }
 
 export default PromptToolsEvent;

@@ -48,6 +48,7 @@ const initialState: State = {
     },
 
     dragInfo: {},
+    promptTools: {},
 
     showControlPanel: true,
     showViews: ["known", "current", "positive", "negative"],
@@ -67,7 +68,7 @@ const initialState: State = {
     copyOrMoveTo: undefined,
     //dragItemId: undefined,
     //dragCurrentIndex: undefined,
-    promptToolsId: undefined,
+    //promptToolsId: undefined,
     collectionToolsId: undefined,
     savePreviewCollection: undefined,
     editTargetCollection: undefined,

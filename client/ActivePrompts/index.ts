@@ -26,6 +26,28 @@ class ActivePrompts {
         currentPromptsList[currentContainer] = currentPrompts;
     }
 
+    private static getUniqueIdsInBranch(uniqueArray: string[], branch?: PromptEntity[]) {
+        let isRoot = false;
+        if(!branch) {
+            branch = ActivePrompts.getCurrentPrompts();
+            isRoot = true;
+        }
+
+        for(const branchItem of branch) {
+            if("groupId" in branchItem) ActivePrompts.getUniqueIdsInBranch(uniqueArray, branchItem.prompts);
+            else if(!branchItem.isSyntax) {
+                if(!uniqueArray.includes(branchItem.id)) uniqueArray.push(branchItem.id);
+            }
+        }
+    }
+
+    public static getUniqueIds() {
+        const uniqueArray: string[] = [];
+        ActivePrompts.getUniqueIdsInBranch(uniqueArray);
+
+        return uniqueArray;
+    }
+
     public static getPromptByIndex(index: number, groupId: number | false) {
         return getPromptByIndexInBranch({index, groupId});
     }
@@ -67,6 +89,11 @@ class ActivePrompts {
     public static insertPrompt(prompt: PromptEntity, index: number, groupId: number | false = false) {
         insertPromptInBranch({prompt, index, groupId});
         reindexPromptGroups();
+    }
+
+    public static replacePrompt(prompt: PromptEntity, index: number, groupId: number | false = false) {
+        insertPromptInBranch({prompt, index, groupId, isReplace: true});
+        //reindexPromptGroups();
     }
 
     public static movePrompt({from, to}: {

@@ -80,11 +80,19 @@ class CurrentPromptsEvent {
     public static onDblClick = (e: MouseEvent) => {
         const target = e.currentTarget as HTMLElement;
         const {state} = PromptsBrowser;
+
+        let index: number = Number(target.dataset.index);
+        let group: number | false = Number(target.dataset.group);
+        if(Number.isNaN(index)) return;
+        if(Number.isNaN(group)) group = false;
+
+        state.promptTools.index = index;
+        state.promptTools.groupId = group;
     
-        const currentId = target.dataset.prompt;
+        /* const currentId = target.dataset.prompt;
         if(!currentId) return;
     
-        state.promptToolsId = currentId;
+        state.promptToolsId = currentId; */
         PromptTools.update();
     }
 

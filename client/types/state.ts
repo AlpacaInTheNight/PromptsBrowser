@@ -52,6 +52,11 @@ type State = {
         groupId?: number | false;
     }
 
+    promptTools: {
+        index?: number;
+        groupId?: number | false;
+    }
+
     showControlPanel: boolean;
     showViews: string[];
     currentContainer: string;
@@ -72,7 +77,8 @@ type State = {
     //dragItemId: string | undefined;
     //dragCurrentIndex: string | number | undefined;
 
-    promptToolsId: string | undefined;
+    //promptToolsId: string | undefined;
+    
     collectionToolsId: string | undefined;
     savePreviewCollection: string | undefined;
     editTargetCollection: string | undefined;

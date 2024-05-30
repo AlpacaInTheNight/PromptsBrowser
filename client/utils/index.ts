@@ -10,6 +10,11 @@ const regex = {
     REGX_SINGLE_UNDERSCORE: /(?<!_)_(?!_)/g,
 }
 
+function clone<T>(obj: T): T {
+    if(structuredClone) return structuredClone(obj);
+    else return JSON.parse( JSON.stringify(obj) );
+}
+
 function replaceAllRegex(str: string, oldStr: string | RegExp, newStr: string): string {
     if(!str || !oldStr) return str;
 
@@ -129,6 +134,7 @@ function isInSameCollection(promptA: string, promptB: string): any {
 }
 
 export {
+    clone,
     replaceAllRegex,
     makeFileNameSafe,
     normalizePrompt,

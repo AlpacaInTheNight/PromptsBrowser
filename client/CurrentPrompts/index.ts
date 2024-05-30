@@ -1,12 +1,9 @@
 import PromptsBrowser from "client/index";
 import ActivePrompts from "client/ActivePrompts/index";
 import Database from "client/Database/index";
-import showPromptItem from "client/showPromptItem";
-import Prompt, { PromptEntity, PromptGroup } from "clientTypes/prompt";
-import { DEFAULT_PROMPT_WEIGHT } from "client/const";
 import CurrentPromptsEvent from "./event";
 import { synchroniseListToTextarea } from "client/synchroniseCurrentPrompts";
-import { makeElement, makeDiv, makeSelect } from "client/dom";
+import showPrompts from "./showPrompts";
 
 class CurrentPrompts {
 
@@ -31,49 +28,6 @@ class CurrentPrompts {
     
         positiveWrapper.appendChild(normalizeButton);
     }
-
-    private static showPromptsGroup(promptsGroup: PromptEntity[] = [], wrapper: HTMLElement) {
-        const {state} = PromptsBrowser;
-        const {cardHeight = 100} = state.config;
-
-        for(let index = 0; index < promptsGroup.length; index++) {
-            const promptItem = promptsGroup[index];
-
-            if("groupId" in promptItem) {
-                const groupContainer = makeDiv({className: "PBE_promptsGroup"});
-                const groupHead = makeDiv({className: "PBE_groupHead"});
-                groupHead.style.height = cardHeight + "px";
-                groupContainer.appendChild(groupHead);
-                wrapper.appendChild(groupContainer);
-                if(promptItem.weight) groupHead.innerText = promptItem.weight + "";
-
-                CurrentPrompts.showPromptsGroup(promptItem.prompts, groupContainer);
-                continue;
-            }
-
-            const {id, parentGroup = false} = promptItem;
-    
-            const promptElement = showPromptItem({prompt: promptItem, options: {index, parentGroup}});
-    
-            if(promptItem.isSyntax) promptElement.dataset.issyntax = "true";
-            else if(state.selectedPrompt === id) promptElement.classList.add("PBE_selectedCurrentElement");
-    
-            promptElement.addEventListener("dragstart", CurrentPromptsEvent.onDragStart);
-            promptElement.addEventListener("dragover", CurrentPromptsEvent.onDragOver);
-            promptElement.addEventListener("dragenter", CurrentPromptsEvent.onDragEnter);
-            promptElement.addEventListener("dragleave", CurrentPromptsEvent.onDragLeave);
-            promptElement.addEventListener("drop", CurrentPromptsEvent.onDrop);
-            promptElement.addEventListener("click", CurrentPromptsEvent.onPromptSelected);
-            
-            if(!promptItem.isSyntax) {
-                promptElement.addEventListener("dblclick", CurrentPromptsEvent.onDblClick);
-                promptElement.addEventListener("wheel", CurrentPromptsEvent.scrollWeight);
-            }
-    
-            wrapper.appendChild(promptElement);
-        }
-
-    }
     
     public static update = (noTextAreaUpdate = false) => {
         const {state} = PromptsBrowser;
@@ -85,7 +39,15 @@ class CurrentPrompts {
         if(!wrapper || !textArea) return;
         wrapper.innerHTML = "";
 
-        CurrentPrompts.showPromptsGroup(activePrompts, wrapper);
+        showPrompts({
+            prompts: activePrompts,
+            wrapper,
+            allowMove: true,
+            onClick: CurrentPromptsEvent.onPromptSelected,
+            onDblClick: CurrentPromptsEvent.onDblClick,
+            onWheel: CurrentPromptsEvent.scrollWeight,
+        });
+
         if(noTextAreaUpdate) return;
 
         synchroniseListToTextarea(activePrompts);

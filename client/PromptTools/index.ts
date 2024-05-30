@@ -1,16 +1,19 @@
 import PromptsBrowser from "client/index";
 import ActivePrompts from "client/ActivePrompts/index";
-import Prompt from "clientTypes/prompt";
+import Prompt, { PromptEntity, PromptGroup } from "clientTypes/prompt";
 import Database from "client/Database/index";
-import { makeElement } from "client/dom";
+import { makeElement, makeDiv } from "client/dom";
 import showPromptItem from "client/showPromptItem";
 import { replaceAllRegex } from "client/utils/index";
 import PromptsSimpleFilter from "client/PromptsFilter/simple";
+import showPrompts from "client/CurrentPrompts/showPrompts";
+import { FilterSimple } from "clientTypes/filter";
+import { clone } from "client/utils/index";
 import PromptToolsEvent from "./event";
 
 class PromptTools {
     
-    private static currentFilters = {
+    private static currentFilters: FilterSimple = {
         collection: "",
         category: "",
         tags: [] as string[],
@@ -25,7 +28,7 @@ class PromptTools {
         ]
     }
 
-    private static possibleFilters = {
+    private static possibleFilters: FilterSimple = {
         collection: "",
         category: "",
         tags: [] as string[],
@@ -56,25 +59,46 @@ class PromptTools {
         });
     }
 
-    private static showCurrentPrompts(wrapper: HTMLElement) {
-        const {data} = Database;
+    private static showCurrentPromptsList(wrapper: HTMLElement) {
         const {state} = PromptsBrowser;
         const {currentFilters} = PromptTools;
-        const {checkFilter} = PromptsSimpleFilter;
-        const {sorting} = currentFilters;
-        const {unitedList} = data;
-        const activePrompts = [...ActivePrompts.getCurrentPrompts()];
-        if(!state.promptToolsId) return;
+         const activePrompts = clone( ActivePrompts.getCurrentPrompts() );
+        if(state.promptTools.index === undefined) return;
 
-        const setupContainer = makeElement<HTMLElement>({element: "div", className: "PBE_List PBE_toolsSetup"});
-        const currentPromptsContainer = makeElement<HTMLElement>({element: "div", className: "PBE_windowCurrentList PBE_Scrollbar"});
+        const currentPromptsContainer = makeDiv({className: "PBE_windowCurrentList PBE_Scrollbar"});
+
+        showPrompts({
+            prompts: activePrompts,
+            wrapper: currentPromptsContainer,
+            focusOn: {index: state.promptTools.index, groupId: state.promptTools.groupId},
+            filterSimple: currentFilters,
+            allowMove: false,
+            onClick: PromptToolsEvent.onChangeSelected,
+        });
+
+        currentPromptsContainer.addEventListener("wheel", (e) => {
+            const target = e.currentTarget as HTMLElement;
+            if(!e.deltaY) return;
+
+            target.scrollLeft += e.deltaY + e.deltaX;
+            e.preventDefault();
+        });
+
+        wrapper.appendChild(currentPromptsContainer);
+    }
+
+    private static showCurrentPrompts(wrapper: HTMLElement) {
+        const {state} = PromptsBrowser;
+        if(state.promptTools.index === undefined) return;
+
+        const setupContainer = makeDiv({className: "PBE_List PBE_toolsSetup"});
         
         //setup fieldset
         const setupField = makeElement<HTMLElement>({element: "fieldset", className: "PBE_fieldset"});
         const setupLegend = makeElement<HTMLElement>({element: "legend", content: "Setup"});
 
-        const showAll = makeElement<HTMLElement>({element: "div", content: "Show All", className: "PBE_toggleButton"});
-        const replaceMode = makeElement<HTMLElement>({element: "div", content: "Replace mode", className: "PBE_toggleButton"});
+        const showAll = makeDiv({content: "Show All", className: "PBE_toggleButton"});
+        const replaceMode = makeDiv({content: "Replace mode", className: "PBE_toggleButton"});
         showAll.dataset.id = "tools_showAll";
         replaceMode.dataset.id = "tools_replaceMode";
 
@@ -91,9 +115,9 @@ class PromptTools {
         const simField = makeElement<HTMLElement>({element: "fieldset", className: "PBE_fieldset"});
         const simLegend = makeElement<HTMLElement>({element: "legend", content: "Similarity by:"});
 
-        const showTags = makeElement<HTMLElement>({element: "div", content: "Tags", className: "PBE_toggleButton"});
-        const showCategory = makeElement<HTMLElement>({element: "div", content: "Category", className: "PBE_toggleButton"});
-        const showName = makeElement<HTMLElement>({element: "div", content: "Name", className: "PBE_toggleButton"});
+        const showTags = makeDiv({content: "Tags", className: "PBE_toggleButton"});
+        const showCategory = makeDiv({content: "Category", className: "PBE_toggleButton"});
+        const showName = makeDiv({content: "Name", className: "PBE_toggleButton"});
 
         simField.appendChild(simLegend);
         simField.appendChild(showTags);
@@ -107,71 +131,15 @@ class PromptTools {
         if(state.toggledButtons.includes("tools_tags")) showTags.classList.add("PBE_toggledButton");
         if(state.toggledButtons.includes("tools_category")) showCategory.classList.add("PBE_toggledButton");
         if(state.toggledButtons.includes("tools_name")) showName.classList.add("PBE_toggledButton");
-        
 
         showTags.addEventListener("click", PromptToolsEvent.onToggleButton);
         showCategory.addEventListener("click", PromptToolsEvent.onToggleButton);
         showName.addEventListener("click", PromptToolsEvent.onToggleButton);
 
-        switch(sorting) {
-
-            case "alph":
-                //sorting prompts alphabetically
-                activePrompts.sort( (A, B) => {
-                    if(A.id.toLowerCase() < B.id.toLowerCase()) return -1;
-                    if(A.id.toLowerCase() > B.id.toLowerCase()) return 1;
-
-                    return 0;
-                });
-                break;
-
-            case "alphReversed":
-                //sorting prompts alphabetically in reverse orderd
-                activePrompts.sort( (A, B) => {
-                    if(A.id.toLowerCase() < B.id.toLowerCase()) return 1;
-                    if(A.id.toLowerCase() > B.id.toLowerCase()) return -1;
-
-                    return 0;
-                });
-                break;
-
-            case "weight":
-                //sorting prompts based on their weight
-                activePrompts.sort( (A, B) => {
-                    if(A.weight < B.weight) return 1;
-                    if(A.weight > B.weight) return -1;
-
-                    return 0;
-                });
-        }
-
-        for(const i in activePrompts) {
-            const currPrompt = activePrompts[i];
-            if(!currPrompt || currPrompt.isSyntax) continue;
-            if(unitedList[currPrompt.id] && !checkFilter(currPrompt.id, currentFilters)) continue;
-            const isShadowed = currPrompt.id !== state.promptToolsId;
-
-            const promptElement = showPromptItem({
-                prompt: {id: currPrompt.id, isExternalNetwork: currPrompt.isExternalNetwork},
-                options: {isShadowed},
-            });
-            
-            promptElement.addEventListener("click", PromptToolsEvent.onElementClick);
-            currentPromptsContainer.appendChild(promptElement);
-        }
-
-        currentPromptsContainer.addEventListener("wheel", (e) => {
-            const target = e.currentTarget as HTMLElement;
-            if(!e.deltaY) return;
-
-            target.scrollLeft += e.deltaY + e.deltaX;
-            e.preventDefault();
-        })
-
         setupContainer.appendChild(setupField);
         setupContainer.appendChild(simField);
 
-        wrapper.appendChild(currentPromptsContainer);
+        PromptTools.showCurrentPromptsList(wrapper);
         wrapper.appendChild(setupContainer);
     }
 
@@ -183,22 +151,27 @@ class PromptTools {
         const {possibleFilters} = PromptTools;
         const {sorting} = possibleFilters;
         const {checkFilter} = PromptsSimpleFilter;
-        const promptId = state.promptToolsId;
+        const {index, groupId} = state.promptTools;
         const activePrompts = ActivePrompts.getCurrentPrompts();
+        const uniquePrompts = ActivePrompts.getUniqueIds();
         const showAll = state.toggledButtons.includes("tools_showAll");
-        if(!promptId) return;
+        if(index === undefined) return;
+
+        const targetPrompt = ActivePrompts.getPromptByIndex(index, groupId);
+        if(!targetPrompt || !targetPrompt.id) return;
+
         let targetTags: string[] = [];
         let targetCategories: string[] = [];
-        let targetNameWords: string[] = replaceAllRegex(promptId.toLowerCase(), "_", " ").split(" ");
+        let targetNameWords: string[] = replaceAllRegex(targetPrompt.id.toLowerCase(), "_", " ").split(" ");
         let shownItems = 0;
 
-        const targetPromptItem = united.find(item => item.id === promptId);
-        if(targetPromptItem) {
-            targetTags = targetPromptItem.tags || [];
-            targetCategories = targetPromptItem.category || [];
+        const targetPromptSource = united.find(item => item.id === targetPrompt.id);
+        if(targetPromptSource) {
+            targetTags = targetPromptSource.tags || [];
+            targetCategories = targetPromptSource.category || [];
         }
 
-        const nameArr: string[] = promptId.split(" ");
+        const nameArr: string[] = targetPrompt.id.split(" ");
         const possiblePrompts: (Prompt & {simIndex: number})[] = [];
         const addedIds: string[] = [];
 
@@ -213,7 +186,7 @@ class PromptTools {
             //similarity index based on the same tags, categories and words used in the prompt name
             let simIndex = 0;
 
-            if(id === promptId) continue;
+            if(id === targetPrompt.id) continue;
 
             let nameWords = replaceAllRegex(id.toLowerCase(), "_", " ").split(" ");
 
@@ -312,11 +285,11 @@ class PromptTools {
 
         function addElement(item: Prompt) {
             if(addedIds.includes(item.id)) return;
-            const isShadowed = activePrompts.some(currItem => currItem.id === item.id);
+            const isShadowed = uniquePrompts.includes(item.id);
 
             addedIds.push(item.id);
             const promptElement = showPromptItem({prompt: item, options: {isShadowed}});
-            promptElement.addEventListener("click", PromptToolsEvent.onElementClick);
+            promptElement.addEventListener("click", PromptToolsEvent.onSelectNew);
             wrapper.appendChild(promptElement);
         }
 
@@ -325,9 +298,11 @@ class PromptTools {
 
     public static update() {
         const {state} = PromptsBrowser;
+        const {index, groupId = false} = state.promptTools;
         const wrapper = PromptsBrowser.DOMCache.promptTools;
+        if(!wrapper || index === undefined) return;
 
-        if(!wrapper || !state.promptToolsId) return;
+        const targetPrompt = ActivePrompts.getPromptByIndex(index, groupId);
         PromptsBrowser.onCloseActiveWindow = PromptToolsEvent.onCloseWindow;
 
         let currScrollState = 0;
@@ -342,7 +317,7 @@ class PromptTools {
         wrapper.style.display = "flex";
 
         const backImage = document.createElement("div");
-        backImage.style.backgroundImage = Database.getPromptPreviewURL(state.promptToolsId);
+        if(targetPrompt && targetPrompt.id) backImage.style.backgroundImage = Database.getPromptPreviewURL(targetPrompt.id);
         backImage.className = "PBE_toolsBackImage";
 
         const currentFilterBlock = document.createElement("div");

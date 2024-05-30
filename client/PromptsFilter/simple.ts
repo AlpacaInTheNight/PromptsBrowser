@@ -1,7 +1,6 @@
 import { FilterSimple } from "client/types/filter";
-import PromptsBrowser from "client/index";
 import Database from "client/Database/index";
-import { makeElement, makeSelect } from "client/dom";
+import { makeElement, makeDiv, makeSelect } from "client/dom";
 import TagTooltip from "client/TagTooltip/index";
 
 class PromptsSimpleFilter {
@@ -15,11 +14,21 @@ class PromptsSimpleFilter {
     public static checkFilter(promptId: string, filters: FilterSimple = {}) {
         if(!promptId) return false;
         const {data} = Database;
-        const {state} = PromptsBrowser;
         const {unitedList} = data;
+        let onlyName: boolean = false;
         const {collection = "", category = "", tags = [], name = ""} = filters;
 
+        if(!collection && !category && !name && !tags.length) return true;
+        if(!collection && !category && !tags.length && name) onlyName = true;
+
+        //checkinig name first in order to be able to filter new prompts name not yet in collections.
+        //cheking name
+        if(name && !promptId.toLowerCase().includes(name)) return false;
+        if(onlyName) return true;
+
         const unitedPrompt = unitedList[promptId];
+
+        //prompt data not found
         if(!unitedPrompt) return false;
 
         //checking collections
@@ -38,9 +47,6 @@ class PromptsSimpleFilter {
             }
         }
 
-        //cheking name
-        if(name && !unitedPrompt.id.toLowerCase().includes(name)) return false;
-
         return true;
     }
 
@@ -57,7 +63,7 @@ class PromptsSimpleFilter {
         const {categories} = data;
         const {collection = "", category = "", tags = [], name = "", sorting = "", sortingOptions} = filters;
 
-        const filtersContainer = makeElement<HTMLDivElement>({element: "div", className: "PBE_filtersContainer"});
+        const filtersContainer = makeDiv({className: "PBE_filtersContainer"});
 
         //collections filter
         const colOptions = [{id: "", name: "All collections"}];
