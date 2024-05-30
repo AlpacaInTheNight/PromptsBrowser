@@ -1,5 +1,6 @@
 import PromptWordTooltip from "./index";
 import PromptsBrowser from "client/index";
+import ActivePrompts from "client/ActivePrompts/index";
 import Database from "client/Database/index";
 import { promptStringToObject } from "client/utils/index";
 import syncCurrentPrompts from "client/synchroniseCurrentPrompts";
@@ -11,7 +12,7 @@ class PromptWordTooltipEvent {
         if(!str) return "";
     
         const newStrPromptsArr = [];
-        const activePrompts = PromptsBrowser.getCurrentPrompts();
+        const activePrompts = ActivePrompts.getCurrentPrompts();
         const newArr = str.split(",");
     
         for(let prompt of newArr) {

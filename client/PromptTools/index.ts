@@ -1,4 +1,5 @@
 import PromptsBrowser from "client/index";
+import ActivePrompts from "client/ActivePrompts/index";
 import Prompt from "clientTypes/prompt";
 import Database from "client/Database/index";
 import { makeElement } from "client/dom";
@@ -62,7 +63,7 @@ class PromptTools {
         const {checkFilter} = PromptsSimpleFilter;
         const {sorting} = currentFilters;
         const {unitedList} = data;
-        const activePrompts = [...PromptsBrowser.getCurrentPrompts()];
+        const activePrompts = [...ActivePrompts.getCurrentPrompts()];
         if(!state.promptToolsId) return;
 
         const setupContainer = makeElement<HTMLElement>({element: "div", className: "PBE_List PBE_toolsSetup"});
@@ -183,7 +184,7 @@ class PromptTools {
         const {sorting} = possibleFilters;
         const {checkFilter} = PromptsSimpleFilter;
         const promptId = state.promptToolsId;
-        const activePrompts = PromptsBrowser.getCurrentPrompts();
+        const activePrompts = ActivePrompts.getCurrentPrompts();
         const showAll = state.toggledButtons.includes("tools_showAll");
         if(!promptId) return;
         let targetTags: string[] = [];

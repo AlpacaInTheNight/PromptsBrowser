@@ -1,5 +1,6 @@
 import State from "clientTypes/state";
 import Data from "clientTypes/data";
+import ActivePrompts from "client/ActivePrompts/index";
 import Database from "client/Database/index";
 import PromptsBrowser from "client/index";
 import promptStringToObject from "./promptStringToObject";
@@ -94,7 +95,7 @@ function stringToPromptsArray(str: string, supportExtendedSyntax: boolean) {
 function addStrToActive(str: string, atStart = false, supportExtendedSyntax: boolean = false) {
     const arr = stringToPromptsArray(str, supportExtendedSyntax);
     if(!arr || !arr.length) return;
-    const activePrompts = PromptsBrowser.getCurrentPrompts();
+    const activePrompts = ActivePrompts.getCurrentPrompts();
 
     for(let prompt of arr) {
         if(activePrompts.some(item => item.id === prompt.id)) continue;

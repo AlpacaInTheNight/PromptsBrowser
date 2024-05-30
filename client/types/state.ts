@@ -46,6 +46,12 @@ type ConfigTrackStyleMeta = {
 type State = {
     config: Config;
 
+    dragInfo: {
+        id?: string;
+        index?: number;
+        groupId?: number | false;
+    }
+
     showControlPanel: boolean;
     showViews: string[];
     currentContainer: string;
@@ -62,8 +68,10 @@ type State = {
     newStyleCollection: string | undefined;
     sortKnownPrompts: string | undefined;
     copyOrMoveTo: string | undefined;
-    dragItemId: string | undefined;
-    dragCurrentIndex: string | number | undefined;
+
+    //dragItemId: string | undefined;
+    //dragCurrentIndex: string | number | undefined;
+
     promptToolsId: string | undefined;
     collectionToolsId: string | undefined;
     savePreviewCollection: string | undefined;

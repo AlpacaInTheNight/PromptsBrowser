@@ -1,5 +1,6 @@
 import PromptTools from "./index";
 import PromptsBrowser from "client/index";
+import ActivePrompts from "client/ActivePrompts/index";
 import Prompt from "clientTypes/prompt";
 import Database from "client/Database/index";
 import CurrentPrompts from "client/CurrentPrompts/index";
@@ -43,11 +44,11 @@ class PromptToolsEvent {
         const clickPrompt = target.dataset.prompt;
         if(!currPrompt || !clickPrompt) return;
         const replaceMode = state.toggledButtons.includes("tools_replaceMode");
-        let activePrompts = PromptsBrowser.getCurrentPrompts();
+        let activePrompts = ActivePrompts.getCurrentPrompts();
         let activePrompt: Prompt | undefined = undefined;
 
         //let selectedPrompt = activePrompts.find(item => item.id === clickPrompt);
-        let selectedPrompt = PromptsBrowser.getPromptById({id: clickPrompt});
+        let selectedPrompt = ActivePrompts.getPromptById({id: clickPrompt});
         if(!selectedPrompt) {
             selectedPrompt = united.find(item => item.id === clickPrompt);
         }
@@ -67,7 +68,7 @@ class PromptToolsEvent {
             if(e.metaKey || e.ctrlKey) {
                 //activePrompts = activePrompts.filter(item => item.id !== clickPrompt);
                 //PromptsBrowser.setCurrentPrompts(activePrompts);
-                PromptsBrowser.removePrompt(clickPrompt);
+                ActivePrompts.removePrompt(clickPrompt);
 
             } else if(e.shiftKey) {
                 state.editingPrompt = clickPrompt;

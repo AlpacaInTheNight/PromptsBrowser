@@ -1,4 +1,5 @@
 import PromptsBrowser from "client/index";
+import ActivePrompts from "client/ActivePrompts/index";
 import CurrentPrompts from "client/CurrentPrompts/index";
 import PreviewSave from "client/PreviewSave/index";
 import LoadStyle from "client/LoadStyle/index";
@@ -253,8 +254,7 @@ class Database {
         if(!imageArea) return;
         if(!selectedPrompt) return;
         if(!savePreviewCollection) return;
-        
-        const activePrompts = PromptsBrowser.getCurrentPrompts();
+
         const imageContainer = imageArea.querySelector("img");
         if(!imageContainer) return;
     
@@ -272,7 +272,7 @@ class Database {
         if(!data.original[savePreviewCollection]) return;
     
         //const targetCurrentPrompt = activePrompts.find(item => item.id === state.selectedPrompt);
-        const targetCurrentPrompt = PromptsBrowser.getPromptById({id: state.selectedPrompt});
+        const targetCurrentPrompt = ActivePrompts.getPromptById({id: state.selectedPrompt});
         if(targetCurrentPrompt && targetCurrentPrompt.isExternalNetwork) isExternalNetwork = true;
     
         const saveData = {src, prompt: selectedPrompt, collection: savePreviewCollection};

@@ -1,5 +1,6 @@
 import PromptScribe from "./index";
 import PromptsBrowser from "client/index";
+import ActivePrompts from "client/ActivePrompts/index";
 import Database from "client/Database/index";
 import KnownPrompts from "client/KnownPrompts/index";
 import CurrentPrompts from "client/CurrentPrompts/index";
@@ -21,7 +22,7 @@ class PromptScribeEvent {
         const {data} = Database;
         const {state} = PromptsBrowser;
         let {selectedNewPrompts = []} = state;
-        const activePrompts = PromptsBrowser.getCurrentPrompts();
+        const activePrompts = ActivePrompts.getCurrentPrompts();
         if(!state.savePreviewCollection) return;
         const targetCollection = data.original[state.savePreviewCollection];
         if(!targetCollection) return;

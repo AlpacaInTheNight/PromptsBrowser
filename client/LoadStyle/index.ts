@@ -1,4 +1,5 @@
 import PromptsBrowser from "client/index";
+import ActivePrompts from "client/ActivePrompts/index";
 import Database from "client/Database/index";
 import Style from "clientTypes/style";
 import { makeElement, makeCheckbox } from "client/dom";
@@ -98,7 +99,7 @@ class LoadStyle {
         let cfg = undefined;
         let sampling = undefined;
     
-        const activePrompts = PromptsBrowser.getCurrentPrompts();
+        const activePrompts = ActivePrompts.getCurrentPrompts();
         const seedInput = PromptsBrowser.DOMCache.containers[state.currentContainer].seedInput;
         const negativePrompts = PromptsBrowser.DOMCache.containers[state.currentContainer].negativePrompts;
     
@@ -344,7 +345,7 @@ class LoadStyle {
         const {data} = Database;
         const {state} = PromptsBrowser;
         const {filterStyleCollection, filterStyleName} = state;
-        const activePrompts = PromptsBrowser.getCurrentPrompts();
+        const activePrompts = ActivePrompts.getCurrentPrompts();
     
         let styles = [];
     

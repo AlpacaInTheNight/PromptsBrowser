@@ -1,4 +1,5 @@
 import PromptsBrowser from "client/index";
+import ActivePrompts from "client/ActivePrompts/index";
 import Database from "client/Database/index";
 import syncCurrentPrompts from "client/synchroniseCurrentPrompts";
 import showPromptItem from "client/showPromptItem";
@@ -107,7 +108,7 @@ class PromptScribe {
         const {state} = PromptsBrowser;
         let {selectedNewPrompts = [], savePreviewCollection, toggledButtons = []} = state;
         const newInAllCollections = toggledButtons.includes("new_in_all_collections");
-        const activePrompts = PromptsBrowser.getCurrentPrompts();
+        const activePrompts = ActivePrompts.getCurrentPrompts();
         let database = data.united;
 
         if(!newInAllCollections && savePreviewCollection && data.original[state.savePreviewCollection]) {

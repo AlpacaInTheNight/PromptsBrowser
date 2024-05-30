@@ -1,5 +1,6 @@
 import CurrentPrompts from "./index";
 import PromptsBrowser from "client/index";
+import ActivePrompts from "client/ActivePrompts/index";
 import Database from "client/Database/index";
 import PreviewSave from "client/PreviewSave/index";
 import PromptEdit from "client/PromptEdit/index";
@@ -12,10 +13,14 @@ class CurrentPromptsEvent {
     public static onDragStart = (e: DragEvent) => {
         const target = e.currentTarget as HTMLElement;
         const {state} = PromptsBrowser;
-        const index = target.dataset.index;
+        let index = Number(target.dataset.index);
+        let group: number | false = Number(target.dataset.group);
+        if(Number.isNaN(index)) return;
+        if(Number.isNaN(group)) group = false;
     
-        state.dragCurrentIndex = index;
-        e.dataTransfer.setData("text", index);
+        state.dragInfo.index = index;
+        state.dragInfo.groupId = group;
+        e.dataTransfer.setData("text", index + "");
     }
     
     public static onDragOver = (e: DragEvent) => {
@@ -33,11 +38,17 @@ class CurrentPromptsEvent {
     
         e.preventDefault();
         const dragIndex = Number(target.dataset.index);
-        const dropIndex = Number(state.dragCurrentIndex);
-    
-        if(Number.isNaN(dragIndex) || Number.isNaN(dropIndex)) return;
-        if(dragIndex === undefined || dropIndex === undefined) return;
-        if(dragIndex === dropIndex) return;
+        let dragGroup: number | false = Number(target.dataset.group);
+        if(Number.isNaN(dragGroup)) dragGroup = false;
+
+        const dropIndex = state.dragInfo.index;
+        const dropGroup = state.dragInfo.groupId;
+
+        //invalid element
+        if(Number.isNaN(dragIndex) || dropIndex === undefined) return;
+
+        //is the same element
+        if(dragIndex === dropIndex && dragGroup === dropGroup) return;
         
         target.classList.add("PBE_swap");
     }
@@ -45,18 +56,23 @@ class CurrentPromptsEvent {
     public static onDrop = (e: DragEvent) => {
         const target = e.currentTarget as HTMLElement;
         const {state} = PromptsBrowser;
-        const activePrompts = PromptsBrowser.getCurrentPrompts();
     
         const dragIndex = Number(target.dataset.index);
-        const dropIndex = Number(state.dragCurrentIndex);
+        let dragGroup: number | false = Number(target.dataset.group);
+        if(Number.isNaN(dragGroup)) dragGroup = false;
+
+        const dropIndex = state.dragInfo.index;
+        const dropGroup = state.dragInfo.groupId;
         target.classList.remove("PBE_swap");
-    
-        state.dragCurrentIndex = undefined;
+        
+        state.dragInfo = {};
         e.preventDefault();
         e.stopPropagation();
-    
-        const element = activePrompts.splice(dropIndex, 1)[0];
-        activePrompts.splice(dragIndex, 0, element);
+
+        ActivePrompts.movePrompt({
+            from: {index: dropIndex, groupId: dropGroup},
+            to: {index: dragIndex, groupId: dragGroup},
+        });
     
         CurrentPrompts.update();
     }
@@ -78,21 +94,24 @@ class CurrentPromptsEvent {
         const {united} = Database.data;
         const {state} = PromptsBrowser;
         const currentId = target.dataset.prompt;
-        let index: string | number = target.dataset.index;
+        let index: number = Number(target.dataset.index);
+        let group: number | false = Number(target.dataset.group);
         const isSyntax = target.dataset.issyntax ? true : false;
-        const activePrompts = PromptsBrowser.getCurrentPrompts();
         const wrapper = PromptsBrowser.DOMCache.containers[state.currentContainer].currentPrompts;
         if(!wrapper || !currentId) return;
-    
-        if(index !== undefined) index = Number(index);
-    
-        if(isSyntax && index !== undefined && (e.ctrlKey || e.metaKey)) {
-            activePrompts.splice(index as number, 1)
-            PromptsBrowser.setCurrentPrompts(activePrompts);
+
+        //on remove element
+        if(e.ctrlKey || e.metaKey) {
+            if(Number.isNaN(index)) return;
+            if(Number.isNaN(group)) group = false;
+
+            ActivePrompts.removePrompt(index, group);
             CurrentPrompts.update();
     
             return;
         }
+
+        if(isSyntax) return;
     
         const targetPrompt = united.find(item => item.id.toLowerCase() === currentId.toLowerCase());
     
@@ -101,14 +120,6 @@ class CurrentPromptsEvent {
                 state.savePreviewCollection = targetPrompt.collections[0];
                 PreviewSave.update();
             }
-        }
-    
-        if(e.ctrlKey || e.metaKey) {
-            //PromptsBrowser.setCurrentPrompts(activePrompts.filter(item => item.id !== currentId));
-            PromptsBrowser.removePrompt(currentId);
-            CurrentPrompts.update();
-    
-            return;
         }
     
         if(!readonly && e.shiftKey) {
@@ -150,10 +161,15 @@ class CurrentPromptsEvent {
         const {belowOneWeight = 0.05, aboveOneWeight = 0.01} = state.config;
         if(!e.shiftKey) return;
         const currentId = target.dataset.prompt;
-        //const activePrompts = PromptsBrowser.getCurrentPrompts();
-        //const targetItem = activePrompts.find(item => item.id === currentId);
-        const targetItem = PromptsBrowser.getPromptById({id: currentId});
-        if(!currentId || !targetItem) return;
+        let index = Number(target.dataset.index);
+        let group: number | false = Number(target.dataset.group);
+        if(Number.isNaN(index)) return;
+        if(Number.isNaN(group)) group = false;
+
+        if(!currentId) return;
+
+        const targetItem = ActivePrompts.getPromptByIndex(index, group);
+        if(!targetItem) return;
         if(targetItem.isSyntax) return;
     
         e.preventDefault();

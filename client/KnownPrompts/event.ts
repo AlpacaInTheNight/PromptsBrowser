@@ -1,5 +1,6 @@
 import KnownPrompts from "./index";
 import PromptsBrowser from "client/index";
+import ActivePrompts from "client/ActivePrompts/index";
 import Database from "client/Database/index";
 import CurrentPrompts from "client/CurrentPrompts/index";
 import PromptEdit from "client/PromptEdit/index";
@@ -12,7 +13,7 @@ class KnownPromptsEvent {
 
     private static addPromptItem(targetItem: Prompt) {
         if(!targetItem) return;
-        const activePrompts = PromptsBrowser.getCurrentPrompts();
+        const activePrompts = ActivePrompts.getCurrentPrompts();
         const {id, addAtStart, addAfter, addStart, addEnd} = targetItem;
     
         if(activePrompts.some(item => item.id === id)) return;
@@ -46,7 +47,7 @@ class KnownPromptsEvent {
         const {data} = Database;
         const {state} = PromptsBrowser;
         const {united} = data;
-        const activePrompts = PromptsBrowser.getCurrentPrompts();
+        const activePrompts = ActivePrompts.getCurrentPrompts();
         let dataArr = [];
 
         if(state.filterCollection) {
@@ -81,7 +82,7 @@ class KnownPromptsEvent {
 
         const promptItem = target.dataset.prompt;
 
-        state.dragItemId = promptItem;
+        state.dragInfo.id = promptItem;
         e.dataTransfer.setData("text", promptItem);
     }
 
@@ -114,7 +115,8 @@ class KnownPromptsEvent {
         const dropItem = e.dataTransfer.getData("text");
         target.classList.remove("PBE_swap");
 
-        state.dragItemId = undefined;
+        //state.dragItemId = undefined;
+        state.dragInfo.id = undefined;
         e.preventDefault();
         e.stopPropagation();
 

@@ -1,5 +1,6 @@
 import Database from "client/Database/index";
 import PromptsBrowser from "client/index";
+import ActivePrompts from "client/ActivePrompts/index";
 import CurrentPrompts from "client/CurrentPrompts/index";
 import { DEFAULT_PROMPT_WEIGHT } from "client/const";
 import { normalizePrompt, promptStringToObject} from "client/utils/index";
@@ -20,7 +21,7 @@ function createPromptObjects({value, activePrompts, groupId, nestingLevel = 0, n
     const DELIMITER_CHAR = ",";
     const SPACE_CHAR = " ";
     let prompts: string[] = [];
-    let index = 0;
+    //let index = 0;
 
     if(supportExtendedSyntax) {
         prompts = value.split(/([,{}|])/g);
@@ -66,7 +67,7 @@ function createPromptObjects({value, activePrompts, groupId, nestingLevel = 0, n
 
         if(normalize && !isExternalNetwork && !isSyntax) promptItem = normalizePrompt({prompt: promptItem, state, data});
 
-        let targetItem = !isSyntax ? PromptsBrowser.getPromptById({id: promptItem, groupId}) : undefined;
+        let targetItem = !isSyntax ? ActivePrompts.getPromptById({id: promptItem, groupId}) : undefined;
         
         if(targetItem) {
             if(targetItem.weight !== weight) targetItem.weight = weight;
@@ -74,7 +75,7 @@ function createPromptObjects({value, activePrompts, groupId, nestingLevel = 0, n
         } else {
             targetItem = {
                 id: promptItem,
-                index,
+                //index,
                 parentGroup: groupId,
                 weight: weight !== undefined ? weight : DEFAULT_PROMPT_WEIGHT
             }
@@ -98,7 +99,7 @@ function createPromptObjects({value, activePrompts, groupId, nestingLevel = 0, n
         }
 
         activePrompts.push(targetItem);
-        index++;
+        //index++;
     }
 }
 
@@ -159,7 +160,7 @@ function syncCurrentPrompts(noTextAreaUpdate: boolean = true, normalize: boolean
         normalize,
     });
 
-    PromptsBrowser.setCurrentPrompts(newActivePrompts);
+    ActivePrompts.setCurrentPrompts(newActivePrompts);
     CurrentPrompts.update(noTextAreaUpdate);
 }
 

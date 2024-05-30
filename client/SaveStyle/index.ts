@@ -1,4 +1,5 @@
 import PromptsBrowser from "client/index";
+import ActivePrompts from "client/ActivePrompts/index";
 import Database from "client/Database/index";
 import CurrentPrompts from "client/CurrentPrompts/index";
 import LoadStyle from "client/LoadStyle/index";
@@ -35,7 +36,7 @@ class SaveStyle {
     }
     
     private static showCurrentPrompts(wrapper: HTMLElement) {
-        let activePrompts = PromptsBrowser.getCurrentPrompts();
+        let activePrompts = ActivePrompts.getCurrentPrompts();
     
         /* const currentPromptsContainer = document.createElement("div");
         currentPromptsContainer.className = "PBE_windowCurrentList PBE_Scrollbar"; */
@@ -57,7 +58,7 @@ class SaveStyle {
                 if(e.ctrlKey || e.metaKey) {
                     //activePrompts = activePrompts.filter(item => item.id !== currentId);
                     //PromptsBrowser.setCurrentPrompts(activePrompts);
-                    PromptsBrowser.removePrompt(currentId);
+                    ActivePrompts.removePrompt(currentId);
                     SaveStyle.update();
                     CurrentPrompts.update();
     

@@ -47,6 +47,8 @@ const initialState: State = {
         },
     },
 
+    dragInfo: {},
+
     showControlPanel: true,
     showViews: ["known", "current", "positive", "negative"],
     currentContainer: "text2Img",
@@ -63,8 +65,8 @@ const initialState: State = {
     newStyleCollection: undefined,
     sortKnownPrompts: undefined,
     copyOrMoveTo: undefined,
-    dragItemId: undefined,
-    dragCurrentIndex: undefined,
+    //dragItemId: undefined,
+    //dragCurrentIndex: undefined,
     promptToolsId: undefined,
     collectionToolsId: undefined,
     savePreviewCollection: undefined,

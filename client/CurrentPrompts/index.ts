@@ -1,4 +1,5 @@
 import PromptsBrowser from "client/index";
+import ActivePrompts from "client/ActivePrompts/index";
 import Database from "client/Database/index";
 import showPromptItem from "client/showPromptItem";
 import Prompt, { PromptEntity, PromptGroup } from "clientTypes/prompt";
@@ -35,7 +36,9 @@ class CurrentPrompts {
         const {state} = PromptsBrowser;
         const {cardHeight = 100} = state.config;
 
-        for(const promptItem of promptsGroup) {
+        for(let index = 0; index < promptsGroup.length; index++) {
+            const promptItem = promptsGroup[index];
+
             if("groupId" in promptItem) {
                 const groupContainer = makeDiv({className: "PBE_promptsGroup"});
                 const groupHead = makeDiv({className: "PBE_groupHead"});
@@ -48,16 +51,7 @@ class CurrentPrompts {
                 continue;
             }
 
-            const {id, isExternalNetwork = false, weight, parentGroup = false, index} = promptItem;
-
-            /* if(isExternalNetwork) {
-                prompts.push({text: `<${id}:${weight}>`, src: promptItem});
-    
-            } else {
-                if(weight !== undefined && weight !== DEFAULT_PROMPT_WEIGHT) {
-                    prompts.push({text: `(${id}: ${weight})`, src: promptItem});
-                } else prompts.push({text: id, src: promptItem});
-            } */
+            const {id, parentGroup = false} = promptItem;
     
             const promptElement = showPromptItem({prompt: promptItem, options: {index, parentGroup}});
     
@@ -83,7 +77,7 @@ class CurrentPrompts {
     
     public static update = (noTextAreaUpdate = false) => {
         const {state} = PromptsBrowser;
-        const activePrompts = PromptsBrowser.getCurrentPrompts();
+        const activePrompts = ActivePrompts.getCurrentPrompts();
     
         const wrapper = PromptsBrowser.DOMCache.containers[state.currentContainer].currentPrompts;
         const textArea = PromptsBrowser.DOMCache.containers[state.currentContainer].textArea;
@@ -93,7 +87,7 @@ class CurrentPrompts {
 
         CurrentPrompts.showPromptsGroup(activePrompts, wrapper);
         if(noTextAreaUpdate) return;
-        
+
         synchroniseListToTextarea(activePrompts);
     }
 

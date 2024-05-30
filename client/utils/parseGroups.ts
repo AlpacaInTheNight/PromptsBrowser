@@ -23,7 +23,13 @@ function parseBranch(str: string, container: PromptStringEntity[] = []) {
         if(isEscape) {isEscape = false; str = str.substring(1); continue}
         currChar = str.charAt(0);
 
-        if(currChar === "\\") {isEscape = true; body += str.charAt(1); str = str.substring(1); continue}
+        if(currChar === "\\") {
+            isEscape = true;
+            body += "\\";
+            body += str.charAt(1);
+            str = str.substring(1);
+            continue
+        }
 
         if(currChar === "<") isExternalNetwork = true;
         else if(currChar === ">") isExternalNetwork = false;

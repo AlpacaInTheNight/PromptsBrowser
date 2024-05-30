@@ -1,4 +1,5 @@
 import PromptsBrowser from "client/index";
+import ActivePrompts from "client/ActivePrompts/index";
 import CurrentPrompts from "client/CurrentPrompts/index";
 import Style from "clientTypes/style";
 
@@ -17,9 +18,9 @@ function applyStyle(style: Style, isAfter: boolean, override: boolean = false) {
     const {state} = PromptsBrowser;
     const {positive, negative, seed, width, height, steps, cfg, sampling} = style;
 
-    if(override) PromptsBrowser.setCurrentPrompts([]);
+    if(override) ActivePrompts.setCurrentPrompts([]);
 
-    const activePrompts = PromptsBrowser.getCurrentPrompts();
+    const activePrompts = ActivePrompts.getCurrentPrompts();
     const negativePrompts = PromptsBrowser.DOMCache.containers[state.currentContainer].negativePrompts;
     const seedInput = PromptsBrowser.DOMCache.containers[state.currentContainer].seedInput;
     const widthInput = PromptsBrowser.DOMCache.containers[state.currentContainer].widthInput;
