@@ -12,12 +12,12 @@ class PromptWordTooltipEvent {
         if(!str) return "";
     
         const newStrPromptsArr = [];
-        const activePrompts = ActivePrompts.getCurrentPrompts();
+        const uniquePrompts = ActivePrompts.getUnique();
         const newArr = str.split(",");
     
         for(let prompt of newArr) {
             const newPrompt = promptStringToObject({prompt});
-            if(activePrompts.some(item => item.id === newPrompt.id)) continue;
+            if(uniquePrompts.some(item => item.id === newPrompt.id)) continue;
             
             newStrPromptsArr.push(prompt);
         }
