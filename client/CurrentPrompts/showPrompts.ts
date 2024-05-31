@@ -5,6 +5,8 @@ import CurrentPromptsEvent from "./event";
 import PromptsSimpleFilter from "client/PromptsFilter/simple";
 import { FilterSimple } from "clientTypes/filter";
 import { makeDiv } from "client/dom";
+import { DEFAULT_PROMPT_WEIGHT } from "client/const";
+import ActivePrompts from "client/ActivePrompts/index";
 
 function sortPrompts(prompts: PromptEntity[], sorting: string) {
 
@@ -85,14 +87,25 @@ function showPrompts(props: {
         const promptItem = prompts[index];
 
         if("groupId" in promptItem) {
-            const groupContainer = makeDiv({className: "PBE_promptsGroup"});
+            const groupContainer = makeDiv({className: promptItem.folded ? "PBE_promptsGroup PBE_promptsGroupFolded" : "PBE_promptsGroup"});
+
             const groupHead = makeDiv({className: "PBE_groupHead"});
             groupHead.style.height = cardHeight + "px";
+            groupHead.dataset.id = promptItem.groupId + "";
+            groupHead.addEventListener("click", CurrentPromptsEvent.onGroupHeadClick);
+
+            if(promptItem.folded) groupHead.innerText += ActivePrompts.makeGroupKey(promptItem);
+
+            if(promptItem.weight && promptItem.weight !== DEFAULT_PROMPT_WEIGHT) {
+                const groupWeight = makeDiv({className: "PBE_groupHeadWeight", content: promptItem.weight + ""});
+                groupHead.appendChild(groupWeight);
+            }
+
             groupContainer.appendChild(groupHead);
             wrapper.appendChild(groupContainer);
-            if(promptItem.weight) groupHead.innerText = promptItem.weight + "";
 
-            showPrompts({...props, prompts: promptItem.prompts, wrapper: groupContainer})
+            
+            if(!promptItem.folded) showPrompts({...props, prompts: promptItem.prompts, wrapper: groupContainer})
             continue;
         }
 

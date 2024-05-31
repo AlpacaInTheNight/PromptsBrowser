@@ -549,7 +549,7 @@ select.PBE_generalInput {
     flex-shrink: 0;
     border: 2px solid rgba(200, 200, 200, 0.5);
     background-color: rgba(200, 200, 200, 0.2);
-    border-radius: 52px 10px 10px 52px;
+    border-radius: 10px 10px 10px 10px;
     margin: 0 4px;
     overflow: hidden;
     justify-content: flex-start;
@@ -564,14 +564,41 @@ select.PBE_generalInput {
     box-shadow: 5px 5px 5px black;
 }
 
+.PBE_promptsGroupFolded  {
+    border-radius: 10px 10px 10px 10px;
+}
+
+.PBE_promptsGroupFolded .PBE_groupHead {
+    font-size: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-content: flex-start;
+    align-items: flex-start;
+    border-radius: 0;
+    width: 60px !important;
+}
+
 .PBE_groupHead {
-    width: 40px !important;
-    font-size: 16px;
+    position: relative;
+    cursor: pointer;
+    width: 30px !important;
     display: flex;
     justify-content: center;
     align-items: center;
     background-image: none !important;
     background-color: grey !important;
     background: linear-gradient(to left, #b5bdc8 0%,#828c95 36%,#28343b 100%) !important;
-    border-radius: 50px 0 0 50px;
+    border-radius: 10px 0 0 10px;
+}
+
+.PBE_groupHeadWeight {
+    font-size: 16px;
+    color: white;
+    position: absolute;
+    bottom: 2px;
+    width: 100%;
+    text-align: center;
+    background-color: rgba(0,0,0, 0.5);
+    font-weight: bold;
 }

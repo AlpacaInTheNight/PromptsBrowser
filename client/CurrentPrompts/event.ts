@@ -214,6 +214,15 @@ class CurrentPromptsEvent {
         syncCurrentPrompts(true, true);
         CurrentPrompts.update();
     }
+
+    public static onGroupHeadClick = (e: MouseEvent) => {
+        const target = e.currentTarget as HTMLElement;
+        const groupId = Number(target.dataset.id);
+        if(Number.isNaN(groupId)) return;
+
+        ActivePrompts.toggleGroupFold(groupId);
+        CurrentPrompts.update();
+    }
 }
 
 export default CurrentPromptsEvent;

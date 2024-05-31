@@ -85,6 +85,7 @@ type Prompt = PromptBase & PromptClient & PromptListItem;
 type PromptGroup = {
     groupId: number;
     weight: number;
+    folded?: boolean;
     prompts: PromptEntity[];
 }
 

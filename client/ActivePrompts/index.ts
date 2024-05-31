@@ -9,6 +9,8 @@ import removePromptInBranch from "./removePromptInBranch";
 
 class ActivePrompts {
 
+    public static foldedGroups: string[] = [];
+
     public static getCurrentPrompts = () => {
         const {state} = PromptsBrowser;
 
@@ -41,9 +43,9 @@ class ActivePrompts {
         }
     }
 
-    public static getUniqueIds() {
+    public static getUniqueIds(branch?: PromptEntity[]) {
         const uniqueArray: string[] = [];
-        ActivePrompts.getUniqueIdsInBranch(uniqueArray);
+        ActivePrompts.getUniqueIdsInBranch(uniqueArray, branch);
 
         return uniqueArray;
     }
@@ -128,6 +130,58 @@ class ActivePrompts {
         ActivePrompts.insertPrompt(fromElement[0], to.index, to.groupId);
     }
 
+    public static getGroupById(id: number, branch?: PromptEntity[]): false | PromptGroup {
+        if(!branch) branch = ActivePrompts.getCurrentPrompts();
+
+        for(const branchItem of branch) {
+            if("groupId" in branchItem) {
+                if(branchItem.groupId === id) return branchItem;
+
+                const result = ActivePrompts.getGroupById(id, branchItem.prompts);
+                if(result) return result;
+            }
+        }
+
+        return false;
+    }
+
+    public static makeGroupKey(group: number | PromptGroup) {
+        if(typeof group === "number") group = ActivePrompts.getGroupById(group) as PromptGroup;
+        if(!group || !group.prompts) return false;
+
+        const uniquePrompts = ActivePrompts.getUniqueIds(group.prompts);
+        const key = uniquePrompts.join(" ");
+
+        return key;
+    }
+
+    private static updateFoldedKeys(branch?: PromptEntity[]) {
+        if(!branch) {
+            ActivePrompts.foldedGroups = [];
+            branch = ActivePrompts.getCurrentPrompts();
+        }
+
+        for(const branchItem of branch) {
+            if("groupId" in branchItem) {
+                if(branchItem.folded) {
+                    const key = ActivePrompts.makeGroupKey(branchItem);
+                    if(key) ActivePrompts.foldedGroups.push(key);
+                }
+
+                if(branchItem?.prompts.length) ActivePrompts.updateFoldedKeys(branchItem.prompts);
+            }
+        }
+    }
+
+    public static toggleGroupFold(groupId: number) {
+        const targetGroup = ActivePrompts.getGroupById(groupId);
+        if(!targetGroup) return false;
+        
+        targetGroup.folded = targetGroup.folded ? false : true;
+        ActivePrompts.updateFoldedKeys();
+
+        return true;
+    }
 }
 
 export default ActivePrompts;

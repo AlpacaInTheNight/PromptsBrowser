@@ -123,6 +123,13 @@ function processGroup({entityArray, activePrompts, normalize = false, nestingLev
                 nestingLevel: nestingLevel + 1,
                 groupId: id,
             });
+
+            if(ActivePrompts.foldedGroups.length) {
+                const keyForGroup = ActivePrompts.makeGroupKey(newGroup);
+                if(keyForGroup && ActivePrompts.foldedGroups.includes(keyForGroup)) {
+                    newGroup.folded = true;
+                }
+            }
         }
     }
 }
