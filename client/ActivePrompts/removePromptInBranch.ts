@@ -1,14 +1,13 @@
 import Prompt, { PromptEntity, PromptGroup } from "clientTypes/prompt";
 import ActivePrompts from "./index";
 
-function removePromptInBranch({index, branch, terminator, groupId, currentGroupId}: {
+function removePromptInBranch({index, branch, terminator = 0, groupId, currentGroupId}: {
     index: number;
     branch?: PromptEntity[];
     terminator?: number;
     groupId?: number | false;
     currentGroupId?: number | false;
 }): false | PromptEntity[] {
-
     if(terminator > 100) return false;
     let isRoot = false;
     let isTargetBranch = false;
@@ -27,16 +26,20 @@ function removePromptInBranch({index, branch, terminator, groupId, currentGroupI
     } else {
         for(const branchItem of branch) {
             if("groupId" in branchItem) {
-                return removePromptInBranch({
+                const result = removePromptInBranch({
                     index,
                     groupId,
                     currentGroupId: branchItem.groupId,
                     branch: (branchItem as PromptGroup).prompts,
                     terminator: terminator + 1
                 });
+
+                if(result !== false) return result;
             }
         }
     }
+
+    return false;
 }
 
 export default removePromptInBranch;

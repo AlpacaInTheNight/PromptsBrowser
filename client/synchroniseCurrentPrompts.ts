@@ -21,7 +21,6 @@ function createPromptObjects({value, activePrompts, groupId, nestingLevel = 0, n
     const DELIMITER_CHAR = ",";
     const SPACE_CHAR = " ";
     let prompts: string[] = [];
-    //let index = 0;
 
     if(supportExtendedSyntax) {
         prompts = value.split(/([,{}|])/g);
@@ -50,35 +49,23 @@ function createPromptObjects({value, activePrompts, groupId, nestingLevel = 0, n
         
     }
 
-    //let currNestedWeight = 0;
-
     for(let i = 0; i < prompts.length; i++) {
         let promptItem = prompts[i];
         if(!promptItem) continue;
 
-        //promptItem = promptItem.trim();
         if(!promptItem || promptItem === ",") continue;
 
         const {id, weight, isExternalNetwork, isSyntax = false, nestedWeight} = promptStringToObject({prompt: promptItem, nestedWeight: 0});
         if(!id) continue;
 
-        //currNestedWeight = nestedWeight;
         promptItem = id;
 
         if(normalize && !isExternalNetwork && !isSyntax) promptItem = normalizePrompt({prompt: promptItem, state, data});
 
-        let targetItem = !isSyntax ? ActivePrompts.getPromptById({id: promptItem, groupId}) : undefined;
-        
-        if(targetItem) {
-            if(targetItem.weight !== weight) targetItem.weight = weight;
-            
-        } else {
-            targetItem = {
-                id: promptItem,
-                //index,
-                parentGroup: groupId,
-                weight: weight !== undefined ? weight : DEFAULT_PROMPT_WEIGHT
-            }
+        const targetItem: Prompt = {
+            id: promptItem,
+            parentGroup: groupId,
+            weight: weight !== undefined ? weight : DEFAULT_PROMPT_WEIGHT
         }
 
         if(isExternalNetwork) targetItem.isExternalNetwork = true;
@@ -99,7 +86,6 @@ function createPromptObjects({value, activePrompts, groupId, nestingLevel = 0, n
         }
 
         activePrompts.push(targetItem);
-        //index++;
     }
 }
 

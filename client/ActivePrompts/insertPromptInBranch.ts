@@ -1,7 +1,7 @@
 import Prompt, { PromptEntity, PromptGroup } from "clientTypes/prompt";
 import ActivePrompts from "./index";
 
-function insertPromptInBranch({prompt, isReplace = false, index, branch, terminator, groupId, currentGroupId}: {
+function insertPromptInBranch({prompt, isReplace = false, index, branch, terminator = 0, groupId, currentGroupId}: {
     prompt: PromptEntity;
     index: number;
     isReplace?: boolean;
@@ -37,7 +37,7 @@ function insertPromptInBranch({prompt, isReplace = false, index, branch, termina
     } else {
         for(const branchItem of branch) {
             if("groupId" in branchItem) {
-                return insertPromptInBranch({
+                const result = insertPromptInBranch({
                     prompt,
                     index,
                     groupId,
@@ -46,6 +46,8 @@ function insertPromptInBranch({prompt, isReplace = false, index, branch, termina
                     branch: (branchItem as PromptGroup).prompts,
                     terminator: terminator + 1
                 });
+
+                if(result) return true;
             }
         }
     }

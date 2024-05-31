@@ -88,11 +88,7 @@ class CurrentPromptsEvent {
 
         state.promptTools.index = index;
         state.promptTools.groupId = group;
-    
-        /* const currentId = target.dataset.prompt;
-        if(!currentId) return;
-    
-        state.promptToolsId = currentId; */
+
         PromptTools.update();
     }
 

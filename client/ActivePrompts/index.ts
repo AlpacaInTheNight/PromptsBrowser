@@ -52,7 +52,6 @@ class ActivePrompts {
         return getPromptByIndexInBranch({index, groupId});
     }
 
-    //TODO: finish me
     public static getPromptById({id, groupId = false, currentGroupId = false, branch, terminator = 0}: {
         id: string;
         groupId?: number | false;

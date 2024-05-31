@@ -270,8 +270,8 @@ class Database {
         const imageExtension = src.split('.').pop();
     
         if(!data.original[savePreviewCollection]) return;
-    
-        //const targetCurrentPrompt = activePrompts.find(item => item.id === state.selectedPrompt);
+
+        //checking if prompt have an external network syntax.
         const targetCurrentPrompt = ActivePrompts.getPromptById({id: state.selectedPrompt});
         if(targetCurrentPrompt && targetCurrentPrompt.isExternalNetwork) isExternalNetwork = true;
     
