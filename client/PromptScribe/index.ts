@@ -108,7 +108,8 @@ class PromptScribe {
         const {state} = PromptsBrowser;
         let {selectedNewPrompts = [], savePreviewCollection, toggledButtons = []} = state;
         const newInAllCollections = toggledButtons.includes("new_in_all_collections");
-        const activePrompts = ActivePrompts.getCurrentPrompts();
+        //const activePrompts = ActivePrompts.getCurrentPrompts();
+        const uniquePrompts = ActivePrompts.getUnique();
         let database = data.united;
 
         if(!newInAllCollections && savePreviewCollection && data.original[state.savePreviewCollection]) {
@@ -118,7 +119,7 @@ class PromptScribe {
         if(initial) selectedNewPrompts = [];
         let unknownPromptsList = [];
 
-        for(const item of activePrompts) {
+        for(const item of uniquePrompts) {
             if(item.isSyntax) continue;
             let isKnown = false;
 

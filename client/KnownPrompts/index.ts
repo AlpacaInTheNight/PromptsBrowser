@@ -3,11 +3,12 @@ import Database from "client/Database/index";
 import CurrentPrompts from "client/CurrentPrompts/index";
 import CollectionTools from "client/CollectionTools/index";
 import Prompt from "clientTypes/prompt";
-import { makeElement } from "client/dom";
+import { makeElement, makeDiv } from "client/dom";
 import showPromptItem from "client/showPromptItem";
 import TagTooltip from "client/TagTooltip/index";
 import { log } from "client/utils/index";
 import KnownPromptsEvent from "./event";
+import ActivePrompts from "client/ActivePrompts/index";
 
 type UpdateOptions = {
     holdTagsInput?: boolean;
@@ -250,6 +251,7 @@ class KnownPrompts {
         const {state} = PromptsBrowser;
         const {cardWidth = 50, cardHeight = 100, showPromptIndex = false, rowsInKnownCards = 3, maxCardsShown = 1000} = state.config;
         const wrapper = PromptsBrowser.DOMCache.containers[state.currentContainer].promptsCatalogue;
+        const usedPrompts = ActivePrompts.getUniqueIds();
         let scrollState = 0;
         let shownItems = 0;
     
@@ -310,8 +312,7 @@ class KnownPrompts {
         //show Add Random card
         if(dataArr.length) {
     
-            const addRandom = makeElement<HTMLDivElement>({
-                element: "div",
+            const addRandom = makeDiv({
                 className: "PBE_promptElement PBE_promptElement_random",
                 content: "Add random"
             });
@@ -328,13 +329,12 @@ class KnownPrompts {
             if(shownItems > maxCardsShown) break;
     
             if(!KnownPrompts.checkFilter(prompt)) continue;
-    
-            const promptElement = showPromptItem({prompt});
+            //const isShadowed = usedPrompts.includes(prompt.id);
+            const promptElement = showPromptItem({prompt, options: {isShadowed: false}});
     
             if(showPromptIndex && state.filterCollection) {
 
-                promptElement.appendChild(makeElement<HTMLDivElement>({
-                    element: "div",
+                promptElement.appendChild(makeDiv({
                     className: "PBE_promptElementIndex",
                     content: index,
                 }));

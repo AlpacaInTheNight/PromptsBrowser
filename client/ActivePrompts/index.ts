@@ -48,6 +48,29 @@ class ActivePrompts {
         return uniqueArray;
     }
 
+    private static getUniqueInBranch(uniqueArray: Prompt[], branch?: PromptEntity[]) {
+        let isRoot = false;
+        if(!branch) {
+            branch = ActivePrompts.getCurrentPrompts();
+            isRoot = true;
+        }
+
+        for(const branchItem of branch) {
+            if("groupId" in branchItem) ActivePrompts.getUniqueInBranch(uniqueArray, branchItem.prompts);
+            else if(!branchItem.isSyntax) {
+                if(!uniqueArray.some(item => item.id === branchItem.id)) uniqueArray.push(branchItem);
+            }
+        }
+    }
+
+    public static getUnique(): Prompt[] {
+        const uniqueArray: Prompt[] = [];
+
+        ActivePrompts.getUniqueInBranch(uniqueArray);
+
+        return uniqueArray;
+    }
+
     public static getPromptByIndex(index: number, groupId: number | false) {
         return getPromptByIndexInBranch({index, groupId});
     }

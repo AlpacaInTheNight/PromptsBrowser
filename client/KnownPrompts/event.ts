@@ -16,7 +16,7 @@ class KnownPromptsEvent {
         const activePrompts = ActivePrompts.getCurrentPrompts();
         const {id, addAtStart, addAfter, addStart, addEnd} = targetItem;
     
-        if(activePrompts.some(item => item.id === id)) return;
+        //if(activePrompts.some(item => item.id === id)) return;
     
         const newPrompt: Prompt = {id, weight: DEFAULT_PROMPT_WEIGHT, isExternalNetwork: targetItem.isExternalNetwork};
     
@@ -47,8 +47,8 @@ class KnownPromptsEvent {
         const {data} = Database;
         const {state} = PromptsBrowser;
         const {united} = data;
-        const activePrompts = ActivePrompts.getCurrentPrompts();
-        let dataArr = [];
+        const usedPrompts = ActivePrompts.getUniqueIds();
+        let dataArr: Prompt[] = [];
 
         if(state.filterCollection) {
             const targetCategory = data.original[state.filterCollection];
@@ -66,7 +66,7 @@ class KnownPromptsEvent {
             }
         }
 
-        dataArr = dataArr.filter(dataItem => !activePrompts.some(item => item.id === dataItem.id));
+        dataArr = dataArr.filter(dataItem => !usedPrompts.includes(dataItem.id));
 
         const randomPrompt = dataArr[Math.floor(Math.random() * dataArr.length)];
 
@@ -95,7 +95,7 @@ class KnownPromptsEvent {
         const {state} = PromptsBrowser;
         e.preventDefault();
         const dragItem = target.dataset.prompt;
-        const dropItem = state.dragItemId;
+        const dropItem = state.dragInfo.id;
 
         if(!dragItem || !dropItem) return;
         if(dragItem === dropItem) return;

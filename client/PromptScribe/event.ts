@@ -22,13 +22,13 @@ class PromptScribeEvent {
         const {data} = Database;
         const {state} = PromptsBrowser;
         let {selectedNewPrompts = []} = state;
-        const activePrompts = ActivePrompts.getCurrentPrompts();
+        const uniquePrompts = ActivePrompts.getUnique();
         if(!state.savePreviewCollection) return;
         const targetCollection = data.original[state.savePreviewCollection];
         if(!targetCollection) return;
         let newPrompts = false;
 
-        for(const prompt of activePrompts) {
+        for(const prompt of uniquePrompts) {
             if(!selectedNewPrompts.includes(prompt.id)) continue;
 
             const known = targetCollection.some(item => item.id === prompt.id);
