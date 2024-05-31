@@ -101,9 +101,10 @@ function addStrToActive(str: string, atStart = false, supportExtendedSyntax: boo
     const arr = stringToPromptsArray(str, supportExtendedSyntax);
     if(!arr || !arr.length) return;
     const activePrompts = ActivePrompts.getCurrentPrompts();
+    const uniquePrompots = ActivePrompts.getUnique();
 
     for(let prompt of arr) {
-        if(activePrompts.some(item => item.id === prompt.id)) continue;
+        if(uniquePrompots.some(item => item.id === prompt.id)) continue;
         
         atStart ? activePrompts.unshift(prompt) : activePrompts.push(prompt);
     }
