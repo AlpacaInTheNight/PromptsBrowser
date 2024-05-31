@@ -2,6 +2,7 @@ import PromptsBrowser from "client/index";
 import ActivePrompts from "client/ActivePrompts/index";
 import Database from "client/Database/index";
 import CurrentPrompts from "client/CurrentPrompts/index";
+import showPrompts from "client/CurrentPrompts/showPrompts";
 import LoadStyle from "client/LoadStyle/index";
 import { makeElement } from "client/dom";
 import showPromptItem from "client/showPromptItem";
@@ -37,45 +38,13 @@ class SaveStyle {
     
     private static showCurrentPrompts(wrapper: HTMLElement) {
         let activePrompts = ActivePrompts.getCurrentPrompts();
-    
-        /* const currentPromptsContainer = document.createElement("div");
-        currentPromptsContainer.className = "PBE_windowCurrentList PBE_Scrollbar"; */
-    
-        for(const i in activePrompts) {
-            const currPrompt = activePrompts[i];
-    
-            const promptElement = showPromptItem({
-                prompt: {id: currPrompt.id, isExternalNetwork: currPrompt.isExternalNetwork},
-                options: {},
-            });
-            wrapper.appendChild(promptElement);
-    
-            promptElement.addEventListener("click", (e) => {
-                const target = e.currentTarget as HTMLDivElement;
-                const currentId = target.dataset.prompt;
-                if(!currentId) return;
-    
-                if(e.ctrlKey || e.metaKey) {
-                    //activePrompts = activePrompts.filter(item => item.id !== currentId);
-                    //PromptsBrowser.setCurrentPrompts(activePrompts);
-                    ActivePrompts.removePrompt(currentId);
-                    SaveStyle.update();
-                    CurrentPrompts.update();
-    
-                    return;
-                }
-            });
-        }
-    
-        /* currentPromptsContainer.addEventListener("wheel", (e) => {
-            if(!e.deltaY) return;
-    
-            e.currentTarget.scrollLeft += e.deltaY + e.deltaX;
-            e.preventDefault();
+
+        showPrompts({
+            prompts: activePrompts,
+            wrapper,
+            allowMove: false,
+            onClick: SaveStyleEvent.onClickActivePrompt,
         });
-    
-    
-        wrapper.appendChild(currentPromptsContainer); */
     }
     
     private static showAddStyle(wrapper: HTMLElement) {
