@@ -55,10 +55,49 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     class ActivePrompts {
+        static getUniqueIdsInBranch(uniqueArray, branch) {
+            let isRoot = false;
+            if (!branch) {
+                branch = ActivePrompts.getCurrentPrompts();
+                isRoot = true;
+            }
+            for (const branchItem of branch) {
+                if ("groupId" in branchItem)
+                    ActivePrompts.getUniqueIdsInBranch(uniqueArray, branchItem.prompts);
+                else if (!branchItem.isSyntax) {
+                    if (!uniqueArray.includes(branchItem.id))
+                        uniqueArray.push(branchItem.id);
+                }
+            }
+        }
+        static getUniqueIds() {
+            const uniqueArray = [];
+            ActivePrompts.getUniqueIdsInBranch(uniqueArray);
+            return uniqueArray;
+        }
+        static getUniqueInBranch(uniqueArray, branch) {
+            let isRoot = false;
+            if (!branch) {
+                branch = ActivePrompts.getCurrentPrompts();
+                isRoot = true;
+            }
+            for (const branchItem of branch) {
+                if ("groupId" in branchItem)
+                    ActivePrompts.getUniqueInBranch(uniqueArray, branchItem.prompts);
+                else if (!branchItem.isSyntax) {
+                    if (!uniqueArray.some(item => item.id === branchItem.id))
+                        uniqueArray.push(branchItem);
+                }
+            }
+        }
+        static getUnique() {
+            const uniqueArray = [];
+            ActivePrompts.getUniqueInBranch(uniqueArray);
+            return uniqueArray;
+        }
         static getPromptByIndex(index, groupId) {
             return (0, getPromptByIndexInBranch_1.default)({ index, groupId });
         }
-        //TODO: finish me
         static getPromptById({ id, groupId = false, currentGroupId = false, branch, terminator = 0 }) {
             if (terminator > 100)
                 return false;
@@ -87,6 +126,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         static insertPrompt(prompt, index, groupId = false) {
             (0, insertPromptInBranch_1.default)({ prompt, index, groupId });
             (0, reindexPromptGroups_1.default)();
+        }
+        static replacePrompt(prompt, index, groupId = false) {
+            (0, insertPromptInBranch_1.default)({ prompt, index, groupId, isReplace: true });
+            //reindexPromptGroups();
         }
         static movePrompt({ from, to }) {
             const fromElement = (0, removePromptInBranch_1.default)(Object.assign({}, from));
@@ -123,7 +166,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./index */ "./client/ActivePrompts/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
-    function insertPromptInBranch({ prompt, index, branch, terminator, groupId, currentGroupId }) {
+    function insertPromptInBranch({ prompt, isReplace = false, index, branch, terminator = 0, groupId, currentGroupId }) {
         if (terminator > 100)
             return false;
         let isRoot = false;
@@ -137,20 +180,31 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         else if (groupId === currentGroupId)
             isTargetBranch = true;
         if (isTargetBranch) {
-            branch.splice(index, 0, prompt);
+            if (isReplace && "id" in prompt) {
+                const targetPrompt = branch[index];
+                if (!targetPrompt || "groupId" in targetPrompt)
+                    return false;
+                targetPrompt.id = prompt.id;
+                targetPrompt.isExternalNetwork = prompt.isExternalNetwork;
+            }
+            else
+                branch.splice(index, 0, prompt);
             return true;
         }
         else {
             for (const branchItem of branch) {
                 if ("groupId" in branchItem) {
-                    return insertPromptInBranch({
+                    const result = insertPromptInBranch({
                         prompt,
                         index,
                         groupId,
+                        isReplace,
                         currentGroupId: branchItem.groupId,
                         branch: branchItem.prompts,
                         terminator: terminator + 1
                     });
+                    if (result)
+                        return true;
                 }
             }
         }
@@ -205,7 +259,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./index */ "./client/ActivePrompts/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
-    function removePromptInBranch({ index, branch, terminator, groupId, currentGroupId }) {
+    function removePromptInBranch({ index, branch, terminator = 0, groupId, currentGroupId }) {
         if (terminator > 100)
             return false;
         let isRoot = false;
@@ -224,16 +278,19 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         else {
             for (const branchItem of branch) {
                 if ("groupId" in branchItem) {
-                    return removePromptInBranch({
+                    const result = removePromptInBranch({
                         index,
                         groupId,
                         currentGroupId: branchItem.groupId,
                         branch: branchItem.prompts,
                         terminator: terminator + 1
                     });
+                    if (result !== false)
+                        return result;
                 }
             }
         }
+        return false;
     }
     exports["default"] = removePromptInBranch;
 }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
@@ -1259,10 +1316,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     CurrentPromptsEvent.onDblClick = (e) => {
         const target = e.currentTarget;
         const { state } = index_2.default;
-        const currentId = target.dataset.prompt;
-        if (!currentId)
+        let index = Number(target.dataset.index);
+        let group = Number(target.dataset.group);
+        if (Number.isNaN(index))
             return;
-        state.promptToolsId = currentId;
+        if (Number.isNaN(group))
+            group = false;
+        state.promptTools.index = index;
+        state.promptTools.groupId = group;
         index_8.default.update();
     };
     CurrentPromptsEvent.onPromptSelected = (e) => {
@@ -1390,45 +1451,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \****************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/ActivePrompts/index */ "./client/ActivePrompts/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/showPromptItem */ "./client/showPromptItem.ts"), __webpack_require__(/*! ./event */ "./client/CurrentPrompts/event.ts"), __webpack_require__(/*! client/synchroniseCurrentPrompts */ "./client/synchroniseCurrentPrompts.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, showPromptItem_1, event_1, synchroniseCurrentPrompts_1, dom_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/ActivePrompts/index */ "./client/ActivePrompts/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! ./event */ "./client/CurrentPrompts/event.ts"), __webpack_require__(/*! client/synchroniseCurrentPrompts */ "./client/synchroniseCurrentPrompts.ts"), __webpack_require__(/*! ./showPrompts */ "./client/CurrentPrompts/showPrompts.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, event_1, synchroniseCurrentPrompts_1, showPrompts_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     class CurrentPrompts {
-        static showPromptsGroup(promptsGroup = [], wrapper) {
-            const { state } = index_1.default;
-            const { cardHeight = 100 } = state.config;
-            for (let index = 0; index < promptsGroup.length; index++) {
-                const promptItem = promptsGroup[index];
-                if ("groupId" in promptItem) {
-                    const groupContainer = (0, dom_1.makeDiv)({ className: "PBE_promptsGroup" });
-                    const groupHead = (0, dom_1.makeDiv)({ className: "PBE_groupHead" });
-                    groupHead.style.height = cardHeight + "px";
-                    groupContainer.appendChild(groupHead);
-                    wrapper.appendChild(groupContainer);
-                    if (promptItem.weight)
-                        groupHead.innerText = promptItem.weight + "";
-                    CurrentPrompts.showPromptsGroup(promptItem.prompts, groupContainer);
-                    continue;
-                }
-                const { id, parentGroup = false } = promptItem;
-                const promptElement = (0, showPromptItem_1.default)({ prompt: promptItem, options: { index, parentGroup } });
-                if (promptItem.isSyntax)
-                    promptElement.dataset.issyntax = "true";
-                else if (state.selectedPrompt === id)
-                    promptElement.classList.add("PBE_selectedCurrentElement");
-                promptElement.addEventListener("dragstart", event_1.default.onDragStart);
-                promptElement.addEventListener("dragover", event_1.default.onDragOver);
-                promptElement.addEventListener("dragenter", event_1.default.onDragEnter);
-                promptElement.addEventListener("dragleave", event_1.default.onDragLeave);
-                promptElement.addEventListener("drop", event_1.default.onDrop);
-                promptElement.addEventListener("click", event_1.default.onPromptSelected);
-                if (!promptItem.isSyntax) {
-                    promptElement.addEventListener("dblclick", event_1.default.onDblClick);
-                    promptElement.addEventListener("wheel", event_1.default.scrollWeight);
-                }
-                wrapper.appendChild(promptElement);
-            }
-        }
     }
     CurrentPrompts.init = (wrapper, containerId) => {
         const currentPrompts = document.createElement("div");
@@ -1454,12 +1480,148 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         if (!wrapper || !textArea)
             return;
         wrapper.innerHTML = "";
-        CurrentPrompts.showPromptsGroup(activePrompts, wrapper);
+        (0, showPrompts_1.default)({
+            prompts: activePrompts,
+            wrapper,
+            allowMove: true,
+            onClick: event_1.default.onPromptSelected,
+            onDblClick: event_1.default.onDblClick,
+            onWheel: event_1.default.scrollWeight,
+        });
         if (noTextAreaUpdate)
             return;
         (0, synchroniseCurrentPrompts_1.synchroniseListToTextarea)(activePrompts);
     };
     exports["default"] = CurrentPrompts;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/CurrentPrompts/showPrompts.ts":
+/*!**********************************************!*\
+  !*** ./client/CurrentPrompts/showPrompts.ts ***!
+  \**********************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/showPromptItem */ "./client/showPromptItem.ts"), __webpack_require__(/*! ./event */ "./client/CurrentPrompts/event.ts"), __webpack_require__(/*! client/PromptsFilter/simple */ "./client/PromptsFilter/simple.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, showPromptItem_1, event_1, simple_1, dom_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function sortPrompts(prompts, sorting) {
+        //store original index
+        for (let index = 0; index < prompts.length; index++) {
+            const promptItem = prompts[index];
+            if ("id" in promptItem)
+                promptItem.index = index;
+        }
+        switch (sorting) {
+            case "alph":
+                //sorting prompts alphabetically
+                prompts.sort((A, B) => {
+                    if ("groupId" in A && "groupId" in B)
+                        return 0;
+                    if ("id" in A && "groupId" in B)
+                        return -1;
+                    if ("id" in B && "groupId" in A)
+                        return 1;
+                    if ("id" in A && "id" in B) {
+                        if (A.id.toLowerCase() < B.id.toLowerCase())
+                            return -1;
+                        if (A.id.toLowerCase() > B.id.toLowerCase())
+                            return 1;
+                    }
+                    return 0;
+                });
+                break;
+            case "alphReversed":
+                //sorting prompts alphabetically in reverse orderd
+                prompts.sort((A, B) => {
+                    if ("groupId" in A && "groupId" in B)
+                        return 0;
+                    if ("id" in A && "groupId" in B)
+                        return -1;
+                    if ("id" in B && "groupId" in A)
+                        return 1;
+                    if ("id" in A && "id" in B) {
+                        if (A.id.toLowerCase() < B.id.toLowerCase())
+                            return 1;
+                        if (A.id.toLowerCase() > B.id.toLowerCase())
+                            return -1;
+                    }
+                    return 0;
+                });
+                break;
+            case "weight":
+                //sorting prompts based on their weight
+                prompts.sort((A, B) => {
+                    if ("id" in A && "groupId" in B)
+                        return -1;
+                    if ("id" in B && "groupId" in A)
+                        return 1;
+                    if (A.weight < B.weight)
+                        return 1;
+                    if (A.weight > B.weight)
+                        return -1;
+                    return 0;
+                });
+        }
+    }
+    function showPrompts(props) {
+        const { prompts = [], focusOn, filterSimple, wrapper, allowMove = false, onClick, onDblClick, onWheel } = props;
+        const { state } = index_1.default;
+        const { checkFilter } = simple_1.default;
+        const { cardHeight = 100 } = state.config;
+        if (filterSimple === null || filterSimple === void 0 ? void 0 : filterSimple.sorting)
+            sortPrompts(prompts, filterSimple.sorting);
+        for (let index = 0; index < prompts.length; index++) {
+            const promptItem = prompts[index];
+            if ("groupId" in promptItem) {
+                const groupContainer = (0, dom_1.makeDiv)({ className: "PBE_promptsGroup" });
+                const groupHead = (0, dom_1.makeDiv)({ className: "PBE_groupHead" });
+                groupHead.style.height = cardHeight + "px";
+                groupContainer.appendChild(groupHead);
+                wrapper.appendChild(groupContainer);
+                if (promptItem.weight)
+                    groupHead.innerText = promptItem.weight + "";
+                showPrompts(Object.assign(Object.assign({}, props), { prompts: promptItem.prompts, wrapper: groupContainer }));
+                continue;
+            }
+            //check filters
+            if (filterSimple && !checkFilter(promptItem.id, filterSimple))
+                continue;
+            const useIndex = promptItem.index !== undefined ? promptItem.index : index;
+            const { id, parentGroup = false } = promptItem;
+            let isShadowed = false;
+            if (focusOn) {
+                isShadowed = true;
+                if (useIndex === focusOn.index && parentGroup === focusOn.groupId)
+                    isShadowed = false;
+            }
+            const promptElement = (0, showPromptItem_1.default)({ prompt: promptItem, options: { index: useIndex, parentGroup, isShadowed } });
+            if (promptItem.isSyntax)
+                promptElement.dataset.issyntax = "true";
+            else if (state.selectedPrompt === id)
+                promptElement.classList.add("PBE_selectedCurrentElement");
+            if (allowMove) {
+                promptElement.addEventListener("dragstart", event_1.default.onDragStart);
+                promptElement.addEventListener("dragover", event_1.default.onDragOver);
+                promptElement.addEventListener("dragenter", event_1.default.onDragEnter);
+                promptElement.addEventListener("dragleave", event_1.default.onDragLeave);
+                promptElement.addEventListener("drop", event_1.default.onDrop);
+            }
+            if (onClick)
+                promptElement.addEventListener("click", onClick);
+            if (!promptItem.isSyntax) {
+                if (onDblClick)
+                    promptElement.addEventListener("dblclick", onDblClick);
+                if (onWheel)
+                    promptElement.addEventListener("wheel", onWheel);
+            }
+            wrapper.appendChild(promptElement);
+        }
+    }
+    exports["default"] = showPrompts;
 }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
 		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
@@ -1762,7 +1924,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
         const imageExtension = src.split('.').pop();
         if (!data.original[savePreviewCollection])
             return;
-        //const targetCurrentPrompt = activePrompts.find(item => item.id === state.selectedPrompt);
+        //checking if prompt have an external network syntax.
         const targetCurrentPrompt = index_2.default.getPromptById({ id: state.selectedPrompt });
         if (targetCurrentPrompt && targetCurrentPrompt.isExternalNetwork)
             isExternalNetwork = true;
@@ -1942,8 +2104,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 return;
             const activePrompts = index_3.default.getCurrentPrompts();
             const { id, addAtStart, addAfter, addStart, addEnd } = targetItem;
-            if (activePrompts.some(item => item.id === id))
-                return;
+            //if(activePrompts.some(item => item.id === id)) return;
             const newPrompt = { id, weight: const_1.DEFAULT_PROMPT_WEIGHT, isExternalNetwork: targetItem.isExternalNetwork };
             if (addStart)
                 (0, index_7.addStrToActive)(addStart, true);
@@ -1973,7 +2134,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             const { data } = index_4.default;
             const { state } = index_2.default;
             const { united } = data;
-            const activePrompts = index_3.default.getCurrentPrompts();
+            const usedPrompts = index_3.default.getUniqueIds();
             let dataArr = [];
             if (state.filterCollection) {
                 const targetCategory = data.original[state.filterCollection];
@@ -1992,7 +2153,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                         dataArr.push(Object.assign({}, united[id]));
                 }
             }
-            dataArr = dataArr.filter(dataItem => !activePrompts.some(item => item.id === dataItem.id));
+            dataArr = dataArr.filter(dataItem => !usedPrompts.includes(dataItem.id));
             const randomPrompt = dataArr[Math.floor(Math.random() * dataArr.length)];
             KnownPromptsEvent.addPromptItem(randomPrompt);
             index_5.default.update();
@@ -2014,7 +2175,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             const { state } = index_2.default;
             e.preventDefault();
             const dragItem = target.dataset.prompt;
-            const dropItem = state.dragItemId;
+            const dropItem = state.dragInfo.id;
             if (!dragItem || !dropItem)
                 return;
             if (dragItem === dropItem)
@@ -2094,7 +2255,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \**************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/CurrentPrompts/index */ "./client/CurrentPrompts/index.ts"), __webpack_require__(/*! client/CollectionTools/index */ "./client/CollectionTools/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! client/showPromptItem */ "./client/showPromptItem.ts"), __webpack_require__(/*! client/TagTooltip/index */ "./client/TagTooltip/index.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! ./event */ "./client/KnownPrompts/event.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, dom_1, showPromptItem_1, index_5, index_6, event_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/CurrentPrompts/index */ "./client/CurrentPrompts/index.ts"), __webpack_require__(/*! client/CollectionTools/index */ "./client/CollectionTools/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! client/showPromptItem */ "./client/showPromptItem.ts"), __webpack_require__(/*! client/TagTooltip/index */ "./client/TagTooltip/index.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! ./event */ "./client/KnownPrompts/event.ts"), __webpack_require__(/*! client/ActivePrompts/index */ "./client/ActivePrompts/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, dom_1, showPromptItem_1, index_5, index_6, event_1, index_7) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     class KnownPrompts {
@@ -2175,6 +2336,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             const { state } = index_1.default;
             const { cardWidth = 50, cardHeight = 100, showPromptIndex = false, rowsInKnownCards = 3, maxCardsShown = 1000 } = state.config;
             const wrapper = index_1.default.DOMCache.containers[state.currentContainer].promptsCatalogue;
+            const usedPrompts = index_7.default.getUniqueIds();
             let scrollState = 0;
             let shownItems = 0;
             if (wrapper) {
@@ -2231,8 +2393,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             }
             //show Add Random card
             if (dataArr.length) {
-                const addRandom = (0, dom_1.makeElement)({
-                    element: "div",
+                const addRandom = (0, dom_1.makeDiv)({
                     className: "PBE_promptElement PBE_promptElement_random",
                     content: "Add random"
                 });
@@ -2247,10 +2408,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                     break;
                 if (!KnownPrompts.checkFilter(prompt))
                     continue;
-                const promptElement = (0, showPromptItem_1.default)({ prompt });
+                //const isShadowed = usedPrompts.includes(prompt.id);
+                const promptElement = (0, showPromptItem_1.default)({ prompt, options: { isShadowed: false } });
                 if (showPromptIndex && state.filterCollection) {
-                    promptElement.appendChild((0, dom_1.makeElement)({
-                        element: "div",
+                    promptElement.appendChild((0, dom_1.makeDiv)({
                         className: "PBE_promptElementIndex",
                         content: index,
                     }));
@@ -3773,14 +3934,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             const { data } = index_4.default;
             const { state } = index_2.default;
             let { selectedNewPrompts = [] } = state;
-            const activePrompts = index_3.default.getCurrentPrompts();
+            const uniquePrompts = index_3.default.getUnique();
             if (!state.savePreviewCollection)
                 return;
             const targetCollection = data.original[state.savePreviewCollection];
             if (!targetCollection)
                 return;
             let newPrompts = false;
-            for (const prompt of activePrompts) {
+            for (const prompt of uniquePrompts) {
                 if (!selectedNewPrompts.includes(prompt.id))
                     continue;
                 const known = targetCollection.some(item => item.id === prompt.id);
@@ -3922,7 +4083,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             const { state } = index_1.default;
             let { selectedNewPrompts = [], savePreviewCollection, toggledButtons = [] } = state;
             const newInAllCollections = toggledButtons.includes("new_in_all_collections");
-            const activePrompts = index_2.default.getCurrentPrompts();
+            //const activePrompts = ActivePrompts.getCurrentPrompts();
+            const uniquePrompts = index_2.default.getUnique();
             let database = data.united;
             if (!newInAllCollections && savePreviewCollection && data.original[state.savePreviewCollection]) {
                 database = data.original[state.savePreviewCollection];
@@ -3930,7 +4092,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             if (initial)
                 selectedNewPrompts = [];
             let unknownPromptsList = [];
-            for (const item of activePrompts) {
+            for (const item of uniquePrompts) {
                 if (item.isSyntax)
                     continue;
                 let isKnown = false;
@@ -4019,7 +4181,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             const wrapper = index_2.default.DOMCache.promptTools;
             if (!wrapper)
                 return;
-            state.promptToolsId = undefined;
+            state.promptTools = undefined;
             wrapper.style.display = "none";
         }
         static onToggleButton(e) {
@@ -4036,75 +4198,67 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             }
             index_1.default.update();
         }
-        static onElementClick(e) {
+        static onChangeSelected(e) {
+            const target = e.currentTarget;
+            const { state } = index_2.default;
+            const { index, groupId } = state.promptTools;
+            if (index === undefined)
+                return;
+            const clickPrompt = target.dataset.prompt;
+            const newIndex = Number(target.dataset.index);
+            let newGroup = Number(target.dataset.group);
+            if (Number.isNaN(newGroup))
+                newGroup = false;
+            if (e.shiftKey && clickPrompt) {
+                state.editingPrompt = clickPrompt;
+                index_6.default.update();
+                return;
+            }
+            if (e.metaKey || e.ctrlKey) {
+                index_3.default.removePrompt(newIndex, newGroup);
+            }
+            else {
+                //same element
+                if (index === newIndex && groupId === newGroup)
+                    return;
+                state.promptTools.index = newIndex;
+                state.promptTools.groupId = newGroup;
+            }
+            index_1.default.update();
+            index_5.default.update();
+        }
+        static onSelectNew(e) {
             const target = e.currentTarget;
             const { data } = index_4.default;
             const { united } = data;
             const { state } = index_2.default;
-            const currPrompt = state.promptToolsId;
+            const { index, groupId } = state.promptTools;
             const clickPrompt = target.dataset.prompt;
-            if (!currPrompt || !clickPrompt)
-                return;
             const replaceMode = state.toggledButtons.includes("tools_replaceMode");
-            let activePrompts = index_3.default.getCurrentPrompts();
-            let activePrompt = undefined;
-            //let selectedPrompt = activePrompts.find(item => item.id === clickPrompt);
-            let selectedPrompt = index_3.default.getPromptById({ id: clickPrompt });
-            if (!selectedPrompt) {
-                selectedPrompt = united.find(item => item.id === clickPrompt);
-            }
+            if (index === undefined || !clickPrompt)
+                return;
+            const selectedPrompt = united.find(item => item.id === clickPrompt);
             if (!selectedPrompt)
                 return;
-            const currTargetIndex = activePrompts.findIndex(item => {
-                if (item.id === currPrompt) {
-                    activePrompt = item;
-                    return true;
-                }
-            });
-            const clickTargetIndex = activePrompts.findIndex(item => item.id === clickPrompt);
-            if (currTargetIndex === -1)
-                return;
-            if (clickTargetIndex !== -1) {
-                if (e.metaKey || e.ctrlKey) {
-                    //activePrompts = activePrompts.filter(item => item.id !== clickPrompt);
-                    //PromptsBrowser.setCurrentPrompts(activePrompts);
-                    index_3.default.removePrompt(clickPrompt);
-                }
-                else if (e.shiftKey) {
-                    state.editingPrompt = clickPrompt;
-                    index_6.default.update();
-                }
-                else {
-                    state.promptToolsId = clickPrompt;
-                }
-                index_1.default.update();
-                index_5.default.update();
+            if (e.shiftKey) {
+                state.editingPrompt = clickPrompt;
+                index_6.default.update();
                 return;
             }
             const newItem = {
                 id: clickPrompt,
                 weight: const_1.DEFAULT_PROMPT_WEIGHT,
-                isExternalNetwork: selectedPrompt.isExternalNetwork
+                isExternalNetwork: selectedPrompt.isExternalNetwork,
             };
-            let action = "";
-            if (e.shiftKey) {
-                state.editingPrompt = clickPrompt;
-                index_6.default.update();
-            }
-            else {
-                if (replaceMode)
-                    action = e.altKey ? "add" : "replace";
-                else
-                    action = e.altKey ? "replace" : "add";
-            }
+            let action = "add";
+            if (replaceMode)
+                action = e.altKey ? "add" : "replace";
+            else
+                action = e.altKey ? "replace" : "add";
             if (action === "add")
-                activePrompts.splice(currTargetIndex, 0, newItem);
-            else if (action === "replace") {
-                if (activePrompt && activePrompt.weight !== undefined)
-                    newItem.weight = activePrompt.weight;
-                activePrompts[currTargetIndex] = newItem;
-                state.promptToolsId = clickPrompt;
-            }
+                index_3.default.insertPrompt(newItem, index + 1, groupId);
+            else
+                index_3.default.replacePrompt(newItem, index, groupId);
             index_1.default.update();
             index_5.default.update();
         }
@@ -4122,7 +4276,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \*************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/ActivePrompts/index */ "./client/ActivePrompts/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! client/showPromptItem */ "./client/showPromptItem.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! client/PromptsFilter/simple */ "./client/PromptsFilter/simple.ts"), __webpack_require__(/*! ./event */ "./client/PromptTools/event.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, dom_1, showPromptItem_1, index_4, simple_1, event_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/ActivePrompts/index */ "./client/ActivePrompts/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! client/showPromptItem */ "./client/showPromptItem.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! client/PromptsFilter/simple */ "./client/PromptsFilter/simple.ts"), __webpack_require__(/*! client/CurrentPrompts/showPrompts */ "./client/CurrentPrompts/showPrompts.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! ./event */ "./client/PromptTools/event.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, dom_1, showPromptItem_1, index_4, simple_1, showPrompts_1, index_5, event_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     class PromptTools {
@@ -4137,23 +4291,40 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
             });
         }
-        static showCurrentPrompts(wrapper) {
-            const { data } = index_3.default;
+        static showCurrentPromptsList(wrapper) {
             const { state } = index_1.default;
             const { currentFilters } = PromptTools;
-            const { checkFilter } = simple_1.default;
-            const { sorting } = currentFilters;
-            const { unitedList } = data;
-            const activePrompts = [...index_2.default.getCurrentPrompts()];
-            if (!state.promptToolsId)
+            const activePrompts = (0, index_5.clone)(index_2.default.getCurrentPrompts());
+            if (state.promptTools.index === undefined)
                 return;
-            const setupContainer = (0, dom_1.makeElement)({ element: "div", className: "PBE_List PBE_toolsSetup" });
-            const currentPromptsContainer = (0, dom_1.makeElement)({ element: "div", className: "PBE_windowCurrentList PBE_Scrollbar" });
+            const currentPromptsContainer = (0, dom_1.makeDiv)({ className: "PBE_windowCurrentList PBE_Scrollbar" });
+            (0, showPrompts_1.default)({
+                prompts: activePrompts,
+                wrapper: currentPromptsContainer,
+                focusOn: { index: state.promptTools.index, groupId: state.promptTools.groupId },
+                filterSimple: currentFilters,
+                allowMove: false,
+                onClick: event_1.default.onChangeSelected,
+            });
+            currentPromptsContainer.addEventListener("wheel", (e) => {
+                const target = e.currentTarget;
+                if (!e.deltaY)
+                    return;
+                target.scrollLeft += e.deltaY + e.deltaX;
+                e.preventDefault();
+            });
+            wrapper.appendChild(currentPromptsContainer);
+        }
+        static showCurrentPrompts(wrapper) {
+            const { state } = index_1.default;
+            if (state.promptTools.index === undefined)
+                return;
+            const setupContainer = (0, dom_1.makeDiv)({ className: "PBE_List PBE_toolsSetup" });
             //setup fieldset
             const setupField = (0, dom_1.makeElement)({ element: "fieldset", className: "PBE_fieldset" });
             const setupLegend = (0, dom_1.makeElement)({ element: "legend", content: "Setup" });
-            const showAll = (0, dom_1.makeElement)({ element: "div", content: "Show All", className: "PBE_toggleButton" });
-            const replaceMode = (0, dom_1.makeElement)({ element: "div", content: "Replace mode", className: "PBE_toggleButton" });
+            const showAll = (0, dom_1.makeDiv)({ content: "Show All", className: "PBE_toggleButton" });
+            const replaceMode = (0, dom_1.makeDiv)({ content: "Replace mode", className: "PBE_toggleButton" });
             showAll.dataset.id = "tools_showAll";
             replaceMode.dataset.id = "tools_replaceMode";
             if (state.toggledButtons.includes("tools_showAll"))
@@ -4168,9 +4339,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             //similarity fieldset
             const simField = (0, dom_1.makeElement)({ element: "fieldset", className: "PBE_fieldset" });
             const simLegend = (0, dom_1.makeElement)({ element: "legend", content: "Similarity by:" });
-            const showTags = (0, dom_1.makeElement)({ element: "div", content: "Tags", className: "PBE_toggleButton" });
-            const showCategory = (0, dom_1.makeElement)({ element: "div", content: "Category", className: "PBE_toggleButton" });
-            const showName = (0, dom_1.makeElement)({ element: "div", content: "Name", className: "PBE_toggleButton" });
+            const showTags = (0, dom_1.makeDiv)({ content: "Tags", className: "PBE_toggleButton" });
+            const showCategory = (0, dom_1.makeDiv)({ content: "Category", className: "PBE_toggleButton" });
+            const showName = (0, dom_1.makeDiv)({ content: "Name", className: "PBE_toggleButton" });
             simField.appendChild(simLegend);
             simField.appendChild(showTags);
             simField.appendChild(showCategory);
@@ -4187,61 +4358,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             showTags.addEventListener("click", event_1.default.onToggleButton);
             showCategory.addEventListener("click", event_1.default.onToggleButton);
             showName.addEventListener("click", event_1.default.onToggleButton);
-            switch (sorting) {
-                case "alph":
-                    //sorting prompts alphabetically
-                    activePrompts.sort((A, B) => {
-                        if (A.id.toLowerCase() < B.id.toLowerCase())
-                            return -1;
-                        if (A.id.toLowerCase() > B.id.toLowerCase())
-                            return 1;
-                        return 0;
-                    });
-                    break;
-                case "alphReversed":
-                    //sorting prompts alphabetically in reverse orderd
-                    activePrompts.sort((A, B) => {
-                        if (A.id.toLowerCase() < B.id.toLowerCase())
-                            return 1;
-                        if (A.id.toLowerCase() > B.id.toLowerCase())
-                            return -1;
-                        return 0;
-                    });
-                    break;
-                case "weight":
-                    //sorting prompts based on their weight
-                    activePrompts.sort((A, B) => {
-                        if (A.weight < B.weight)
-                            return 1;
-                        if (A.weight > B.weight)
-                            return -1;
-                        return 0;
-                    });
-            }
-            for (const i in activePrompts) {
-                const currPrompt = activePrompts[i];
-                if (!currPrompt || currPrompt.isSyntax)
-                    continue;
-                if (unitedList[currPrompt.id] && !checkFilter(currPrompt.id, currentFilters))
-                    continue;
-                const isShadowed = currPrompt.id !== state.promptToolsId;
-                const promptElement = (0, showPromptItem_1.default)({
-                    prompt: { id: currPrompt.id, isExternalNetwork: currPrompt.isExternalNetwork },
-                    options: { isShadowed },
-                });
-                promptElement.addEventListener("click", event_1.default.onElementClick);
-                currentPromptsContainer.appendChild(promptElement);
-            }
-            currentPromptsContainer.addEventListener("wheel", (e) => {
-                const target = e.currentTarget;
-                if (!e.deltaY)
-                    return;
-                target.scrollLeft += e.deltaY + e.deltaX;
-                e.preventDefault();
-            });
             setupContainer.appendChild(setupField);
             setupContainer.appendChild(simField);
-            wrapper.appendChild(currentPromptsContainer);
+            PromptTools.showCurrentPromptsList(wrapper);
             wrapper.appendChild(setupContainer);
         }
         static showPossiblePromptswrapper(wrapper) {
@@ -4252,21 +4371,25 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             const { possibleFilters } = PromptTools;
             const { sorting } = possibleFilters;
             const { checkFilter } = simple_1.default;
-            const promptId = state.promptToolsId;
+            const { index, groupId } = state.promptTools;
             const activePrompts = index_2.default.getCurrentPrompts();
+            const uniquePrompts = index_2.default.getUniqueIds();
             const showAll = state.toggledButtons.includes("tools_showAll");
-            if (!promptId)
+            if (index === undefined)
+                return;
+            const targetPrompt = index_2.default.getPromptByIndex(index, groupId);
+            if (!targetPrompt || !targetPrompt.id)
                 return;
             let targetTags = [];
             let targetCategories = [];
-            let targetNameWords = (0, index_4.replaceAllRegex)(promptId.toLowerCase(), "_", " ").split(" ");
+            let targetNameWords = (0, index_4.replaceAllRegex)(targetPrompt.id.toLowerCase(), "_", " ").split(" ");
             let shownItems = 0;
-            const targetPromptItem = united.find(item => item.id === promptId);
-            if (targetPromptItem) {
-                targetTags = targetPromptItem.tags || [];
-                targetCategories = targetPromptItem.category || [];
+            const targetPromptSource = united.find(item => item.id === targetPrompt.id);
+            if (targetPromptSource) {
+                targetTags = targetPromptSource.tags || [];
+                targetCategories = targetPromptSource.category || [];
             }
-            const nameArr = promptId.split(" ");
+            const nameArr = targetPrompt.id.split(" ");
             const possiblePrompts = [];
             const addedIds = [];
             for (const index in united) {
@@ -4278,7 +4401,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                     continue;
                 //similarity index based on the same tags, categories and words used in the prompt name
                 let simIndex = 0;
-                if (id === promptId)
+                if (id === targetPrompt.id)
                     continue;
                 let nameWords = (0, index_4.replaceAllRegex)(id.toLowerCase(), "_", " ").split(" ");
                 if (state.toggledButtons.includes("tools_tags"))
@@ -4367,10 +4490,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             function addElement(item) {
                 if (addedIds.includes(item.id))
                     return;
-                const isShadowed = activePrompts.some(currItem => currItem.id === item.id);
+                const isShadowed = uniquePrompts.includes(item.id);
                 addedIds.push(item.id);
                 const promptElement = (0, showPromptItem_1.default)({ prompt: item, options: { isShadowed } });
-                promptElement.addEventListener("click", event_1.default.onElementClick);
+                promptElement.addEventListener("click", event_1.default.onSelectNew);
                 wrapper.appendChild(promptElement);
             }
             for (const item of possiblePrompts)
@@ -4378,9 +4501,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         }
         static update() {
             const { state } = index_1.default;
+            const { index, groupId = false } = state.promptTools;
             const wrapper = index_1.default.DOMCache.promptTools;
-            if (!wrapper || !state.promptToolsId)
+            if (!wrapper || index === undefined)
                 return;
+            const targetPrompt = index_2.default.getPromptByIndex(index, groupId);
             index_1.default.onCloseActiveWindow = event_1.default.onCloseWindow;
             let currScrollState = 0;
             let prevPromptContainer = wrapper.querySelector(".PBE_windowCurrentList");
@@ -4391,7 +4516,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             wrapper.innerHTML = "";
             wrapper.style.display = "flex";
             const backImage = document.createElement("div");
-            backImage.style.backgroundImage = index_3.default.getPromptPreviewURL(state.promptToolsId);
+            if (targetPrompt && targetPrompt.id)
+                backImage.style.backgroundImage = index_3.default.getPromptPreviewURL(targetPrompt.id);
             backImage.className = "PBE_toolsBackImage";
             const currentFilterBlock = document.createElement("div");
             const possibleFilterBlock = document.createElement("div");
@@ -4472,11 +4598,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             if (!str)
                 return "";
             const newStrPromptsArr = [];
-            const activePrompts = index_3.default.getCurrentPrompts();
+            const uniquePrompts = index_3.default.getUnique();
             const newArr = str.split(",");
             for (let prompt of newArr) {
                 const newPrompt = (0, index_5.promptStringToObject)({ prompt });
-                if (activePrompts.some(item => item.id === newPrompt.id))
+                if (uniquePrompts.some(item => item.id === newPrompt.id))
                     continue;
                 newStrPromptsArr.push(prompt);
             }
@@ -5105,7 +5231,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \****************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! client/TagTooltip/index */ "./client/TagTooltip/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, dom_1, index_3) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! client/TagTooltip/index */ "./client/TagTooltip/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, dom_1, index_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     class PromptsSimpleFilter {
@@ -5118,11 +5244,22 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         static checkFilter(promptId, filters = {}) {
             if (!promptId)
                 return false;
-            const { data } = index_2.default;
-            const { state } = index_1.default;
+            const { data } = index_1.default;
             const { unitedList } = data;
+            let onlyName = false;
             const { collection = "", category = "", tags = [], name = "" } = filters;
+            if (!collection && !category && !name && !tags.length)
+                return true;
+            if (!collection && !category && !tags.length && name)
+                onlyName = true;
+            //checkinig name first in order to be able to filter new prompts name not yet in collections.
+            //cheking name
+            if (name && !promptId.toLowerCase().includes(name))
+                return false;
+            if (onlyName)
+                return true;
             const unitedPrompt = unitedList[promptId];
+            //prompt data not found
             if (!unitedPrompt)
                 return false;
             //checking collections
@@ -5142,9 +5279,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                         return false;
                 }
             }
-            //cheking name
-            if (name && !unitedPrompt.id.toLowerCase().includes(name))
-                return false;
             return true;
         }
         /**
@@ -5157,10 +5291,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         static show(wrapper, filters = {}, callback) {
             if (!wrapper || !callback)
                 return;
-            const { data } = index_2.default;
+            const { data } = index_1.default;
             const { categories } = data;
             const { collection = "", category = "", tags = [], name = "", sorting = "", sortingOptions } = filters;
-            const filtersContainer = (0, dom_1.makeElement)({ element: "div", className: "PBE_filtersContainer" });
+            const filtersContainer = (0, dom_1.makeDiv)({ className: "PBE_filtersContainer" });
             //collections filter
             const colOptions = [{ id: "", name: "All collections" }];
             for (const collectionId in data.original)
@@ -5205,7 +5339,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                     callback();
                 }
             });
-            index_3.default.add(tagsInput);
+            index_2.default.add(tagsInput);
             //name filter
             const nameInput = (0, dom_1.makeElement)({
                 element: "input",
@@ -5250,7 +5384,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \***********************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./index */ "./client/SaveStyle/index.ts"), __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/LoadStyle/index */ "./client/LoadStyle/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./index */ "./client/SaveStyle/index.ts"), __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/ActivePrompts/index */ "./client/ActivePrompts/index.ts"), __webpack_require__(/*! client/CurrentPrompts/index */ "./client/CurrentPrompts/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/LoadStyle/index */ "./client/LoadStyle/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, index_5, index_6) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     class SaveStyleEvent {
@@ -5268,7 +5402,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             wrapper.style.display = "none";
         }
         static onSaveStyle() {
-            const { data } = index_3.default;
+            const { data } = index_5.default;
             const { state } = index_2.default;
             const collectionId = state.newStyleCollection;
             if (!collectionId)
@@ -5280,11 +5414,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             const name = styleNameInput.value;
             if (!name || !data.styles)
                 return;
-            const newStyle = index_4.default.grabCurrentStyle(name, collectionId);
+            const newStyle = index_6.default.grabCurrentStyle(name, collectionId);
             if (!newStyle)
                 return;
             targetCollection.push(newStyle);
-            index_3.default.updateStyles(collectionId);
+            index_5.default.updateStyles(collectionId);
             index_1.default.update();
         }
         static onChangeNewCollection(e) {
@@ -5294,6 +5428,19 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             if (!value)
                 return;
             state.newStyleCollection = value;
+        }
+        static onClickActivePrompt(e) {
+            const target = e.currentTarget;
+            const index = Number(target.dataset.index);
+            let group = Number(target.dataset.group);
+            if (Number.isNaN(group))
+                group = false;
+            if (e.ctrlKey || e.metaKey) {
+                index_3.default.removePrompt(index, group);
+                index_1.default.update();
+                index_4.default.update();
+                return;
+            }
         }
     }
     exports["default"] = SaveStyleEvent;
@@ -5309,7 +5456,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \***********************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/ActivePrompts/index */ "./client/ActivePrompts/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/CurrentPrompts/index */ "./client/CurrentPrompts/index.ts"), __webpack_require__(/*! client/LoadStyle/index */ "./client/LoadStyle/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! client/showPromptItem */ "./client/showPromptItem.ts"), __webpack_require__(/*! ./event */ "./client/SaveStyle/event.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, index_5, dom_1, showPromptItem_1, event_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/ActivePrompts/index */ "./client/ActivePrompts/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/CurrentPrompts/showPrompts */ "./client/CurrentPrompts/showPrompts.ts"), __webpack_require__(/*! client/LoadStyle/index */ "./client/LoadStyle/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! ./event */ "./client/SaveStyle/event.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, showPrompts_1, index_4, dom_1, event_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     class SaveStyle {
@@ -5333,39 +5480,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         }
         static showCurrentPrompts(wrapper) {
             let activePrompts = index_2.default.getCurrentPrompts();
-            /* const currentPromptsContainer = document.createElement("div");
-            currentPromptsContainer.className = "PBE_windowCurrentList PBE_Scrollbar"; */
-            for (const i in activePrompts) {
-                const currPrompt = activePrompts[i];
-                const promptElement = (0, showPromptItem_1.default)({
-                    prompt: { id: currPrompt.id, isExternalNetwork: currPrompt.isExternalNetwork },
-                    options: {},
-                });
-                wrapper.appendChild(promptElement);
-                promptElement.addEventListener("click", (e) => {
-                    const target = e.currentTarget;
-                    const currentId = target.dataset.prompt;
-                    if (!currentId)
-                        return;
-                    if (e.ctrlKey || e.metaKey) {
-                        //activePrompts = activePrompts.filter(item => item.id !== currentId);
-                        //PromptsBrowser.setCurrentPrompts(activePrompts);
-                        index_2.default.removePrompt(currentId);
-                        SaveStyle.update();
-                        index_4.default.update();
-                        return;
-                    }
-                });
-            }
-            /* currentPromptsContainer.addEventListener("wheel", (e) => {
-                if(!e.deltaY) return;
-        
-                e.currentTarget.scrollLeft += e.deltaY + e.deltaX;
-                e.preventDefault();
+            (0, showPrompts_1.default)({
+                prompts: activePrompts,
+                wrapper,
+                allowMove: false,
+                onClick: event_1.default.onClickActivePrompt,
             });
-        
-        
-            wrapper.appendChild(currentPromptsContainer); */
         }
         static showAddStyle(wrapper) {
             const { data } = index_3.default;
@@ -5399,7 +5519,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             setupContainer.appendChild(styleNameInput);
             setupContainer.appendChild(saveRow);
             wrapper.appendChild(setupContainer);
-            index_5.default.showMetaCheckboxes(wrapper);
+            index_4.default.showMetaCheckboxes(wrapper);
         }
         static update() {
             const { readonly } = index_3.default.meta;
@@ -6587,6 +6707,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             },
         },
         dragInfo: {},
+        promptTools: {},
         showControlPanel: true,
         showViews: ["known", "current", "positive", "negative"],
         currentContainer: "text2Img",
@@ -6605,7 +6726,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         copyOrMoveTo: undefined,
         //dragItemId: undefined,
         //dragCurrentIndex: undefined,
-        promptToolsId: undefined,
+        //promptToolsId: undefined,
         collectionToolsId: undefined,
         savePreviewCollection: undefined,
         editTargetCollection: undefined,
@@ -6806,7 +6927,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         const DELIMITER_CHAR = ",";
         const SPACE_CHAR = " ";
         let prompts = [];
-        //let index = 0;
         if (supportExtendedSyntax) {
             prompts = value.split(/([,{}|])/g);
             prompts = prompts.filter(strItem => strItem);
@@ -6830,34 +6950,23 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             prompts = value.split(",");
             prompts = prompts.filter(strItem => strItem && strItem.trim());
         }
-        //let currNestedWeight = 0;
         for (let i = 0; i < prompts.length; i++) {
             let promptItem = prompts[i];
             if (!promptItem)
                 continue;
-            //promptItem = promptItem.trim();
             if (!promptItem || promptItem === ",")
                 continue;
             const { id, weight, isExternalNetwork, isSyntax = false, nestedWeight } = (0, index_5.promptStringToObject)({ prompt: promptItem, nestedWeight: 0 });
             if (!id)
                 continue;
-            //currNestedWeight = nestedWeight;
             promptItem = id;
             if (normalize && !isExternalNetwork && !isSyntax)
                 promptItem = (0, index_5.normalizePrompt)({ prompt: promptItem, state, data });
-            let targetItem = !isSyntax ? index_3.default.getPromptById({ id: promptItem, groupId }) : undefined;
-            if (targetItem) {
-                if (targetItem.weight !== weight)
-                    targetItem.weight = weight;
-            }
-            else {
-                targetItem = {
-                    id: promptItem,
-                    //index,
-                    parentGroup: groupId,
-                    weight: weight !== undefined ? weight : const_1.DEFAULT_PROMPT_WEIGHT
-                };
-            }
+            const targetItem = {
+                id: promptItem,
+                parentGroup: groupId,
+                weight: weight !== undefined ? weight : const_1.DEFAULT_PROMPT_WEIGHT
+            };
             if (isExternalNetwork)
                 targetItem.isExternalNetwork = true;
             /**
@@ -6876,7 +6985,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                     targetItem.delimiter = "next";
             }
             activePrompts.push(targetItem);
-            //index++;
         }
     }
     function processGroup({ entityArray, activePrompts, normalize = false, nestingLevel = 0, groupId = false }) {
@@ -7004,12 +7112,19 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/ActivePrompts/index */ "./client/ActivePrompts/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! ./promptStringToObject */ "./client/utils/promptStringToObject.ts"), __webpack_require__(/*! ./parseGroups */ "./client/utils/parseGroups.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, promptStringToObject_1, parseGroups_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
-    exports.log = exports.isInSameCollection = exports.randomIntFromInterval = exports.addStrToActive = exports.stringToPromptsArray = exports.promptStringToObject = exports.parseGroups = exports.normalizePrompt = exports.makeFileNameSafe = exports.replaceAllRegex = void 0;
+    exports.log = exports.isInSameCollection = exports.randomIntFromInterval = exports.addStrToActive = exports.stringToPromptsArray = exports.promptStringToObject = exports.parseGroups = exports.normalizePrompt = exports.makeFileNameSafe = exports.replaceAllRegex = exports.clone = void 0;
     exports.promptStringToObject = promptStringToObject_1.default;
     exports.parseGroups = parseGroups_1.default;
     const regex = {
         REGX_SINGLE_UNDERSCORE: /(?<!_)_(?!_)/g,
     };
+    function clone(obj) {
+        if (structuredClone)
+            return structuredClone(obj);
+        else
+            return JSON.parse(JSON.stringify(obj));
+    }
+    exports.clone = clone;
     function replaceAllRegex(str, oldStr, newStr) {
         if (!str || !oldStr)
             return str;
@@ -7089,8 +7204,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         if (!arr || !arr.length)
             return;
         const activePrompts = index_1.default.getCurrentPrompts();
+        const uniquePrompots = index_1.default.getUnique();
         for (let prompt of arr) {
-            if (activePrompts.some(item => item.id === prompt.id))
+            if (uniquePrompots.some(item => item.id === prompt.id))
                 continue;
             atStart ? activePrompts.unshift(prompt) : activePrompts.push(prompt);
         }
