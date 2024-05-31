@@ -51,7 +51,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \***************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! ./reindexPromptGroups */ "./client/ActivePrompts/reindexPromptGroups.ts"), __webpack_require__(/*! ./getPromptByIndexInBranch */ "./client/ActivePrompts/getPromptByIndexInBranch.ts"), __webpack_require__(/*! ./insertPromptInBranch */ "./client/ActivePrompts/insertPromptInBranch.ts"), __webpack_require__(/*! ./removePromptInBranch */ "./client/ActivePrompts/removePromptInBranch.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, reindexPromptGroups_1, getPromptByIndexInBranch_1, insertPromptInBranch_1, removePromptInBranch_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! ./reindexPromptGroups */ "./client/ActivePrompts/reindexPromptGroups.ts"), __webpack_require__(/*! ./getPromptByIndexInBranch */ "./client/ActivePrompts/getPromptByIndexInBranch.ts"), __webpack_require__(/*! ./insertPromptInBranch */ "./client/ActivePrompts/insertPromptInBranch.ts"), __webpack_require__(/*! ./removePromptInBranch */ "./client/ActivePrompts/removePromptInBranch.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, reindexPromptGroups_1, getPromptByIndexInBranch_1, insertPromptInBranch_1, removePromptInBranch_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     class ActivePrompts {
@@ -124,18 +124,24 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             (0, reindexPromptGroups_1.default)();
         }
         static insertPrompt(prompt, index, groupId = false) {
-            (0, insertPromptInBranch_1.default)({ prompt, index, groupId });
-            (0, reindexPromptGroups_1.default)();
+            const result = (0, insertPromptInBranch_1.default)({ prompt, index, groupId });
+            if (result)
+                (0, reindexPromptGroups_1.default)();
+            return result;
         }
         static replacePrompt(prompt, index, groupId = false) {
             (0, insertPromptInBranch_1.default)({ prompt, index, groupId, isReplace: true });
             //reindexPromptGroups();
         }
         static movePrompt({ from, to }) {
+            const origin = (0, index_2.clone)(ActivePrompts.getCurrentPrompts());
             const fromElement = (0, removePromptInBranch_1.default)(Object.assign({}, from));
             if (!fromElement || !fromElement[0])
-                return;
-            ActivePrompts.insertPrompt(fromElement[0], to.index, to.groupId);
+                return false;
+            const result = ActivePrompts.insertPrompt(fromElement[0], to.index, to.groupId);
+            if (!result)
+                ActivePrompts.setCurrentPrompts(origin);
+            return result;
         }
         static getGroupById(id, branch) {
             if (!branch)
@@ -284,12 +290,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         for (const branchItem of branch) {
             if ("groupId" in branchItem)
                 reindexPromptGroups(branchItem.prompts, branchItem.groupId);
-            else {
-                if (isRoot)
-                    delete branchItem.parentGroup;
-                else if (branchItem.parentGroup !== parentGroup)
-                    branchItem.parentGroup = parentGroup;
-            }
+            if (isRoot)
+                delete branchItem.parentGroup;
+            else if (branchItem.parentGroup !== parentGroup)
+                branchItem.parentGroup = parentGroup;
         }
     }
     exports["default"] = reindexPromptGroups;
@@ -1679,11 +1683,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             sortPrompts(prompts, filterSimple.sorting);
         for (let index = 0; index < prompts.length; index++) {
             const promptItem = prompts[index];
+            const useIndex = promptItem.index !== undefined ? promptItem.index : index;
             if ("groupId" in promptItem) {
                 const groupContainer = (0, dom_1.makeDiv)({ className: promptItem.folded ? "PBE_promptsGroup PBE_promptsGroupFolded" : "PBE_promptsGroup" });
                 const groupHead = (0, dom_1.makeDiv)({ className: "PBE_groupHead" });
                 groupHead.style.height = cardHeight + "px";
                 groupHead.dataset.id = promptItem.groupId + "";
+                groupHead.dataset.index = useIndex + "";
+                groupHead.dataset.group = promptItem.parentGroup + "";
+                groupHead.dataset.isgroup = "true";
                 groupHead.addEventListener("click", event_1.default.onGroupHeadClick);
                 groupHead.addEventListener("wheel", event_1.default.onGroupHeadWheel);
                 if (promptItem.folded)
@@ -1691,6 +1699,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 if (promptItem.weight && promptItem.weight !== const_1.DEFAULT_PROMPT_WEIGHT) {
                     const groupWeight = (0, dom_1.makeDiv)({ className: "PBE_groupHeadWeight", content: promptItem.weight + "" });
                     groupHead.appendChild(groupWeight);
+                }
+                if (allowMove) {
+                    groupHead.draggable = true;
+                    groupHead.addEventListener("dragstart", event_1.default.onDragStart);
+                    groupHead.addEventListener("dragover", event_1.default.onDragOver);
+                    groupHead.addEventListener("dragenter", event_1.default.onDragEnter);
+                    groupHead.addEventListener("dragleave", event_1.default.onDragLeave);
+                    groupHead.addEventListener("drop", event_1.default.onDrop);
                 }
                 groupContainer.appendChild(groupHead);
                 wrapper.appendChild(groupContainer);
@@ -1701,7 +1717,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             //check filters
             if (filterSimple && !checkFilter(promptItem.id, filterSimple))
                 continue;
-            const useIndex = promptItem.index !== undefined ? promptItem.index : index;
             const { id, parentGroup = false } = promptItem;
             let isShadowed = false;
             if (focusOn) {
@@ -7113,6 +7128,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 const { id, weight, body } = entity;
                 const newGroup = {
                     groupId: id,
+                    parentGroup: groupId,
                     weight: weight,
                     prompts: [],
                 };

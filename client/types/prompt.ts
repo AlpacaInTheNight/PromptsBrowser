@@ -84,9 +84,11 @@ type Prompt = PromptBase & PromptClient & PromptListItem;
 
 type PromptGroup = {
     groupId: number;
+    parentGroup?: number | false;
     weight: number;
     folded?: boolean;
     prompts: PromptEntity[];
+    index?: number;
 }
 
 type PromptEntity = PromptGroup | Prompt;

@@ -10,10 +10,9 @@ function reindexPromptGroups(branch?: PromptEntity[], parentGroup?: number) {
 
     for(const branchItem of branch) {
         if("groupId" in branchItem) reindexPromptGroups(branchItem.prompts, branchItem.groupId);
-        else {
-            if(isRoot) delete branchItem.parentGroup;
-            else if(branchItem.parentGroup !== parentGroup) branchItem.parentGroup = parentGroup;
-        }
+        
+        if(isRoot) delete branchItem.parentGroup;
+        else if(branchItem.parentGroup !== parentGroup) branchItem.parentGroup = parentGroup;
     }
 }
 

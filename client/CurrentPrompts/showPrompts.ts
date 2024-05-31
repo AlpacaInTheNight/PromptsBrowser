@@ -85,6 +85,7 @@ function showPrompts(props: {
 
     for(let index = 0; index < prompts.length; index++) {
         const promptItem = prompts[index];
+        const useIndex = promptItem.index !== undefined ? promptItem.index : index;
 
         if("groupId" in promptItem) {
             const groupContainer = makeDiv({className: promptItem.folded ? "PBE_promptsGroup PBE_promptsGroupFolded" : "PBE_promptsGroup"});
@@ -92,6 +93,9 @@ function showPrompts(props: {
             const groupHead = makeDiv({className: "PBE_groupHead"});
             groupHead.style.height = cardHeight + "px";
             groupHead.dataset.id = promptItem.groupId + "";
+            groupHead.dataset.index = useIndex + "";
+            groupHead.dataset.group = promptItem.parentGroup + "";
+            groupHead.dataset.isgroup = "true";
             groupHead.addEventListener("click", CurrentPromptsEvent.onGroupHeadClick);
             groupHead.addEventListener("wheel", CurrentPromptsEvent.onGroupHeadWheel);
 
@@ -100,6 +104,15 @@ function showPrompts(props: {
             if(promptItem.weight && promptItem.weight !== DEFAULT_PROMPT_WEIGHT) {
                 const groupWeight = makeDiv({className: "PBE_groupHeadWeight", content: promptItem.weight + ""});
                 groupHead.appendChild(groupWeight);
+            }
+
+            if(allowMove) {
+                groupHead.draggable = true;
+                groupHead.addEventListener("dragstart", CurrentPromptsEvent.onDragStart);
+                groupHead.addEventListener("dragover", CurrentPromptsEvent.onDragOver);
+                groupHead.addEventListener("dragenter", CurrentPromptsEvent.onDragEnter);
+                groupHead.addEventListener("dragleave", CurrentPromptsEvent.onDragLeave);
+                groupHead.addEventListener("drop", CurrentPromptsEvent.onDrop);
             }
 
             groupContainer.appendChild(groupHead);
@@ -112,7 +125,6 @@ function showPrompts(props: {
         //check filters
         if(filterSimple && !checkFilter(promptItem.id, filterSimple)) continue;
 
-        const useIndex = promptItem.index !== undefined ? promptItem.index : index;
         const {id, parentGroup = false} = promptItem;
         let isShadowed: boolean = false;
         if(focusOn) {

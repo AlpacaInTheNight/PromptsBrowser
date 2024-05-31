@@ -111,6 +111,7 @@ function processGroup({entityArray, activePrompts, normalize = false, nestingLev
 
             const newGroup: PromptGroup = {
                 groupId: id,
+                parentGroup: groupId,
                 weight: weight,
                 prompts: [],
             }

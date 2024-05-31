@@ -1,6 +1,6 @@
 import Prompt, { PromptEntity, PromptGroup } from "clientTypes/prompt";
 import PromptsBrowser from "client/index";
-import { log } from "client/utils/index";
+import { clone, log } from "client/utils/index";
 
 import reindexPromptGroups from "./reindexPromptGroups";
 import getPromptByIndexInBranch from "./getPromptByIndexInBranch";
@@ -110,9 +110,11 @@ class ActivePrompts {
         reindexPromptGroups();
     }
 
-    public static insertPrompt(prompt: PromptEntity, index: number, groupId: number | false = false) {
-        insertPromptInBranch({prompt, index, groupId});
-        reindexPromptGroups();
+    public static insertPrompt(prompt: PromptEntity, index: number, groupId: number | false = false): boolean {
+        const result = insertPromptInBranch({prompt, index, groupId});
+        if(result) reindexPromptGroups();
+
+        return result;
     }
 
     public static replacePrompt(prompt: PromptEntity, index: number, groupId: number | false = false) {
@@ -123,11 +125,15 @@ class ActivePrompts {
     public static movePrompt({from, to}: {
         from: {index: number; groupId: number | false};
         to: {index: number; groupId: number | false};
-    }) {
+    }): boolean {
+        const origin = clone(ActivePrompts.getCurrentPrompts());
         const fromElement = removePromptInBranch({...from});
-        if(!fromElement || !fromElement[0]) return;
+        if(!fromElement || !fromElement[0]) return false;
 
-        ActivePrompts.insertPrompt(fromElement[0], to.index, to.groupId);
+        const result = ActivePrompts.insertPrompt(fromElement[0], to.index, to.groupId);
+        if(!result) ActivePrompts.setCurrentPrompts(origin);
+
+        return result;
     }
 
     public static getGroupById(id: number, branch?: PromptEntity[]): false | PromptGroup {
