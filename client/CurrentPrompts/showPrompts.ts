@@ -93,6 +93,7 @@ function showPrompts(props: {
             groupHead.style.height = cardHeight + "px";
             groupHead.dataset.id = promptItem.groupId + "";
             groupHead.addEventListener("click", CurrentPromptsEvent.onGroupHeadClick);
+            groupHead.addEventListener("wheel", CurrentPromptsEvent.onGroupHeadWheel);
 
             if(promptItem.folded) groupHead.innerText += ActivePrompts.makeGroupKey(promptItem);
 
@@ -103,7 +104,6 @@ function showPrompts(props: {
 
             groupContainer.appendChild(groupHead);
             wrapper.appendChild(groupContainer);
-
             
             if(!promptItem.folded) showPrompts({...props, prompts: promptItem.prompts, wrapper: groupContainer})
             continue;

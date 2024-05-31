@@ -223,6 +223,55 @@ class CurrentPromptsEvent {
         ActivePrompts.toggleGroupFold(groupId);
         CurrentPrompts.update();
     }
+
+    //TODO: unite similar logic with scrollWeight method
+    public static onGroupHeadWheel = (e: WheelEvent) => {
+        const target = e.currentTarget as HTMLElement;
+        const {state} = PromptsBrowser;
+        const {belowOneWeight = 0.05, aboveOneWeight = 0.01} = state.config;
+        if(!e.shiftKey) return;
+        const groupId = Number(target.dataset.id);
+        if(Number.isNaN(groupId)) return;
+
+        const targetGroup = ActivePrompts.getGroupById(groupId);
+        if(!targetGroup) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        if(!targetGroup.weight) targetGroup.weight = 1;
+    
+        if(e.deltaY < 0) { //rising weight
+    
+            if(targetGroup.weight < 1 && (targetGroup.weight + belowOneWeight) > 1 ) {
+                targetGroup.weight = 1;
+    
+            } else {
+                if(targetGroup.weight >= 1) targetGroup.weight += aboveOneWeight;
+                else targetGroup.weight += belowOneWeight;
+    
+            }
+            
+        } else { //lowering weight
+    
+            if(targetGroup.weight > 1 && (targetGroup.weight - aboveOneWeight) < 1 ) {
+                targetGroup.weight = 1;
+    
+            } else {
+                if(targetGroup.weight <= 1) targetGroup.weight -= belowOneWeight;
+                else targetGroup.weight -= aboveOneWeight;
+    
+            }
+    
+        }
+    
+        if(targetGroup.weight < 0) targetGroup.weight = 0;
+        targetGroup.weight = Number(targetGroup.weight.toFixed(2));
+
+        if(targetGroup.weight === 1) targetGroup.weight = undefined;
+
+        CurrentPrompts.update();
+    }
 }
 
 export default CurrentPromptsEvent;

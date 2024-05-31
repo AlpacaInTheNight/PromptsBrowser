@@ -70,9 +70,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 }
             }
         }
-        static getUniqueIds() {
+        static getUniqueIds(branch) {
             const uniqueArray = [];
-            ActivePrompts.getUniqueIdsInBranch(uniqueArray);
+            ActivePrompts.getUniqueIdsInBranch(uniqueArray, branch);
             return uniqueArray;
         }
         static getUniqueInBranch(uniqueArray, branch) {
@@ -137,7 +137,56 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 return;
             ActivePrompts.insertPrompt(fromElement[0], to.index, to.groupId);
         }
+        static getGroupById(id, branch) {
+            if (!branch)
+                branch = ActivePrompts.getCurrentPrompts();
+            for (const branchItem of branch) {
+                if ("groupId" in branchItem) {
+                    if (branchItem.groupId === id)
+                        return branchItem;
+                    const result = ActivePrompts.getGroupById(id, branchItem.prompts);
+                    if (result)
+                        return result;
+                }
+            }
+            return false;
+        }
+        static makeGroupKey(group) {
+            if (typeof group === "number")
+                group = ActivePrompts.getGroupById(group);
+            if (!group || !group.prompts)
+                return false;
+            const uniquePrompts = ActivePrompts.getUniqueIds(group.prompts);
+            const key = uniquePrompts.join(" ");
+            return key;
+        }
+        static updateFoldedKeys(branch) {
+            if (!branch) {
+                ActivePrompts.foldedGroups = [];
+                branch = ActivePrompts.getCurrentPrompts();
+            }
+            for (const branchItem of branch) {
+                if ("groupId" in branchItem) {
+                    if (branchItem.folded) {
+                        const key = ActivePrompts.makeGroupKey(branchItem);
+                        if (key)
+                            ActivePrompts.foldedGroups.push(key);
+                    }
+                    if (branchItem === null || branchItem === void 0 ? void 0 : branchItem.prompts.length)
+                        ActivePrompts.updateFoldedKeys(branchItem.prompts);
+                }
+            }
+        }
+        static toggleGroupFold(groupId) {
+            const targetGroup = ActivePrompts.getGroupById(groupId);
+            if (!targetGroup)
+                return false;
+            targetGroup.folded = targetGroup.folded ? false : true;
+            ActivePrompts.updateFoldedKeys();
+            return true;
+        }
     }
+    ActivePrompts.foldedGroups = [];
     ActivePrompts.getCurrentPrompts = () => {
         const { state } = index_1.default;
         if (!state.currentPromptsList[state.currentContainer]) {
@@ -1438,6 +1487,60 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         (0, synchroniseCurrentPrompts_1.default)(true, true);
         index_1.default.update();
     };
+    CurrentPromptsEvent.onGroupHeadClick = (e) => {
+        const target = e.currentTarget;
+        const groupId = Number(target.dataset.id);
+        if (Number.isNaN(groupId))
+            return;
+        index_3.default.toggleGroupFold(groupId);
+        index_1.default.update();
+    };
+    //TODO: unite similar logic with scrollWeight method
+    CurrentPromptsEvent.onGroupHeadWheel = (e) => {
+        const target = e.currentTarget;
+        const { state } = index_2.default;
+        const { belowOneWeight = 0.05, aboveOneWeight = 0.01 } = state.config;
+        if (!e.shiftKey)
+            return;
+        const groupId = Number(target.dataset.id);
+        if (Number.isNaN(groupId))
+            return;
+        const targetGroup = index_3.default.getGroupById(groupId);
+        if (!targetGroup)
+            return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (!targetGroup.weight)
+            targetGroup.weight = 1;
+        if (e.deltaY < 0) { //rising weight
+            if (targetGroup.weight < 1 && (targetGroup.weight + belowOneWeight) > 1) {
+                targetGroup.weight = 1;
+            }
+            else {
+                if (targetGroup.weight >= 1)
+                    targetGroup.weight += aboveOneWeight;
+                else
+                    targetGroup.weight += belowOneWeight;
+            }
+        }
+        else { //lowering weight
+            if (targetGroup.weight > 1 && (targetGroup.weight - aboveOneWeight) < 1) {
+                targetGroup.weight = 1;
+            }
+            else {
+                if (targetGroup.weight <= 1)
+                    targetGroup.weight -= belowOneWeight;
+                else
+                    targetGroup.weight -= aboveOneWeight;
+            }
+        }
+        if (targetGroup.weight < 0)
+            targetGroup.weight = 0;
+        targetGroup.weight = Number(targetGroup.weight.toFixed(2));
+        if (targetGroup.weight === 1)
+            targetGroup.weight = undefined;
+        index_1.default.update();
+    };
     exports["default"] = CurrentPromptsEvent;
 }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
 		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
@@ -1505,7 +1608,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \**********************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/showPromptItem */ "./client/showPromptItem.ts"), __webpack_require__(/*! ./event */ "./client/CurrentPrompts/event.ts"), __webpack_require__(/*! client/PromptsFilter/simple */ "./client/PromptsFilter/simple.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, showPromptItem_1, event_1, simple_1, dom_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/showPromptItem */ "./client/showPromptItem.ts"), __webpack_require__(/*! ./event */ "./client/CurrentPrompts/event.ts"), __webpack_require__(/*! client/PromptsFilter/simple */ "./client/PromptsFilter/simple.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts"), __webpack_require__(/*! client/const */ "./client/const.ts"), __webpack_require__(/*! client/ActivePrompts/index */ "./client/ActivePrompts/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, showPromptItem_1, event_1, simple_1, dom_1, const_1, index_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     function sortPrompts(prompts, sorting) {
@@ -1577,14 +1680,22 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         for (let index = 0; index < prompts.length; index++) {
             const promptItem = prompts[index];
             if ("groupId" in promptItem) {
-                const groupContainer = (0, dom_1.makeDiv)({ className: "PBE_promptsGroup" });
+                const groupContainer = (0, dom_1.makeDiv)({ className: promptItem.folded ? "PBE_promptsGroup PBE_promptsGroupFolded" : "PBE_promptsGroup" });
                 const groupHead = (0, dom_1.makeDiv)({ className: "PBE_groupHead" });
                 groupHead.style.height = cardHeight + "px";
+                groupHead.dataset.id = promptItem.groupId + "";
+                groupHead.addEventListener("click", event_1.default.onGroupHeadClick);
+                groupHead.addEventListener("wheel", event_1.default.onGroupHeadWheel);
+                if (promptItem.folded)
+                    groupHead.innerText += index_2.default.makeGroupKey(promptItem);
+                if (promptItem.weight && promptItem.weight !== const_1.DEFAULT_PROMPT_WEIGHT) {
+                    const groupWeight = (0, dom_1.makeDiv)({ className: "PBE_groupHeadWeight", content: promptItem.weight + "" });
+                    groupHead.appendChild(groupWeight);
+                }
                 groupContainer.appendChild(groupHead);
                 wrapper.appendChild(groupContainer);
-                if (promptItem.weight)
-                    groupHead.innerText = promptItem.weight + "";
-                showPrompts(Object.assign(Object.assign({}, props), { prompts: promptItem.prompts, wrapper: groupContainer }));
+                if (!promptItem.folded)
+                    showPrompts(Object.assign(Object.assign({}, props), { prompts: promptItem.prompts, wrapper: groupContainer }));
                 continue;
             }
             //check filters
@@ -7013,6 +7124,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                     nestingLevel: nestingLevel + 1,
                     groupId: id,
                 });
+                if (index_3.default.foldedGroups.length) {
+                    const keyForGroup = index_3.default.makeGroupKey(newGroup);
+                    if (keyForGroup && index_3.default.foldedGroups.includes(keyForGroup)) {
+                        newGroup.folded = true;
+                    }
+                }
             }
         }
     }
