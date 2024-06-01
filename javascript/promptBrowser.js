@@ -1,6 +1,65 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./client/ActivePrompts/convertToGroup.ts":
+/*!************************************************!*\
+  !*** ./client/ActivePrompts/convertToGroup.ts ***!
+  \************************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./index */ "./client/ActivePrompts/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function convertToGroup({ index, groupId = false, currentGroupId = false, branch, terminator = 0 }) {
+        if (terminator > 100)
+            return false;
+        let isRoot = false;
+        let isTargetBranch = false;
+        if (!branch) {
+            branch = index_1.default.getCurrentPrompts();
+            isRoot = true;
+        }
+        if (isRoot && groupId === false)
+            isTargetBranch = true;
+        else if (groupId === currentGroupId)
+            isTargetBranch = true;
+        if (isTargetBranch) {
+            const targetEntity = branch[index];
+            if (!targetEntity)
+                return false;
+            const newGroup = {
+                groupId: undefined,
+                parentGroup: currentGroupId,
+                weight: 0,
+                prompts: [targetEntity],
+            };
+            branch[index] = newGroup;
+            return branch[index];
+        }
+        else {
+            for (const branchItem of branch) {
+                if ("groupId" in branchItem) {
+                    const result = convertToGroup({
+                        index,
+                        groupId,
+                        currentGroupId: branchItem.groupId,
+                        branch: branchItem.prompts,
+                        terminator: terminator + 1
+                    });
+                    if (result)
+                        return result;
+                }
+            }
+        }
+        return false;
+    }
+    exports["default"] = convertToGroup;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
 /***/ "./client/ActivePrompts/getPromptByIndexInBranch.ts":
 /*!**********************************************************!*\
   !*** ./client/ActivePrompts/getPromptByIndexInBranch.ts ***!
@@ -51,7 +110,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \***************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! ./reindexPromptGroups */ "./client/ActivePrompts/reindexPromptGroups.ts"), __webpack_require__(/*! ./getPromptByIndexInBranch */ "./client/ActivePrompts/getPromptByIndexInBranch.ts"), __webpack_require__(/*! ./insertPromptInBranch */ "./client/ActivePrompts/insertPromptInBranch.ts"), __webpack_require__(/*! ./removePromptInBranch */ "./client/ActivePrompts/removePromptInBranch.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, reindexPromptGroups_1, getPromptByIndexInBranch_1, insertPromptInBranch_1, removePromptInBranch_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! ./reindexPromptGroups */ "./client/ActivePrompts/reindexPromptGroups.ts"), __webpack_require__(/*! ./getPromptByIndexInBranch */ "./client/ActivePrompts/getPromptByIndexInBranch.ts"), __webpack_require__(/*! ./insertPromptInBranch */ "./client/ActivePrompts/insertPromptInBranch.ts"), __webpack_require__(/*! ./removePromptInBranch */ "./client/ActivePrompts/removePromptInBranch.ts"), __webpack_require__(/*! ./convertToGroup */ "./client/ActivePrompts/convertToGroup.ts"), __webpack_require__(/*! ./unGroupInBranch */ "./client/ActivePrompts/unGroupInBranch.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, reindexPromptGroups_1, getPromptByIndexInBranch_1, insertPromptInBranch_1, removePromptInBranch_1, convertToGroup_1, unGroupInBranch_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     class ActivePrompts {
@@ -143,6 +202,20 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 ActivePrompts.setCurrentPrompts(origin);
             return result;
         }
+        static groupPrompts({ from, to }) {
+            const origin = (0, index_2.clone)(ActivePrompts.getCurrentPrompts());
+            const result = (0, convertToGroup_1.default)(Object.assign({}, to));
+            if (!result)
+                return false;
+            const fromElement = (0, removePromptInBranch_1.default)(Object.assign({}, from));
+            if (!fromElement || !fromElement[0]) {
+                ActivePrompts.setCurrentPrompts(origin);
+                return false;
+            }
+            result.prompts.push(fromElement[0]);
+            (0, reindexPromptGroups_1.default)();
+            return true;
+        }
         static getGroupById(id, branch) {
             if (!branch)
                 branch = ActivePrompts.getCurrentPrompts();
@@ -190,6 +263,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             targetGroup.folded = targetGroup.folded ? false : true;
             ActivePrompts.updateFoldedKeys();
             return true;
+        }
+        static unGroup(groupId) {
+            if (groupId === undefined)
+                return false;
+            const result = (0, unGroupInBranch_1.default)({ groupId });
+            if (result)
+                (0, reindexPromptGroups_1.default)();
+            return result;
         }
     }
     ActivePrompts.foldedGroups = [];
@@ -346,6 +427,47 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         return false;
     }
     exports["default"] = removePromptInBranch;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/ActivePrompts/unGroupInBranch.ts":
+/*!*************************************************!*\
+  !*** ./client/ActivePrompts/unGroupInBranch.ts ***!
+  \*************************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./index */ "./client/ActivePrompts/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function unGroupInBranch({ groupId, currentGroupId = false, branch, terminator = 0 }) {
+        if (terminator > 100)
+            return false;
+        if (!branch)
+            branch = index_1.default.getCurrentPrompts();
+        for (let index = 0; index < branch.length; index++) {
+            const branchItem = branch[index];
+            if ("groupId" in branchItem) {
+                if (branchItem.groupId === groupId) {
+                    const { prompts = [] } = branchItem;
+                    branch.splice(index, 1, ...prompts);
+                    return true;
+                }
+                const result = unGroupInBranch({
+                    groupId,
+                    currentGroupId: branchItem.groupId,
+                    branch: branchItem.prompts,
+                    terminator: terminator + 1
+                });
+                if (result)
+                    return result;
+            }
+        }
+        return false;
+    }
+    exports["default"] = unGroupInBranch;
 }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
 		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
@@ -1360,10 +1482,18 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         state.dragInfo = {};
         e.preventDefault();
         e.stopPropagation();
-        index_3.default.movePrompt({
-            from: { index: dropIndex, groupId: dropGroup },
-            to: { index: dragIndex, groupId: dragGroup },
-        });
+        if (e.shiftKey) {
+            index_3.default.groupPrompts({
+                from: { index: dropIndex, groupId: dropGroup },
+                to: { index: dragIndex, groupId: dragGroup },
+            });
+        }
+        else {
+            index_3.default.movePrompt({
+                from: { index: dropIndex, groupId: dropGroup },
+                to: { index: dragIndex, groupId: dragGroup },
+            });
+        }
         index_1.default.update();
     };
     CurrentPromptsEvent.onDblClick = (e) => {
@@ -1496,7 +1626,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         const groupId = Number(target.dataset.id);
         if (Number.isNaN(groupId))
             return;
-        index_3.default.toggleGroupFold(groupId);
+        if (e.ctrlKey || e.metaKey) {
+            index_3.default.unGroup(groupId);
+        }
+        else {
+            index_3.default.toggleGroupFold(groupId);
+        }
         index_1.default.update();
     };
     //TODO: unite similar logic with scrollWeight method
@@ -1906,7 +2041,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
         categories: categories_1.default,
     };
     Database.meta = {
-        version: "1.2.0",
+        version: "1.3.0",
         readonly: false,
     };
     Database.getAPIurl = (endpoint, root = false) => {

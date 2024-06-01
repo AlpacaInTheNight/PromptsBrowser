@@ -18,7 +18,7 @@ class Database {
     } as Data;
 
     public static meta = {
-        version: "1.2.0",
+        version: "1.3.0",
         readonly: false,
     }
 
