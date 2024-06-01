@@ -228,7 +228,13 @@ class CurrentPromptsEvent {
         const groupId = Number(target.dataset.id);
         if(Number.isNaN(groupId)) return;
 
-        ActivePrompts.toggleGroupFold(groupId);
+        if(e.ctrlKey || e.metaKey) {
+            ActivePrompts.unGroup(groupId);
+
+        } else {
+            ActivePrompts.toggleGroupFold(groupId);
+        }
+        
         CurrentPrompts.update();
     }
 

@@ -7,6 +7,7 @@ import getPromptByIndexInBranch from "./getPromptByIndexInBranch";
 import insertPromptInBranch from "./insertPromptInBranch";
 import removePromptInBranch from "./removePromptInBranch";
 import convertToGroup from "./convertToGroup";
+import unGroupInBranch from "./unGroupInBranch";
 
 class ActivePrompts {
 
@@ -209,6 +210,17 @@ class ActivePrompts {
         ActivePrompts.updateFoldedKeys();
 
         return true;
+    }
+
+    
+
+    public static unGroup(groupId: number): boolean {
+        if(groupId === undefined) return false;
+
+        const result = unGroupInBranch({groupId});
+        if(result) reindexPromptGroups();
+
+        return result;
     }
 }
 
