@@ -33,7 +33,7 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 
 ## Installation:
 
-1. Make sure you have the latest AUTOMATIC1111/stable-diffusion-webui version instaled. Prompt Browser 1.2.0 was tested and adapted for WebUI versions 1.8.0.
+1. Make sure you have the latest AUTOMATIC1111/stable-diffusion-webui version instaled. Prompt Browser 1.3.0 was tested and adapted for WebUI versions 1.8.0 - v1.9.4.
 
 2. Unzip/clone the plugin into the extensions directory. Or install it using WebUI Extensions -> Install from URL tab.
 
