@@ -69,10 +69,18 @@ class CurrentPromptsEvent {
         e.preventDefault();
         e.stopPropagation();
 
-        ActivePrompts.movePrompt({
-            from: {index: dropIndex, groupId: dropGroup},
-            to: {index: dragIndex, groupId: dragGroup},
-        });
+        if(e.shiftKey) {
+            ActivePrompts.groupPrompts({
+                from: {index: dropIndex, groupId: dropGroup},
+                to: {index: dragIndex, groupId: dragGroup},
+            });
+
+        } else {
+            ActivePrompts.movePrompt({
+                from: {index: dropIndex, groupId: dropGroup},
+                to: {index: dragIndex, groupId: dragGroup},
+            });
+        }
     
         CurrentPrompts.update();
     }

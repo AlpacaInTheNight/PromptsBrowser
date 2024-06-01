@@ -6,6 +6,7 @@ import reindexPromptGroups from "./reindexPromptGroups";
 import getPromptByIndexInBranch from "./getPromptByIndexInBranch";
 import insertPromptInBranch from "./insertPromptInBranch";
 import removePromptInBranch from "./removePromptInBranch";
+import convertToGroup from "./convertToGroup";
 
 class ActivePrompts {
 
@@ -134,6 +135,27 @@ class ActivePrompts {
         if(!result) ActivePrompts.setCurrentPrompts(origin);
 
         return result;
+    }
+
+    public static groupPrompts({from, to}: {
+        from: {index: number; groupId: number | false};
+        to: {index: number; groupId: number | false};
+    }) {
+        const origin = clone(ActivePrompts.getCurrentPrompts());
+
+        const result = convertToGroup({...to});
+        if(!result) return false;
+
+        const fromElement = removePromptInBranch({...from});
+        if(!fromElement || !fromElement[0]) {
+            ActivePrompts.setCurrentPrompts(origin);
+            return false;
+        }
+
+        result.prompts.push(fromElement[0]);
+        reindexPromptGroups();
+
+        return true;
     }
 
     public static getGroupById(id: number, branch?: PromptEntity[]): false | PromptGroup {
