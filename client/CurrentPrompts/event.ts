@@ -93,6 +93,7 @@ class CurrentPromptsEvent {
         let group: number | false = Number(target.dataset.group);
         if(Number.isNaN(index)) return;
         if(Number.isNaN(group)) group = false;
+        if(!state.promptTools) state.promptTools = {};
 
         state.promptTools.index = index;
         state.promptTools.groupId = group;
