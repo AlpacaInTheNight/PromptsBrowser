@@ -572,9 +572,10 @@ select.PBE_generalInput {
     font-size: 10px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    align-content: flex-start;
-    align-items: flex-start;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    text-align: center;
     border-radius: 0;
     width: 60px !important;
 }
