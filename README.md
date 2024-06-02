@@ -26,9 +26,15 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 ### Changes in 1.3.0
 ⚠️ The client side was rewritten from javascript to typescript. In addition, the code has been refactored and redesigned to support prompt groups. This leaves a wide margin for possible bugs, so be prepared. ⚠️
 
-- Group Support. Previously, the extension did not understand the prompt grouping syntax correctly, trying to transfer the detected weight of groups to each prompt individually. This did not allow to use the convenience of grouping prompts and caused various bugs. Now groups are understood as such and the interface of active prompts displays them as they are. In addition, the functionality of working with groups using the active prompts interface has been added.
+- Group Support. Previously, the extension did not understand the prompt grouping syntax correctly, trying to transfer the detected weight of groups to each prompt individually. This did not allow to use the convenience of grouping prompts and caused various bugs. Now groups are understood as such and the interface of active prompts displays them as they are. In addition, the functionality of working with groups using the active prompts interface has been added. Usage info: [Active prompts groups](#active-prompts-groups).
 
 - Previously, the application tried to prevent the addition of identical prompts. However, there are many scenarios in which using the same prompts more than once is desirable. These restrictions have been removed and it is now possible to add the same prompt more than once.
+
+- Styles now have an `Addition Type` parameter. It can be `All`, `Unique at root` and `Unique all`. The `All` addition type will add all prompts from the style, whether they are already added or not. `Unique at root` - will do a uniqueness check on the prompts at the top level of the attachment, but will not do so for the prompts within the group. `Unique all` - before adding will check uniqueness of all prompts, including those inside groups.
+
+- The default style behavior is `Unique at root`. All previously created styles will be applied in this mode. Old styles can be updated by specifying a different `Addition Type` in the standard way.
+
+- Syntax elements (|, {, }) will always be added, regardless of their uniqueness.
 
 
 ## Installation:
@@ -149,6 +155,8 @@ This extension modifies the DOM directly, without working through any API for su
 1. The current prompts can be saved as a style by typing in the text box above the name of the style and clicking the `Save as style` button next to it.
 
 1. In the list of style collections, you can select the collection where the style will be saved. You can also select the current generation parameters that will be saved along with the style's prompts (such as negative prompts, size, sampler, etc).
+
+1. `Addition Type` specifies the method of adding prompts. It can be `All`, `Unique at root` and `Unique all`. The `All` addition type will add all prompts from the style, whether they are already added or not. `Unique at root` - will do a uniqueness check on the prompts at the top level of the attachment, but will not do so for the prompts within the group. `Unique all` - before adding will check uniqueness of all prompts, including those inside groups.
 
 ![](img/styles.jpg)
 

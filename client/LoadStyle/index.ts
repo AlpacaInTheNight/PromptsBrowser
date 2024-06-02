@@ -49,14 +49,14 @@ class LoadStyle {
         const targetMeta = isUpdate ? updateStyleMeta : saveStyleMeta;
         
         const paramsRow = makeElement<HTMLFieldSetElement>({element: "fieldset", className: "PBE_fieldset PBE_styleCofig"});
-        const paramsRowLegend = makeElement<HTMLLegendElement>({element: "legend", content: "Apply prompts:"});
+        const paramsRowLegend = makeElement<HTMLLegendElement>({element: "legend", content: "Addition Type:"});
 
         const addTypeSelector = makeSelect({
             className: "PBE_generalInput PBE_select PBE_addStyleTypeSelect",
             value: targetMeta.addType || AddStyleType.UniqueRoot,
             options: [
                 {id: AddStyleType.All, name: "All"},
-                {id: AddStyleType.UniqueRoot, name: "Unique in root"},
+                {id: AddStyleType.UniqueRoot, name: "Unique at root"},
                 {id: AddStyleType.UniqueOnly, name: "Unique all"},
             ],
             onChange: LoadStyleEvent.onChangeApplyMethod

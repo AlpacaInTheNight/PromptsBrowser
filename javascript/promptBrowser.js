@@ -3186,13 +3186,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             const { saveStyleMeta = {}, updateStyleMeta = {} } = state.config || {};
             const targetMeta = isUpdate ? updateStyleMeta : saveStyleMeta;
             const paramsRow = (0, dom_1.makeElement)({ element: "fieldset", className: "PBE_fieldset PBE_styleCofig" });
-            const paramsRowLegend = (0, dom_1.makeElement)({ element: "legend", content: "Apply prompts:" });
+            const paramsRowLegend = (0, dom_1.makeElement)({ element: "legend", content: "Addition Type:" });
             const addTypeSelector = (0, dom_1.makeSelect)({
                 className: "PBE_generalInput PBE_select PBE_addStyleTypeSelect",
                 value: targetMeta.addType || style_1.AddStyleType.UniqueRoot,
                 options: [
                     { id: style_1.AddStyleType.All, name: "All" },
-                    { id: style_1.AddStyleType.UniqueRoot, name: "Unique in root" },
+                    { id: style_1.AddStyleType.UniqueRoot, name: "Unique at root" },
                     { id: style_1.AddStyleType.UniqueOnly, name: "Unique all" },
                 ],
                 onChange: event_1.default.onChangeApplyMethod
