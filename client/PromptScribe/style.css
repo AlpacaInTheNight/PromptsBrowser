@@ -1,0 +1,37 @@
+/* Prompts Scriber */
+
+.PBE_newPromptsHeader {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 10px;
+}
+
+.PBE_autocompliteBox {
+    position: absolute;
+    z-index: 501;
+    box-shadow: 3px 3px 5px var(--primary-500);
+    /* background: linear-gradient(to right, rgba(207,231,250,1) 0%,rgba(99,147,193,1) 100%); */
+    background: linear-gradient(to right, var(--primary-100) 0%, var(--primary-500) 100%);
+    background-color: black;
+}
+
+.PBE_hintItem {
+    font-family: var(--font);
+    /* text-transform: capitalize; */
+    color: var(--button-primary-text-color);
+    text-shadow: 1px 1px 1px black;
+    padding: 0 10px;
+    overflow: hidden;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.PBE_hintItem:hover,
+.PBE_hintItemSelected {
+    background: var(--primary-900);
+    transform: scale(1.05);
+}
+
+/* Prompts Scriber end*/

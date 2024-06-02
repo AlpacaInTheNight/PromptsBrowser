@@ -1,0 +1,43 @@
+/* Prompt tools window */
+
+.PBE_promptTools {
+    width: 90vw !important;
+    height: 90vh !important;
+    top: 5vh !important;
+    left: 5vw !important;
+}
+
+.PBE_toolsBackImage {
+    position: absolute;
+    filter: grayscale(55%) blur(5px) brightness(53%);
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    z-index: 1;
+}
+
+.PBE_toolsFilter {
+    z-index: 4;
+    padding: 10px 10px 0 10px;
+}
+
+.PBE_toolsHeader {
+    z-index: 4;
+    flex-direction: column !important;
+}
+
+.PBE_toolsHeader:hover {
+    z-index: 6;
+}
+
+.PBE_toolsSetup {
+    margin: 10px;
+    flex-shrink: 0;
+}
+
+.PBE_toolsFooter {
+    z-index: 2;
+}
+
+/* Prompt tools window end */

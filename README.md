@@ -1,9 +1,12 @@
-# Prompts Browser Extension 1.2.0
+# Prompts Browser Extension 1.3.0
 Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui).
+
+## Table of Contents
 
 1. [Installation](#installation)
 1. [Known Prompts Browser](#known-prompts-browser)
 1. [Active Prompts](#active-prompts)
+1. [Active prompts groups](#active-prompts-groups)
 1. [Adding new prompts to the collection](#adding-new-prompts-to-the-collection)
 1. [Generating previews for prompts](#generating-previews-for-prompts)
 1. [Prompt tools](#prompt-tools)
@@ -15,37 +18,28 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 1. [Normalize](#normalize)
 1. [Setup window](#setup-window)
 1. [Collections database](#collections-database)
+1. [Development](#development)
 1. [Credits](#credits)
 
 ![](img/preview.jpg)
 
-### Changes in 1.2.0
-⚠️ The extension configuration used to be in a separate window and stored on the client. As of 1.2.0, the extension settings are now stored in the WebUI settings in the "Prompts Browser" category.
+### Changes in 1.3.0
+⚠️ The client side was rewritten from javascript to typescript. In addition, the code has been refactored and redesigned to support prompt groups. This leaves a wide margin for possible bugs, so be prepared. ⚠️
 
-The old extension settings will need to be set again. In addition, a number of new settings are available in version 1.2.0. ⚠️
+- Group Support. Previously, the extension did not understand the prompt grouping syntax correctly, trying to transfer the detected weight of groups to each prompt individually. This did not allow to use the convenience of grouping prompts and caused various bugs. Now groups are understood as such and the interface of active prompts displays them as they are. In addition, the functionality of working with groups using the active prompts interface has been added. Usage info: [Active prompts groups](#active-prompts-groups).
 
-- The size of the thumbnail on the client can now be customized. It is also possible to specify the maximum number of prompts to be displayed in the prompt list.
+- Previously, the application tried to prevent the addition of identical prompts. However, there are many scenarios in which using the same prompts more than once is desirable. These restrictions have been removed and it is now possible to add the same prompt more than once.
 
-- It is possible to specify how many maximum rows of prompts can be displayed in the list of prompts (now it is easier to adapt the extension to different screen/window resolutions).
+- Styles now have an `Addition Type` parameter. It can be `All`, `Unique at root` and `Unique all`. The `All` addition type will add all prompts from the style, whether they are already added or not. `Unique at root` - will do a uniqueness check on the prompts at the top level of the attachment, but will not do so for the prompts within the group. `Unique all` - before adding will check uniqueness of all prompts, including those inside groups.
 
-- The size and format of preview images in collections on disk can now be customized.
+- The default style behavior is `Unique at root`. All previously created styles will be applied in this mode. Old styles can be updated by specifying a different `Addition Type` in the standard way.
 
-- Prompt tools have been updated and made more convenient. Possible prompts for replacement/addition are now sorted by similarity. It is possible to switch between replacement and addition modes of the selected prompt. It is also possible to open prompts for editing and delete prompts from the list of current prompts in the standard way.
-
-- Prompts saved in collections will not be normalized to avoid unwanted changes to the prompt text required for LORAs triggering.
-
-- The Styles window is divided into Save and Load Styles windows.
-
-- Having positive prompts is no longer necessary to create styles. For example, you can now create styles for negative parameters or image quality/size settings.
-
-- The styles loading window has been updated. Now updating styles works identically to saving styles and you can override what information should be stored in a style.
-
-- The style can now be renamed.
+- Syntax elements (|, {, }) will always be added, regardless of their uniqueness.
 
 
 ## Installation:
 
-1. Make sure you have the latest AUTOMATIC1111/stable-diffusion-webui version instaled. Prompt Browser 1.2.0 was tested and adapted for WebUI versions 1.8.0.
+1. Make sure you have the latest AUTOMATIC1111/stable-diffusion-webui version instaled. Prompt Browser 1.3.0 was tested and adapted for WebUI versions 1.8.0 - v1.9.4.
 
 2. Unzip/clone the plugin into the extensions directory. Or install it using WebUI Extensions -> Install from URL tab.
 
@@ -85,12 +79,29 @@ This extension modifies the DOM directly, without working through any API for su
 
 3. `Shift + mouse wheel`: will change the weight of the Prompt depending on the direction of the mouse wheel.
 
-4. `Ctrl + click`: deletes prompt from the active prompts.
+4. `Ctrl/Meta + click`: deletes prompt from the active prompts.
 
 5. `Double click`: opens the Prompt Tools.
 
 6. `shift` + click: opens Prompt Editor.
 
+### Active prompts groups
+
+1. You can group prompts together by dragging one on top of the other while holding down the `shift` key.
+
+1. Groups will also be displayed if you manually type them into a text field or paste text from the clipboard.
+
+1. You can perform operations with groups using the group header element in the same way as you do with regular prompts.
+
+1. Groups can be moved in the same way as regular prompts.
+
+1. Groups can be nested within other groups.
+
+1. Clicking on the group header allows you to fold and unfold the group.
+
+1. `Shift + mouse wheel`: will change the weight of the Group depending on the direction of the mouse wheel.
+
+1. `Ctrl/Meta + click`: Ungroups the prompts back.
 
 ### Adding new prompts to the collection
 
@@ -144,6 +155,8 @@ This extension modifies the DOM directly, without working through any API for su
 1. The current prompts can be saved as a style by typing in the text box above the name of the style and clicking the `Save as style` button next to it.
 
 1. In the list of style collections, you can select the collection where the style will be saved. You can also select the current generation parameters that will be saved along with the style's prompts (such as negative prompts, size, sampler, etc).
+
+1. `Addition Type` specifies the method of adding prompts. It can be `All`, `Unique at root` and `Unique all`. The `All` addition type will add all prompts from the style, whether they are already added or not. `Unique at root` - will do a uniqueness check on the prompts at the top level of the attachment, but will not do so for the prompts within the group. `Unique all` - before adding will check uniqueness of all prompts, including those inside groups.
 
 ![](img/styles.jpg)
 
@@ -303,6 +316,25 @@ Some existing collections:
 
 1. [prompts_portrait](https://github.com/AlpacaInTheNight/prompts_portrait) - A proof of concept collection for generating character portraits. Comes with tags and categories tagged in.
 
+### Development
+
+1. Project structure
+    * `client` - extension typescript source code.
+    * `javascript` - compiled javascript and javascript libraries.
+    * `server` - python fastAPI server methods.
+    * `scripts` - python extension code.
+
+1. Extension styles are located in the style.css file, as well as in the exported style files in the client folder for the corresponding extension component.
+
+1. Typescript code requires a compiler that requires Node.js.
+    * Install [Node.js](https://nodejs.org/en/download/).
+    * Run `npm install` to install the required dependencies.
+    * Run command `npm run start` to start typescript compiler.
+    * Webpack will track changes to the typescript source and compile the javascript bundle for the browser.
+
+1. `promptBrowser.js` in the `javascript` is a compiled file and should not be changed manually.
+
+1. It is not necessary to add the `promptBrowser.js` file to commits.
 
 ### Credits
 

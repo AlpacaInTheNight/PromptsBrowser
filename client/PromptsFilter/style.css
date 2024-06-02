@@ -1,0 +1,99 @@
+/* Prompts filter */
+
+.PBE_filtersWrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin: 5px;
+    padding: 2px 2px 0 2px;
+    /* background-color: white; */
+    border-radius: 10px;
+    flex-grow: 1;
+    /* box-shadow: 2px 2px 4px black inset; */
+}
+
+.PBE_filtersAddNew {
+    height: 20px;
+    width: 20px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--button-primary-background-fill) ;
+    color: white;
+    font-family: monospace;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 0 0px 2px 2px;
+}
+
+.PBE_filtersRemoveNew {
+    background: var(--button-cancel-background-fill) !important;
+    color: var(--button-cancel-text-color) !important;
+}
+
+.PBE_filtersRemoveNew:hover {
+    background: var(--button-cancel-background-fill-hover) !important;
+    color: var(--button-cancel-text-color-hover) !important;
+}
+
+.PBE_newFilterContainer {
+    background-color: var(--primary-300);
+    align-items: center;
+    padding: 0 10px;
+    border-radius: 10px;
+    flex-wrap: nowrap;
+    height: 20px;
+}
+
+.PBE_filterAction {
+    font-family: sans-serif;
+    height: 20px;
+    line-height: 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    padding: 0 10px;
+    color: var(--button-secondary-text-color);
+    background: var(--secondary-500);
+    cursor: pointer;
+    width: 80px;
+    text-align: center;
+}
+
+.PBE_filterItem {
+    display: flex;
+    flex-wrap: nowrap;
+    height: 20px;
+    background-color: aqua;
+    border-radius: 10px;
+    padding-left: 5px;
+    margin-right: 5px;
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: 15px;
+    align-items: center;
+    color: black;
+    margin-bottom: 2px;
+}
+
+.PBE_filterItemNegative {
+    background-color: coral;
+}
+
+.PBE_filterItemRemove {
+    /* background-color: crimson; */
+    width: 20px;
+    height: 20px;
+    /* color: white; */
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    margin-left: 5px;
+}
+
+/* Prompts filter end*/

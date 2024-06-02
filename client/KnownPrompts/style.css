@@ -1,0 +1,55 @@
+/* Prompts Catalogue */
+
+.PBE_promptsCatalogue {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    position: relative;
+    width: 100%;
+    margin: 10px;
+    margin-top: 10px;
+}
+
+.PBE_promptsCatalogueHeader {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    width: 100%;
+    overflow: hidden;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.PBE_promptsCatalogueHeader select,
+.PBE_promptsCatalogueHeader input {
+    margin-right: 5px;
+    height: 30px;
+    width: 1px;
+    max-width: 220px;
+    flex-shrink: 1;
+    flex-grow: 1;
+    display: flex;
+    padding: 0 5px;
+}
+
+.PBE_promptsCatalogueHeader input {
+    padding: 0 10px;
+}
+
+.PBE_promptsCatalogueContent {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    max-height: 300px;
+    overflow: auto;
+    overflow-x: hidden;
+    padding: 0 10px 0 10px;
+    margin-top: 10px;
+    z-index: 501;
+}
+
+.PBE_promptsCatalogueContent:hover {
+    z-index: 503;
+}
+
+/* Prompts Catalogue end */

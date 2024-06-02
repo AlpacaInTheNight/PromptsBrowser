@@ -1,0 +1,118 @@
+/* Styles window */
+
+.PBE_stylesWindow {
+    width: 80vw;
+    height: 80vh;
+    top: 10vh;
+    left: 10vw;
+}
+
+.PBE_stylesHeader {
+    /* height: 110px; */
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+}
+
+.PBE_stylesSetup {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-right: 10px;
+    padding-top: 10px;
+    flex-shrink: 0;
+}
+
+.PBE_newStyleName {
+    padding: 0 5px;
+    border-radius: 10px;
+    height: 30px;
+    width: 256px;
+    margin-bottom: 5px;
+    border: none;
+}
+
+.PBE_styleItem {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    /* background-color: rgba(50, 100, 200, 0.5); */
+    margin: 10px 0;
+    background-size: cover !important;
+    background-position: center;
+    background: var(--secondary-900);
+}
+
+.PBE_styleHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    padding: 2px 10px;
+    background: var(--secondary-500);
+}
+
+.PBE_styleItemName {
+    /* color: white; */
+    /* text-shadow: 1px 1px 1px black; */
+    font-size: 20px;
+    color: var(--body-text-color);
+    font-family: var(--font);
+}
+
+.PBE_styleItemMetaInfo {
+    padding: 0.5em;
+    font-size: 14px;
+    color: var(--body-text-color);
+    font-family: var(--font);
+    background-color: rgba(0,0,0, 0.5);
+}
+
+.PBE_styleMetaField {
+    font-weight: bold;
+    font-style: italic;
+    color: var(--body-text-color);
+}
+
+.PBE_styleItemContent {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+.PBE_stylesCurrentList {
+    display: flex;
+    flex-direction: row;
+    overflow: auto;
+    margin: 5px;
+    flex-grow: 1;
+}
+
+.PBE_stylesAction {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin: 10px;
+    min-height: 90px;
+    flex-shrink: 0;
+    max-width: 210px;
+    justify-content: center;
+}
+
+.PBE_stylesAction button {
+    margin: 0 2px;
+    width: 100px;
+}
+
+.PBE_stylesFilter {
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 10px;
+    padding: 0 10px;
+}
+
+.PBE_stylesFilter > * {
+    margin-right: 10px;
+}
+
+/* Styles window end */
