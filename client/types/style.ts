@@ -1,11 +1,11 @@
-import Prompt from "clientTypes/prompt";
+import Prompt, { PromptEntity } from "clientTypes/prompt";
 
 type Style = {
     name: string;
 
     id?: string;
 
-    positive?: Prompt[];
+    positive?: PromptEntity[];
 
     negative?: string;
 
@@ -22,6 +22,17 @@ type Style = {
     previewImage?: "png" | "jpg";
 
     seed?: number;
+
+    addType?: AddStyleType;
 }
 
+enum AddStyleType {
+    UniqueOnly = "unique only",
+    UniqueRoot = "unique root",
+    All = "all",
+}
+
+export {
+    AddStyleType,
+}
 export default Style;

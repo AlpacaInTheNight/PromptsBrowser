@@ -1,11 +1,9 @@
 import PromptsBrowser from "client/index";
 import ActivePrompts from "client/ActivePrompts/index";
 import Database from "client/Database/index";
-import CurrentPrompts from "client/CurrentPrompts/index";
 import showPrompts from "client/CurrentPrompts/showPrompts";
 import LoadStyle from "client/LoadStyle/index";
-import { makeElement } from "client/dom";
-import showPromptItem from "client/showPromptItem";
+import { makeDiv, makeElement } from "client/dom";
 import SaveStyleEvent from "./event";
 
 class SaveStyle {
@@ -91,7 +89,8 @@ class SaveStyle {
         setupContainer.appendChild(saveRow);
     
         wrapper.appendChild(setupContainer);
-        LoadStyle.showMetaCheckboxes(wrapper);
+        LoadStyle.showMetaCheckboxes(wrapper, false);
+        LoadStyle.showStyleSetup(wrapper, false);
     }
     
     public static update() {
@@ -103,16 +102,13 @@ class SaveStyle {
         wrapper.innerHTML = "";
         wrapper.style.display = "flex";
     
-        const currentPromptsBlock = document.createElement("div");
-      
-        const footerBlock = document.createElement("div");
+        const currentPromptsBlock = makeDiv({className: "PBE_dataBlock PBE_Scrollbar PBE_windowContent"});
+        const footerBlock = makeDiv({className: "PBE_rowBlock PBE_rowBlock_wide"});
         const closeButton = document.createElement("button");
-        footerBlock.className = "PBE_rowBlock PBE_rowBlock_wide";
-        currentPromptsBlock.className = "PBE_dataBlock PBE_Scrollbar PBE_windowContent";
         closeButton.innerText = "Close";
         closeButton.className = "PBE_button";
     
-        const addNewContainer = makeElement<HTMLDivElement>({element: "div", className: "PBE_row"});
+        const addNewContainer = makeDiv({className: "PBE_row"});
     
         if(!readonly) {
             SaveStyle.showCurrentPrompts(currentPromptsBlock);

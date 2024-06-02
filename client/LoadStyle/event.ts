@@ -3,6 +3,7 @@ import PromptsBrowser from "client/index";
 import Database from "client/Database/index";
 import applyStyle from "client/applyStyle";
 import { Config, ConfigTrackStyleMeta } from "clientTypes/state";
+import { AddStyleType } from "clientTypes/style";
 
 class LoadStyleEvent {
 
@@ -80,6 +81,25 @@ class LoadStyleEvent {
         if(!state.config.updateStyleMeta) state.config.updateStyleMeta = {} as ConfigTrackStyleMeta;
     
         (state.config.updateStyleMeta as any)[id] = checked;
+        localStorage.setItem("PBE_config", JSON.stringify(state.config));
+    }
+
+    public static onChangeApplyMethod(e: Event) {
+        const {state} = PromptsBrowser;
+        const target = e.currentTarget as HTMLSelectElement;
+        const value = target.value;
+        const isUpdate = target.dataset.update ? true : false;
+        if(!value) return;
+    
+        if(!state.config) state.config = {} as Config;
+        if(isUpdate) {
+            if(!state.config.updateStyleMeta) state.config.updateStyleMeta = {} as ConfigTrackStyleMeta;
+            state.config.updateStyleMeta.addType = value as any;
+        } else {
+            if(!state.config.saveStyleMeta) state.config.saveStyleMeta = {} as ConfigTrackStyleMeta;
+            state.config.saveStyleMeta.addType = value as any;
+        }
+    
         localStorage.setItem("PBE_config", JSON.stringify(state.config));
     }
 
@@ -255,6 +275,14 @@ class LoadStyleEvent {
                         const targetElement = checkBoxesWrapper.querySelector(field.id) as HTMLInputElement;
                         targetElement.checked = field.checked;
                         (updateStyleMeta as any)[fieldId] = field.checked;
+                    }
+
+                    const addTypeSelector = document.querySelector("#PBE_stylesWindow .PBE_addStyleTypeSelect") as HTMLSelectElement;
+                    if(addTypeSelector) {
+                        if(targetStyle.addType) {
+                            updateStyleMeta.addType = targetStyle.addType;
+                            addTypeSelector.value = targetStyle.addType;
+                        } else addTypeSelector.value = AddStyleType.UniqueRoot;
                     }
     
                     if(state.config) state.config.updateStyleMeta = updateStyleMeta;

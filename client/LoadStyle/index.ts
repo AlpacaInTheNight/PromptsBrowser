@@ -1,9 +1,10 @@
 import PromptsBrowser from "client/index";
 import ActivePrompts from "client/ActivePrompts/index";
 import Database from "client/Database/index";
-import Style from "clientTypes/style";
-import { makeElement, makeCheckbox } from "client/dom";
+import Style, { AddStyleType } from "clientTypes/style";
+import { makeElement, makeCheckbox, makeSelect } from "client/dom";
 import showPromptItem from "client/showPromptItem";
+import showPrompts from "client/CurrentPrompts/showPrompts";
 import { EMPTY_CARD_GRADIENT } from "client/const";
 import { ConfigTrackStyleMeta } from "clientTypes/state";
 import LoadStyleEvent from "./event";
@@ -40,6 +41,32 @@ class LoadStyle {
         addStylesButton.addEventListener("click", LoadStyleEvent.onOpenStyles);
     
         positiveWrapper.appendChild(addStylesButton);
+    }
+
+    public static showStyleSetup(wrapper: HTMLElement, isUpdate = false) {
+        const {state} = PromptsBrowser;
+        const {saveStyleMeta = {} as ConfigTrackStyleMeta, updateStyleMeta = {} as ConfigTrackStyleMeta} = state.config || {};
+        const targetMeta = isUpdate ? updateStyleMeta : saveStyleMeta;
+        
+        const paramsRow = makeElement<HTMLFieldSetElement>({element: "fieldset", className: "PBE_fieldset PBE_styleCofig"});
+        const paramsRowLegend = makeElement<HTMLLegendElement>({element: "legend", content: "Apply prompts:"});
+
+        const addTypeSelector = makeSelect({
+            className: "PBE_generalInput PBE_select PBE_addStyleTypeSelect",
+            value: targetMeta.addType || AddStyleType.UniqueRoot,
+            options: [
+                {id: AddStyleType.All, name: "All"},
+                {id: AddStyleType.UniqueRoot, name: "Unique in root"},
+                {id: AddStyleType.UniqueOnly, name: "Unique all"},
+            ],
+            onChange: LoadStyleEvent.onChangeApplyMethod
+        });
+        if(isUpdate) addTypeSelector.dataset.update = "true";
+
+        paramsRow.appendChild(paramsRowLegend);
+        paramsRow.appendChild(addTypeSelector);
+
+        wrapper.appendChild(paramsRow);
     }
     
     public static showMetaCheckboxes(wrapper: HTMLElement, isUpdate = false) {
@@ -155,6 +182,8 @@ class LoadStyle {
         if(targetMeta.quality && cfg !== undefined) newStyle.cfg = cfg;
         
         if(targetMeta.sampler && sampling) newStyle.sampling = sampling;
+
+        if(targetMeta.addType) newStyle.addType = targetMeta.addType;
     
         return newStyle;
     }
@@ -263,6 +292,7 @@ class LoadStyle {
             if(!readonly) {
                 wrapper.appendChild(nameContainer);
                 LoadStyle.showMetaCheckboxes(wrapper, true);
+                LoadStyle.showStyleSetup(wrapper, true);
             }
     
             return;
@@ -336,6 +366,7 @@ class LoadStyle {
             wrapper.appendChild(editContainer);
             wrapper.appendChild(nameContainer);
             LoadStyle.showMetaCheckboxes(wrapper, true);
+            LoadStyle.showStyleSetup(wrapper, true);
             wrapper.appendChild(systemContainer);
         }
     }
@@ -400,14 +431,13 @@ class LoadStyle {
     
             updatePreview.dataset.id = name;
             updatePreview.dataset.collection = id;
-    
-            if(positive) for(const stylePrompt of positive) {
-                const {id, weight, isExternalNetwork} = stylePrompt;
-                const promptElement = showPromptItem({
-                    prompt: {id, weight, isExternalNetwork},
-                    options: {},
+
+            if(positive && positive.length) {
+                showPrompts({
+                    prompts: positive,
+                    wrapper: currentPromptsContainer,
+                    allowMove: false,
                 });
-                currentPromptsContainer.appendChild(promptElement);
             }
     
             /* currentPromptsContainer.addEventListener("wheel", (e) => {
