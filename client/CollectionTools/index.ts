@@ -136,40 +136,22 @@ class CollectionTools {
     
                 continue;
             }
+
+            const promptContainer = makeDiv({className: "PBE_detailedItem"});
+        
+            const selectArea = makeDiv({className: "PBE_detailedItemSelector"});
+            const contentArea = makeDiv({className: "PBE_detailedItemContent"});
+        
+            const topContainer = makeDiv({className: "PBE_detailedItemTop"});
+            const bottomContainer = makeDiv({className: "PBE_detailedItemBottom"});
     
-            const promptContainer = document.createElement("div");
-    
-            const selectArea = document.createElement("div");
-            const contentArea = document.createElement("div");
-    
-            const topContainer = document.createElement("div");
-            const bottomContainer = document.createElement("div");
-    
-            const nameContainer = document.createElement("div");
-            const tagsContainer = document.createElement("div");
-            const categoriesContainer = document.createElement("div");
-            const commentContainer = document.createElement("div");
+            const nameContainer = makeDiv({className: "PBE_detailedItemName", content: id});
+            const tagsContainer = makeDiv({className: "PBE_detailedItemTags", content: tags.join(", ")});
+            const categoriesContainer = makeDiv({className: "PBE_detailedItemCategories", content: category.join(", ")});
+            const commentContainer = makeDiv({className: "PBE_detailedItemComment", content: comment});
     
             selectArea.dataset.id = id;
-            selectArea.className = "PBE_detailedItemSelector";
-            contentArea.className = "PBE_detailedItemContent";
             selectArea.style.backgroundImage = Database.getPromptPreviewURL(id, collectionToolsId);
-    
-            promptContainer.className = "PBE_detailedItem";
-            topContainer.className = "PBE_detailedItemTop";
-            bottomContainer.className = "PBE_detailedItemBottom";
-    
-            nameContainer.className = "PBE_detailedItemName";
-            commentContainer.className = "PBE_detailedItemComment";
-    
-            tagsContainer.className = "PBE_detailedItemTags";
-            categoriesContainer.className = "PBE_detailedItemCategories";
-    
-            nameContainer.innerText = id;
-            tagsContainer.innerText = tags.join(", ");
-            categoriesContainer.innerText = category.join(", ");
-    
-            commentContainer.innerText = comment;
     
             topContainer.appendChild(nameContainer);
             topContainer.appendChild(commentContainer);
@@ -204,18 +186,18 @@ class CollectionTools {
     
         const collectionSelect = document.createElement("select");
         collectionSelect.className = "PBE_generalInput PBE_select";
-    
-        const moveButton = document.createElement("div")
-        moveButton.innerText = "Move";
-        moveButton.className = "PBE_button";
-        moveButton.title = "Move selected prompts to the target collection";
-        moveButton.addEventListener("click", CollectionToolsEvent.onMoveSelected);
-    
-        const copyButton = document.createElement("div")
-        copyButton.innerText = "Copy";
-        copyButton.className = "PBE_button";
-        copyButton.title = "Copy selected prompts to the target collection";
-        copyButton.addEventListener("click", CollectionToolsEvent.onCopySelected);
+
+        const moveButton = makeDiv({className: "PBE_button",
+            content: "Move",
+            title: "Move selected prompts to the target collection",
+            onClick: CollectionToolsEvent.onMoveSelected,
+        });
+
+        const copyButton = makeDiv({className: "PBE_button",
+            content: "Copy",
+            title: "Copy selected prompts to the target collection",
+            onClick: CollectionToolsEvent.onCopySelected,
+        });
     
         let options = "";
         for(const collectionId in data.original) {
@@ -252,26 +234,25 @@ class CollectionTools {
         let options = "";
     
         const categorySelect = document.createElement("select");
-        const addButton = document.createElement("div");
-        const removeButton = document.createElement("div");
-    
         categorySelect.className = "PBE_generalInput PBE_select PBE_categoryAction";
-        addButton.className = "PBE_button";
-        addButton.title = "Add selected category to all selected prompts";
-        removeButton.className = "PBE_button PBE_buttonCancel";
-    
-        addButton.innerText = "Add";
-        removeButton.title = "Remove selected category from all selected prompts";
-        removeButton.innerText = "Remove";
+
+        const addButton = makeDiv({className: "PBE_button",
+            content: "Add",
+            title: "Add selected category to all selected prompts",
+            onClick: CollectionToolsEvent.onAddCategory,
+        });
+
+        const removeButton = makeDiv({className: "PBE_button PBE_buttonCancel",
+            content: "Remove",
+            title: "Remove selected category from all selected prompts",
+            onClick: CollectionToolsEvent.onRemoveCategory,
+        });
     
         for(const categoryItem of categories) {
             if(!categorySelect.value) categorySelect.value = categoryItem;
             options += `<option value="${categoryItem}">${categoryItem}</option>`;
         }
         categorySelect.innerHTML = options;
-    
-        addButton.addEventListener("click", CollectionToolsEvent.onAddCategory);
-        removeButton.addEventListener("click", CollectionToolsEvent.onRemoveCategory);
     
         const container = document.createElement("fieldset");
         container.className = "PBE_fieldset";
@@ -289,22 +270,20 @@ class CollectionTools {
     private static showTagsAction(wrapper: HTMLElement) {
     
         const tagsInput = document.createElement("input");
-        const addButton = document.createElement("div");
-        const removeButton = document.createElement("div");
-    
         tagsInput.placeholder = "tag1, tag2, tag3";
-    
         tagsInput.className = "PBE_generalInput PBE_input PBE_tagsAction";
-        addButton.className = "PBE_button";
-        removeButton.className = "PBE_button PBE_buttonCancel";
-        addButton.title = "Add target tags to all selected prompts";
-        removeButton.title = "Remove target tags from all selected prompts";
-    
-        addButton.innerText = "Add";
-        removeButton.innerText = "Remove";
-    
-        addButton.addEventListener("click", CollectionToolsEvent.onAddTags);
-        removeButton.addEventListener("click", CollectionToolsEvent.onRemoveTags);
+
+        const addButton = makeDiv({className: "PBE_button",
+            content: "Add",
+            title: "Add target tags to all selected prompts",
+            onClick: CollectionToolsEvent.onAddTags,
+        });
+
+        const removeButton = makeDiv({className: "PBE_button PBE_buttonCancel",
+            content: "Remove",
+            title: "Remove target tags from all selected prompts",
+            onClick: CollectionToolsEvent.onRemoveTags,
+        });
     
         const container = document.createElement("fieldset");
         container.className = "PBE_fieldset";
@@ -358,8 +337,11 @@ class CollectionTools {
         CollectionTools.autogenStyleSelector = styleSelect;
     
         //assign button
-        const assignButton = makeElement<HTMLDivElement>({element: "div", className: "PBE_button", content: "Assign"});
-        assignButton.addEventListener("click", CollectionToolsEvent.onAssignAutogenStyle);
+        const assignButton = makeDiv({className: "PBE_button",
+            content: "Assign",
+            onClick: CollectionToolsEvent.onAssignAutogenStyle,
+        });
+
         container.appendChild(assignButton);
     
         //append to wrapper
@@ -370,8 +352,10 @@ class CollectionTools {
     private static showAutogenerate(wrapper: HTMLElement) {
         const {state} = PromptsBrowser;
     
-        const generateButton = makeElement<HTMLDivElement>({element: "div", className: "PBE_button", content: "Generate"});
-        generateButton.addEventListener("click", CollectionToolsEvent.onGeneratePreviews);
+        const generateButton = makeDiv({className: "PBE_button",
+            content: "Generate",
+            onClick: CollectionToolsEvent.onGeneratePreviews,
+        });
     
         const generateTypeSelect = makeSelect({
             className: "PBE_generalInput PBE_select", value: state.autoGenerateType,
@@ -398,18 +382,18 @@ class CollectionTools {
     
     private static showActions(wrapper: HTMLElement) {
         const {data} = Database;
-    
-        const toggleAllButton = document.createElement("div");
-        toggleAllButton.innerText = "Toggle all";
-        toggleAllButton.className = "PBE_button";
-        toggleAllButton.title = "Select and unselect all visible prompts";
-        toggleAllButton.addEventListener("click", CollectionToolsEvent.onToggleSelected);
-    
-        const deleteButton = document.createElement("div");
-        deleteButton.innerText = "Delete selected";
-        deleteButton.className = "PBE_button PBE_buttonCancel";
-        deleteButton.title = "Delete selected prompts";
-        deleteButton.addEventListener("click", CollectionToolsEvent.onDeleteSelected);
+
+        const toggleAllButton = makeDiv({className: "PBE_button",
+            content: "Toggle all",
+            title: "Select and unselect all visible prompts",
+            onClick: CollectionToolsEvent.onToggleSelected,
+        });
+
+        const deleteButton = makeDiv({className: "PBE_button PBE_buttonCancel",
+            content: "Delete selected",
+            title: "Delete selected prompts",
+            onClick: CollectionToolsEvent.onDeleteSelected,
+        });
     
         const container = document.createElement("fieldset");
         container.className = "PBE_fieldset";
@@ -500,11 +484,10 @@ class CollectionTools {
 
         const footerBlock = makeDiv({className: "PBE_rowBlock PBE_rowBlock_wide PBE_toolsFooter"});
 
-        const closeButton = document.createElement("button");
-        closeButton.innerText = "Close";
-        closeButton.className = "PBE_button";
-    
-        closeButton.addEventListener("click", CollectionToolsEvent.onCloseWindow);
+        const closeButton = makeDiv({className: "PBE_button",
+            content: "Close",
+            onClick: CollectionToolsEvent.onCloseWindow,
+        });
     
         const headerBlock   = makeDiv({className: "PBE_collectionToolsHeader"});
         const contentBlock  = makeDiv({className: "PBE_dataBlock PBE_Scrollbar PBE_windowContent"});

@@ -17,12 +17,13 @@ type MakeElementParams = {
 
     wrapper: HTMLElement;
     onChange: (this: HTMLElement, ev: Event) => void;
+    onClick: (e: MouseEvent) => void;
 }
 
 function makeElement<T>(params: Partial<MakeElementParams>): T {
     if(!params) return;
 
-    const {element, id, name, className, type, content, title, style, value, placeholder, onChange} = params;
+    const {element, id, name, className, type, content, title, style, value, placeholder, onChange, onClick} = params;
     if(!element) return;
 
     const newElement = document.createElement(element) as any;
@@ -38,6 +39,7 @@ function makeElement<T>(params: Partial<MakeElementParams>): T {
     if(style) for(const i in style) newElement.style[i] = style[i];
 
     if(onChange) newElement.addEventListener("change", onChange);
+    if(onClick) newElement.addEventListener("click", onClick);
 
     return newElement as T;
 }
