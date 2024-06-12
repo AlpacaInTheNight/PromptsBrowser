@@ -5,6 +5,7 @@ import PromptEdit from "client/PromptEdit/index";
 import checkFilter from "client/checkFilter";
 import { GenerateRequest } from "./type";
 import generateNextPreview from "./generateNextPreview";
+import updateCurrentCollection from "./updateCurrentCollection";
 
 class CollectionToolsEvent {
 
@@ -83,7 +84,7 @@ class CollectionToolsEvent {
             else delete prompt.autogen;
         }
     
-        CollectionTools.updateCurrentCollection();
+        updateCurrentCollection();
     }
     
     public static onAddCategory(e: MouseEvent) {
@@ -107,7 +108,7 @@ class CollectionToolsEvent {
             if(!prompt.category.includes(categoryId)) prompt.category.push(categoryId);
         }
     
-        CollectionTools.updateCurrentCollection();
+        updateCurrentCollection();
     }
     
     public static onRemoveCategory(e: MouseEvent) {
@@ -131,7 +132,7 @@ class CollectionToolsEvent {
             if(prompt.category.includes(categoryId)) prompt.category = prompt.category.filter(id => id !== categoryId);
         }
     
-        CollectionTools.updateCurrentCollection();
+        updateCurrentCollection();
     }
     
     public static onAddTags(e: MouseEvent) {
@@ -161,7 +162,7 @@ class CollectionToolsEvent {
             }
         }
     
-        CollectionTools.updateCurrentCollection();
+        updateCurrentCollection();
     }
     
     public static onRemoveTags(e: MouseEvent) {
@@ -187,7 +188,7 @@ class CollectionToolsEvent {
             prompt.tags = prompt.tags.filter(id => !tagsArr.includes(id));
         }
     
-        CollectionTools.updateCurrentCollection();
+        updateCurrentCollection();
     }
     
     public static onSelectItem(e: MouseEvent) {

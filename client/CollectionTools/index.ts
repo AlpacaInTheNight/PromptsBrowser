@@ -53,37 +53,6 @@ class CollectionTools {
         CurrentPrompts.update(true);
     }
     
-    public static updateCurrentCollection() {
-        const {state} = PromptsBrowser;
-        const {data} = Database;
-        const {promptsFilter} = PromptsBrowser.state;
-        const {collectionToolsId, selectedCollectionPrompts} = state;
-        if(!collectionToolsId) return;
-        const filterSetup = promptsFilter["collectionTools"];
-        const targetCollection = data.original[collectionToolsId];
-        if(!targetCollection) return;
-    
-        for(const item of targetCollection) {
-            const {id} = item;
-            if(!id) continue;
-    
-            /**
-             * Removing prompt from selected if it will not be shown.
-             */
-            if(!checkFilter(item, filterSetup)) {
-                if(selectedCollectionPrompts.includes(id)) {
-                    state.selectedCollectionPrompts = state.selectedCollectionPrompts.filter(selId => selId !== id);
-                }
-    
-                continue;
-            }
-        }
-    
-        Database.saveJSONData(collectionToolsId);
-        Database.updateMixedList();
-        CollectionTools.updateViews();
-    }
-    
     public static checkProgressState() {
         const {state} = PromptsBrowser;
         const resultsContainer = PromptsBrowser.DOMCache.containers[state.currentContainer].resultsContainer;
@@ -173,10 +142,6 @@ class CollectionTools {
     
             wrapper.appendChild(promptContainer);
         }
-    }
-    
-    private static showPromptsShort(wrapper: HTMLElement) {
-    
     }
     
     private static showCopyOrMove(wrapper: HTMLElement) {
