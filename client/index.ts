@@ -24,6 +24,8 @@ class PromptsBrowser {
 
     public static DOMCache: {
         mainContainer?: ShadowRoot | HTMLElement;
+        modelCheckpoint?: HTMLElement;
+
         collectionTools?: HTMLElement;
         promptEdit?: HTMLElement;
         promptScribe?: HTMLElement;
@@ -162,6 +164,7 @@ class PromptsBrowser {
         }
 
         DOMCache.mainContainer = mainContainer;
+        DOMCache.modelCheckpoint = mainContainer.querySelector("#setting_sd_model_checkpoint");
 
         const tabsContainer = mainContainer.querySelector("#tabs > div:first-child");
 

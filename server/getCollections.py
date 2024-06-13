@@ -74,6 +74,9 @@ def formSetupObject():
 
     if hasattr(opts, "pbe_resize_thumbnails_format"):
         config["resizeThumbnailsFormat"] = opts.pbe_resize_thumbnails_format
+
+    if hasattr(opts, "pbe_preview_for_model"):
+        config["savePreviewForModel"] = opts.pbe_preview_for_model
     
     return config
 
@@ -165,17 +168,41 @@ def getCollections(isReadOnly):
         Getting preview images to mark prompt if it have one or not.
         """
         if isdir(pathToPreviewDir):
-            imageFileNames = [filename for filename in os.listdir(pathToPreviewDir) if filename.endswith('.jpg') or filename.endswith('.png')]
 
+            #root level general previews
+            imageFileNames = [filename for filename in os.listdir(pathToPreviewDir) if filename.endswith('.jpg') or filename.endswith('.png')]
             for promptItem in dataFile:
-                previewImage = ""
                 safeFileName = makeFileNameSafe(promptItem["id"])
+                previewImage = ""
 
                 if safeFileName + ".png" in imageFileNames: previewImage = "png"
                 elif safeFileName + ".jpg" in imageFileNames: previewImage = "jpg"
 
                 if previewImage: promptItem["previewImage"] = previewImage
                 else: promptItem.pop("previewImage", None)
+            
+            #model level previews
+            colModelsDirs = os.listdir(pathToPreviewDir)
+            for colModelDirName in colModelsDirs:
+                if not isdir(join(pathToPreviewDir, colModelDirName)): continue
+
+                pathToModelPreview = join(pathToPreviewDir, colModelDirName)
+                imageFileNames = [filename for filename in os.listdir(pathToModelPreview) if filename.endswith('.jpg') or filename.endswith('.png')]
+                
+                for promptItem in dataFile:
+                    safeFileName = makeFileNameSafe(promptItem["id"])
+                    previewImage = ""
+
+                    if safeFileName + ".png" in imageFileNames: previewImage = "png"
+                    elif safeFileName + ".jpg" in imageFileNames: previewImage = "jpg"
+
+                    if previewImage:
+                        if not hasattr(promptItem, "previews"): promptItem["previews"] = {}
+                        promptItem["previews"][colModelDirName] = {"file": previewImage}
+
+                    elif hasattr(promptItem, "previews") and hasattr(promptItem["previews"], colModelDirName):
+                        promptItem["previews"].pop(colModelDirName, None)
+
             
         dataList["prompts"][dirName] = dataFile
     

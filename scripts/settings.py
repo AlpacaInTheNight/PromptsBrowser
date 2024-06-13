@@ -204,3 +204,12 @@ def on_ui_settings():
             section=section,
         ),
     )
+
+    shared.opts.add_option(
+        key="pbe_preview_for_model",
+        info=shared.OptionInfo(
+            False,
+            label="Save unique previews for models",
+            section=section,
+        ),
+    )

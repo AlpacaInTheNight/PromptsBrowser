@@ -27,6 +27,7 @@ class ReqSavePreview(BaseModel):
     src: str
     prompt: str
     collection: str
+    model: str
 
 class ReqSaveStylePreview(BaseModel):
     src: str
@@ -70,6 +71,11 @@ def on_app_started(_: gr.Blocks, app: FastAPI):
     @app.get(ROOT_URL + "promptImage/{coll_id}/{prompt_id}")
     async def get_prompt_image(coll_id, prompt_id):
         url = join(pathPromptsCatalogue, coll_id, "preview", prompt_id)
+        return FileResponse(url)
+
+    @app.get(ROOT_URL + "promptImage/{coll_id}/{model_id}/{prompt_id}")
+    async def get_prompt_model_image(coll_id, model_id, prompt_id):
+        url = join(pathPromptsCatalogue, coll_id, "preview", model_id, prompt_id)
         return FileResponse(url)
 
     @app.get(ROOT_URL + "styleImage/{coll_id}/{style_id}")

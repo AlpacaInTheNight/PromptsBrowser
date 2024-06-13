@@ -1,5 +1,6 @@
 import PromptsBrowser from "client/index";
 import Database from "client/Database/index";
+import { makeDiv, makeSelect } from "client/dom";
 
 class PreviewSave {
     
@@ -14,6 +15,14 @@ class PreviewSave {
         Database.savePromptPreview();
     }
 
+    private static onChangeCollection(e: Event) {
+        const {state} = PromptsBrowser;
+
+        const target = e.currentTarget as HTMLSelectElement;
+        const value = target.value;
+        state.savePreviewCollection = value || undefined;
+    }
+
     public static update = () => {
         const {data} = Database;
         const {readonly} = Database.meta;
@@ -24,30 +33,23 @@ class PreviewSave {
 
         if(!state.selectedPrompt) return;
 
-        const savePromptPreviewButton = document.createElement("div");
-        savePromptPreviewButton.className = "PBE_actionButton PBE_savePromptPreview";
-        savePromptPreviewButton.innerText = "save preview";
-
-        const collectionSelect = document.createElement("select");
-        collectionSelect.className = "PBE_generalInput PBE_select PBE_savePromptSelect";
-
-        let options = "";
-        for(const collectionId in data.original) {
-            if(!state.savePreviewCollection) state.savePreviewCollection = collectionId;
-            options += `<option value="${collectionId}">${collectionId}</option>`;
-        }
-        collectionSelect.innerHTML = options;
-
-        if(state.savePreviewCollection) collectionSelect.value = state.savePreviewCollection;
-
-        collectionSelect.addEventListener("change", (e) => {
-            const target = e.currentTarget as HTMLSelectElement;
-            const value = target.value;
-            state.savePreviewCollection = value || undefined;
+        const savePromptPreviewButton = makeDiv({className: "PBE_actionButton PBE_savePromptPreview",
+            content: "Save preview",
+            title: "Save the generated preview for the selected prompt",
+            onClick: PreviewSave.onSavePreview,
         });
 
-        savePromptPreviewButton.removeEventListener("click", PreviewSave.onSavePreview);
-        savePromptPreviewButton.addEventListener("click", PreviewSave.onSavePreview);
+        let options: {id: string; name: string;}[] = [];
+        for(const collectionId in data.original) {
+            if(!state.savePreviewCollection) state.savePreviewCollection = collectionId;
+            options.push({name: collectionId, id: collectionId})
+        }
+
+        const collectionSelect = makeSelect({className: "PBE_generalInput PBE_select PBE_savePromptSelect",
+            value: state.savePreviewCollection || undefined,
+            options,
+            onChange: PreviewSave.onChangeCollection,
+        });
 
         wrapper.appendChild(collectionSelect);
         wrapper.appendChild(savePromptPreviewButton);

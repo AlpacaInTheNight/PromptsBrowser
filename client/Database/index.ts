@@ -1,15 +1,15 @@
 import PromptsBrowser from "client/index";
-import ActivePrompts from "client/ActivePrompts/index";
 import CurrentPrompts from "client/CurrentPrompts/index";
-import PreviewSave from "client/PreviewSave/index";
 import LoadStyle from "client/LoadStyle/index";
 import Prompt from "clientTypes/prompt";
 import Style from "clientTypes/style";
 import Data from "clientTypes/data";
 import categories from "client/categories";
-import { makeFileNameSafe, normalizePrompt } from "client/utils/index";
+import { makeFileNameSafe } from "client/utils/index";
 import { EMPTY_CARD_GRADIENT, NEW_CARD_GRADIENT } from "client/const";
 import KnownPrompts from "client/KnownPrompts/index";
+import savePromptPreview from "./savePromptPreview";
+import getPromptPreviewURL from "./getPromptPreviewURL";
 
 class Database {
 
@@ -22,7 +22,7 @@ class Database {
         readonly: false,
     }
 
-    private static getAPIurl = (endpoint: string, root = false) => {
+    public static getAPIurl = (endpoint: string, root = false) => {
         const server = root ? window.location.origin + "/" : window.location.origin + "/promptBrowser/";
     
         return server + endpoint;
@@ -45,7 +45,7 @@ class Database {
                     (state as any).config[i] = res.config[i];
                 }
             }
-    
+
             Database.data.styles = styles;
             Database.data.original = prompts;
             Database.updateMixedList();
@@ -90,8 +90,8 @@ class Database {
             if(!Array.isArray(collection)) continue;
     
             for(const collectionPrompt of collection) {
-                const {id, isExternalNetwork, previewImage, addAtStart, addAfter, addStart, addEnd} = collectionPrompt;
-                let newItem: Prompt = {id, tags: [], category: [], collections: [], knownPreviews: {}};
+                const {id, isExternalNetwork, previewImage, previews, addAtStart, addAfter, addStart, addEnd} = collectionPrompt;
+                let newItem: Prompt = {id, tags: [], category: [], collections: [], knownPreviews: {}, knownModelPreviews: {}};
                 if(addedIds[id]) newItem = unitedArray.find(item => item.id === id);
     
                 if(addAtStart) newItem.addAtStart = addAtStart;
@@ -100,8 +100,18 @@ class Database {
                 if(addEnd) newItem.addEnd = addEnd;
     
                 if(isExternalNetwork) newItem.isExternalNetwork = true;
+
                 if(previewImage) {
                     newItem.knownPreviews[collectionId] = previewImage;
+                }
+
+                if(previews) {
+                    for(const modelId in previews) {
+                        if(previews[modelId] && previews[modelId].file) {
+                            if(!newItem.knownModelPreviews[collectionId]) newItem.knownModelPreviews[collectionId] = {};
+                            newItem.knownModelPreviews[collectionId][modelId] = previews[modelId].file;
+                        }
+                    }
                 }
     
                 if(!newItem.collections.includes(collectionId)) {
@@ -188,46 +198,7 @@ class Database {
         })();
     }
 
-    public static getPromptPreviewURL = (prompt: string, collectionId?: string) => {
-        if(!prompt) return NEW_CARD_GRADIENT;
-        const apiUrl = Database.getAPIurl("promptImage");
-        const {data} = Database;
-        const {united} = data;
-        const {state} = PromptsBrowser;
-        let fileExtension = "";
-    
-        let targetPrompt = united.find(item => item.id.toLowerCase() === prompt.toLowerCase());
-    
-        //if no target prompt found - searching for the normalized version of the target prompt
-        if(!targetPrompt) {
-            const normalizedPrompt = normalizePrompt({prompt, state, data});
-            targetPrompt = united.find(item => item.id.toLowerCase() === normalizedPrompt.toLowerCase());
-        }
-    
-        //if no prompt found - returning New Card image.
-        if(!targetPrompt || !targetPrompt.knownPreviews) return NEW_CARD_GRADIENT;
-    
-        if(!collectionId && state.filterCollection) collectionId = state.filterCollection;
-    
-        if(collectionId && targetPrompt.knownPreviews[collectionId])
-            fileExtension = targetPrompt.knownPreviews[collectionId];
-        
-        if(!fileExtension) {
-            for(let colId in targetPrompt.knownPreviews) {
-                fileExtension = targetPrompt.knownPreviews[colId];
-                collectionId = colId;
-                break;
-            }
-        }
-    
-        if(!collectionId) return EMPTY_CARD_GRADIENT;
-        if(!fileExtension) return EMPTY_CARD_GRADIENT;
-    
-        const safeFileName = makeFileNameSafe(prompt);
-    
-        const url = `url("${apiUrl}/${collectionId}/${safeFileName}.${fileExtension}?${state.filesIteration}"), ${EMPTY_CARD_GRADIENT}`;
-        return url;
-    }
+    public static getPromptPreviewURL = getPromptPreviewURL;
     
     public static getStylePreviewURL(style: Style) {
         const {state} = PromptsBrowser;
@@ -243,89 +214,7 @@ class Database {
         return url;
     }
 
-    public static savePromptPreview = (callUpdate: boolean = true) => {
-        const {state} = PromptsBrowser;
-        const {data} = Database;
-        const {united} = data;
-        const {selectedPrompt, savePreviewCollection, currentContainer} = state;
-        const url = Database.getAPIurl("savePreview");
-    
-        const imageArea = PromptsBrowser.DOMCache.containers[currentContainer].imageArea;
-        if(!imageArea) return;
-        if(!selectedPrompt) return;
-        if(!savePreviewCollection) return;
-
-        const imageContainer = imageArea.querySelector("img");
-        if(!imageContainer) return;
-    
-        let isExternalNetwork = false;
-        let src = imageContainer.src;
-        const fileMarkIndex = src.indexOf("file=");
-        if(fileMarkIndex === -1) return;
-        src = src.slice(fileMarkIndex + 5);
-    
-        const cacheMarkIndex = src.indexOf("?");
-        if(cacheMarkIndex && cacheMarkIndex !== -1) src = src.substring(0, cacheMarkIndex);
-    
-        const imageExtension = src.split('.').pop();
-    
-        if(!data.original[savePreviewCollection]) return;
-
-        //checking if prompt have an external network syntax.
-        const targetCurrentPrompt = ActivePrompts.getPromptById({id: state.selectedPrompt});
-        if(targetCurrentPrompt && targetCurrentPrompt.isExternalNetwork) isExternalNetwork = true;
-    
-        const saveData = {src, prompt: selectedPrompt, collection: savePreviewCollection};
-        if(isExternalNetwork) (saveData as any).isExternalNetwork = true;
-    
-        let targetItem = united.find(item => item.id === selectedPrompt);
-        if(!targetItem) {
-            targetItem = {id: selectedPrompt, tags: [], category: [], collections: []};
-            if(isExternalNetwork) targetItem.isExternalNetwork = true;
-            united.push(targetItem);
-        }
-    
-        if(!targetItem.collections) targetItem.collections = [];
-        if(!targetItem.collections.includes(savePreviewCollection)) {
-            targetItem.collections.push(savePreviewCollection);
-        }
-    
-        let originalItem = data.original[savePreviewCollection].find(item => item.id === selectedPrompt);
-        if(!originalItem) {
-            originalItem = {id: selectedPrompt, tags: [], category: []};
-            if(isExternalNetwork) originalItem.isExternalNetwork = true;
-            data.original[savePreviewCollection].push(originalItem);
-        }
-    
-        if(state.config.resizeThumbnails && state.config.resizeThumbnailsFormat) {
-            originalItem.previewImage = state.config.resizeThumbnailsFormat.toLowerCase() as any;
-    
-        } else originalItem.previewImage = imageExtension as any;
-    
-        (async () => {
-    
-            const rawResponse = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(saveData)
-            });
-            const answer = await rawResponse.json();
-    
-            if(answer === "ok" && callUpdate) {
-                state.selectedPrompt = undefined;
-                state.filesIteration++;
-                Database.updateMixedList();
-                
-                PreviewSave.update();
-                KnownPrompts.update();
-                CurrentPrompts.update(true);
-            }
-    
-        })();
-    }
+    public static savePromptPreview = savePromptPreview;
 
     public static updateStyles = (collectionId: string) => {
         if(!collectionId) return;

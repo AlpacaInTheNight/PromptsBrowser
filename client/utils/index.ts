@@ -134,12 +134,34 @@ function isInSameCollection(promptA: string, promptB: string): any {
     return targetCollection
 }
 
+function getCheckpoint(): string | false {
+    const checkpointSelector = PromptsBrowser.DOMCache.modelCheckpoint;
+    if(!checkpointSelector) return false;
+    const input = checkpointSelector.querySelector("input");
+    if(!input || !input.value) return false;
+    let checkpoint = input.value;
+
+    //removing the cache marker.
+    const arr = checkpoint.split(" ");
+    const lastPart = arr[arr.length - 1];
+    if(lastPart && lastPart[0] === "[") arr.pop();
+    checkpoint = arr.join(" ");
+
+    //remove file extension
+    checkpoint = checkpoint.replace(".safetensors", "");
+    
+    checkpoint = checkpoint.trim();
+
+    return checkpoint;
+}
+
 export {
     clone,
     replaceAllRegex,
     makeFileNameSafe,
     normalizePrompt,
     parseGroups,
+    getCheckpoint,
     promptStringToObject,
     stringToPromptsArray,
     addStrToActive,

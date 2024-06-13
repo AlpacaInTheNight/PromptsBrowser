@@ -23,6 +23,8 @@ type Config = {
     resizeThumbnailsMaxHeight: number;
     resizeThumbnailsFormat: "JPG" | "PNG";
 
+    savePreviewForModel: boolean;
+
     /**
      * If true, will enable extended syntax element support for prompts used by some addons.
      */

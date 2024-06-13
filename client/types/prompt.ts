@@ -26,12 +26,16 @@ type PromptBase = {
 
     comment?: string;
 
-    previewImage?: "png" | "jpg";
-
     autogen?: {
         collection?: string;
         style?: string;
     }
+
+    //old
+    previewImage?: "png" | "jpg";
+    
+    //new
+    previews?: {[key: string]: PromptPreview};
 }
 
 /**
@@ -44,6 +48,12 @@ type PromptClient = {
      */
     knownPreviews?: {
         [key: string]: "png" | "jpg";
+    }
+
+    knownModelPreviews?: {
+        [key: string]: {
+            [key: string]: "png" | "jpg";
+        }
     }
 
     /**
@@ -81,6 +91,12 @@ type PromptListItem = {
 }
 
 type Prompt = PromptBase & PromptClient & PromptListItem;
+
+type PromptPreview = {
+    file: "png" | "jpg";
+    haveThumbnail?: boolean;
+    //model?: string;
+}
 
 type PromptGroup = {
     groupId: number;
