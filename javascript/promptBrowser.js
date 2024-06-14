@@ -5628,6 +5628,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 metaSelect.className = "PBE_generalInput PBE_select PBE_filterMeta";
                 metaSelect.innerHTML = `
                 <option value="preview">Have preview image</option>
+                <option value="previewModel">Have preview for the model</option>
                 <option value="categories">Have categories</option>
                 <option value="categories3">Have at least 3 categories</option>
                 <option value="tags">Have tags</option>
@@ -6752,7 +6753,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \*******************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     /**
@@ -6762,12 +6763,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
      * @returns boolean
      */
     function checkFilter(prompt, filter) {
+        var _a;
         if (!filter || !filter.length)
             return true; //no filter requirements
         let { id, comment = "", autogen = {} } = prompt;
         if (!id)
             return false; //invalid prompt
-        const { tags = [], category = [], previewImage } = prompt;
+        const checkpoint = (0, index_1.makeFileNameSafe)((0, index_1.getCheckpoint)() || "");
+        const { tags = [], category = [], previewImage, previews = {} } = prompt;
         let fulfil = false;
         id = id.toLowerCase();
         comment = comment.toLowerCase();
@@ -6801,12 +6804,24 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                     fulfil = true;
             }
             else if (type === "meta") {
+                let modelPreview = "";
+                if (value === "preview" || value === "png" || value === "jpg") {
+                    if (previews) {
+                        for (const modelId in previews) {
+                            if ((_a = previews[modelId]) === null || _a === void 0 ? void 0 : _a.file) {
+                                modelPreview = previews[modelId].file;
+                                break;
+                            }
+                        }
+                    }
+                }
+                const previewFinal = previewImage ? previewImage : modelPreview;
                 if (value === "preview")
-                    fulfil = isInclude ? !!previewImage : !previewImage;
+                    fulfil = isInclude ? !!previewFinal : !previewFinal;
                 else if (value === "png")
-                    fulfil = isInclude ? previewImage === "png" : previewImage !== "png";
+                    fulfil = isInclude ? previewFinal === "png" : previewFinal !== "png";
                 else if (value === "jpg")
-                    fulfil = isInclude ? previewImage === "jpg" : previewImage !== "jpg";
+                    fulfil = isInclude ? previewFinal === "jpg" : previewFinal !== "jpg";
                 else if (value === "categories")
                     fulfil = isInclude ? !!category.length : !category.length;
                 else if (value === "tags")
@@ -6819,6 +6834,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                     fulfil = isInclude ? category.length >= 3 : category.length < 3;
                 else if (value === "tags3")
                     fulfil = isInclude ? tags.length >= 3 : tags.length < 3;
+                else if (value === "previewModel")
+                    fulfil = isInclude ? !!previews[checkpoint] : !previews[checkpoint];
             }
             if (!fulfil)
                 return false;

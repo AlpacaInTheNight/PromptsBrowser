@@ -200,6 +200,7 @@ class PromptsFilter {
             metaSelect.className = "PBE_generalInput PBE_select PBE_filterMeta";
             metaSelect.innerHTML = `
                 <option value="preview">Have preview image</option>
+                <option value="previewModel">Have preview for the model</option>
                 <option value="categories">Have categories</option>
                 <option value="categories3">Have at least 3 categories</option>
                 <option value="tags">Have tags</option>
