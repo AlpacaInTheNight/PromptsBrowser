@@ -480,7 +480,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \*****************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./index */ "./client/CollectionTools/index.ts"), __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/PromptEdit/index */ "./client/PromptEdit/index.ts"), __webpack_require__(/*! client/checkFilter */ "./client/checkFilter.ts"), __webpack_require__(/*! ./generateNextPreview */ "./client/CollectionTools/generateNextPreview.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, checkFilter_1, generateNextPreview_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./index */ "./client/CollectionTools/index.ts"), __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/PromptEdit/index */ "./client/PromptEdit/index.ts"), __webpack_require__(/*! client/checkFilter */ "./client/checkFilter.ts"), __webpack_require__(/*! ./generateNextPreview */ "./client/CollectionTools/generateNextPreview.ts"), __webpack_require__(/*! ./updateCurrentCollection */ "./client/CollectionTools/updateCurrentCollection.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, checkFilter_1, generateNextPreview_1, updateCurrentCollection_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     class CollectionToolsEvent {
@@ -552,7 +552,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 else
                     delete prompt.autogen;
             }
-            index_1.default.updateCurrentCollection();
+            (0, updateCurrentCollection_1.default)();
         }
         static onAddCategory(e) {
             const { state } = index_2.default;
@@ -576,7 +576,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 if (!prompt.category.includes(categoryId))
                     prompt.category.push(categoryId);
             }
-            index_1.default.updateCurrentCollection();
+            (0, updateCurrentCollection_1.default)();
         }
         static onRemoveCategory(e) {
             const { state } = index_2.default;
@@ -600,7 +600,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 if (prompt.category.includes(categoryId))
                     prompt.category = prompt.category.filter(id => id !== categoryId);
             }
-            index_1.default.updateCurrentCollection();
+            (0, updateCurrentCollection_1.default)();
         }
         static onAddTags(e) {
             const { state } = index_2.default;
@@ -629,7 +629,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                         prompt.tags.push(tagItem);
                 }
             }
-            index_1.default.updateCurrentCollection();
+            (0, updateCurrentCollection_1.default)();
         }
         static onRemoveTags(e) {
             const { state } = index_2.default;
@@ -653,7 +653,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                     continue;
                 prompt.tags = prompt.tags.filter(id => !tagsArr.includes(id));
             }
-            index_1.default.updateCurrentCollection();
+            (0, updateCurrentCollection_1.default)();
         }
         static onSelectItem(e) {
             const target = e.currentTarget;
@@ -917,35 +917,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             CollectionTools.update();
             index_4.default.update(true);
         }
-        static updateCurrentCollection() {
-            const { state } = index_1.default;
-            const { data } = index_2.default;
-            const { promptsFilter } = index_1.default.state;
-            const { collectionToolsId, selectedCollectionPrompts } = state;
-            if (!collectionToolsId)
-                return;
-            const filterSetup = promptsFilter["collectionTools"];
-            const targetCollection = data.original[collectionToolsId];
-            if (!targetCollection)
-                return;
-            for (const item of targetCollection) {
-                const { id } = item;
-                if (!id)
-                    continue;
-                /**
-                 * Removing prompt from selected if it will not be shown.
-                 */
-                if (!(0, checkFilter_1.default)(item, filterSetup)) {
-                    if (selectedCollectionPrompts.includes(id)) {
-                        state.selectedCollectionPrompts = state.selectedCollectionPrompts.filter(selId => selId !== id);
-                    }
-                    continue;
-                }
-            }
-            index_2.default.saveJSONData(collectionToolsId);
-            index_2.default.updateMixedList();
-            CollectionTools.updateViews();
-        }
         static checkProgressState() {
             const { state } = index_1.default;
             const resultsContainer = index_1.default.DOMCache.containers[state.currentContainer].resultsContainer;
@@ -990,30 +961,17 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                     }
                     continue;
                 }
-                const promptContainer = document.createElement("div");
-                const selectArea = document.createElement("div");
-                const contentArea = document.createElement("div");
-                const topContainer = document.createElement("div");
-                const bottomContainer = document.createElement("div");
-                const nameContainer = document.createElement("div");
-                const tagsContainer = document.createElement("div");
-                const categoriesContainer = document.createElement("div");
-                const commentContainer = document.createElement("div");
+                const promptContainer = (0, dom_1.makeDiv)({ className: "PBE_detailedItem" });
+                const selectArea = (0, dom_1.makeDiv)({ className: "PBE_detailedItemSelector" });
+                const contentArea = (0, dom_1.makeDiv)({ className: "PBE_detailedItemContent" });
+                const topContainer = (0, dom_1.makeDiv)({ className: "PBE_detailedItemTop" });
+                const bottomContainer = (0, dom_1.makeDiv)({ className: "PBE_detailedItemBottom" });
+                const nameContainer = (0, dom_1.makeDiv)({ className: "PBE_detailedItemName", content: id });
+                const tagsContainer = (0, dom_1.makeDiv)({ className: "PBE_detailedItemTags", content: tags.join(", ") });
+                const categoriesContainer = (0, dom_1.makeDiv)({ className: "PBE_detailedItemCategories", content: category.join(", ") });
+                const commentContainer = (0, dom_1.makeDiv)({ className: "PBE_detailedItemComment", content: comment });
                 selectArea.dataset.id = id;
-                selectArea.className = "PBE_detailedItemSelector";
-                contentArea.className = "PBE_detailedItemContent";
                 selectArea.style.backgroundImage = index_2.default.getPromptPreviewURL(id, collectionToolsId);
-                promptContainer.className = "PBE_detailedItem";
-                topContainer.className = "PBE_detailedItemTop";
-                bottomContainer.className = "PBE_detailedItemBottom";
-                nameContainer.className = "PBE_detailedItemName";
-                commentContainer.className = "PBE_detailedItemComment";
-                tagsContainer.className = "PBE_detailedItemTags";
-                categoriesContainer.className = "PBE_detailedItemCategories";
-                nameContainer.innerText = id;
-                tagsContainer.innerText = tags.join(", ");
-                categoriesContainer.innerText = category.join(", ");
-                commentContainer.innerText = comment;
                 topContainer.appendChild(nameContainer);
                 topContainer.appendChild(commentContainer);
                 if (tags.length || category.length) {
@@ -1030,24 +988,22 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 wrapper.appendChild(promptContainer);
             }
         }
-        static showPromptsShort(wrapper) {
-        }
         static showCopyOrMove(wrapper) {
             const { state } = index_1.default;
             const { data } = index_2.default;
             const { collectionToolsId } = state;
             const collectionSelect = document.createElement("select");
             collectionSelect.className = "PBE_generalInput PBE_select";
-            const moveButton = document.createElement("div");
-            moveButton.innerText = "Move";
-            moveButton.className = "PBE_button";
-            moveButton.title = "Move selected prompts to the target collection";
-            moveButton.addEventListener("click", event_1.default.onMoveSelected);
-            const copyButton = document.createElement("div");
-            copyButton.innerText = "Copy";
-            copyButton.className = "PBE_button";
-            copyButton.title = "Copy selected prompts to the target collection";
-            copyButton.addEventListener("click", event_1.default.onCopySelected);
+            const moveButton = (0, dom_1.makeDiv)({ className: "PBE_button",
+                content: "Move",
+                title: "Move selected prompts to the target collection",
+                onClick: event_1.default.onMoveSelected,
+            });
+            const copyButton = (0, dom_1.makeDiv)({ className: "PBE_button",
+                content: "Copy",
+                title: "Copy selected prompts to the target collection",
+                onClick: event_1.default.onCopySelected,
+            });
             let options = "";
             for (const collectionId in data.original) {
                 if (collectionId === collectionToolsId)
@@ -1077,23 +1033,23 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             const categories = data.categories;
             let options = "";
             const categorySelect = document.createElement("select");
-            const addButton = document.createElement("div");
-            const removeButton = document.createElement("div");
             categorySelect.className = "PBE_generalInput PBE_select PBE_categoryAction";
-            addButton.className = "PBE_button";
-            addButton.title = "Add selected category to all selected prompts";
-            removeButton.className = "PBE_button PBE_buttonCancel";
-            addButton.innerText = "Add";
-            removeButton.title = "Remove selected category from all selected prompts";
-            removeButton.innerText = "Remove";
+            const addButton = (0, dom_1.makeDiv)({ className: "PBE_button",
+                content: "Add",
+                title: "Add selected category to all selected prompts",
+                onClick: event_1.default.onAddCategory,
+            });
+            const removeButton = (0, dom_1.makeDiv)({ className: "PBE_button PBE_buttonCancel",
+                content: "Remove",
+                title: "Remove selected category from all selected prompts",
+                onClick: event_1.default.onRemoveCategory,
+            });
             for (const categoryItem of categories) {
                 if (!categorySelect.value)
                     categorySelect.value = categoryItem;
                 options += `<option value="${categoryItem}">${categoryItem}</option>`;
             }
             categorySelect.innerHTML = options;
-            addButton.addEventListener("click", event_1.default.onAddCategory);
-            removeButton.addEventListener("click", event_1.default.onRemoveCategory);
             const container = document.createElement("fieldset");
             container.className = "PBE_fieldset";
             const legend = document.createElement("legend");
@@ -1106,18 +1062,18 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         }
         static showTagsAction(wrapper) {
             const tagsInput = document.createElement("input");
-            const addButton = document.createElement("div");
-            const removeButton = document.createElement("div");
             tagsInput.placeholder = "tag1, tag2, tag3";
             tagsInput.className = "PBE_generalInput PBE_input PBE_tagsAction";
-            addButton.className = "PBE_button";
-            removeButton.className = "PBE_button PBE_buttonCancel";
-            addButton.title = "Add target tags to all selected prompts";
-            removeButton.title = "Remove target tags from all selected prompts";
-            addButton.innerText = "Add";
-            removeButton.innerText = "Remove";
-            addButton.addEventListener("click", event_1.default.onAddTags);
-            removeButton.addEventListener("click", event_1.default.onRemoveTags);
+            const addButton = (0, dom_1.makeDiv)({ className: "PBE_button",
+                content: "Add",
+                title: "Add target tags to all selected prompts",
+                onClick: event_1.default.onAddTags,
+            });
+            const removeButton = (0, dom_1.makeDiv)({ className: "PBE_button PBE_buttonCancel",
+                content: "Remove",
+                title: "Remove target tags from all selected prompts",
+                onClick: event_1.default.onRemoveTags,
+            });
             const container = document.createElement("fieldset");
             container.className = "PBE_fieldset";
             const legend = document.createElement("legend");
@@ -1159,8 +1115,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             container.appendChild(styleSelect);
             CollectionTools.autogenStyleSelector = styleSelect;
             //assign button
-            const assignButton = (0, dom_1.makeElement)({ element: "div", className: "PBE_button", content: "Assign" });
-            assignButton.addEventListener("click", event_1.default.onAssignAutogenStyle);
+            const assignButton = (0, dom_1.makeDiv)({ className: "PBE_button",
+                content: "Assign",
+                onClick: event_1.default.onAssignAutogenStyle,
+            });
             container.appendChild(assignButton);
             //append to wrapper
             container.appendChild(legend);
@@ -1168,8 +1126,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         }
         static showAutogenerate(wrapper) {
             const { state } = index_1.default;
-            const generateButton = (0, dom_1.makeElement)({ element: "div", className: "PBE_button", content: "Generate" });
-            generateButton.addEventListener("click", event_1.default.onGeneratePreviews);
+            const generateButton = (0, dom_1.makeDiv)({ className: "PBE_button",
+                content: "Generate",
+                onClick: event_1.default.onGeneratePreviews,
+            });
             const generateTypeSelect = (0, dom_1.makeSelect)({
                 className: "PBE_generalInput PBE_select", value: state.autoGenerateType,
                 options: [
@@ -1191,16 +1151,16 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         }
         static showActions(wrapper) {
             const { data } = index_2.default;
-            const toggleAllButton = document.createElement("div");
-            toggleAllButton.innerText = "Toggle all";
-            toggleAllButton.className = "PBE_button";
-            toggleAllButton.title = "Select and unselect all visible prompts";
-            toggleAllButton.addEventListener("click", event_1.default.onToggleSelected);
-            const deleteButton = document.createElement("div");
-            deleteButton.innerText = "Delete selected";
-            deleteButton.className = "PBE_button PBE_buttonCancel";
-            deleteButton.title = "Delete selected prompts";
-            deleteButton.addEventListener("click", event_1.default.onDeleteSelected);
+            const toggleAllButton = (0, dom_1.makeDiv)({ className: "PBE_button",
+                content: "Toggle all",
+                title: "Select and unselect all visible prompts",
+                onClick: event_1.default.onToggleSelected,
+            });
+            const deleteButton = (0, dom_1.makeDiv)({ className: "PBE_button PBE_buttonCancel",
+                content: "Delete selected",
+                title: "Delete selected prompts",
+                onClick: event_1.default.onDeleteSelected,
+            });
             const container = document.createElement("fieldset");
             container.className = "PBE_fieldset";
             const legend = document.createElement("legend");
@@ -1278,10 +1238,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             wrapper.innerHTML = "";
             wrapper.style.display = "flex";
             const footerBlock = (0, dom_1.makeDiv)({ className: "PBE_rowBlock PBE_rowBlock_wide PBE_toolsFooter" });
-            const closeButton = document.createElement("button");
-            closeButton.innerText = "Close";
-            closeButton.className = "PBE_button";
-            closeButton.addEventListener("click", event_1.default.onCloseWindow);
+            const closeButton = (0, dom_1.makeDiv)({ className: "PBE_button",
+                content: "Close",
+                onClick: event_1.default.onCloseWindow,
+            });
             const headerBlock = (0, dom_1.makeDiv)({ className: "PBE_collectionToolsHeader" });
             const contentBlock = (0, dom_1.makeDiv)({ className: "PBE_dataBlock PBE_Scrollbar PBE_windowContent" });
             const statusBlock = (0, dom_1.makeDiv)({ className: "PBE_collectionToolsStatus PBE_row" });
@@ -1309,6 +1269,51 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     CollectionTools.generateNextTimer = 0;
     CollectionTools.generateQueue = [];
     exports["default"] = CollectionTools;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/CollectionTools/updateCurrentCollection.ts":
+/*!***********************************************************!*\
+  !*** ./client/CollectionTools/updateCurrentCollection.ts ***!
+  \***********************************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/checkFilter */ "./client/checkFilter.ts"), __webpack_require__(/*! ./index */ "./client/CollectionTools/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, checkFilter_1, index_3) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function updateCurrentCollection() {
+        const { state } = index_1.default;
+        const { data } = index_2.default;
+        const { promptsFilter } = index_1.default.state;
+        const { collectionToolsId, selectedCollectionPrompts } = state;
+        if (!collectionToolsId)
+            return;
+        const filterSetup = promptsFilter["collectionTools"];
+        const targetCollection = data.original[collectionToolsId];
+        if (!targetCollection)
+            return;
+        for (const item of targetCollection) {
+            const { id } = item;
+            if (!id)
+                continue;
+            /**
+             * Removing prompt from selected if it will not be shown.
+             */
+            if (!(0, checkFilter_1.default)(item, filterSetup)) {
+                if (selectedCollectionPrompts.includes(id)) {
+                    state.selectedCollectionPrompts = state.selectedCollectionPrompts.filter(selId => selId !== id);
+                }
+                continue;
+            }
+        }
+        index_2.default.saveJSONData(collectionToolsId);
+        index_2.default.updateMixedList();
+        index_3.default.updateViews();
+    }
+    exports["default"] = updateCurrentCollection;
 }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
 		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
@@ -1891,6 +1896,111 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 
 /***/ }),
 
+/***/ "./client/Database/getPromptPreviewURL.ts":
+/*!************************************************!*\
+  !*** ./client/Database/getPromptPreviewURL.ts ***!
+  \************************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! client/const */ "./client/const.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! ./index */ "./client/Database/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, const_1, index_3, index_4) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function getModelPreview(targetPrompt, desiredCollection) {
+        if (!targetPrompt.knownModelPreviews)
+            return false;
+        let desiredModel = (0, index_3.getCheckpoint)();
+        if (desiredModel)
+            desiredModel = (0, index_2.makeFileNameSafe)(desiredModel);
+        let foundDesiredModel = false;
+        let targetCollection = "";
+        let targetModel = "";
+        let targetFile = "";
+        for (const colId in targetPrompt.knownModelPreviews) {
+            const models = targetPrompt.knownModelPreviews[colId];
+            if (!models)
+                continue;
+            //checking all models if no preview for desired model found yet
+            if (!foundDesiredModel) {
+                for (const modelId in models) {
+                    const fileItem = models[modelId];
+                    if (fileItem) {
+                        targetFile = fileItem;
+                        targetModel = modelId;
+                        targetCollection = colId;
+                        if (modelId === desiredModel) {
+                            foundDesiredModel = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            else if (desiredModel && models[desiredModel]) { //checking only preview for desired model if found it in any other collection
+                targetFile = models[desiredModel];
+                targetModel = desiredModel;
+                targetCollection = colId;
+            }
+            if (foundDesiredModel && colId === desiredCollection)
+                break;
+        }
+        if (targetCollection && targetModel && targetFile) {
+            const safeFileName = (0, index_2.makeFileNameSafe)(targetPrompt.id);
+            return `${targetCollection}/${targetModel}/${safeFileName}.${targetFile}`;
+        }
+        return false;
+    }
+    function getPromptPreviewURL(prompt, collectionId) {
+        if (!prompt)
+            return const_1.NEW_CARD_GRADIENT;
+        const apiUrl = index_4.default.getAPIurl("promptImage");
+        const { data } = index_4.default;
+        const { united } = data;
+        const { state } = index_1.default;
+        let fileExtension = "";
+        let targetPrompt = united.find(item => item.id.toLowerCase() === prompt.toLowerCase());
+        //if no target prompt found - searching for the normalized version of the target prompt
+        if (!targetPrompt) {
+            const normalizedPrompt = (0, index_2.normalizePrompt)({ prompt, state, data });
+            targetPrompt = united.find(item => item.id.toLowerCase() === normalizedPrompt.toLowerCase());
+        }
+        //if no prompt found - returning New Card image.
+        if (!targetPrompt)
+            return const_1.NEW_CARD_GRADIENT;
+        if (!collectionId && state.filterCollection)
+            collectionId = state.filterCollection;
+        //checking target model previews
+        if (targetPrompt.knownModelPreviews) {
+            const modelPreviewPath = getModelPreview(targetPrompt, collectionId);
+            if (modelPreviewPath) {
+                return `url("${apiUrl}/${modelPreviewPath}?${state.filesIteration}"), ${const_1.EMPTY_CARD_GRADIENT}`;
+            }
+        }
+        //checking general previews
+        if (!targetPrompt.knownPreviews)
+            return const_1.NEW_CARD_GRADIENT;
+        if (collectionId && targetPrompt.knownPreviews[collectionId])
+            fileExtension = targetPrompt.knownPreviews[collectionId];
+        if (!fileExtension) {
+            for (let colId in targetPrompt.knownPreviews) {
+                fileExtension = targetPrompt.knownPreviews[colId];
+                collectionId = colId;
+                break;
+            }
+        }
+        if (!collectionId)
+            return const_1.EMPTY_CARD_GRADIENT;
+        if (!fileExtension)
+            return const_1.EMPTY_CARD_GRADIENT;
+        const safeFileName = (0, index_2.makeFileNameSafe)(prompt);
+        const url = `url("${apiUrl}/${collectionId}/${safeFileName}.${fileExtension}?${state.filesIteration}"), ${const_1.EMPTY_CARD_GRADIENT}`;
+        return url;
+    }
+    exports["default"] = getPromptPreviewURL;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
 /***/ "./client/Database/index.ts":
 /*!**********************************!*\
   !*** ./client/Database/index.ts ***!
@@ -1906,7 +2016,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/ActivePrompts/index */ "./client/ActivePrompts/index.ts"), __webpack_require__(/*! client/CurrentPrompts/index */ "./client/CurrentPrompts/index.ts"), __webpack_require__(/*! client/PreviewSave/index */ "./client/PreviewSave/index.ts"), __webpack_require__(/*! client/LoadStyle/index */ "./client/LoadStyle/index.ts"), __webpack_require__(/*! client/categories */ "./client/categories.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! client/const */ "./client/const.ts"), __webpack_require__(/*! client/KnownPrompts/index */ "./client/KnownPrompts/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, index_5, categories_1, index_6, const_1, index_7) {
+!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/CurrentPrompts/index */ "./client/CurrentPrompts/index.ts"), __webpack_require__(/*! client/LoadStyle/index */ "./client/LoadStyle/index.ts"), __webpack_require__(/*! client/categories */ "./client/categories.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! client/const */ "./client/const.ts"), __webpack_require__(/*! client/KnownPrompts/index */ "./client/KnownPrompts/index.ts"), __webpack_require__(/*! ./savePromptPreview */ "./client/Database/savePromptPreview.ts"), __webpack_require__(/*! ./getPromptPreviewURL */ "./client/Database/getPromptPreviewURL.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, categories_1, index_4, const_1, index_5, savePromptPreview_1, getPromptPreviewURL_1) {
     "use strict";
     var _a;
     Object.defineProperty(exports, "__esModule", ({ value: true }));
@@ -1945,8 +2055,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
                 if (!Array.isArray(collection))
                     continue;
                 for (const collectionPrompt of collection) {
-                    const { id, isExternalNetwork, previewImage, addAtStart, addAfter, addStart, addEnd } = collectionPrompt;
-                    let newItem = { id, tags: [], category: [], collections: [], knownPreviews: {} };
+                    const { id, isExternalNetwork, previewImage, previews, addAtStart, addAfter, addStart, addEnd } = collectionPrompt;
+                    let newItem = { id, tags: [], category: [], collections: [], knownPreviews: {}, knownModelPreviews: {} };
                     if (addedIds[id])
                         newItem = unitedArray.find(item => item.id === id);
                     if (addAtStart)
@@ -1961,6 +2071,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
                         newItem.isExternalNetwork = true;
                     if (previewImage) {
                         newItem.knownPreviews[collectionId] = previewImage;
+                    }
+                    if (previews) {
+                        for (const modelId in previews) {
+                            if (previews[modelId] && previews[modelId].file) {
+                                if (!newItem.knownModelPreviews[collectionId])
+                                    newItem.knownModelPreviews[collectionId] = {};
+                                newItem.knownModelPreviews[collectionId][modelId] = previews[modelId].file;
+                            }
+                        }
                     }
                     if (!newItem.collections.includes(collectionId)) {
                         newItem.collections.push(collectionId);
@@ -1995,7 +2114,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
             if (!name || !id || !previewImage)
                 return const_1.NEW_CARD_GRADIENT;
             const apiUrl = Database.getAPIurl("styleImage");
-            const safeFileName = (0, index_6.makeFileNameSafe)(name);
+            const safeFileName = (0, index_4.makeFileNameSafe)(name);
             const url = `url("${apiUrl}/${id}/${safeFileName}.${previewImage}?${state.filesIteration}"), ${const_1.EMPTY_CARD_GRADIENT}`;
             return url;
         }
@@ -2014,8 +2133,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
                 });
                 //const answer = await rawResponse.json();
                 Database.load();
-                index_7.default.update();
-                index_3.default.update();
+                index_5.default.update();
+                index_2.default.update();
             }))();
         }
         static createNewStylesCollection(id, mode = "short") {
@@ -2033,8 +2152,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
                 });
                 //const answer = await rawResponse.json();
                 Database.load();
-                index_7.default.update();
-                index_3.default.update();
+                index_5.default.update();
+                index_2.default.update();
             }))();
         }
     }
@@ -2067,8 +2186,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
                 body: JSON.stringify({ collection: collectionId, data: JSON.stringify(targetData), noClear })
             });
             if (!noUpdate) {
-                index_7.default.update();
-                index_3.default.update(true);
+                index_5.default.update();
+                index_2.default.update(true);
             }
         }))();
     };
@@ -2104,7 +2223,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
         targetCollection.splice(indexInOriginA, 0, element);
         Database.saveJSONData(collectionId, false, true);
         Database.updateMixedList();
-        index_7.default.update();
+        index_5.default.update();
     };
     Database.movePreviewImage = (item, movefrom, to, type) => {
         const { state } = index_1.default;
@@ -2119,125 +2238,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
                 body: JSON.stringify({ item, movefrom, to, type })
             });
             state.filesIteration++;
-            index_7.default.update();
-            index_3.default.update(true);
+            index_5.default.update();
+            index_2.default.update(true);
         }))();
     };
-    Database.getPromptPreviewURL = (prompt, collectionId) => {
-        if (!prompt)
-            return const_1.NEW_CARD_GRADIENT;
-        const apiUrl = Database.getAPIurl("promptImage");
-        const { data } = Database;
-        const { united } = data;
-        const { state } = index_1.default;
-        let fileExtension = "";
-        let targetPrompt = united.find(item => item.id.toLowerCase() === prompt.toLowerCase());
-        //if no target prompt found - searching for the normalized version of the target prompt
-        if (!targetPrompt) {
-            const normalizedPrompt = (0, index_6.normalizePrompt)({ prompt, state, data });
-            targetPrompt = united.find(item => item.id.toLowerCase() === normalizedPrompt.toLowerCase());
-        }
-        //if no prompt found - returning New Card image.
-        if (!targetPrompt || !targetPrompt.knownPreviews)
-            return const_1.NEW_CARD_GRADIENT;
-        if (!collectionId && state.filterCollection)
-            collectionId = state.filterCollection;
-        if (collectionId && targetPrompt.knownPreviews[collectionId])
-            fileExtension = targetPrompt.knownPreviews[collectionId];
-        if (!fileExtension) {
-            for (let colId in targetPrompt.knownPreviews) {
-                fileExtension = targetPrompt.knownPreviews[colId];
-                collectionId = colId;
-                break;
-            }
-        }
-        if (!collectionId)
-            return const_1.EMPTY_CARD_GRADIENT;
-        if (!fileExtension)
-            return const_1.EMPTY_CARD_GRADIENT;
-        const safeFileName = (0, index_6.makeFileNameSafe)(prompt);
-        const url = `url("${apiUrl}/${collectionId}/${safeFileName}.${fileExtension}?${state.filesIteration}"), ${const_1.EMPTY_CARD_GRADIENT}`;
-        return url;
-    };
-    Database.savePromptPreview = (callUpdate = true) => {
-        const { state } = index_1.default;
-        const { data } = Database;
-        const { united } = data;
-        const { selectedPrompt, savePreviewCollection, currentContainer } = state;
-        const url = Database.getAPIurl("savePreview");
-        const imageArea = index_1.default.DOMCache.containers[currentContainer].imageArea;
-        if (!imageArea)
-            return;
-        if (!selectedPrompt)
-            return;
-        if (!savePreviewCollection)
-            return;
-        const imageContainer = imageArea.querySelector("img");
-        if (!imageContainer)
-            return;
-        let isExternalNetwork = false;
-        let src = imageContainer.src;
-        const fileMarkIndex = src.indexOf("file=");
-        if (fileMarkIndex === -1)
-            return;
-        src = src.slice(fileMarkIndex + 5);
-        const cacheMarkIndex = src.indexOf("?");
-        if (cacheMarkIndex && cacheMarkIndex !== -1)
-            src = src.substring(0, cacheMarkIndex);
-        const imageExtension = src.split('.').pop();
-        if (!data.original[savePreviewCollection])
-            return;
-        //checking if prompt have an external network syntax.
-        const targetCurrentPrompt = index_2.default.getPromptById({ id: state.selectedPrompt });
-        if (targetCurrentPrompt && targetCurrentPrompt.isExternalNetwork)
-            isExternalNetwork = true;
-        const saveData = { src, prompt: selectedPrompt, collection: savePreviewCollection };
-        if (isExternalNetwork)
-            saveData.isExternalNetwork = true;
-        let targetItem = united.find(item => item.id === selectedPrompt);
-        if (!targetItem) {
-            targetItem = { id: selectedPrompt, tags: [], category: [], collections: [] };
-            if (isExternalNetwork)
-                targetItem.isExternalNetwork = true;
-            united.push(targetItem);
-        }
-        if (!targetItem.collections)
-            targetItem.collections = [];
-        if (!targetItem.collections.includes(savePreviewCollection)) {
-            targetItem.collections.push(savePreviewCollection);
-        }
-        let originalItem = data.original[savePreviewCollection].find(item => item.id === selectedPrompt);
-        if (!originalItem) {
-            originalItem = { id: selectedPrompt, tags: [], category: [] };
-            if (isExternalNetwork)
-                originalItem.isExternalNetwork = true;
-            data.original[savePreviewCollection].push(originalItem);
-        }
-        if (state.config.resizeThumbnails && state.config.resizeThumbnailsFormat) {
-            originalItem.previewImage = state.config.resizeThumbnailsFormat.toLowerCase();
-        }
-        else
-            originalItem.previewImage = imageExtension;
-        (() => __awaiter(void 0, void 0, void 0, function* () {
-            const rawResponse = yield fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(saveData)
-            });
-            const answer = yield rawResponse.json();
-            if (answer === "ok" && callUpdate) {
-                state.selectedPrompt = undefined;
-                state.filesIteration++;
-                Database.updateMixedList();
-                index_4.default.update();
-                index_7.default.update();
-                index_3.default.update(true);
-            }
-        }))();
-    };
+    Database.getPromptPreviewURL = getPromptPreviewURL_1.default;
+    Database.savePromptPreview = savePromptPreview_1.default;
     Database.updateStyles = (collectionId) => {
         if (!collectionId)
             return;
@@ -2282,7 +2288,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
                     }
                 });
             }
-            index_5.default.update();
+            index_3.default.update();
         }))();
     };
     Database.onUpdateStylePreview = (e) => {
@@ -2292,7 +2298,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
         let collectionId = undefined;
         let styleId = undefined;
         if (target.dataset.action) {
-            const { selectedItem } = index_5.default;
+            const { selectedItem } = index_3.default;
             collectionId = selectedItem.collection;
             styleId = selectedItem.styleId;
         }
@@ -2342,10 +2348,140 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
                     }
                 });
             }
-            index_5.default.update();
+            index_3.default.update();
         }))();
     };
     exports["default"] = Database;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/Database/savePromptPreview.ts":
+/*!**********************************************!*\
+  !*** ./client/Database/savePromptPreview.ts ***!
+  \**********************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/ActivePrompts/index */ "./client/ActivePrompts/index.ts"), __webpack_require__(/*! client/CurrentPrompts/index */ "./client/CurrentPrompts/index.ts"), __webpack_require__(/*! client/PreviewSave/index */ "./client/PreviewSave/index.ts"), __webpack_require__(/*! client/KnownPrompts/index */ "./client/KnownPrompts/index.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! ./index */ "./client/Database/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, index_4, index_5, index_6, index_7) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function getGeneratedImageSrc() {
+        const { state } = index_1.default;
+        const { selectedPrompt, savePreviewCollection, currentContainer } = state;
+        const imageArea = index_1.default.DOMCache.containers[currentContainer].imageArea;
+        if (!imageArea)
+            return false;
+        if (!selectedPrompt)
+            return false;
+        if (!savePreviewCollection)
+            return false;
+        const imageContainer = imageArea.querySelector("img");
+        if (!imageContainer)
+            return false;
+        let src = imageContainer.src;
+        const fileMarkIndex = src.indexOf("file=");
+        if (fileMarkIndex === -1)
+            return false;
+        src = src.slice(fileMarkIndex + 5);
+        const cacheMarkIndex = src.indexOf("?");
+        if (cacheMarkIndex && cacheMarkIndex !== -1)
+            src = src.substring(0, cacheMarkIndex);
+        const extension = src.split('.').pop();
+        return { src, extension };
+    }
+    function updateInCollections(isExternalNetwork, extension, checkpoint = "") {
+        const { state } = index_1.default;
+        const { data } = index_7.default;
+        const { united, original } = data;
+        const { selectedPrompt, savePreviewCollection } = state;
+        checkpoint = (0, index_6.makeFileNameSafe)(checkpoint);
+        let targetItem = united.find(item => item.id === selectedPrompt);
+        if (!targetItem) {
+            targetItem = { id: selectedPrompt, tags: [], category: [], collections: [] };
+            if (isExternalNetwork)
+                targetItem.isExternalNetwork = true;
+            united.push(targetItem);
+        }
+        if (!targetItem.collections)
+            targetItem.collections = [];
+        if (!targetItem.collections.includes(savePreviewCollection)) {
+            targetItem.collections.push(savePreviewCollection);
+        }
+        let originalItem = original[savePreviewCollection].find(item => item.id === selectedPrompt);
+        if (!originalItem) {
+            originalItem = { id: selectedPrompt, tags: [], category: [] };
+            if (isExternalNetwork)
+                originalItem.isExternalNetwork = true;
+            original[savePreviewCollection].push(originalItem);
+        }
+        if (state.config.resizeThumbnails && state.config.resizeThumbnailsFormat)
+            extension = state.config.resizeThumbnailsFormat.toLowerCase();
+        if (state.config.savePreviewForModel) {
+            if (!originalItem.previews)
+                originalItem.previews = {};
+            if (checkpoint)
+                originalItem.previews[checkpoint] = {
+                    file: extension,
+                };
+        }
+        else
+            originalItem.previewImage = extension;
+    }
+    function savePromptPreview(callUpdate = true) {
+        const { state } = index_1.default;
+        const { data } = index_7.default;
+        const { selectedPrompt, savePreviewCollection } = state;
+        const url = index_7.default.getAPIurl("savePreview");
+        let isExternalNetwork = false;
+        if (!data.original[savePreviewCollection])
+            return;
+        const srcImage = getGeneratedImageSrc();
+        if (!srcImage)
+            return;
+        const { src, extension } = srcImage;
+        //checking if prompt have an external network syntax.
+        const targetCurrentPrompt = index_2.default.getPromptById({ id: state.selectedPrompt });
+        if (targetCurrentPrompt && targetCurrentPrompt.isExternalNetwork)
+            isExternalNetwork = true;
+        const saveData = { src, prompt: selectedPrompt, collection: savePreviewCollection };
+        if (isExternalNetwork)
+            saveData.isExternalNetwork = true;
+        const checkpoint = (0, index_6.getCheckpoint)();
+        if (checkpoint)
+            saveData.model = checkpoint;
+        updateInCollections(isExternalNetwork, extension, checkpoint || "");
+        (() => __awaiter(this, void 0, void 0, function* () {
+            const rawResponse = yield fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(saveData)
+            });
+            const answer = yield rawResponse.json();
+            if (answer === "ok" && callUpdate) {
+                state.selectedPrompt = undefined;
+                state.filesIteration++;
+                index_7.default.updateMixedList();
+                index_4.default.update();
+                index_5.default.update();
+                index_3.default.update(true);
+            }
+        }))();
+    }
+    exports["default"] = savePromptPreview;
 }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
 		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
@@ -3643,12 +3779,18 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \*************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/dom */ "./client/dom.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, dom_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     class PreviewSave {
         static onSavePreview() {
             index_2.default.savePromptPreview();
+        }
+        static onChangeCollection(e) {
+            const { state } = index_1.default;
+            const target = e.currentTarget;
+            const value = target.value;
+            state.savePreviewCollection = value || undefined;
         }
     }
     PreviewSave.init = (wrapper, containerId) => {
@@ -3666,27 +3808,22 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         wrapper.innerHTML = "";
         if (!state.selectedPrompt)
             return;
-        const savePromptPreviewButton = document.createElement("div");
-        savePromptPreviewButton.className = "PBE_actionButton PBE_savePromptPreview";
-        savePromptPreviewButton.innerText = "save preview";
-        const collectionSelect = document.createElement("select");
-        collectionSelect.className = "PBE_generalInput PBE_select PBE_savePromptSelect";
-        let options = "";
+        const savePromptPreviewButton = (0, dom_1.makeDiv)({ className: "PBE_actionButton PBE_savePromptPreview",
+            content: "Save preview",
+            title: "Save the generated preview for the selected prompt",
+            onClick: PreviewSave.onSavePreview,
+        });
+        let options = [];
         for (const collectionId in data.original) {
             if (!state.savePreviewCollection)
                 state.savePreviewCollection = collectionId;
-            options += `<option value="${collectionId}">${collectionId}</option>`;
+            options.push({ name: collectionId, id: collectionId });
         }
-        collectionSelect.innerHTML = options;
-        if (state.savePreviewCollection)
-            collectionSelect.value = state.savePreviewCollection;
-        collectionSelect.addEventListener("change", (e) => {
-            const target = e.currentTarget;
-            const value = target.value;
-            state.savePreviewCollection = value || undefined;
+        const collectionSelect = (0, dom_1.makeSelect)({ className: "PBE_generalInput PBE_select PBE_savePromptSelect",
+            value: state.savePreviewCollection || undefined,
+            options,
+            onChange: PreviewSave.onChangeCollection,
         });
-        savePromptPreviewButton.removeEventListener("click", PreviewSave.onSavePreview);
-        savePromptPreviewButton.addEventListener("click", PreviewSave.onSavePreview);
         wrapper.appendChild(collectionSelect);
         wrapper.appendChild(savePromptPreviewButton);
     };
@@ -6732,7 +6869,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     function makeElement(params) {
         if (!params)
             return;
-        const { element, id, name, className, type, content, title, style, value, placeholder, onChange } = params;
+        const { element, id, name, className, type, content, title, style, value, placeholder, onChange, onClick } = params;
         if (!element)
             return;
         const newElement = document.createElement(element);
@@ -6757,6 +6894,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 newElement.style[i] = style[i];
         if (onChange)
             newElement.addEventListener("change", onChange);
+        if (onClick)
+            newElement.addEventListener("click", onClick);
         return newElement;
     }
     exports.makeElement = makeElement;
@@ -6918,6 +7057,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             return;
         }
         DOMCache.mainContainer = mainContainer;
+        DOMCache.modelCheckpoint = mainContainer.querySelector("#setting_sd_model_checkpoint");
         const tabsContainer = mainContainer.querySelector("#tabs > div:first-child");
         tabsContainer.removeEventListener("click", PromptsBrowser.onChangeTab);
         tabsContainer.addEventListener("click", PromptsBrowser.onChangeTab);
@@ -7507,10 +7647,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \*******************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/ActivePrompts/index */ "./client/ActivePrompts/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! ./promptStringToObject */ "./client/utils/promptStringToObject.ts"), __webpack_require__(/*! ./parseGroups */ "./client/utils/parseGroups.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, promptStringToObject_1, parseGroups_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/ActivePrompts/index */ "./client/ActivePrompts/index.ts"), __webpack_require__(/*! client/Database/index */ "./client/Database/index.ts"), __webpack_require__(/*! client/index */ "./client/index.ts"), __webpack_require__(/*! ./promptStringToObject */ "./client/utils/promptStringToObject.ts"), __webpack_require__(/*! ./parseGroups */ "./client/utils/parseGroups.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, index_2, index_3, promptStringToObject_1, parseGroups_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
-    exports.log = exports.isInSameCollection = exports.randomIntFromInterval = exports.addStrToActive = exports.stringToPromptsArray = exports.promptStringToObject = exports.parseGroups = exports.normalizePrompt = exports.makeFileNameSafe = exports.replaceAllRegex = exports.clone = void 0;
+    exports.log = exports.isInSameCollection = exports.randomIntFromInterval = exports.addStrToActive = exports.stringToPromptsArray = exports.promptStringToObject = exports.getCheckpoint = exports.parseGroups = exports.normalizePrompt = exports.makeFileNameSafe = exports.replaceAllRegex = exports.clone = void 0;
     exports.promptStringToObject = promptStringToObject_1.default;
     exports.parseGroups = parseGroups_1.default;
     const regex = {
@@ -7632,6 +7772,26 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         return targetCollection;
     }
     exports.isInSameCollection = isInSameCollection;
+    function getCheckpoint() {
+        const checkpointSelector = index_3.default.DOMCache.modelCheckpoint;
+        if (!checkpointSelector)
+            return false;
+        const input = checkpointSelector.querySelector("input");
+        if (!input || !input.value)
+            return false;
+        let checkpoint = input.value;
+        //removing the cache marker.
+        const arr = checkpoint.split(" ");
+        const lastPart = arr[arr.length - 1];
+        if (lastPart && lastPart[0] === "[")
+            arr.pop();
+        checkpoint = arr.join(" ");
+        //remove file extension
+        checkpoint = checkpoint.replace(".safetensors", "");
+        checkpoint = checkpoint.trim();
+        return checkpoint;
+    }
+    exports.getCheckpoint = getCheckpoint;
 }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
 		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
