@@ -5,7 +5,7 @@ import { getCheckpoint } from "client/utils/index";
 import Prompt from "clientTypes/prompt";
 import Database from "./index";
 
-function getModelPreview(targetPrompt: Prompt, desiredCollection?: string): string | false {
+function getModelPreview(targetPrompt: Prompt, desiredCollection?: string, targetModelOnly: boolean = false): string | false {
     if(!targetPrompt.knownModelPreviews) return false;
     let desiredModel = getCheckpoint();
     if(desiredModel) desiredModel = makeFileNameSafe(desiredModel);
@@ -44,6 +44,8 @@ function getModelPreview(targetPrompt: Prompt, desiredCollection?: string): stri
         if(foundDesiredModel && colId === desiredCollection) break;
     }
 
+    if(targetModelOnly && !foundDesiredModel) return false;
+
     if(targetCollection && targetModel && targetFile) {
         const safeFileName = makeFileNameSafe(targetPrompt.id);
         return `${targetCollection}/${targetModel}/${safeFileName}.${targetFile}`;
@@ -74,12 +76,12 @@ function getPromptPreviewURL(prompt: string, collectionId?: string) {
 
     //checking target model previews
     if(targetPrompt.knownModelPreviews) {
-        const modelPreviewPath = getModelPreview(targetPrompt, collectionId);
+        const modelPreviewPath = getModelPreview(targetPrompt, collectionId, true);
         if(modelPreviewPath) {
             return `url("${apiUrl}/${modelPreviewPath}?${state.filesIteration}"), ${EMPTY_CARD_GRADIENT}`;
         }
     }
-
+    
     //checking general previews
     if(!targetPrompt.knownPreviews) return NEW_CARD_GRADIENT;
 
@@ -94,8 +96,14 @@ function getPromptPreviewURL(prompt: string, collectionId?: string) {
         }
     }
 
-    if(!collectionId) return EMPTY_CARD_GRADIENT;
-    if(!fileExtension) return EMPTY_CARD_GRADIENT;
+    if(!collectionId || !fileExtension) {
+        const anyModelPreviewPath = getModelPreview(targetPrompt, collectionId, false);
+        if(anyModelPreviewPath) {
+            return `url("${apiUrl}/${anyModelPreviewPath}?${state.filesIteration}"), ${EMPTY_CARD_GRADIENT}`;
+        }
+
+        return EMPTY_CARD_GRADIENT;
+    }
 
     const safeFileName = makeFileNameSafe(prompt);
 
