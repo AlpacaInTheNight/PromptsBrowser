@@ -1,11 +1,14 @@
 @import url("./client/general.css");
 
-@import url("./client/promptTools/style.css");
-@import url("./client/PromptScribe/style.css");
-@import url("./client/CollectionTools/style.css");
-@import url("./client/LoadStyle/style.css");
-@import url("./client/SetupWindow/style.css");
-@import url("./client/PromptEdit/style.css");
-@import url("./client/PromptsFilter/style.css");
-@import url("./client/KnownPrompts/style.css");
-@import url("./client/ControlPanel/style.css");
+@import url("./client/components/KnownPrompts/style.css");
+@import url("./client/components/ControlPanel/style.css");
+@import url("./client/components/PromptTooltip/style.css");
+@import url("./client/components/PromptEdit/style.css");
+@import url("./client/components/TextareaButtons/style.css");
+@import url("./client/components/LoadStyle/style.css");
+@import url("./client/components/PromptTools/style.css");
+@import url("./client/components/CollectionTools/style.css");
+@import url("./client/components/PromptScribe/style.css");
+@import url("./client/components/SetupWindow/style.css");
+
+@import url("./client/components/ui/PromptsFilter/style.css");

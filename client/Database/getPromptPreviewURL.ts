@@ -1,13 +1,18 @@
-import PromptsBrowser from "client/index";
 import { makeFileNameSafe, normalizePrompt } from "client/utils/index";
 import { EMPTY_CARD_GRADIENT, NEW_CARD_GRADIENT } from "client/const";
 import { getCheckpoint } from "client/utils/index";
 import Prompt from "clientTypes/prompt";
 import Database from "./index";
 
-function getModelPreview(targetPrompt: Prompt, desiredCollection?: string, targetModelOnly: boolean = false): string | false {
+
+function getModelPreview({targetPrompt, desiredCollection, desiredModel, targetModelOnly = false}: {
+    targetPrompt: Prompt;
+    desiredCollection?: string;
+    desiredModel?: string | false;
+    targetModelOnly?: boolean;
+}): string | false {
     if(!targetPrompt.knownModelPreviews) return false;
-    let desiredModel = getCheckpoint();
+    if(!desiredModel) desiredModel = getCheckpoint();
     if(desiredModel) desiredModel = makeFileNameSafe(desiredModel);
     let foundDesiredModel: boolean = false;
 
@@ -54,31 +59,42 @@ function getModelPreview(targetPrompt: Prompt, desiredCollection?: string, targe
     return false;
 }
 
-function getPromptPreviewURL(prompt: string, collectionId?: string) {
+function getPromptPreviewURL({prompt, collectionId, model, filesIteration = 0, filterCollection}: {
+    prompt: string;
+    collectionId?: string;
+    model?: string | false;
+    filesIteration?: number;
+    filterCollection?: string;
+}) {
     if(!prompt) return NEW_CARD_GRADIENT;
     const apiUrl = Database.getAPIurl("promptImage");
     const {data} = Database;
     const {united} = data;
-    const {state} = PromptsBrowser;
     let fileExtension = "";
 
     let targetPrompt = united.find(item => item.id.toLowerCase() === prompt.toLowerCase());
 
     //if no target prompt found - searching for the normalized version of the target prompt
     if(!targetPrompt) {
-        const normalizedPrompt = normalizePrompt({prompt, state, data});
+        const normalizedPrompt = normalizePrompt({prompt, data});
         targetPrompt = united.find(item => item.id.toLowerCase() === normalizedPrompt.toLowerCase());
     }
 
     //if no prompt found - returning New Card image.
     if(!targetPrompt) return NEW_CARD_GRADIENT;
-    if(!collectionId && state.filterCollection) collectionId = state.filterCollection;
+    if(!collectionId && filterCollection) collectionId = filterCollection;
 
     //checking target model previews
-    if(targetPrompt.knownModelPreviews) {
-        const modelPreviewPath = getModelPreview(targetPrompt, collectionId, true);
+    if(model !== false && targetPrompt.knownModelPreviews) {
+        const modelPreviewPath = getModelPreview({
+            targetPrompt,
+            desiredCollection: collectionId,
+            targetModelOnly: true,
+            desiredModel: model || false,
+        });
+        
         if(modelPreviewPath) {
-            return `url("${apiUrl}/${modelPreviewPath}?${state.filesIteration}"), ${EMPTY_CARD_GRADIENT}`;
+            return `url("${apiUrl}/${modelPreviewPath}?${filesIteration}"), ${EMPTY_CARD_GRADIENT}`;
         }
     }
     
@@ -97,9 +113,17 @@ function getPromptPreviewURL(prompt: string, collectionId?: string) {
     }
 
     if(!collectionId || !fileExtension) {
-        const anyModelPreviewPath = getModelPreview(targetPrompt, collectionId, false);
-        if(anyModelPreviewPath) {
-            return `url("${apiUrl}/${anyModelPreviewPath}?${state.filesIteration}"), ${EMPTY_CARD_GRADIENT}`;
+
+        if(model !== false) {
+            const anyModelPreviewPath = getModelPreview({
+                targetPrompt,
+                desiredCollection: collectionId,
+                targetModelOnly: false,
+            });
+            
+            if(anyModelPreviewPath) {
+                return `url("${apiUrl}/${anyModelPreviewPath}?${filesIteration}"), ${EMPTY_CARD_GRADIENT}`;
+            }
         }
 
         return EMPTY_CARD_GRADIENT;
@@ -107,8 +131,12 @@ function getPromptPreviewURL(prompt: string, collectionId?: string) {
 
     const safeFileName = makeFileNameSafe(prompt);
 
-    const url = `url("${apiUrl}/${collectionId}/${safeFileName}.${fileExtension}?${state.filesIteration}"), ${EMPTY_CARD_GRADIENT}`;
+    const url = `url("${apiUrl}/${collectionId}/${safeFileName}.${fileExtension}?${filesIteration}"), ${EMPTY_CARD_GRADIENT}`;
     return url;
 }
 
 export default getPromptPreviewURL;
+
+export {
+    getModelPreview,
+}

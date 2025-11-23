@@ -180,7 +180,7 @@ def getCollections(isReadOnly):
 
                 if previewImage: promptItem["previewImage"] = previewImage
                 else: promptItem.pop("previewImage", None)
-            
+
             #model level previews
             colModelsDirs = os.listdir(pathToPreviewDir)
             for colModelDirName in colModelsDirs:
@@ -197,7 +197,8 @@ def getCollections(isReadOnly):
                     elif safeFileName + ".jpg" in imageFileNames: previewImage = "jpg"
 
                     if previewImage:
-                        if not hasattr(promptItem, "previews"): promptItem["previews"] = {}
+                        if "previews" not in promptItem: promptItem["previews"] = {}
+
                         promptItem["previews"][colModelDirName] = {"file": previewImage}
 
                     elif hasattr(promptItem, "previews") and hasattr(promptItem["previews"], colModelDirName):

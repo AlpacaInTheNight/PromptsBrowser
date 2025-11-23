@@ -1,93 +1,31 @@
-import PromptsBrowser from "client/index";
-import ActivePrompts from "client/ActivePrompts/index";
-import CurrentPrompts from "client/CurrentPrompts/index";
-import PreviewSave from "client/PreviewSave/index";
-import KnownPrompts from "client/KnownPrompts/index";
-import { getCheckpoint, makeFileNameSafe } from "client/utils/index";
+import ActivePrompts from "client/managers/ActivePrompts";
+import { getCheckpoint } from "client/utils/index";
+import previewStore from "client/components/PreviewSave/store";
+import appStore, {setSelectedPrompt, updateFilesIteration} from "client/store";
 import Database from "./index";
 import { SavePrompt } from "./type";
+import getGeneratedImageSrc from "./utils/getGeneratedImageSrc";
+import updateInCollections from "./utils/updateInCollections";
 
-function getGeneratedImageSrc(): {src: string, extension: string} | false {
-    const {state} = PromptsBrowser;
-    const {selectedPrompt, savePreviewCollection, currentContainer} = state;
 
-    const imageArea = PromptsBrowser.DOMCache.containers[currentContainer].imageArea;
-    if(!imageArea) return false;
-    if(!selectedPrompt) return false;
-    if(!savePreviewCollection) return false;
-
-    const imageContainer = imageArea.querySelector("img");
-    if(!imageContainer) return false;
-
-    let src = imageContainer.src;
-    const fileMarkIndex = src.indexOf("file=");
-    if(fileMarkIndex === -1) return false;
-    src = src.slice(fileMarkIndex + 5);
-
-    const cacheMarkIndex = src.indexOf("?");
-    if(cacheMarkIndex && cacheMarkIndex !== -1) src = src.substring(0, cacheMarkIndex);
-
-    const extension = src.split('.').pop();
-
-    return {src, extension};
-}
-
-function updateInCollections(isExternalNetwork: boolean, extension: string, checkpoint: string = "") {
-    const {state} = PromptsBrowser;
+export default function savePromptPreview(callUpdate: boolean = true) {
     const {data} = Database;
-    const {united, original} = data;
-    const {selectedPrompt, savePreviewCollection} = state;
-    checkpoint = makeFileNameSafe(checkpoint);
-
-    let targetItem = united.find(item => item.id === selectedPrompt);
-    if(!targetItem) {
-        targetItem = {id: selectedPrompt, tags: [], category: [], collections: []};
-        if(isExternalNetwork) targetItem.isExternalNetwork = true;
-        united.push(targetItem);
-    }
-
-    if(!targetItem.collections) targetItem.collections = [];
-    if(!targetItem.collections.includes(savePreviewCollection)) {
-        targetItem.collections.push(savePreviewCollection);
-    }
-
-    let originalItem = original[savePreviewCollection].find(item => item.id === selectedPrompt);
-    if(!originalItem) {
-        originalItem = {id: selectedPrompt, tags: [], category: []};
-        if(isExternalNetwork) originalItem.isExternalNetwork = true;
-        original[savePreviewCollection].push(originalItem);
-    }
-
-    if(state.config.resizeThumbnails && state.config.resizeThumbnailsFormat) extension = state.config.resizeThumbnailsFormat.toLowerCase();
-
-    if(state.config.savePreviewForModel) {
-
-        if(!originalItem.previews) originalItem.previews = {};
-        if(checkpoint) originalItem.previews[checkpoint] = {
-            file: extension as any,
-        };
-
-    } else originalItem.previewImage = extension as any;
-}
-
-function savePromptPreview(callUpdate: boolean = true) {
-    const {state} = PromptsBrowser;
-    const {data} = Database;
-    const {selectedPrompt, savePreviewCollection} = state;
+    const {selectedPrompt} = appStore.getState();
+    const {previewCollection} = previewStore.getState();
     const url = Database.getAPIurl("savePreview");
     let isExternalNetwork = false;
 
-    if(!data.original[savePreviewCollection]) return;
+    if(!data.original[previewCollection]) return;
 
     const srcImage = getGeneratedImageSrc();
     if(!srcImage) return;
     const {src, extension} = srcImage;
 
     //checking if prompt have an external network syntax.
-    const targetCurrentPrompt = ActivePrompts.getPromptById({id: state.selectedPrompt});
+    const targetCurrentPrompt = ActivePrompts.getPromptById({id: selectedPrompt});
     if(targetCurrentPrompt && targetCurrentPrompt.isExternalNetwork) isExternalNetwork = true;
 
-    const saveData: SavePrompt = {src, prompt: selectedPrompt, collection: savePreviewCollection};
+    const saveData: SavePrompt = {src, prompt: selectedPrompt, collection: previewCollection};
     if(isExternalNetwork) saveData.isExternalNetwork = true;
 
     const checkpoint = getCheckpoint();
@@ -101,23 +39,18 @@ function savePromptPreview(callUpdate: boolean = true) {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify(saveData)
         });
         const answer = await rawResponse.json();
 
         if(answer === "ok" && callUpdate) {
-            state.selectedPrompt = undefined;
-            state.filesIteration++;
             Database.updateMixedList();
-            
-            PreviewSave.update();
-            KnownPrompts.update();
-            CurrentPrompts.update(true);
+
+            setSelectedPrompt(undefined);
+            updateFilesIteration();
         }
 
     })();
 }
-
-export default savePromptPreview;

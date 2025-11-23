@@ -18,10 +18,17 @@
     },
     "homepage": "https://github.com/AlpacaInTheNight/PromptsBrowser#readme",
     "devDependencies": {
+        "@types/react": "^19.1.1",
+        "@types/react-dom": "^19.1.2",
         "@types/webpack-env": "^1.18.4",
-        "webpack": "^5.90.3",
-        "webpack-cli": "^5.1.4",
         "ts-loader": "^9.5.1",
-        "typescript": "^4.3.5"
+        "typescript": "^4.3.5",
+        "webpack": "^5.90.3",
+        "webpack-cli": "^5.1.4"
+    },
+    "dependencies": {
+        "react": "^19.1.0",
+        "react-dom": "^19.1.0",
+        "zustand": "^5.0.3"
     }
 }

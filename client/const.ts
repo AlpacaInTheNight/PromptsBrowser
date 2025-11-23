@@ -7,9 +7,14 @@ const EMPTY_CARD_GRADIENT = "linear-gradient(135deg, rgba(179,220,237,1) 0%,rgba
 
 const NEW_CARD_GRADIENT = "linear-gradient(135deg, rgba(180,221,180,1) 0%,rgba(131,199,131,1) 17%,rgba(82,177,82,1) 33%,rgba(0,138,0,1) 67%,rgba(0,87,0,1) 83%,rgba(0,36,0,1) 100%)";
 
+const DEFAULT_CONTAINER_ID = "img2Img";
+const DEFAULT_CONTAINER_NAME = "txt2img";
+
 export {
     DEFAULT_PROMPT_WEIGHT,
     PROMPT_WEIGHT_FACTOR,
     EMPTY_CARD_GRADIENT,
     NEW_CARD_GRADIENT,
+    DEFAULT_CONTAINER_ID,
+    DEFAULT_CONTAINER_NAME,
 }

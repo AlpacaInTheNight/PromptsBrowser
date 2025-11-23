@@ -26,18 +26,18 @@ def moveModelPreviews(postJSON):
     for colModelDirName in colModelsDirs:
         if not isdir(join(pathToPreviewDir, colModelDirName)): continue
 
-        pathToPreviewDir        = join(pathPromptsCatalogue, itemFrom, "preview", colModelDirName)
+        pathToModelPreviewDir   = join(pathPromptsCatalogue, itemFrom, "preview", colModelDirName)
         pathSaveDest            = join(pathPromptsCatalogue, itemTo, "preview", colModelDirName)
         os.makedirs(pathSaveDest, exist_ok=True)
 
         extension = ".png"
 
-        imageFileNames = [filename for filename in os.listdir(pathToPreviewDir) if filename.endswith('.jpg') or filename.endswith('.png')]
+        imageFileNames = [filename for filename in os.listdir(pathToModelPreviewDir) if filename.endswith('.jpg') or filename.endswith('.png')]
         if safeFileName + ".png" in imageFileNames: extension = ".png"
         elif safeFileName + ".jpg" in imageFileNames: extension = ".jpg"
         else: continue
 
-        sourcePath = join(pathToPreviewDir, safeFileName + extension)
+        sourcePath = join(pathToModelPreviewDir, safeFileName + extension)
         savePath = join(pathSaveDest, safeFileName + extension)
 
         if not isfile(sourcePath): continue
@@ -54,7 +54,7 @@ def moveModelPreviews(postJSON):
             os.remove(sourcePath)
             emitMessage(f'preview image: deleted prompt preview "{item}" from "{itemFrom}" for model "{colModelDirName}"')
         
-        return "ok"
+    return "ok"
 
 def movePreview(postJSON):
     item = postJSON.item

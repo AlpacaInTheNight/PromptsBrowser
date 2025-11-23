@@ -2,6 +2,7 @@ import Prompt, { PromptEntity } from "clientTypes/prompt";
 import Filter from "clientTypes/filter";
 import { AddStyleType } from "clientTypes/style";
 
+
 type Config = {
     belowOneWeight: number;
     aboveOneWeight: number;

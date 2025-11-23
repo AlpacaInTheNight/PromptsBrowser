@@ -107,3 +107,4 @@ dist
 /styles_catalogue
 /prompts_catalogue
 /.vscode
+package-lock.json

@@ -1,4 +1,6 @@
 type AppContainer = {
+    tabName: string;
+
     prompt: string;
     results: string;
     gallery: string;
@@ -14,6 +16,8 @@ type AppContainer = {
 
 const supportedContainers: {[key: string]: AppContainer} = {
     text2Img: {
+        tabName: "txt2img",
+
         prompt: "txt2img_prompt_container",
         results: "txt2img_results",
         gallery: "txt2img_gallery_container",
@@ -27,6 +31,8 @@ const supportedContainers: {[key: string]: AppContainer} = {
         sampling: "txt2img_sampling",
     },
     img2Img: {
+        tabName: "img2img",
+
         prompt: "img2img_prompt_container",
         results: "img2img_results",
         gallery: "img2img_gallery_container",

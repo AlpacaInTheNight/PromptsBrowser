@@ -1,15 +1,17 @@
-import PromptsBrowser from "client/index";
-import CurrentPrompts from "client/CurrentPrompts/index";
-import LoadStyle from "client/LoadStyle/index";
 import Prompt from "clientTypes/prompt";
 import Style from "clientTypes/style";
 import Data from "clientTypes/data";
 import categories from "client/categories";
-import { makeFileNameSafe } from "client/utils/index";
-import { EMPTY_CARD_GRADIENT, NEW_CARD_GRADIENT } from "client/const";
-import KnownPrompts from "client/KnownPrompts/index";
+import ConfigManager from 'client/managers/Config'
+import { updateCollectionsIteration } from "client/store";
+
+import updateMixedList from "./updateMixedList";
 import savePromptPreview from "./savePromptPreview";
-import getPromptPreviewURL from "./getPromptPreviewURL";
+import getPromptPreviewURL from './getPromptPreviewURL'
+import getStylePreviewURL from './getStylePreviewURL'
+import updateStylePreview from './updateStylePreview'
+import renameStyle from './renameStyle'
+
 
 class Database {
 
@@ -29,7 +31,6 @@ class Database {
     }
 
     public static async load() {
-        const {state} = PromptsBrowser;
         const url = Database.getAPIurl("getPrompts")
         
         await fetch(url, {
@@ -40,17 +41,15 @@ class Database {
             const prompts = res.prompts as {[key: string]: Prompt[]};
             const styles = res.styles as {[key: string]: Style[]};
     
-            if(res.config) {
-                for(const i in res.config) {
-                    (state as any).config[i] = res.config[i];
-                }
-            }
+            if(res.config) ConfigManager.setConfig(res.config);
 
             Database.data.styles = styles;
             Database.data.original = prompts;
             Database.updateMixedList();
     
             Database.meta.readonly = readonly;
+
+            updateCollectionsIteration();
         });
     }
 
@@ -71,78 +70,16 @@ class Database {
                 },
                 body: JSON.stringify({collection: collectionId, data: JSON.stringify(targetData), noClear})
             });
-    
-            if(!noUpdate) {
-                KnownPrompts.update();
-                CurrentPrompts.update(true);
-            }
         })();
     }
 
-    public static updateMixedList() {
-        const unitedArray: Prompt[] = [];
-        const unitedList: {[key: string]: Prompt} = {};
-        const res = Database.data.original;
-        const addedIds: {[key: string]: boolean} = {};
-    
-        for(const collectionId in res) {
-            const collection = res[collectionId];
-            if(!Array.isArray(collection)) continue;
-    
-            for(const collectionPrompt of collection) {
-                const {id, isExternalNetwork, previewImage, previews, addAtStart, addAfter, addStart, addEnd} = collectionPrompt;
-                let newItem: Prompt = {id, tags: [], category: [], collections: [], knownPreviews: {}, knownModelPreviews: {}};
-                if(addedIds[id]) newItem = unitedArray.find(item => item.id === id);
-    
-                if(addAtStart) newItem.addAtStart = addAtStart;
-                if(addAfter) newItem.addAfter = addAfter;
-                if(addStart) newItem.addStart = addStart;
-                if(addEnd) newItem.addEnd = addEnd;
-    
-                if(isExternalNetwork) newItem.isExternalNetwork = true;
+    public static updateMixedList = updateMixedList;
 
-                if(previewImage) {
-                    newItem.knownPreviews[collectionId] = previewImage;
-                }
-
-                if(previews) {
-                    for(const modelId in previews) {
-                        if(previews[modelId] && previews[modelId].file) {
-                            if(!newItem.knownModelPreviews[collectionId]) newItem.knownModelPreviews[collectionId] = {};
-                            newItem.knownModelPreviews[collectionId][modelId] = previews[modelId].file;
-                        }
-                    }
-                }
-    
-                if(!newItem.collections.includes(collectionId)) {
-                    newItem.collections.push(collectionId);
-                }
-    
-                if(collectionPrompt.tags) {
-                    collectionPrompt.tags.forEach(item => {
-                        if(!newItem.tags.includes(item)) newItem.tags.push(item);
-                    });
-                }
-    
-                if(collectionPrompt.category) {
-                    collectionPrompt.category.forEach(item => {
-                        if(!newItem.category.includes(item)) newItem.category.push(item);
-                    });
-                }
-    
-                if(!addedIds[id]) {
-                    unitedArray.push(newItem);
-                    unitedList[id] = newItem;
-                }
-                addedIds[id] = true;
-            }
-        }
-    
-        Database.data.united = unitedArray;
-        Database.data.unitedList = unitedList;
-    }
-
-    public static movePrompt = (promptA: string, promptB: string, collectionId?: string) => {
+    /**
+     * Note: Code from the old implementation.
+     * I found updating the prompt collection to be a simpler and more universal solution. I left this code in case I'm wrong.
+     */
+    /* public static movePrompt = (promptA: string, promptB: string, collectionId?: string) => {
         const {united} = Database.data;
         const {state} = PromptsBrowser;
         if(!promptA || !promptB || promptA === promptB) return;
@@ -176,10 +113,9 @@ class Database {
         Database.saveJSONData(collectionId, false, true);
         Database.updateMixedList();
         KnownPrompts.update();
-    }
+    } */
 
     public static movePreviewImage = (item: string, movefrom: string, to: string, type: string) => {
-        const {state} = PromptsBrowser;
         const url = Database.getAPIurl("movePreview");
     
         (async () => {
@@ -192,27 +128,14 @@ class Database {
                 body: JSON.stringify({item, movefrom, to, type})
             });
     
-            state.filesIteration++;
+            /* state.filesIteration++;
             KnownPrompts.update();
-            CurrentPrompts.update(true);
+            CurrentPrompts.update(true); */
         })();
     }
 
     public static getPromptPreviewURL = getPromptPreviewURL;
-    
-    public static getStylePreviewURL(style: Style) {
-        const {state} = PromptsBrowser;
-        if(!style) return NEW_CARD_GRADIENT;
-        const {name, id, previewImage} = style;
-        if(!name || !id || !previewImage) return NEW_CARD_GRADIENT;
-    
-        const apiUrl = Database.getAPIurl("styleImage");
-    
-        const safeFileName = makeFileNameSafe(name);
-    
-        const url = `url("${apiUrl}/${id}/${safeFileName}.${previewImage}?${state.filesIteration}"), ${EMPTY_CARD_GRADIENT}`;
-        return url;
-    }
+    public static getStylePreviewURL = getStylePreviewURL;
 
     public static savePromptPreview = savePromptPreview;
 
@@ -239,108 +162,9 @@ class Database {
         })();
     }
 
-    public static onRenameStyle = (collection: string, oldName: string, newName: string) => {
-        const {data} = Database;
-    
-        if(!collection || !oldName || !newName) return;
-    
-        const url = Database.getAPIurl("renameStyle");
-    
-        (async () => {
-            const saveData = {oldName, newName, collection};
-    
-            const rawResponse = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(saveData)
-            });
-    
-            const targetStylesCollection = data.styles[collection];
-            if(targetStylesCollection) {
-                targetStylesCollection.some(item => {
-                    if(item.name === oldName) {
-                        item.name = newName;
-        
-                        return true;
-                    }
-                });
-            }
-    
-            LoadStyle.update();
-        })();
-    }
+    public static renameStyle = renameStyle;
 
-    public static onUpdateStylePreview = (e: MouseEvent) => {
-        const target = e.currentTarget as HTMLElement;
-        const {data} = Database;
-        const {state} = PromptsBrowser;
-    
-        let collectionId = undefined;
-        let styleId = undefined;
-    
-        if(target.dataset.action) {
-            const {selectedItem} = LoadStyle;
-            collectionId = selectedItem.collection;
-            styleId = selectedItem.styleId;
-    
-        } else {
-            collectionId = target.dataset.id;
-            styleId = target.dataset.id;
-        }
-    
-        if(!collectionId || !styleId) return;
-    
-        const imageArea = PromptsBrowser.DOMCache.containers[state.currentContainer].imageArea;
-        if(!imageArea) return;
-    
-        const imageContainer = imageArea.querySelector("img");
-        if(!imageContainer) return;
-    
-        let src = imageContainer.src;
-        const fileMarkIndex = src.indexOf("file=");
-        if(fileMarkIndex === -1) return;
-        src = src.slice(fileMarkIndex + 5);
-    
-        const cacheMarkIndex = src.indexOf("?");
-        if(cacheMarkIndex && cacheMarkIndex !== -1) src = src.substring(0, cacheMarkIndex);
-    
-        const imageExtension = src.split('.').pop();
-    
-        const url = Database.getAPIurl("saveStylePreview");
-    
-        (async () => {
-            const saveData = {src, style: styleId, collection: collectionId};
-    
-            const rawResponse = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(saveData)
-            });
-            //const content = await rawResponse.json();
-    
-            const targetStylesCollection = data.styles[collectionId];
-            if(targetStylesCollection) {
-                targetStylesCollection.some(item => {
-                    if(item.name === styleId) {
-                        if(state.config.resizeThumbnails && state.config.resizeThumbnailsFormat) {
-                            item.previewImage = state.config.resizeThumbnailsFormat.toLowerCase() as any;
-                    
-                        } else item.previewImage = imageExtension as any;
-        
-                        return true;
-                    }
-                });
-            }
-    
-            LoadStyle.update();
-        })();
-    }
+    public static updateStylePreview = updateStylePreview;
 
     public static createNewCollection(id: string, mode = "short") {
         if(!id) return;
@@ -358,8 +182,6 @@ class Database {
             //const answer = await rawResponse.json();
     
             Database.load();
-            KnownPrompts.update();
-            CurrentPrompts.update();
         })();
     }
     
@@ -379,8 +201,6 @@ class Database {
             //const answer = await rawResponse.json();
     
             Database.load();
-            KnownPrompts.update();
-            CurrentPrompts.update();
         })();
     }
 

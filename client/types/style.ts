@@ -1,4 +1,5 @@
-import Prompt, { PromptEntity } from "clientTypes/prompt";
+import { PromptEntity } from "clientTypes/prompt";
+
 
 type Style = {
     name: string;

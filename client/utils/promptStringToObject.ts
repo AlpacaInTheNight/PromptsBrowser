@@ -1,6 +1,7 @@
 import Prompt from "clientTypes/prompt";
 import { DEFAULT_PROMPT_WEIGHT, PROMPT_WEIGHT_FACTOR } from "client/const";
 
+
 /**
  * Converts prompt string to prompt object (including meta data like weight and external network).
  * @param {*} promptItem 

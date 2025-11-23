@@ -1,10 +1,13 @@
 
+
 /**
  * Prompt base.
- * This properties are stored in collection.
+ * This properties are stored in the collection.
  */
 type PromptBase = {
     id: string;
+
+    meta?: Partial<PromptMeta>;
 
     category?: string[];
 
@@ -36,6 +39,10 @@ type PromptBase = {
     
     //new
     previews?: {[key: string]: PromptPreview};
+}
+
+type PromptMeta = {
+    url: string;
 }
 
 /**
@@ -112,6 +119,7 @@ type PromptEntity = PromptGroup | Prompt;
 export {
     PromptEntity,
     PromptGroup,
+    PromptMeta,
 }
 
 export default Prompt;

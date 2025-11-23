@@ -249,6 +249,7 @@ select.PBE_generalInput {
 .PBE_Textarea {
     color: black;
     width: 500px;
+    flex-grow: 1;
 }
 
 /* Windows */
@@ -278,6 +279,15 @@ select.PBE_generalInput {
     align-content: flex-start;
 }
 
+.PBE_contentPanel {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    flex-grow: 1;
+    height: 100%;
+}
+
 .PBE_windowCurrentList {
     display: flex;
     flex-direction: row;
@@ -286,25 +296,35 @@ select.PBE_generalInput {
     flex-grow: 1;
     overflow-y: hidden;
     width: 100%;
+    padding: 4px;
 }
 
 /* Windows end*/
 
 .PBE_promptsWrapper {
+    z-index: 3;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     position: relative;
 }
 
+.PBE_promptsWrapper:hover {
+    z-index: 101;
+}
+
 .PBE_currentPrompts {
+    z-index: 3;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     padding: 5px 15px 15px 15px;
-    z-index: 502;
     justify-content: flex-start;
     align-items: flex-end;
+}
+
+.PBE_currentPrompts:hover {
+    z-index: 101;
 }
 
 .PBE_promptElement {
