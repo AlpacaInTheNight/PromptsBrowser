@@ -8235,31 +8235,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 /***/ ((module, exports, __webpack_require__) => {
 
 var __webpack_unused_export__;
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/supportedContainers */ "./client/supportedContainers.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! client/utils/gradioApp */ "./client/utils/gradioApp.ts"), __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! ./staticStore */ "./client/staticStore.ts"), __webpack_require__(/*! ./DOMCache */ "./client/DOMCache.ts"), __webpack_require__(/*! ./Database */ "./client/Database/index.ts"), __webpack_require__(/*! client/synchroniseCurrentPrompts */ "./client/synchroniseCurrentPrompts/index.ts"), __webpack_require__(/*! client/components/SetupWindow/mount */ "./client/components/SetupWindow/mount.tsx"), __webpack_require__(/*! client/components/ControlPanel/mount */ "./client/components/ControlPanel/mount.tsx"), __webpack_require__(/*! client/components/KnownPrompts/mount */ "./client/components/KnownPrompts/mount.tsx"), __webpack_require__(/*! client/components/CurrentPrompts/mount */ "./client/components/CurrentPrompts/mount.tsx"), __webpack_require__(/*! client/components/PromptTooltip/mount */ "./client/components/PromptTooltip/mount.tsx"), __webpack_require__(/*! client/components/PromptEdit/mount */ "./client/components/PromptEdit/mount.tsx"), __webpack_require__(/*! client/components/TextareaButtons/mount */ "./client/components/TextareaButtons/mount.tsx"), __webpack_require__(/*! client/components/LoadStyle/mount */ "./client/components/LoadStyle/mount.tsx"), __webpack_require__(/*! client/components/SaveStyle/mount */ "./client/components/SaveStyle/mount.tsx"), __webpack_require__(/*! client/components/PromptScribe/mount */ "./client/components/PromptScribe/mount.tsx"), __webpack_require__(/*! client/components/PreviewSave/mount */ "./client/components/PreviewSave/mount.tsx"), __webpack_require__(/*! client/components/CollectionTools/mount */ "./client/components/CollectionTools/mount.tsx"), __webpack_require__(/*! client/components/PromptTools/mount */ "./client/components/PromptTools/mount.tsx"), __webpack_require__(/*! client/components/ui/TagTooltip/mount */ "./client/components/ui/TagTooltip/mount.tsx")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, supportedContainers_1, index_1, gradioApp_1, store_1, staticStore_1, DOMCache_1, Database_1, synchroniseCurrentPrompts_1, mount_1, mount_2, mount_3, mount_4, mount_5, mount_6, mount_7, mount_8, mount_9, mount_10, mount_11, mount_12, mount_13, mount_14) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/supportedContainers */ "./client/supportedContainers.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! client/utils/gradioApp */ "./client/utils/gradioApp.ts"), __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! ./DOMCache */ "./client/DOMCache.ts"), __webpack_require__(/*! ./Database */ "./client/Database/index.ts"), __webpack_require__(/*! ./main/mountContainer */ "./client/main/mountContainer.ts"), __webpack_require__(/*! ./main/mountGlobal */ "./client/main/mountGlobal.ts"), __webpack_require__(/*! ./main/events/onChangeTab */ "./client/main/events/onChangeTab.ts"), __webpack_require__(/*! ./main/events/onDocumentKey */ "./client/main/events/onDocumentKey.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, supportedContainers_1, index_1, gradioApp_1, store_1, DOMCache_1, Database_1, mountContainer_1, mountGlobal_1, onChangeTab_1, onDocumentKey_1) {
     "use strict";
     __webpack_unused_export__ = ({ value: true });
     let timeoutPBUpdatePrompt = 0;
-    function onChangeTab(e) {
-        const target = e.target;
-        const tagName = target.tagName.toLowerCase();
-        if (tagName !== "button")
-            return;
-        const text = target.innerText.trim();
-        if (!text)
-            return;
-        (0, store_1.setCurrentContainer)(text);
-    }
-    function onDocumentKey(e) {
-        if (e.key !== "Escape")
-            return;
-        if (staticStore_1.default.onClose) {
-            staticStore_1.default.onClose();
-            staticStore_1.default.onClose = undefined;
-        }
-    }
     function tryToHook(tries = 0) {
-        const store = store_1.default.getState();
-        const showViews = store.showViews;
         const mainContainer = (0, gradioApp_1.default)();
         if (tries > 100) {
             (0, index_1.log)("No prompt wrapper container found or server did not returned prompts data.");
@@ -8273,92 +8253,192 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         DOMCache_1.default.mainContainer = mainContainer;
         DOMCache_1.default.modelCheckpoint = mainContainer.querySelector("#setting_sd_model_checkpoint");
         const tabsContainer = mainContainer.querySelector("#tabs > div:first-child");
-        tabsContainer.removeEventListener("click", onChangeTab);
-        tabsContainer.addEventListener("click", onChangeTab);
-        document.removeEventListener('keyup', onDocumentKey);
-        document.addEventListener('keyup', onDocumentKey);
-        for (const containerId in supportedContainers_1.default) {
-            const container = supportedContainers_1.default[containerId];
-            const { tabName = "" } = container;
-            DOMCache_1.default.containers[tabName] = {};
-            const domContainer = DOMCache_1.default.containers[tabName];
-            if (container.prompt) {
-                const promptContainer = mainContainer.querySelector(`#${container.prompt}`);
-                const positivePrompts = mainContainer.querySelector(`#${container.prompt} > div`);
-                const negativePrompts = mainContainer.querySelector(`#${container.prompt} > div:nth-child(2)`);
-                if (!positivePrompts || !negativePrompts) {
-                    (0, index_1.log)(`No prompt containers found for ${tabName}`);
-                    continue;
-                }
-                domContainer.promptContainer = promptContainer;
-                domContainer.positivePrompts = positivePrompts;
-                domContainer.negativePrompts = negativePrompts;
-                if (!showViews.includes(store_1.ViewType.POSITIVE))
-                    positivePrompts.style.display = "none";
-                if (!showViews.includes(store_1.ViewType.NEGATIVE))
-                    negativePrompts.style.display = "none";
-                //in order to be able to place buttons correctly
-                positivePrompts.style.position = "relative";
-                if (container.buttons) {
-                    const buttonsContainer = mainContainer.querySelector(`#${container.buttons}`);
-                    if (buttonsContainer) {
-                        domContainer.buttonsContainer = buttonsContainer;
-                        const generateButton = buttonsContainer.querySelector(".primary");
-                        if (generateButton)
-                            domContainer.generateButton = generateButton;
-                    }
-                }
-                if (container.results) {
-                    const resultsContainer = mainContainer.querySelector(`#${container.results}`);
-                    if (resultsContainer) {
-                        domContainer.resultsContainer = resultsContainer;
-                    }
-                }
-                //caching prompts textArea element
-                domContainer.textArea = positivePrompts.querySelector("textarea");
-                const textArea = domContainer.textArea;
-                if (textArea && !textArea.dataset.pbelistenerready) {
-                    textArea.dataset.pbelistenerready = "true";
-                    textArea.removeEventListener("input", () => (0, synchroniseCurrentPrompts_1.default)(true, false));
-                    textArea.addEventListener("input", () => (0, synchroniseCurrentPrompts_1.default)(true, false));
-                }
-                if (container.gallery) {
-                    domContainer.imageArea = mainContainer.querySelector(`#${container.gallery}`);
-                    (0, mount_11.default)({ wrapper: domContainer.imageArea, tabName });
-                }
-                (0, mount_5.default)({ wrapper: positivePrompts, tabName });
-                (0, mount_2.default)({ wrapper: promptContainer, tabName });
-                (0, mount_3.default)({ wrapper: promptContainer, positivePrompts: domContainer.positivePrompts, tabName });
-                (0, mount_4.default)({ wrapper: promptContainer, tabName });
-                (0, mount_7.default)({ positivePrompts: domContainer.positivePrompts, tabName });
-            }
-            if (container.seed)
-                domContainer.seedInput = mainContainer.querySelector(`#${container.seed} input`);
-            if (container.width)
-                domContainer.widthInput = mainContainer.querySelector(`#${container.width} input`);
-            if (container.height)
-                domContainer.heightInput = mainContainer.querySelector(`#${container.height} input`);
-            if (container.steps)
-                domContainer.stepsInput = mainContainer.querySelector(`#${container.steps} input`);
-            if (container.cfg)
-                domContainer.cfgInput = mainContainer.querySelector(`#${container.cfg} input`);
-            if (container.sampling)
-                domContainer.samplingInput = mainContainer.querySelector(`#${container.sampling} input`);
-        }
-        (0, mount_1.default)({ wrapper: mainContainer });
-        (0, mount_8.default)({ wrapper: mainContainer });
-        (0, mount_9.default)({ wrapper: mainContainer });
-        (0, mount_10.default)({ wrapper: mainContainer });
-        (0, mount_12.default)({ wrapper: mainContainer });
-        (0, mount_13.default)({ wrapper: mainContainer });
-        (0, mount_6.default)({ wrapper: mainContainer });
-        (0, mount_14.default)({ wrapper: mainContainer });
+        tabsContainer.removeEventListener("click", onChangeTab_1.default);
+        tabsContainer.addEventListener("click", onChangeTab_1.default);
+        document.removeEventListener('keyup', onDocumentKey_1.default);
+        document.addEventListener('keyup', onDocumentKey_1.default);
+        for (const containerId in supportedContainers_1.default)
+            (0, mountContainer_1.default)({ containerId, mainContainer });
+        (0, mountGlobal_1.default)({ mainContainer });
     }
     document.addEventListener('DOMContentLoaded', function () {
         (0, store_1.loadUIConfig)();
         Database_1.default.load();
         tryToHook();
     });
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/main/events/onChangeTab.ts":
+/*!*******************************************!*\
+  !*** ./client/main/events/onChangeTab.ts ***!
+  \*******************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/store */ "./client/store.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, store_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function onChangeTab(e) {
+        const target = e.target;
+        const tagName = target.tagName.toLowerCase();
+        if (tagName !== "button")
+            return;
+        const tabName = target.innerText.trim();
+        if (!tabName)
+            return;
+        console.log(tabName);
+        (0, store_1.setCurrentContainer)(tabName.toLowerCase());
+    }
+    exports["default"] = onChangeTab;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/main/events/onDocumentKey.ts":
+/*!*********************************************!*\
+  !*** ./client/main/events/onDocumentKey.ts ***!
+  \*********************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/staticStore */ "./client/staticStore.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, staticStore_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function onDocumentKey(e) {
+        if (e.key !== "Escape")
+            return;
+        if (staticStore_1.default.onClose) {
+            staticStore_1.default.onClose();
+            staticStore_1.default.onClose = undefined;
+        }
+    }
+    exports["default"] = onDocumentKey;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/main/mountContainer.ts":
+/*!***************************************!*\
+  !*** ./client/main/mountContainer.ts ***!
+  \***************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/supportedContainers */ "./client/supportedContainers.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! client/DOMCache */ "./client/DOMCache.ts"), __webpack_require__(/*! client/synchroniseCurrentPrompts */ "./client/synchroniseCurrentPrompts/index.ts"), __webpack_require__(/*! client/components/ControlPanel/mount */ "./client/components/ControlPanel/mount.tsx"), __webpack_require__(/*! client/components/KnownPrompts/mount */ "./client/components/KnownPrompts/mount.tsx"), __webpack_require__(/*! client/components/CurrentPrompts/mount */ "./client/components/CurrentPrompts/mount.tsx"), __webpack_require__(/*! client/components/PromptTooltip/mount */ "./client/components/PromptTooltip/mount.tsx"), __webpack_require__(/*! client/components/TextareaButtons/mount */ "./client/components/TextareaButtons/mount.tsx"), __webpack_require__(/*! client/components/PreviewSave/mount */ "./client/components/PreviewSave/mount.tsx")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, supportedContainers_1, index_1, store_1, DOMCache_1, synchroniseCurrentPrompts_1, mount_1, mount_2, mount_3, mount_4, mount_5, mount_6) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function mountContainer({ containerId, mainContainer }) {
+        const store = store_1.default.getState();
+        const showViews = store.showViews;
+        const container = supportedContainers_1.default[containerId];
+        if (!container) {
+            (0, index_1.log)(`No speck for container "${containerId}"`);
+            return false;
+        }
+        const { tabName = "" } = container;
+        console.log("tab name: ", tabName);
+        DOMCache_1.default.containers[tabName] = {};
+        const domContainer = DOMCache_1.default.containers[tabName];
+        if (!domContainer) {
+            (0, index_1.log)(`Tab container for "${tabName}" not found`);
+            return false;
+        }
+        if (container.prompt) {
+            const promptContainer = mainContainer.querySelector(`#${container.prompt}`);
+            const positivePrompts = mainContainer.querySelector(`#${container.prompt} > div`);
+            const negativePrompts = mainContainer.querySelector(`#${container.prompt} > div:nth-child(2)`);
+            if (!positivePrompts || !negativePrompts) {
+                (0, index_1.log)(`No prompt containers found for ${tabName}`);
+                return false;
+            }
+            domContainer.promptContainer = promptContainer;
+            domContainer.positivePrompts = positivePrompts;
+            domContainer.negativePrompts = negativePrompts;
+            if (!showViews.includes(store_1.ViewType.POSITIVE))
+                positivePrompts.style.display = "none";
+            if (!showViews.includes(store_1.ViewType.NEGATIVE))
+                negativePrompts.style.display = "none";
+            //in order to be able to place buttons correctly
+            positivePrompts.style.position = "relative";
+            if (container.buttons) {
+                const buttonsContainer = mainContainer.querySelector(`#${container.buttons}`);
+                if (buttonsContainer) {
+                    domContainer.buttonsContainer = buttonsContainer;
+                    const generateButton = buttonsContainer.querySelector(".primary");
+                    if (generateButton)
+                        domContainer.generateButton = generateButton;
+                }
+            }
+            if (container.results) {
+                const resultsContainer = mainContainer.querySelector(`#${container.results}`);
+                if (resultsContainer) {
+                    domContainer.resultsContainer = resultsContainer;
+                }
+            }
+            //caching prompts textArea element
+            domContainer.textArea = positivePrompts.querySelector("textarea");
+            const textArea = domContainer.textArea;
+            if (textArea && !textArea.dataset.pbelistenerready) {
+                textArea.dataset.pbelistenerready = "true";
+                textArea.removeEventListener("input", () => (0, synchroniseCurrentPrompts_1.default)(true, false));
+                textArea.addEventListener("input", () => (0, synchroniseCurrentPrompts_1.default)(true, false));
+            }
+            if (container.gallery) {
+                domContainer.imageArea = mainContainer.querySelector(`#${container.gallery}`);
+                (0, mount_6.default)({ wrapper: domContainer.imageArea, tabName });
+            }
+            (0, mount_4.default)({ wrapper: positivePrompts, tabName });
+            (0, mount_1.default)({ wrapper: promptContainer, tabName });
+            (0, mount_2.default)({ wrapper: promptContainer, positivePrompts: domContainer.positivePrompts, tabName });
+            (0, mount_3.default)({ wrapper: promptContainer, tabName });
+            (0, mount_5.default)({ positivePrompts: domContainer.positivePrompts, tabName });
+        }
+        if (container.seed)
+            domContainer.seedInput = mainContainer.querySelector(`#${container.seed} input`);
+        if (container.width)
+            domContainer.widthInput = mainContainer.querySelector(`#${container.width} input`);
+        if (container.height)
+            domContainer.heightInput = mainContainer.querySelector(`#${container.height} input`);
+        if (container.steps)
+            domContainer.stepsInput = mainContainer.querySelector(`#${container.steps} input`);
+        if (container.cfg)
+            domContainer.cfgInput = mainContainer.querySelector(`#${container.cfg} input`);
+        if (container.sampling)
+            domContainer.samplingInput = mainContainer.querySelector(`#${container.sampling} input`);
+        return true;
+    }
+    exports["default"] = mountContainer;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/main/mountGlobal.ts":
+/*!************************************!*\
+  !*** ./client/main/mountGlobal.ts ***!
+  \************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/components/SetupWindow/mount */ "./client/components/SetupWindow/mount.tsx"), __webpack_require__(/*! client/components/PromptEdit/mount */ "./client/components/PromptEdit/mount.tsx"), __webpack_require__(/*! client/components/LoadStyle/mount */ "./client/components/LoadStyle/mount.tsx"), __webpack_require__(/*! client/components/SaveStyle/mount */ "./client/components/SaveStyle/mount.tsx"), __webpack_require__(/*! client/components/PromptScribe/mount */ "./client/components/PromptScribe/mount.tsx"), __webpack_require__(/*! client/components/CollectionTools/mount */ "./client/components/CollectionTools/mount.tsx"), __webpack_require__(/*! client/components/PromptTools/mount */ "./client/components/PromptTools/mount.tsx"), __webpack_require__(/*! client/components/ui/TagTooltip/mount */ "./client/components/ui/TagTooltip/mount.tsx")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, mount_1, mount_2, mount_3, mount_4, mount_5, mount_6, mount_7, mount_8) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function mountGlobal({ mainContainer }) {
+        (0, mount_1.default)({ wrapper: mainContainer });
+        (0, mount_3.default)({ wrapper: mainContainer });
+        (0, mount_4.default)({ wrapper: mainContainer });
+        (0, mount_5.default)({ wrapper: mainContainer });
+        (0, mount_6.default)({ wrapper: mainContainer });
+        (0, mount_7.default)({ wrapper: mainContainer });
+        (0, mount_2.default)({ wrapper: mainContainer });
+        (0, mount_8.default)({ wrapper: mainContainer });
+    }
+    exports["default"] = mountGlobal;
 }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
 		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
