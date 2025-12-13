@@ -1,15 +1,15 @@
-import * as React from 'react';
+import * as React from 'react'
 import { JSX, useState, useEffect } from 'react'
 import Database from 'client/Database'
-import loadStyleStore from '../store';
-import getStyles from './utils/getStyles';
-import PromptsList from 'client/components/PromptsList';
-import ActivePrompts from 'client/managers/ActivePrompts';
-import onBlockClick from './events/onBlockClick';
-import onApplyStyle from '../events/onApplyStyle';
-import onUpdatePreview from '../events/onUpdatePreview';
-import onRemoveStyle from '../events/onRemoveStyle';
-import onUpdateStyle from '../events/onUpdateStyle';
+import PromptsList from 'client/components/PromptsList'
+import ActivePrompts from 'client/managers/ActivePrompts'
+import loadStyleStore from '../store'
+import getStyles from './utils/getStyles'
+import onBlockClick from './events/onBlockClick'
+import onApplyStyle from '../events/onApplyStyle'
+import onUpdatePreview from '../events/onUpdatePreview'
+import onRemoveStyle from '../events/onRemoveStyle'
+import onUpdateStyle from '../events/onUpdateStyle'
 
 
 export default function DetailedList() {

@@ -44,7 +44,7 @@ export default function CollectionSelector() {
                 const originalItem = collection.find(item => item.id === targetItem.id);
                 if(!originalItem) return false;
 
-                setEditPrompt(originalItem);
+                setEditPrompt(JSON.parse(JSON.stringify(originalItem)));
             }}
         >
             {JSXOptions}

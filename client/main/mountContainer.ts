@@ -26,7 +26,6 @@ export default function mountContainer({containerId, mainContainer}: {
     }
         
     const {tabName = ""} = container;
-    console.log("tab name: ", tabName);
     DOMCache.containers[tabName] = {} as any;
     const domContainer = DOMCache.containers[tabName];
 

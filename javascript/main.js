@@ -3059,7 +3059,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \**************************************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! client/Database */ "./client/Database/index.ts"), __webpack_require__(/*! ../store */ "./client/components/LoadStyle/store.ts"), __webpack_require__(/*! ./utils/getStyles */ "./client/components/LoadStyle/Content/utils/getStyles.ts"), __webpack_require__(/*! client/components/PromptsList */ "./client/components/PromptsList/index.tsx"), __webpack_require__(/*! client/managers/ActivePrompts */ "./client/managers/ActivePrompts/index.ts"), __webpack_require__(/*! ./events/onBlockClick */ "./client/components/LoadStyle/Content/events/onBlockClick.ts"), __webpack_require__(/*! ../events/onApplyStyle */ "./client/components/LoadStyle/events/onApplyStyle.ts"), __webpack_require__(/*! ../events/onUpdatePreview */ "./client/components/LoadStyle/events/onUpdatePreview.ts"), __webpack_require__(/*! ../events/onRemoveStyle */ "./client/components/LoadStyle/events/onRemoveStyle.ts"), __webpack_require__(/*! ../events/onUpdateStyle */ "./client/components/LoadStyle/events/onUpdateStyle.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, React, Database_1, store_1, getStyles_1, PromptsList_1, ActivePrompts_1, onBlockClick_1, onApplyStyle_1, onUpdatePreview_1, onRemoveStyle_1, onUpdateStyle_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! client/Database */ "./client/Database/index.ts"), __webpack_require__(/*! client/components/PromptsList */ "./client/components/PromptsList/index.tsx"), __webpack_require__(/*! client/managers/ActivePrompts */ "./client/managers/ActivePrompts/index.ts"), __webpack_require__(/*! ../store */ "./client/components/LoadStyle/store.ts"), __webpack_require__(/*! ./utils/getStyles */ "./client/components/LoadStyle/Content/utils/getStyles.ts"), __webpack_require__(/*! ./events/onBlockClick */ "./client/components/LoadStyle/Content/events/onBlockClick.ts"), __webpack_require__(/*! ../events/onApplyStyle */ "./client/components/LoadStyle/events/onApplyStyle.ts"), __webpack_require__(/*! ../events/onUpdatePreview */ "./client/components/LoadStyle/events/onUpdatePreview.ts"), __webpack_require__(/*! ../events/onRemoveStyle */ "./client/components/LoadStyle/events/onRemoveStyle.ts"), __webpack_require__(/*! ../events/onUpdateStyle */ "./client/components/LoadStyle/events/onUpdateStyle.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, React, Database_1, PromptsList_1, ActivePrompts_1, store_1, getStyles_1, onBlockClick_1, onApplyStyle_1, onUpdatePreview_1, onRemoveStyle_1, onUpdateStyle_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     function DetailedList() {
@@ -3209,13 +3209,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \********************************************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ../../store */ "./client/components/LoadStyle/store.ts"), __webpack_require__(/*! ../../events/onApplyStyle */ "./client/components/LoadStyle/events/onApplyStyle.ts"), __webpack_require__(/*! ../../events/onRemoveStyle */ "./client/components/LoadStyle/events/onRemoveStyle.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, store_1, onApplyStyle_1, onRemoveStyle_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/Database */ "./client/Database/index.ts"), __webpack_require__(/*! client/components/LoadStyle/store */ "./client/components/LoadStyle/store.ts"), __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! client/components/LoadStyle/events/onApplyStyle */ "./client/components/LoadStyle/events/onApplyStyle.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, Database_1, store_1, store_2, onApplyStyle_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     function onThumbClick(e, idKey, name, collection, index) {
+        const { data } = Database_1.default;
         const { selectedStyle } = store_1.default.getState();
         const isShift = e.shiftKey;
         const isCtrl = e.metaKey || e.ctrlKey;
+        const isAlt = e.altKey;
         if (!isShift && !isCtrl && selectedStyle === idKey) {
             (0, store_1.setSelectedStyle)("");
             (0, store_1.setSelectedName)("");
@@ -3227,10 +3229,24 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         (0, store_1.setSelectedName)(name);
         (0, store_1.setSelectedCollection)(collection);
         (0, store_1.setSelectedIndex)(index);
-        if (isShift)
+        if (isCtrl && !isShift) {
+            (0, onApplyStyle_1.default)(true);
+        }
+        else if (isCtrl && isShift) {
             (0, onApplyStyle_1.default)(false);
-        else if (isCtrl)
-            (0, onRemoveStyle_1.default)(collection, index);
+        }
+        else if (isShift) {
+            const targetCollection = data.styles[collection];
+            if (!targetCollection)
+                return false;
+            const targetStyle = data.styles[collection][index];
+            if (!targetStyle)
+                return false;
+            (0, store_2.setEditTargetCollection)(collection);
+            (0, store_2.setEditStyle)(JSON.parse(JSON.stringify(targetStyle)));
+        }
+        /* if(isShift) onApplyStyle(false);
+        else if(isCtrl) onRemoveStyle(collection, index); */
     }
     exports["default"] = onThumbClick;
 }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
@@ -4042,7 +4058,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 const originalItem = collection.find(item => item.id === targetItem.id);
                 if (!originalItem)
                     return false;
-                (0, store_1.setEditPrompt)(originalItem);
+                (0, store_1.setEditPrompt)(JSON.parse(JSON.stringify(originalItem)));
             } }, JSXOptions));
     }
     exports["default"] = CollectionSelector;
@@ -7124,6 +7140,241 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 
 /***/ }),
 
+/***/ "./client/components/StyleEdit/Footer.tsx":
+/*!************************************************!*\
+  !*** ./client/components/StyleEdit/Footer.tsx ***!
+  \************************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! ./events/onSaveStyle */ "./client/components/StyleEdit/events/onSaveStyle.ts"), __webpack_require__(/*! ./events/onClose */ "./client/components/StyleEdit/events/onClose.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, React, onSaveStyle_1, onClose_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function Footer() {
+        return (React.createElement("div", { className: "PBE_rowBlock PBE_rowBlock_wide", style: {
+                justifyContent: "space-around",
+            } },
+            React.createElement("button", { className: "PBE_button PBE_buttonCancel", onClick: onClose_1.default }, "Cancel"),
+            React.createElement("button", { className: "PBE_button", onClick: onSaveStyle_1.default }, "Save")));
+    }
+    exports["default"] = Footer;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/components/StyleEdit/MetaBlock.tsx":
+/*!***************************************************!*\
+  !*** ./client/components/StyleEdit/MetaBlock.tsx ***!
+  \***************************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! client/components/ui/InputRow */ "./client/components/ui/InputRow/index.tsx")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, React, react_1, store_1, InputRow_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function MetaBlock() {
+        const [iterate, setIterate] = (0, react_1.useState)(0);
+        const { editStyle } = store_1.default.getState();
+        return (React.createElement(React.Fragment, null,
+            React.createElement(InputRow_1.default, { type: "number", label: "Width", iterate: iterate, value: editStyle.width || 0, nonSpecified: editStyle.width === undefined, onUpdate: value => {
+                    editStyle.width = Number(value);
+                    setIterate(iterate + 1);
+                } }),
+            React.createElement(InputRow_1.default, { type: "number", label: "Height", iterate: iterate, value: editStyle.height || 0, nonSpecified: editStyle.height === undefined, onUpdate: value => {
+                    editStyle.height = Number(value);
+                    setIterate(iterate + 1);
+                } }),
+            React.createElement(InputRow_1.default, { type: "number", label: "CFG", iterate: iterate, value: editStyle.cfg || 0, nonSpecified: editStyle.cfg === undefined, onUpdate: value => {
+                    let cfg = Number(value);
+                    if (cfg <= 0)
+                        cfg = 1;
+                    if (cfg > 30)
+                        cfg = 30;
+                    editStyle.cfg = cfg;
+                    setIterate(iterate + 1);
+                } }),
+            React.createElement(InputRow_1.default, { type: "number", label: "Steps", iterate: iterate, value: editStyle.steps || 0, nonSpecified: editStyle.steps === undefined, onUpdate: value => {
+                    let steps = Number(value);
+                    if (steps <= 0)
+                        steps = 1;
+                    if (steps > 150)
+                        steps = 150;
+                    editStyle.steps = steps;
+                    setIterate(iterate + 1);
+                } }),
+            React.createElement(InputRow_1.default, { type: "number", label: "Seed", iterate: iterate, value: editStyle.seed || 0, nonSpecified: editStyle.seed === undefined, onUpdate: seed => {
+                    editStyle.seed = Number(seed);
+                    setIterate(iterate + 1);
+                } })));
+    }
+    exports["default"] = MetaBlock;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/components/StyleEdit/PromptsBlock.tsx":
+/*!******************************************************!*\
+  !*** ./client/components/StyleEdit/PromptsBlock.tsx ***!
+  \******************************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! client/components/PromptsList */ "./client/components/PromptsList/index.tsx")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, React, react_1, store_1, PromptsList_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function PromptsBlock() {
+        const [iterate, setIterate] = (0, react_1.useState)(0);
+        const { editStyle } = store_1.default.getState();
+        if (!editStyle)
+            return React.createElement("div", { style: { display: "none" } });
+        const { positive, negative = "" } = editStyle;
+        return (React.createElement(React.Fragment, null,
+            React.createElement("div", { className: "PBE_stylesCurrentList PBE_Scrollbar", style: {
+                    flexWrap: "wrap",
+                    justifyContent: "flex-start",
+                    alignItems: "flex-start",
+                    alignContent: "flex-start",
+                } }, (positive && positive.length !== 0) &&
+                React.createElement(PromptsList_1.default, { prompts: positive, allowMove: false, noWrap: false })),
+            React.createElement("textarea", { "data-iterate": iterate, id: "PBE_commentArea", className: "PBE_Textarea PBE_Scrollbar", value: negative, onChange: e => {
+                    editStyle.negative = e.currentTarget.value;
+                    setIterate(iterate + 1);
+                } })));
+    }
+    exports["default"] = PromptsBlock;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/components/StyleEdit/events/onClose.ts":
+/*!*******************************************************!*\
+  !*** ./client/components/StyleEdit/events/onClose.ts ***!
+  \*******************************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/store */ "./client/store.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, store_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function onClose() {
+        (0, store_1.setEditStyle)(undefined);
+    }
+    exports["default"] = onClose;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/components/StyleEdit/events/onSaveStyle.ts":
+/*!***********************************************************!*\
+  !*** ./client/components/StyleEdit/events/onSaveStyle.ts ***!
+  \***********************************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! client/Database */ "./client/Database/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, store_1, Database_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function onSaveStyle() {
+        const { editStyle, editTargetCollection } = store_1.default.getState();
+        const { readonly } = Database_1.default.meta;
+        const { data } = Database_1.default;
+        if (readonly || !data.styles)
+            return;
+        if (!editStyle || !editTargetCollection)
+            return;
+        const targetCollection = data.styles[editTargetCollection];
+        if (!targetCollection)
+            return;
+        const targetIndex = targetCollection.findIndex(styleItem => styleItem.name === editStyle.name);
+        if (targetIndex === -1)
+            return;
+        targetCollection[targetIndex] = editStyle;
+        Database_1.default.updateStyles(editTargetCollection);
+        (0, store_1.setEditStyle)(undefined);
+        (0, store_1.setEditTargetCollection)(undefined);
+    }
+    exports["default"] = onSaveStyle;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/components/StyleEdit/index.tsx":
+/*!***********************************************!*\
+  !*** ./client/components/StyleEdit/index.tsx ***!
+  \***********************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! ./PromptsBlock */ "./client/components/StyleEdit/PromptsBlock.tsx"), __webpack_require__(/*! ./MetaBlock */ "./client/components/StyleEdit/MetaBlock.tsx"), __webpack_require__(/*! ./Footer */ "./client/components/StyleEdit/Footer.tsx")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, React, react_1, store_1, PromptsBlock_1, MetaBlock_1, Footer_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function StyleEdit({ parent }) {
+        const editStyle = (0, store_1.default)(state => state.editStyle);
+        const filesIteration = (0, store_1.default)(state => state.filesIteration);
+        (0, react_1.useEffect)(() => {
+            if (!editStyle) {
+                parent.style.display = "none";
+            }
+            else {
+                parent.style.display = "flex";
+            }
+        }, [editStyle ? editStyle.name : false]);
+        if (!editStyle)
+            return React.createElement("div", { "data-iteration": filesIteration });
+        return (React.createElement(React.Fragment, null,
+            React.createElement("div", { className: "PBE_rowBlock PBE_rowBlock_wide", "data-iteration": filesIteration, style: {
+                    justifyContent: "space-around",
+                } },
+                React.createElement("div", { className: "PBE_promptEditTitle" }, editStyle.name)),
+            React.createElement("div", { className: "PBE_dataBlock PBE_Scrollbar PBE_windowContent", style: {
+                    width: "100%",
+                } },
+                React.createElement("div", { className: "PBE_contentPanel", style: { width: "40%" } },
+                    React.createElement(MetaBlock_1.default, null)),
+                React.createElement("div", { className: "PBE_contentPanel", style: { width: "40%" } },
+                    React.createElement(PromptsBlock_1.default, null))),
+            React.createElement(Footer_1.default, null)));
+    }
+    exports["default"] = StyleEdit;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/components/StyleEdit/mount.tsx":
+/*!***********************************************!*\
+  !*** ./client/components/StyleEdit/mount.tsx ***!
+  \***********************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! react-dom/client */ "./node_modules/react-dom/client.js"), __webpack_require__(/*! ./index */ "./client/components/StyleEdit/index.tsx"), __webpack_require__(/*! ./events/onClose */ "./client/components/StyleEdit/events/onClose.ts"), __webpack_require__(/*! client/staticStore */ "./client/staticStore.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, React, client_1, index_1, onClose_1, staticStore_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function mount({ wrapper }) {
+        const styleEdit = document.createElement("div");
+        styleEdit.className = "PBE_promptEdit PBE_generalWindow";
+        styleEdit.id = "PBE_styleEdit";
+        styleEdit.style.zIndex = "202";
+        styleEdit.style.display = "none";
+        wrapper.appendChild(styleEdit);
+        styleEdit.addEventListener("mouseenter", () => {
+            staticStore_1.default.onClose = onClose_1.default;
+        });
+        const root = (0, client_1.createRoot)(styleEdit);
+        root.render(React.createElement(index_1.default, { parent: styleEdit }));
+    }
+    exports["default"] = mount;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
 /***/ "./client/components/TextareaButtons/index.tsx":
 /*!*****************************************************!*\
   !*** ./client/components/TextareaButtons/index.tsx ***!
@@ -7203,6 +7454,35 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 } }, name)));
     }
     exports["default"] = CheckBox;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/components/ui/InputRow/index.tsx":
+/*!*************************************************!*\
+  !*** ./client/components/ui/InputRow/index.tsx ***!
+  \*************************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! react */ "./node_modules/react/index.js")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, React) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function InputRow({ type, label, value, iterate, nonSpecified = false, onUpdate }) {
+        const style = {
+            height: "40px",
+        };
+        if (nonSpecified) {
+            style.opacity = "0.5";
+        }
+        return (React.createElement("div", { "data-iterate": iterate, className: "PBE_rowBlock", style: style },
+            React.createElement("label", null,
+                label,
+                ":"),
+            React.createElement("input", { className: "PBE_generalInput", type: type, value: value, onChange: e => onUpdate(e.currentTarget.value) })));
+    }
+    exports["default"] = InputRow;
 }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
 		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
@@ -8289,7 +8569,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         const tabName = target.innerText.trim();
         if (!tabName)
             return;
-        console.log(tabName);
         (0, store_1.setCurrentContainer)(tabName.toLowerCase());
     }
     exports["default"] = onChangeTab;
@@ -8341,7 +8620,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             return false;
         }
         const { tabName = "" } = container;
-        console.log("tab name: ", tabName);
         DOMCache_1.default.containers[tabName] = {};
         const domContainer = DOMCache_1.default.containers[tabName];
         if (!domContainer) {
@@ -8425,18 +8703,19 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/components/SetupWindow/mount */ "./client/components/SetupWindow/mount.tsx"), __webpack_require__(/*! client/components/PromptEdit/mount */ "./client/components/PromptEdit/mount.tsx"), __webpack_require__(/*! client/components/LoadStyle/mount */ "./client/components/LoadStyle/mount.tsx"), __webpack_require__(/*! client/components/SaveStyle/mount */ "./client/components/SaveStyle/mount.tsx"), __webpack_require__(/*! client/components/PromptScribe/mount */ "./client/components/PromptScribe/mount.tsx"), __webpack_require__(/*! client/components/CollectionTools/mount */ "./client/components/CollectionTools/mount.tsx"), __webpack_require__(/*! client/components/PromptTools/mount */ "./client/components/PromptTools/mount.tsx"), __webpack_require__(/*! client/components/ui/TagTooltip/mount */ "./client/components/ui/TagTooltip/mount.tsx")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, mount_1, mount_2, mount_3, mount_4, mount_5, mount_6, mount_7, mount_8) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/components/SetupWindow/mount */ "./client/components/SetupWindow/mount.tsx"), __webpack_require__(/*! client/components/PromptEdit/mount */ "./client/components/PromptEdit/mount.tsx"), __webpack_require__(/*! client/components/StyleEdit/mount */ "./client/components/StyleEdit/mount.tsx"), __webpack_require__(/*! client/components/LoadStyle/mount */ "./client/components/LoadStyle/mount.tsx"), __webpack_require__(/*! client/components/SaveStyle/mount */ "./client/components/SaveStyle/mount.tsx"), __webpack_require__(/*! client/components/PromptScribe/mount */ "./client/components/PromptScribe/mount.tsx"), __webpack_require__(/*! client/components/CollectionTools/mount */ "./client/components/CollectionTools/mount.tsx"), __webpack_require__(/*! client/components/PromptTools/mount */ "./client/components/PromptTools/mount.tsx"), __webpack_require__(/*! client/components/ui/TagTooltip/mount */ "./client/components/ui/TagTooltip/mount.tsx")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, mount_1, mount_2, mount_3, mount_4, mount_5, mount_6, mount_7, mount_8, mount_9) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     function mountGlobal({ mainContainer }) {
         (0, mount_1.default)({ wrapper: mainContainer });
-        (0, mount_3.default)({ wrapper: mainContainer });
         (0, mount_4.default)({ wrapper: mainContainer });
         (0, mount_5.default)({ wrapper: mainContainer });
         (0, mount_6.default)({ wrapper: mainContainer });
         (0, mount_7.default)({ wrapper: mainContainer });
-        (0, mount_2.default)({ wrapper: mainContainer });
         (0, mount_8.default)({ wrapper: mainContainer });
+        (0, mount_2.default)({ wrapper: mainContainer });
+        (0, mount_3.default)({ wrapper: mainContainer });
+        (0, mount_9.default)({ wrapper: mainContainer });
     }
     exports["default"] = mountGlobal;
 }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
@@ -9268,7 +9547,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! zustand */ "./node_modules/zustand/index.js"), __webpack_require__(/*! ./DOMCache */ "./client/DOMCache.ts"), __webpack_require__(/*! ./const */ "./client/const.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, zustand_1, DOMCache_1, const_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
-    exports.loadUIConfig = exports.setShowPromptTools = exports.setShowCollectionTools = exports.setShowPromptScribe = exports.setShowSaveStyle = exports.setShowLoadStyle = exports.setShowSetupWindowe = exports.setEditTargetCollection = exports.setSelectedPrompt = exports.setEditPromptGroup = exports.setEditPromptIndex = exports.setEditPrompt = exports.updateCollectionsIteration = exports.updateCurrentIteration = exports.updateFilesIteration = exports.setFilterTags = exports.setFilterName = exports.setSortKnownPrompts = exports.setFilterCategory = exports.setFilterCollection = exports.toggleView = exports.setShowViews = exports.setShowControlPanel = exports.setCurrentContainer = exports.appStore = exports.ViewType = void 0;
+    exports.loadUIConfig = exports.setShowPromptTools = exports.setShowCollectionTools = exports.setShowPromptScribe = exports.setShowSaveStyle = exports.setShowLoadStyle = exports.setShowSetupWindowe = exports.setEditTargetCollection = exports.setSelectedPrompt = exports.setEditPromptGroup = exports.setEditPromptIndex = exports.setEditPrompt = exports.setEditStyle = exports.updateCollectionsIteration = exports.updateCurrentIteration = exports.updateFilesIteration = exports.setFilterTags = exports.setFilterName = exports.setSortKnownPrompts = exports.setFilterCategory = exports.setFilterCollection = exports.toggleView = exports.setShowViews = exports.setShowControlPanel = exports.setCurrentContainer = exports.appStore = exports.ViewType = void 0;
     var ViewType;
     (function (ViewType) {
         ViewType["KNOWN"] = "known";
@@ -9290,6 +9569,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         filterTags: [],
         selectedPrompt: undefined,
         editPrompt: undefined,
+        editStyle: undefined,
         editPromptIndex: false,
         editPromptGroup: false,
         editTargetCollection: undefined,
@@ -9346,6 +9626,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     exports.updateCurrentIteration = updateCurrentIteration;
     const updateCollectionsIteration = () => exports.appStore.setState(store => ({ collectionsIteration: store.collectionsIteration + 1 }));
     exports.updateCollectionsIteration = updateCollectionsIteration;
+    const setEditStyle = (editStyle) => exports.appStore.setState({ editStyle });
+    exports.setEditStyle = setEditStyle;
     const setEditPrompt = (editPrompt) => exports.appStore.setState({ editPrompt });
     exports.setEditPrompt = setEditPrompt;
     const setEditPromptIndex = (editPromptIndex = false) => exports.appStore.setState({ editPromptIndex });

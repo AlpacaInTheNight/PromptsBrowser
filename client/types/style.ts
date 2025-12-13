@@ -20,11 +20,11 @@ type Style = {
 
     sampling?: string;
 
-    previewImage?: "png" | "jpg";
-
     seed?: number;
 
     addType?: AddStyleType;
+
+    previewImage?: "png" | "jpg";
 }
 
 enum AddStyleType {

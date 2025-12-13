@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import DOMCache from './DOMCache'
 import {DEFAULT_CONTAINER_NAME} from './const'
 import Prompt from 'client/types/prompt'
+import Style from 'client/types/style'
 
 
 export enum ViewType {
@@ -27,6 +28,7 @@ export type AppStore = {
 
     selectedPrompt: string | undefined;
     editPrompt: Prompt | undefined;
+    editStyle: Style | undefined;
     editPromptIndex: number | false;
     editPromptGroup: number | false;
     editTargetCollection: string | undefined;
@@ -55,6 +57,7 @@ export const appStore = create<AppStore>((set) => ({
 
     selectedPrompt: undefined,
     editPrompt: undefined,
+    editStyle: undefined,
     editPromptIndex: false,
     editPromptGroup: false,
     editTargetCollection: undefined,
@@ -107,6 +110,8 @@ export const setFilterTags = (filterTags?: string[]) => appStore.setState({filte
 export const updateFilesIteration = () => appStore.setState(store => ({filesIteration: store.filesIteration + 1}));
 export const updateCurrentIteration = () => appStore.setState(store => ({currentIteration: store.currentIteration + 1}));
 export const updateCollectionsIteration = () => appStore.setState(store => ({collectionsIteration: store.collectionsIteration + 1}));
+
+export const setEditStyle = (editStyle?: Style) => appStore.setState({editStyle});
 
 export const setEditPrompt = (editPrompt?: Prompt) => appStore.setState({editPrompt});
 export const setEditPromptIndex = (editPromptIndex: number | false = false) => appStore.setState({editPromptIndex});

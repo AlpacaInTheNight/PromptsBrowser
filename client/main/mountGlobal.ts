@@ -1,5 +1,6 @@
 import mountSetupWindow from 'client/components/SetupWindow/mount'
 import mountPromptEdit from 'client/components/PromptEdit/mount'
+import mountStyleEdit from 'client/components/StyleEdit/mount'
 import mountLoadStyle from 'client/components/LoadStyle/mount'
 import mountSaveStyle from 'client/components/SaveStyle/mount'
 import mountPromptScribe from 'client/components/PromptScribe/mount'
@@ -19,6 +20,7 @@ export default function mountGlobal({mainContainer}: {
     mountCollectionTools({wrapper: mainContainer});
     mountPromptTools({wrapper: mainContainer});
     mountPromptEdit({wrapper: mainContainer});
+    mountStyleEdit({wrapper: mainContainer});
     mountTagTooltip({wrapper: mainContainer});
 
 }
