@@ -445,6 +445,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
         if (!data.original[previewCollection])
             return;
         const srcImage = (0, getGeneratedImageSrc_1.default)();
+        /* console.log("srcImage", srcImage);
+        if(true === true) return false; */
         if (!srcImage)
             return;
         const { src, extension } = srcImage;
@@ -456,8 +458,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
         if (isExternalNetwork)
             saveData.isExternalNetwork = true;
         const checkpoint = (0, index_1.getCheckpoint)();
+        console.log("checkpoint", checkpoint);
         if (checkpoint)
             saveData.model = checkpoint;
+        console.log("saveData", saveData);
+        //if(true === true) return false;
         (0, updateInCollections_1.default)(isExternalNetwork, extension, checkpoint || "");
         (() => __awaiter(this, void 0, void 0, function* () {
             const rawResponse = yield fetch(url, {
@@ -469,6 +474,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
                 body: JSON.stringify(saveData)
             });
             const answer = yield rawResponse.json();
+            console.log(answer);
             if (answer === "ok" && callUpdate) {
                 index_2.default.updateMixedList();
                 (0, store_2.setSelectedPrompt)(undefined);
@@ -8531,7 +8537,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             return;
         }
         DOMCache_1.default.mainContainer = mainContainer;
-        DOMCache_1.default.modelCheckpoint = mainContainer.querySelector("#setting_sd_model_checkpoint");
+        //Automatic1111
+        let modelCheckpoint = mainContainer.querySelector("#setting_sd_model_checkpoint");
+        //Forge
+        if (!modelCheckpoint) {
+            const forgeModelCheckpoint = mainContainer.querySelector("#quicksettings .model_selection ");
+            if (forgeModelCheckpoint)
+                modelCheckpoint = forgeModelCheckpoint;
+        }
+        DOMCache_1.default.modelCheckpoint = modelCheckpoint;
         const tabsContainer = mainContainer.querySelector("#tabs > div:first-child");
         tabsContainer.removeEventListener("click", onChangeTab_1.default);
         tabsContainer.addEventListener("click", onChangeTab_1.default);

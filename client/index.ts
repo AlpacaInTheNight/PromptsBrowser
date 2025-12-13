@@ -29,7 +29,17 @@ function tryToHook(tries = 0) {
     }
 
     DOMCache.mainContainer = mainContainer;
-    DOMCache.modelCheckpoint = mainContainer.querySelector("#setting_sd_model_checkpoint");
+
+    //Automatic1111
+    let modelCheckpoint = mainContainer.querySelector("#setting_sd_model_checkpoint");
+    
+    //Forge
+    if(!modelCheckpoint) {
+        const forgeModelCheckpoint = mainContainer.querySelector("#quicksettings .model_selection");
+        if(forgeModelCheckpoint) modelCheckpoint = forgeModelCheckpoint;
+    } 
+    
+    DOMCache.modelCheckpoint = modelCheckpoint as HTMLElement;
 
     const tabsContainer = mainContainer.querySelector("#tabs > div:first-child");
     tabsContainer.removeEventListener("click", onChangeTab);
