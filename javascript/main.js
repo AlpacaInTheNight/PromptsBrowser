@@ -445,8 +445,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
         if (!data.original[previewCollection])
             return;
         const srcImage = (0, getGeneratedImageSrc_1.default)();
-        /* console.log("srcImage", srcImage);
-        if(true === true) return false; */
         if (!srcImage)
             return;
         const { src, extension } = srcImage;
@@ -458,11 +456,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
         if (isExternalNetwork)
             saveData.isExternalNetwork = true;
         const checkpoint = (0, index_1.getCheckpoint)();
-        console.log("checkpoint", checkpoint);
         if (checkpoint)
             saveData.model = checkpoint;
-        console.log("saveData", saveData);
-        //if(true === true) return false;
         (0, updateInCollections_1.default)(isExternalNetwork, extension, checkpoint || "");
         (() => __awaiter(this, void 0, void 0, function* () {
             const rawResponse = yield fetch(url, {
@@ -474,7 +469,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
                 body: JSON.stringify(saveData)
             });
             const answer = yield rawResponse.json();
-            console.log(answer);
             if (answer === "ok" && callUpdate) {
                 index_2.default.updateMixedList();
                 (0, store_2.setSelectedPrompt)(undefined);
@@ -1777,7 +1771,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \*****************************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! ./mount */ "./client/components/CollectionTools/mount.tsx"), __webpack_require__(/*! ./Header */ "./client/components/CollectionTools/Header.tsx"), __webpack_require__(/*! ./Content */ "./client/components/CollectionTools/Content.tsx"), __webpack_require__(/*! ./Status */ "./client/components/CollectionTools/Status.tsx"), __webpack_require__(/*! ./Actions */ "./client/components/CollectionTools/Actions/index.tsx")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, React, react_1, store_1, mount_1, Header_1, Content_1, Status_1, Actions_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! ./store */ "./client/components/CollectionTools/store.ts"), __webpack_require__(/*! ./mount */ "./client/components/CollectionTools/mount.tsx"), __webpack_require__(/*! ./Header */ "./client/components/CollectionTools/Header.tsx"), __webpack_require__(/*! ./Content */ "./client/components/CollectionTools/Content.tsx"), __webpack_require__(/*! ./Status */ "./client/components/CollectionTools/Status.tsx"), __webpack_require__(/*! ./Actions */ "./client/components/CollectionTools/Actions/index.tsx")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, React, react_1, store_1, store_2, mount_1, Header_1, Content_1, Status_1, Actions_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     exports.mount = void 0;
@@ -1785,6 +1779,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     function CollectionTools({ parent }) {
         const showCollectionTools = (0, store_1.default)(state => state.showCollectionTools);
         (0, react_1.useEffect)(() => {
+            (0, store_2.setSelectedPrompts)([]);
             if (!showCollectionTools) {
                 parent.style.display = "none";
             }
@@ -4185,25 +4180,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \****************************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! client/store */ "./client/store.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, React, react_1, store_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! client/components/ui/TagTooltip */ "./client/components/ui/TagTooltip/index.tsx"), __webpack_require__(/*! ./events/onAddTags */ "./client/components/PromptEdit/events/onAddTags.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, React, react_1, store_1, TagTooltip_1, onAddTags_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
-    function onAddTags(value) {
-        const { editPrompt } = store_1.default.getState();
-        if (!editPrompt)
-            return;
-        let tags = value.split(",").map(item => item.trim());
-        //removing empty tags
-        tags = tags.filter(item => item);
-        for (const tag of tags) {
-            if (editPrompt.tags.includes(tag))
-                continue;
-            editPrompt.tags.push(tag);
-        }
-    }
     function TagsBlock() {
         const [iterate, setIterate] = (0, react_1.useState)(0);
-        const [addTag, setAddTag] = (0, react_1.useState)("");
+        const [addTagArr, setAddTagArr] = (0, react_1.useState)([]);
         const { editPrompt } = store_1.default.getState();
         const JSXTags = [];
         if (editPrompt) {
@@ -4223,25 +4205,49 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 React.createElement("div", null, "Tags:"),
                 React.createElement("div", { className: "PBE_List PBE_Scrollbar PBE_tagsList" }, JSXTags)),
             React.createElement("div", { className: "PBE_rowBlock" },
-                React.createElement("input", { id: "PBE_addTagInput", className: "PBE_generalInput", value: addTag, onChange: e => {
-                        setAddTag(e.currentTarget.value);
-                    }, onKeyUp: e => {
-                        const target = e.currentTarget;
-                        if (e.keyCode !== 13)
-                            return;
-                        if (target.dataset.hint)
-                            return;
-                        onAddTags(addTag);
-                        setAddTag("");
+                React.createElement(TagTooltip_1.default, { tags: addTagArr, onUpdate: newTags => {
+                        setAddTagArr(newTags || []);
+                        setIterate(iterate + 1);
+                    }, onSubmit: () => {
+                        (0, onAddTags_1.default)(addTagArr);
+                        setAddTagArr([]);
                         setIterate(iterate + 1);
                     } }),
                 React.createElement("button", { className: "PBE_button", onClick: () => {
-                        onAddTags(addTag);
-                        setAddTag("");
+                        (0, onAddTags_1.default)(addTagArr);
+                        setAddTagArr([]);
                         setIterate(iterate + 1);
                     } }, "Add tag"))));
     }
     exports["default"] = TagsBlock;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/components/PromptEdit/events/onAddTags.ts":
+/*!**********************************************************!*\
+  !*** ./client/components/PromptEdit/events/onAddTags.ts ***!
+  \**********************************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/store */ "./client/store.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, store_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function onAddTags(tags) {
+        const { editPrompt } = store_1.default.getState();
+        if (!editPrompt)
+            return;
+        //removing empty tags
+        tags = tags.filter(item => item);
+        for (const tag of tags) {
+            if (editPrompt.tags.includes(tag))
+                continue;
+            editPrompt.tags.push(tag);
+        }
+    }
+    exports["default"] = onAddTags;
 }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
 		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
@@ -8541,7 +8547,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         let modelCheckpoint = mainContainer.querySelector("#setting_sd_model_checkpoint");
         //Forge
         if (!modelCheckpoint) {
-            const forgeModelCheckpoint = mainContainer.querySelector("#quicksettings .model_selection ");
+            const forgeModelCheckpoint = mainContainer.querySelector("#quicksettings .model_selection");
             if (forgeModelCheckpoint)
                 modelCheckpoint = forgeModelCheckpoint;
         }
