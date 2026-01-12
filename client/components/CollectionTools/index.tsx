@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { JSX, useState, useEffect } from 'react'
 import appStore, {setShowCollectionTools} from "client/store";
+import {setSelectedPrompts} from './store';
 import mount from './mount';
 import Header from './Header';
 import Content from './Content';
@@ -16,6 +17,8 @@ export default function CollectionTools({parent}: {
     const showCollectionTools = appStore(state => state.showCollectionTools);
 
     useEffect(() => {
+        setSelectedPrompts([]);
+
         if(!showCollectionTools) {
             parent.style.display = "none";
         } else {
