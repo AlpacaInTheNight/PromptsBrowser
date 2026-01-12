@@ -1,26 +1,13 @@
 import * as React from 'react'
-import { JSX, useState, useEffect } from 'react';
+import { JSX, useState, useEffect } from 'react'
 import appStore from 'client/store'
+import TagTooltip from 'client/components/ui/TagTooltip'
+import onAddTags from './events/onAddTags'
 
-
-function onAddTags(value: string) {
-    const {editPrompt} = appStore.getState();
-    if(!editPrompt) return;
-
-    let tags = value.split(",").map(item => item.trim());
-
-    //removing empty tags
-    tags = tags.filter(item => item);
-
-    for(const tag of tags) {
-        if(editPrompt.tags.includes(tag)) continue;
-        editPrompt.tags.push(tag);
-    }
-}
 
 export default function TagsBlock() {
     const [iterate, setIterate] = useState(0);
-    const [addTag, setAddTag] = useState("");
+    const [addTagArr, setAddTagArr] = useState<string[]>([]);
     const {editPrompt} = appStore.getState();
     const JSXTags: JSX.Element[] = [];
 
@@ -59,20 +46,15 @@ export default function TagsBlock() {
             </div>
 
             <div className="PBE_rowBlock">
-                <input
-                    id="PBE_addTagInput"
-                    className="PBE_generalInput"
-                    value={addTag}
-                    onChange={e => {
-                        setAddTag(e.currentTarget.value);
+                <TagTooltip
+                    tags={addTagArr}
+                    onUpdate={newTags => {
+                        setAddTagArr(newTags || []);
+                        setIterate(iterate + 1);
                     }}
-                    onKeyUp={e => {
-                        const target = e.currentTarget as HTMLInputElement;
-                        if(e.keyCode !== 13) return;
-                        if(target.dataset.hint) return;
-
-                        onAddTags(addTag);
-                        setAddTag("");
+                    onSubmit={() => {
+                        onAddTags(addTagArr);
+                        setAddTagArr([]);
                         setIterate(iterate + 1);
                     }}
                 />
@@ -80,8 +62,8 @@ export default function TagsBlock() {
                 <button
                     className="PBE_button"
                     onClick={() => {
-                        onAddTags(addTag);
-                        setAddTag("");
+                        onAddTags(addTagArr);
+                        setAddTagArr([]);
                         setIterate(iterate + 1);
                     }}
                 >
