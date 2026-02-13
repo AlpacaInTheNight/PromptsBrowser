@@ -1,6 +1,7 @@
 import tooltipStore from '../store'
 import onApplyHint from './onApplyHint'
 import onApplyStyleHint from './onApplyStyleHint'
+import { setIsActive } from '../store';
 
 
 export default function onClickHint(e: React.MouseEvent) {
@@ -16,4 +17,6 @@ export default function onClickHint(e: React.MouseEvent) {
 
     if(isStyle) onApplyStyleHint(start, end, name, collection);
     else onApplyHint(start, end, name);
+
+    setIsActive(true);
 }

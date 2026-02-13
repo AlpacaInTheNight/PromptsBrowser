@@ -16,7 +16,7 @@ export default function addTextAreaEvents(textArea?: HTMLTextAreaElement) {
     textArea.addEventListener("input", () => syncCurrentPrompts(true, false));
 
     textArea.addEventListener("focus", () => setIsActive(true));
-    textArea.addEventListener("blur", () => setIsActive(false));
+    textArea.addEventListener("blur", () => setTimeout(() => setIsActive(false), 200));
 
     return true;
 }

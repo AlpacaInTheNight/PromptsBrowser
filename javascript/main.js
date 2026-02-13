@@ -6058,7 +6058,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \***************************************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ../store */ "./client/components/PromptTooltip/store.ts"), __webpack_require__(/*! ./onApplyHint */ "./client/components/PromptTooltip/events/onApplyHint.ts"), __webpack_require__(/*! ./onApplyStyleHint */ "./client/components/PromptTooltip/events/onApplyStyleHint.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, store_1, onApplyHint_1, onApplyStyleHint_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ../store */ "./client/components/PromptTooltip/store.ts"), __webpack_require__(/*! ./onApplyHint */ "./client/components/PromptTooltip/events/onApplyHint.ts"), __webpack_require__(/*! ./onApplyStyleHint */ "./client/components/PromptTooltip/events/onApplyStyleHint.ts"), __webpack_require__(/*! ../store */ "./client/components/PromptTooltip/store.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, store_1, onApplyHint_1, onApplyStyleHint_1, store_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     function onClickHint(e) {
@@ -6075,6 +6075,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             (0, onApplyStyleHint_1.default)(start, end, name, collection);
         else
             (0, onApplyHint_1.default)(start, end, name);
+        (0, store_2.setIsActive)(true);
     }
     exports["default"] = onClickHint;
 }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
@@ -8592,7 +8593,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         textArea.removeEventListener("input", () => (0, synchroniseCurrentPrompts_1.default)(true, false)); //TODO: does this line really needed?
         textArea.addEventListener("input", () => (0, synchroniseCurrentPrompts_1.default)(true, false));
         textArea.addEventListener("focus", () => (0, store_1.setIsActive)(true));
-        textArea.addEventListener("blur", () => (0, store_1.setIsActive)(false));
+        textArea.addEventListener("blur", () => setTimeout(() => (0, store_1.setIsActive)(false), 200));
         return true;
     }
     exports["default"] = addTextAreaEvents;
