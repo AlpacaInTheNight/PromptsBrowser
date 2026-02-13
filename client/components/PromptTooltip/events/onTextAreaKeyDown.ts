@@ -1,6 +1,7 @@
 import ConfigManager from 'client/managers/Config'
 import tooltipStore from '../store'
 import getContainer from '../getContainer'
+import onHintWindowKey from './onHintWindowKey'
 
 
 export default function onKeyDown(e: KeyboardEvent) {
@@ -13,6 +14,8 @@ export default function onKeyDown(e: KeyboardEvent) {
     if(e.keyCode != 38 && e.keyCode != 40 && e.keyCode != 13) return;
     const hints = tooltipStore.getState().hints;
     if(!hints || !hints.length) return;
+
+    onHintWindowKey(e as KeyboardEvent);
 
     e.stopPropagation();
     e.preventDefault();

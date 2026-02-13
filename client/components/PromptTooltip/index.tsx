@@ -13,15 +13,11 @@ let initedEvents: boolean = false;
 export default function PromptTooltip({tabName}: {
     tabName: string;
 }): React.JSX.Element | React.JSX.Element[] {
-    const selected = tooltipStore(state => state.selected);
+    const isActive = tooltipStore(state => state.isActive);
     const word = tooltipStore(state => state.word);
     const hints = tooltipStore(state => state.hints);
     const {autocomplitePromptMode = "prompts"} = ConfigManager.getConfig();
     if(autocomplitePromptMode === "off") return [];
-
-    useEffect(() => {
-        state.selected = selected;
-    }, [selected]);
 
     useEffect(() => {
         state.total = hints.length;
@@ -32,7 +28,7 @@ export default function PromptTooltip({tabName}: {
         initedEvents = true;
     }
 
-    useToggleBox(word);
+    useToggleBox(word, isActive);
 
-    return ShowHints({hints, selected}) || [];
+    return ShowHints({hints}) || [];
 }

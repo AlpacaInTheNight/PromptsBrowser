@@ -2,13 +2,11 @@ import ConfigManager from 'client/managers/Config'
 import {setWord, setEnd, setStart} from '../store'
 import gradioApp from 'client/utils/gradioApp'
 import updateWindowPosition from './updateWindowPosition'
-import onHintWindowKey from './onHintWindowKey'
 import { STOP_SYMBOLS } from '../const'
 
 
 export default function onCarretPosition(e: KeyboardEvent | MouseEvent) {
     const target = e.currentTarget as HTMLTextAreaElement;
-    const keyCode: number | undefined = (e as any).keyCode;
     const {autocomplitePromptMode = "prompts"} = ConfigManager.getConfig();
     if(autocomplitePromptMode === "off") return;
 
@@ -20,19 +18,6 @@ export default function onCarretPosition(e: KeyboardEvent | MouseEvent) {
         setWord("");
         return;
     };
-
-    if(keyCode === 38 || keyCode === 40 || keyCode === 13) {
-        const block = onHintWindowKey(e as KeyboardEvent);
-
-        /* if(block) {
-            console.log("blocking event propagation");
-            e.stopPropagation();
-            e.preventDefault();
-            e.stopImmediatePropagation();
-
-            return false;
-        } */
-    }
 
     const value = textArea.value;
     const caret = textArea.selectionStart;

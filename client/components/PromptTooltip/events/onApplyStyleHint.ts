@@ -1,5 +1,6 @@
 import ActivePrompts from 'client/managers/ActivePrompts'
-import {setHints, setSelected} from '../store'
+import {setHints} from '../store'
+import state from '../state'
 import Database from 'client/Database'
 import appStore from 'client/store'
 import DOMCache from 'client/DOMCache'
@@ -42,7 +43,7 @@ export default function onApplyStyleHint(start: number, end: number, style: stri
 
     textArea.value = newValue;
 
-    setSelected(0);
+    state.selected = 0;
     syncCurrentPrompts(false);
     setHints([]);
 

@@ -5,10 +5,15 @@ import getContainer from '../getContainer'
 import getHintItems from '../utils/getHintItems'
 
 
-export default function useToggleBox(word: string) {
+export default function useToggleBox(word: string, isActive: boolean) {
     useEffect(() => {
         const autoCompleteBox = getContainer();
         if(!autoCompleteBox) return;
+
+        if(!isActive) {
+            autoCompleteBox.style.display = "none";
+            return;
+        }
 
         const hints = getHintItems({word});
 		setHints(hints);
@@ -16,5 +21,5 @@ export default function useToggleBox(word: string) {
         if(!hints || !hints.length) autoCompleteBox.style.display = "none";
         else autoCompleteBox.style.display = "";
 
-	}, [word]);
+	}, [word, isActive]);
 }

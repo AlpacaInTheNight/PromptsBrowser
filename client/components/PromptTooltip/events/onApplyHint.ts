@@ -1,4 +1,5 @@
-import {setHints, setSelected} from '../store'
+import {setHints} from '../store'
+import state from '../state'
 import Database from 'client/Database'
 import appStore from 'client/store'
 import DOMCache from 'client/DOMCache'
@@ -67,7 +68,7 @@ export default function onApplyHint(start: number, end: number, newPrompt: strin
 
     textArea.value = newValue;
 
-    setSelected(0);
+    state.selected = 0;
     syncCurrentPrompts(false);
 
     setHints([]);

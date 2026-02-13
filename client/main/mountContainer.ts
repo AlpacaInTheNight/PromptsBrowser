@@ -2,7 +2,6 @@ import supportedContainers from 'client/supportedContainers'
 import {log} from 'client/utils/index'
 import appStore, {ViewType} from 'client/store'
 import DOMCache from 'client/DOMCache'
-import syncCurrentPrompts from 'client/synchroniseCurrentPrompts'
 
 import mountControlPanel from 'client/components/ControlPanel/mount'
 import mountKnownPrompts from 'client/components/KnownPrompts/mount'
@@ -10,6 +9,7 @@ import mountCurrentPrompts from 'client/components/CurrentPrompts/mount'
 import mountPromptTooltip from 'client/components/PromptTooltip/mount'
 import mountTextareaButtons from 'client/components/TextareaButtons/mount'
 import mountPreviewSave from 'client/components/PreviewSave/mount'
+import addTextAreaEvents from './addTextAreaEvents'
 
 
 export default function mountContainer({containerId, mainContainer}: {
@@ -72,14 +72,7 @@ export default function mountContainer({containerId, mainContainer}: {
 
         //caching prompts textArea element
         domContainer.textArea = positivePrompts.querySelector("textarea") as HTMLTextAreaElement;
-        const textArea = domContainer.textArea;
-
-        if(textArea && !textArea.dataset.pbelistenerready) {
-            textArea.dataset.pbelistenerready = "true";
-
-            textArea.removeEventListener("input", () => syncCurrentPrompts(true, false));
-            textArea.addEventListener("input", () => syncCurrentPrompts(true, false));
-        }
+        addTextAreaEvents(domContainer.textArea);
 
         if(container.gallery) {
             domContainer.imageArea = mainContainer.querySelector(`#${container.gallery}`);

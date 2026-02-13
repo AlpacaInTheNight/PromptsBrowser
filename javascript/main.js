@@ -5791,14 +5791,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! ./events/onClickHint */ "./client/components/PromptTooltip/events/onClickHint.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, React, onClickHint_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
-    function ShowHints({ hints = [], selected }) {
+    function ShowHints({ hints = [] }) {
         const JSXHints = [];
         for (let hintItem of hints) {
             const { name, index = 0, isStyle, collection } = hintItem;
             let className = "PBE_hintItem";
-            if (index === selected)
+            if (index === 0)
                 className += " PBE_hintItemSelected";
-            JSXHints.push(React.createElement("div", { className: className, key: isStyle ? "__style_" + name : name, onClick: onClickHint_1.default, "data-id": name, "data-collection": collection, "data-isstyle": isStyle ? "true" : "" }, isStyle ? "Style: " + name : name));
+            JSXHints.push(React.createElement("div", { className: className, key: isStyle ? "__style_" + name : name, onClick: onClickHint_1.default, "data-index": index, "data-id": name, "data-collection": collection, "data-isstyle": isStyle ? "true" : "" }, isStyle ? "Style: " + name : name));
         }
         return JSXHints;
     }
@@ -5863,7 +5863,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \***************************************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ../store */ "./client/components/PromptTooltip/store.ts"), __webpack_require__(/*! client/Database */ "./client/Database/index.ts"), __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! client/DOMCache */ "./client/DOMCache.ts"), __webpack_require__(/*! ../getContainer */ "./client/components/PromptTooltip/getContainer.ts"), __webpack_require__(/*! ./filterNewPromptsOnly */ "./client/components/PromptTooltip/events/filterNewPromptsOnly.ts"), __webpack_require__(/*! client/synchroniseCurrentPrompts */ "./client/synchroniseCurrentPrompts/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, store_1, Database_1, store_2, DOMCache_1, getContainer_1, filterNewPromptsOnly_1, synchroniseCurrentPrompts_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ../store */ "./client/components/PromptTooltip/store.ts"), __webpack_require__(/*! ../state */ "./client/components/PromptTooltip/state.ts"), __webpack_require__(/*! client/Database */ "./client/Database/index.ts"), __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! client/DOMCache */ "./client/DOMCache.ts"), __webpack_require__(/*! ../getContainer */ "./client/components/PromptTooltip/getContainer.ts"), __webpack_require__(/*! ./filterNewPromptsOnly */ "./client/components/PromptTooltip/events/filterNewPromptsOnly.ts"), __webpack_require__(/*! client/synchroniseCurrentPrompts */ "./client/synchroniseCurrentPrompts/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, store_1, state_1, Database_1, store_2, DOMCache_1, getContainer_1, filterNewPromptsOnly_1, synchroniseCurrentPrompts_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     function onApplyHint(start, end, newPrompt) {
@@ -5926,7 +5926,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 newValue += addEnd;
         }
         textArea.value = newValue;
-        (0, store_1.setSelected)(0);
+        state_1.default.selected = 0;
         (0, synchroniseCurrentPrompts_1.default)(false);
         (0, store_1.setHints)([]);
     }
@@ -5943,7 +5943,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \********************************************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/managers/ActivePrompts */ "./client/managers/ActivePrompts/index.ts"), __webpack_require__(/*! ../store */ "./client/components/PromptTooltip/store.ts"), __webpack_require__(/*! client/Database */ "./client/Database/index.ts"), __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! client/DOMCache */ "./client/DOMCache.ts"), __webpack_require__(/*! ../getContainer */ "./client/components/PromptTooltip/getContainer.ts"), __webpack_require__(/*! client/synchroniseCurrentPrompts */ "./client/synchroniseCurrentPrompts/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, ActivePrompts_1, store_1, Database_1, store_2, DOMCache_1, getContainer_1, synchroniseCurrentPrompts_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/managers/ActivePrompts */ "./client/managers/ActivePrompts/index.ts"), __webpack_require__(/*! ../store */ "./client/components/PromptTooltip/store.ts"), __webpack_require__(/*! ../state */ "./client/components/PromptTooltip/state.ts"), __webpack_require__(/*! client/Database */ "./client/Database/index.ts"), __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! client/DOMCache */ "./client/DOMCache.ts"), __webpack_require__(/*! ../getContainer */ "./client/components/PromptTooltip/getContainer.ts"), __webpack_require__(/*! client/synchroniseCurrentPrompts */ "./client/synchroniseCurrentPrompts/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, ActivePrompts_1, store_1, state_1, Database_1, store_2, DOMCache_1, getContainer_1, synchroniseCurrentPrompts_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     function onApplyStyleHint(start, end, style, collection) {
@@ -5978,7 +5978,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         newValue += prefix;
         newValue += postfix;
         textArea.value = newValue;
-        (0, store_1.setSelected)(0);
+        state_1.default.selected = 0;
         (0, synchroniseCurrentPrompts_1.default)(false);
         (0, store_1.setHints)([]);
         ActivePrompts_1.default.applyStyle(targetStyle, true, false);
@@ -5996,12 +5996,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \********************************************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/managers/Config */ "./client/managers/Config/index.ts"), __webpack_require__(/*! ../store */ "./client/components/PromptTooltip/store.ts"), __webpack_require__(/*! client/utils/gradioApp */ "./client/utils/gradioApp.ts"), __webpack_require__(/*! ./updateWindowPosition */ "./client/components/PromptTooltip/events/updateWindowPosition.ts"), __webpack_require__(/*! ./onHintWindowKey */ "./client/components/PromptTooltip/events/onHintWindowKey.ts"), __webpack_require__(/*! ../const */ "./client/components/PromptTooltip/const.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, Config_1, store_1, gradioApp_1, updateWindowPosition_1, onHintWindowKey_1, const_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/managers/Config */ "./client/managers/Config/index.ts"), __webpack_require__(/*! ../store */ "./client/components/PromptTooltip/store.ts"), __webpack_require__(/*! client/utils/gradioApp */ "./client/utils/gradioApp.ts"), __webpack_require__(/*! ./updateWindowPosition */ "./client/components/PromptTooltip/events/updateWindowPosition.ts"), __webpack_require__(/*! ../const */ "./client/components/PromptTooltip/const.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, Config_1, store_1, gradioApp_1, updateWindowPosition_1, const_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     function onCarretPosition(e) {
         const target = e.currentTarget;
-        const keyCode = e.keyCode;
         const { autocomplitePromptMode = "prompts" } = Config_1.default.getConfig();
         if (autocomplitePromptMode === "off")
             return;
@@ -6014,17 +6013,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             return;
         }
         ;
-        if (keyCode === 38 || keyCode === 40 || keyCode === 13) {
-            const block = (0, onHintWindowKey_1.default)(e);
-            /* if(block) {
-                console.log("blocking event propagation");
-                e.stopPropagation();
-                e.preventDefault();
-                e.stopImmediatePropagation();
-    
-                return false;
-            } */
-        }
         const value = textArea.value;
         const caret = textArea.selectionStart;
         let position = caret;
@@ -6101,7 +6089,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \*******************************************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ../store */ "./client/components/PromptTooltip/store.ts"), __webpack_require__(/*! client/components/PromptTooltip/getContainer */ "./client/components/PromptTooltip/getContainer.ts"), __webpack_require__(/*! ../state */ "./client/components/PromptTooltip/state.ts"), __webpack_require__(/*! ./onApplyHint */ "./client/components/PromptTooltip/events/onApplyHint.ts"), __webpack_require__(/*! ./onApplyStyleHint */ "./client/components/PromptTooltip/events/onApplyStyleHint.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, store_1, getContainer_1, state_1, onApplyHint_1, onApplyStyleHint_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ../store */ "./client/components/PromptTooltip/store.ts"), __webpack_require__(/*! client/components/PromptTooltip/getContainer */ "./client/components/PromptTooltip/getContainer.ts"), __webpack_require__(/*! ../state */ "./client/components/PromptTooltip/state.ts"), __webpack_require__(/*! ./onApplyHint */ "./client/components/PromptTooltip/events/onApplyHint.ts"), __webpack_require__(/*! ./onApplyStyleHint */ "./client/components/PromptTooltip/events/onApplyStyleHint.ts"), __webpack_require__(/*! ../store */ "./client/components/PromptTooltip/store.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, store_1, getContainer_1, state_1, onApplyHint_1, onApplyStyleHint_1, store_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     function onHintWindowKey(e) {
@@ -6113,7 +6101,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         if (e.keyCode != 38 && e.keyCode != 40 && e.keyCode != 13)
             return false;
         if (e.keyCode === 13) {
-            const { hints, selected, start, end } = store_1.default.getState();
+            const { hints, start, end } = store_1.default.getState();
             const selectedHint = hints[selected];
             if (!selectedHint)
                 return false;
@@ -6122,6 +6110,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 (0, onApplyStyleHint_1.default)(start, end, name, collection);
             else
                 (0, onApplyHint_1.default)(start, end, name);
+            (0, store_2.setIsActive)(true);
             return;
         }
         const isDown = e.keyCode == 40;
@@ -6133,7 +6122,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             selected = total - 1;
         else if (selected > total - 1)
             selected = 0;
-        (0, store_1.setSelected)(selected);
+        state_1.default.selected = selected;
+        const hints = document.querySelectorAll("#PBE_autocompliteBox .PBE_hintItem");
+        hints.forEach(nodeItem => {
+            if (nodeItem.dataset.index === selected + "")
+                nodeItem.classList.add("PBE_hintItemSelected");
+            else
+                nodeItem.classList.remove("PBE_hintItemSelected");
+        });
         return true;
     }
     exports["default"] = onHintWindowKey;
@@ -6149,7 +6145,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \*********************************************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/managers/Config */ "./client/managers/Config/index.ts"), __webpack_require__(/*! ../store */ "./client/components/PromptTooltip/store.ts"), __webpack_require__(/*! ../getContainer */ "./client/components/PromptTooltip/getContainer.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, Config_1, store_1, getContainer_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/managers/Config */ "./client/managers/Config/index.ts"), __webpack_require__(/*! ../store */ "./client/components/PromptTooltip/store.ts"), __webpack_require__(/*! ../getContainer */ "./client/components/PromptTooltip/getContainer.ts"), __webpack_require__(/*! ./onHintWindowKey */ "./client/components/PromptTooltip/events/onHintWindowKey.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, Config_1, store_1, getContainer_1, onHintWindowKey_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     function onKeyDown(e) {
@@ -6166,6 +6162,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         const hints = store_1.default.getState().hints;
         if (!hints || !hints.length)
             return;
+        (0, onHintWindowKey_1.default)(e);
         e.stopPropagation();
         e.preventDefault();
         e.stopImmediatePropagation();
@@ -6321,18 +6318,22 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! ../store */ "./client/components/PromptTooltip/store.ts"), __webpack_require__(/*! ../getContainer */ "./client/components/PromptTooltip/getContainer.ts"), __webpack_require__(/*! ../utils/getHintItems */ "./client/components/PromptTooltip/utils/getHintItems.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, react_1, store_1, getContainer_1, getHintItems_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
-    function useToggleBox(word) {
+    function useToggleBox(word, isActive) {
         (0, react_1.useEffect)(() => {
             const autoCompleteBox = (0, getContainer_1.default)();
             if (!autoCompleteBox)
                 return;
+            if (!isActive) {
+                autoCompleteBox.style.display = "none";
+                return;
+            }
             const hints = (0, getHintItems_1.default)({ word });
             (0, store_1.setHints)(hints);
             if (!hints || !hints.length)
                 autoCompleteBox.style.display = "none";
             else
                 autoCompleteBox.style.display = "";
-        }, [word]);
+        }, [word, isActive]);
     }
     exports["default"] = useToggleBox;
 }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
@@ -6352,15 +6353,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     let initedEvents = false;
     function PromptTooltip({ tabName }) {
-        const selected = (0, store_1.default)(state => state.selected);
+        const isActive = (0, store_1.default)(state => state.isActive);
         const word = (0, store_1.default)(state => state.word);
         const hints = (0, store_1.default)(state => state.hints);
         const { autocomplitePromptMode = "prompts" } = Config_1.default.getConfig();
         if (autocomplitePromptMode === "off")
             return [];
-        (0, react_1.useEffect)(() => {
-            state_1.default.selected = selected;
-        }, [selected]);
         (0, react_1.useEffect)(() => {
             state_1.default.total = hints.length;
         }, [hints.length]);
@@ -6369,8 +6367,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 return [];
             initedEvents = true;
         }
-        (0, useToggleBox_1.default)(word);
-        return (0, ShowHints_1.default)({ hints, selected }) || [];
+        (0, useToggleBox_1.default)(word, isActive);
+        return (0, ShowHints_1.default)({ hints }) || [];
     }
     exports["default"] = PromptTooltip;
 }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
@@ -6433,8 +6431,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! zustand */ "./node_modules/zustand/index.js")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, zustand_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
-    exports.setEnd = exports.setStart = exports.setHints = exports.setSelected = exports.setWord = exports.tooltipStore = void 0;
+    exports.tooltipStore = exports.setIsActive = exports.setHints = exports.setWord = exports.setEnd = exports.setStart = void 0;
     const tooltipStore = (0, zustand_1.create)((set) => ({
+        isActive: false,
         start: 0,
         end: 0,
         word: "",
@@ -6448,10 +6447,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     exports.setEnd = setEnd;
     const setWord = (word) => tooltipStore.setState({ word });
     exports.setWord = setWord;
-    const setSelected = (selected) => tooltipStore.setState({ selected });
-    exports.setSelected = setSelected;
     const setHints = (hints) => tooltipStore.setState({ hints });
     exports.setHints = setHints;
+    const setIsActive = (isActive) => tooltipStore.setState({ isActive });
+    exports.setIsActive = setIsActive;
     exports["default"] = tooltipStore;
 }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
 		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
@@ -8572,6 +8571,37 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 
 /***/ }),
 
+/***/ "./client/main/addTextAreaEvents.ts":
+/*!******************************************!*\
+  !*** ./client/main/addTextAreaEvents.ts ***!
+  \******************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/synchroniseCurrentPrompts */ "./client/synchroniseCurrentPrompts/index.ts"), __webpack_require__(/*! client/components/PromptTooltip/store */ "./client/components/PromptTooltip/store.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, synchroniseCurrentPrompts_1, store_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    /**
+     * Adds listeners to the main prompt container.
+     * @param textArea - HTML text area prompt container
+     * @returns
+     */
+    function addTextAreaEvents(textArea) {
+        if (!textArea || textArea.dataset.pbelistenerready)
+            return false;
+        textArea.dataset.pbelistenerready = "true";
+        textArea.removeEventListener("input", () => (0, synchroniseCurrentPrompts_1.default)(true, false)); //TODO: does this line really needed?
+        textArea.addEventListener("input", () => (0, synchroniseCurrentPrompts_1.default)(true, false));
+        textArea.addEventListener("focus", () => (0, store_1.setIsActive)(true));
+        textArea.addEventListener("blur", () => (0, store_1.setIsActive)(false));
+        return true;
+    }
+    exports["default"] = addTextAreaEvents;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
 /***/ "./client/main/events/onChangeTab.ts":
 /*!*******************************************!*\
   !*** ./client/main/events/onChangeTab.ts ***!
@@ -8628,7 +8658,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \***************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/supportedContainers */ "./client/supportedContainers.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! client/DOMCache */ "./client/DOMCache.ts"), __webpack_require__(/*! client/synchroniseCurrentPrompts */ "./client/synchroniseCurrentPrompts/index.ts"), __webpack_require__(/*! client/components/ControlPanel/mount */ "./client/components/ControlPanel/mount.tsx"), __webpack_require__(/*! client/components/KnownPrompts/mount */ "./client/components/KnownPrompts/mount.tsx"), __webpack_require__(/*! client/components/CurrentPrompts/mount */ "./client/components/CurrentPrompts/mount.tsx"), __webpack_require__(/*! client/components/PromptTooltip/mount */ "./client/components/PromptTooltip/mount.tsx"), __webpack_require__(/*! client/components/TextareaButtons/mount */ "./client/components/TextareaButtons/mount.tsx"), __webpack_require__(/*! client/components/PreviewSave/mount */ "./client/components/PreviewSave/mount.tsx")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, supportedContainers_1, index_1, store_1, DOMCache_1, synchroniseCurrentPrompts_1, mount_1, mount_2, mount_3, mount_4, mount_5, mount_6) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/supportedContainers */ "./client/supportedContainers.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! client/DOMCache */ "./client/DOMCache.ts"), __webpack_require__(/*! client/components/ControlPanel/mount */ "./client/components/ControlPanel/mount.tsx"), __webpack_require__(/*! client/components/KnownPrompts/mount */ "./client/components/KnownPrompts/mount.tsx"), __webpack_require__(/*! client/components/CurrentPrompts/mount */ "./client/components/CurrentPrompts/mount.tsx"), __webpack_require__(/*! client/components/PromptTooltip/mount */ "./client/components/PromptTooltip/mount.tsx"), __webpack_require__(/*! client/components/TextareaButtons/mount */ "./client/components/TextareaButtons/mount.tsx"), __webpack_require__(/*! client/components/PreviewSave/mount */ "./client/components/PreviewSave/mount.tsx"), __webpack_require__(/*! ./addTextAreaEvents */ "./client/main/addTextAreaEvents.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, supportedContainers_1, index_1, store_1, DOMCache_1, mount_1, mount_2, mount_3, mount_4, mount_5, mount_6, addTextAreaEvents_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     function mountContainer({ containerId, mainContainer }) {
@@ -8680,12 +8710,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             }
             //caching prompts textArea element
             domContainer.textArea = positivePrompts.querySelector("textarea");
-            const textArea = domContainer.textArea;
-            if (textArea && !textArea.dataset.pbelistenerready) {
-                textArea.dataset.pbelistenerready = "true";
-                textArea.removeEventListener("input", () => (0, synchroniseCurrentPrompts_1.default)(true, false));
-                textArea.addEventListener("input", () => (0, synchroniseCurrentPrompts_1.default)(true, false));
-            }
+            (0, addTextAreaEvents_1.default)(domContainer.textArea);
             if (container.gallery) {
                 domContainer.imageArea = mainContainer.querySelector(`#${container.gallery}`);
                 (0, mount_6.default)({ wrapper: domContainer.imageArea, tabName });
