@@ -11,7 +11,15 @@ export const TagTooltipStaticStore: {
 export type TagTooltipStore = {
     iterate: number;
     selectedIndex: number;
+
+    /**
+     * List of all known tags
+     */
     knownTags: string[];
+
+    /**
+     * List of tags suitable for autocompletion of the entered word
+     */
     possibleTags: PossibleTag[];
 
     autocompliteBox: HTMLDivElement | undefined;

@@ -47,13 +47,12 @@ export default function TagTooltip({tags, iteration = 0, onUpdate, onSubmit}: {
             onKeyDown={e => {
                 if(!onSubmit) return;
 
-                const {autocompliteBox} = tagTooltipStore.getState();
-                if(autocompliteBox.style.display !== "none") return;
+                const {autocompliteBox, possibleTags} = tagTooltipStore.getState();
+                if(possibleTags.length && autocompliteBox.style.display !== "none") return;
 
                 if(e.key === 'Enter') onSubmit();
             }}
             onKeyUp={processCarretPosition}
-            //onClick={processCarretPosition}
             onFocus={e => {
                 TagTooltipStaticStore.onUpdate = onUpdate;
                 setInputElement(e.currentTarget);

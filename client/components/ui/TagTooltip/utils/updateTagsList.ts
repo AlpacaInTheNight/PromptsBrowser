@@ -2,6 +2,10 @@ import Database from "client/Database";
 import {setKnownTags} from "../store";
 
 
+/**
+ * Creates a list of known tags used in the database
+ * @returns 
+ */
 export default function updateTagsList() {
     const {data} = Database;
     if(!data || !data.united) return;

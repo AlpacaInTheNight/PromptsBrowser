@@ -47,10 +47,10 @@ export default function TagsBlock() {
 
             <div className="PBE_rowBlock">
                 <TagTooltip
+                    iteration={iterate}
                     tags={addTagArr}
                     onUpdate={newTags => {
                         setAddTagArr(newTags || []);
-                        setIterate(iterate + 1);
                     }}
                     onSubmit={() => {
                         onAddTags(addTagArr);
