@@ -1,12 +1,12 @@
-import tagTooltipStore, { setSelectedIndex } from "../store";
+import tagTooltipStore, { TagTooltipStaticStore } from "../store";
 import applyHint from "../utils/applyHint";
 
 
 export default function onHintWindowKey(e: React.KeyboardEvent) {
     const autoCompleteBox = tagTooltipStore.getState().autocompliteBox;
     const inputElement = tagTooltipStore.getState().inputElement;
-    const selectedIndex = tagTooltipStore.getState().selectedIndex;
-    if(!autoCompleteBox || !inputElement) return;
+    const {selectedIndex} = TagTooltipStaticStore;
+    if(!autoCompleteBox || !inputElement) return false;
 
     if(autoCompleteBox.style.display === "none") return false;
     if(e.keyCode != 38 && e.keyCode != 40 && e.keyCode != 13) return false;
@@ -38,7 +38,13 @@ export default function onHintWindowKey(e: React.KeyboardEvent) {
     if(newSelectedIndex < 0) newSelectedIndex = hintElements.length - 1;
     else if(newSelectedIndex > hintElements.length - 1) newSelectedIndex = 0;
 
-    setSelectedIndex(newSelectedIndex);
+    TagTooltipStaticStore.selectedIndex = newSelectedIndex;
+
+    const hints = document.querySelectorAll<HTMLDivElement>("#PBE_autocompliteTags .PBE_hintItem");
+    hints.forEach(nodeItem => {
+        if(nodeItem.dataset.index === newSelectedIndex + "") nodeItem.classList.add("PBE_hintItemSelected");
+        else nodeItem.classList.remove("PBE_hintItemSelected");
+    });
 
     return true;
 }

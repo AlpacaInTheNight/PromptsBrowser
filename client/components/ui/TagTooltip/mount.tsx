@@ -9,6 +9,7 @@ export default function mount({wrapper}: {
 }) {
     const autocompliteBox = document.createElement("div");
     autocompliteBox.className = "PBE_autocompliteBox PBE_autocompliteTags";
+    autocompliteBox.id = "PBE_autocompliteTags";
     autocompliteBox.style.position = "fixed";
     autocompliteBox.style.display = "none";
     wrapper.appendChild(autocompliteBox);

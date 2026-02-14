@@ -4,13 +4,14 @@ import { PossibleTag } from './type';
 
 export const TagTooltipStaticStore: {
     onUpdate: ((tags: string[]) => void) | undefined;
+    selectedIndex: number;
 } = {
     onUpdate: undefined,
+    selectedIndex: 0,
 }
 
 export type TagTooltipStore = {
     iterate: number;
-    selectedIndex: number;
 
     /**
      * List of all known tags
@@ -28,7 +29,6 @@ export type TagTooltipStore = {
 
 const tagTooltipStore = create<TagTooltipStore>((set) => ({
     iterate: 0,
-    selectedIndex: 0,
     knownTags: [],
     possibleTags: [],
 
@@ -38,7 +38,6 @@ const tagTooltipStore = create<TagTooltipStore>((set) => ({
 
 export const iterateStore = () => tagTooltipStore.setState({iterate: tagTooltipStore.getState().iterate + 1});
 
-export const setSelectedIndex = (selectedIndex: number) => tagTooltipStore.setState({selectedIndex});
 export const setKnownTags = (knownTags: string[]) => tagTooltipStore.setState({knownTags});
 export const setAutocompliteBox = (autocompliteBox: HTMLDivElement | undefined) => tagTooltipStore.setState({autocompliteBox});
 export const setInputElement = (inputElement: HTMLInputElement | undefined) => tagTooltipStore.setState({inputElement});

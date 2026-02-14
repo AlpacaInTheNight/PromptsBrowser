@@ -1,26 +1,10 @@
-import onHintWindowKey from "./onHintWindowKey";
 import tagTooltipStore, {setPossibleTags} from "../store";
 import { PossibleTag } from "../type";
 
 
 export default function processCarretPosition(e: React.KeyboardEvent | React.MouseEvent | React.FocusEvent) {
     const target = e.currentTarget as HTMLInputElement;
-    const {selectedIndex = 0, knownTags = []} = tagTooltipStore.getState();
-
-    if((e as any).keyCode) {
-        const keyEvent = e as React.KeyboardEvent;
-
-        if(keyEvent.keyCode === 38 || keyEvent.keyCode === 40 || keyEvent.keyCode === 13) {
-            const block = onHintWindowKey(keyEvent);
-    
-            if(block) {
-                e.stopPropagation();
-                e.preventDefault();
-    
-                return false;
-            }
-        }
-    }
+    const {knownTags = []} = tagTooltipStore.getState();
 
     const MAX_HINTS = 20;
     let currHints = 0;

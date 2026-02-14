@@ -1,4 +1,4 @@
-import tagTooltipStore, { setSelectedIndex } from "../store";
+import tagTooltipStore, { TagTooltipStaticStore } from "../store";
 import onChange from '../events/onChange';
 
 
@@ -24,7 +24,7 @@ export default function applyHint({newTag, start, end}: {
 
     inputElement.value = newValue;
 
-    setSelectedIndex(0);
+    TagTooltipStaticStore.selectedIndex = 0;
 
     onChange(inputElement.value);
 }

@@ -1,12 +1,11 @@
 import * as React from 'react'
-import { JSX, useState, useEffect, useRef } from 'react'
+import { JSX, useState, useEffect } from 'react'
 import tagTooltipStore from './store'
 import onClickHint from './events/onClickHint'
 
 
 export default function AutocompliteBox() {
     const possibleTags = tagTooltipStore(state => state.possibleTags);
-    const selectedIndex = tagTooltipStore(state => state.selectedIndex);
     const MAX_HINTS = 20;
     let currHints = 0;
 
@@ -17,12 +16,13 @@ export default function AutocompliteBox() {
         const {value, wordStart, wordEnd} = tag;
 
         let className = "PBE_hintItem";
-        if(currHints === selectedIndex) className += " PBE_hintItemSelected";
+        if(currHints === 0) className += " PBE_hintItemSelected";
 
         JSXHints.push(
             <div
                 key={value}
                 className={className}
+                data-index={currHints}
                 data-start={wordStart + ""}
                 data-end={wordEnd + ""}
                 onClick={onClickHint}

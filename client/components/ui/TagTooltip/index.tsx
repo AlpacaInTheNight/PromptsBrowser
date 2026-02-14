@@ -6,6 +6,7 @@ import processCarretPosition from './events/processCarretPosition';
 import updateTagsList from './utils/updateTagsList';
 import onChange from './events/onChange';
 import onBlur from './events/onBlur';
+import onHintWindowKey from './events/onHintWindowKey';
 
 
 export default function TagTooltip({tags, iteration = 0, onUpdate, onSubmit}: {
@@ -45,6 +46,17 @@ export default function TagTooltip({tags, iteration = 0, onUpdate, onSubmit}: {
                 onChange(value);
             }}
             onKeyDown={e => {
+                if(e.keyCode === 38 || e.keyCode === 40 || e.keyCode === 13) {
+                    const block = onHintWindowKey(e);
+            
+                    if(block) {
+                        e.stopPropagation();
+                        e.preventDefault();
+            
+                        return false;
+                    }
+                }
+
                 if(!onSubmit) return;
 
                 const {autocompliteBox, possibleTags} = tagTooltipStore.getState();
