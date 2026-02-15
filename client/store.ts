@@ -13,6 +13,7 @@ export enum ViewType {
 }
 
 export type AppStore = {
+    modelIteration: number;
     currentContainer: string;
     showControlPanel: boolean;
     showViews: ViewType[];
@@ -42,6 +43,7 @@ export type AppStore = {
 }
 
 export const appStore = create<AppStore>((set) => ({
+    modelIteration: 0,
     currentContainer: DEFAULT_CONTAINER_NAME,
     showControlPanel: true,
     showViews: [ViewType.KNOWN, ViewType.CURRENT, ViewType.POSITIVE, ViewType.NEGATIVE],
@@ -100,6 +102,8 @@ export const toggleView = (viewUpdate: ViewType) => appStore.setState(state => {
     localStorage.setItem("PBE_showViews", JSON.stringify(newShowViews));
     return {showViews: newShowViews};
 });
+
+export const iterateModel = () => appStore.setState(store => ({modelIteration: store.modelIteration + 1}));
 
 export const setFilterCollection = (filterCollection?: string) => appStore.setState(store => ({filterCollection, filesIteration: store.filesIteration + 1}));
 export const setFilterCategory = (filterCategory?: string) => appStore.setState({filterCategory});

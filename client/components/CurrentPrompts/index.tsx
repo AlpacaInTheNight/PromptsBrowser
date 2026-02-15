@@ -11,6 +11,7 @@ export default function CurrentPrompts({tabName}: {
     tabName: string;
 }) {
     const filesIteration = appStore(state => state.filesIteration);
+    const modelIteration = appStore(state => state.modelIteration);
     const currentIteration = appStore(state => state.currentIteration);
     const showViews = appStore(state => state.showViews);
     const currentContainer = appStore(state => state.currentContainer);
@@ -25,7 +26,7 @@ export default function CurrentPrompts({tabName}: {
 
     return (
         <PromptsList
-            iteration={currentIteration + filesIteration}
+            iteration={currentIteration + filesIteration + modelIteration}
             prompts={activePrompts}
             allowMove={true}
             onClick={onPromptClick}

@@ -26,62 +26,16 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \************************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! client/const */ "./client/const.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! ./index */ "./client/Database/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, const_1, index_2, index_3) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! client/const */ "./client/const.ts"), __webpack_require__(/*! ./index */ "./client/Database/index.ts"), __webpack_require__(/*! ./utils/getModelPreview */ "./client/Database/utils/getModelPreview.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, const_1, index_2, getModelPreview_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     exports.getModelPreview = void 0;
-    function getModelPreview({ targetPrompt, desiredCollection, desiredModel, targetModelOnly = false }) {
-        if (!targetPrompt.knownModelPreviews)
-            return false;
-        if (!desiredModel)
-            desiredModel = (0, index_2.getCheckpoint)();
-        if (desiredModel)
-            desiredModel = (0, index_1.makeFileNameSafe)(desiredModel);
-        let foundDesiredModel = false;
-        let targetCollection = "";
-        let targetModel = "";
-        let targetFile = "";
-        for (const colId in targetPrompt.knownModelPreviews) {
-            const models = targetPrompt.knownModelPreviews[colId];
-            if (!models)
-                continue;
-            //checking all models if no preview for desired model found yet
-            if (!foundDesiredModel) {
-                for (const modelId in models) {
-                    const fileItem = models[modelId];
-                    if (fileItem) {
-                        targetFile = fileItem;
-                        targetModel = modelId;
-                        targetCollection = colId;
-                        if (modelId === desiredModel) {
-                            foundDesiredModel = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            else if (desiredModel && models[desiredModel]) { //checking only preview for desired model if found it in any other collection
-                targetFile = models[desiredModel];
-                targetModel = desiredModel;
-                targetCollection = colId;
-            }
-            if (foundDesiredModel && colId === desiredCollection)
-                break;
-        }
-        if (targetModelOnly && !foundDesiredModel)
-            return false;
-        if (targetCollection && targetModel && targetFile) {
-            const safeFileName = (0, index_1.makeFileNameSafe)(targetPrompt.id);
-            return `${targetCollection}/${targetModel}/${safeFileName}.${targetFile}`;
-        }
-        return false;
-    }
-    exports.getModelPreview = getModelPreview;
+    exports.getModelPreview = getModelPreview_1.default;
     function getPromptPreviewURL({ prompt, collectionId, model, filesIteration = 0, filterCollection }) {
         if (!prompt)
             return const_1.NEW_CARD_GRADIENT;
-        const apiUrl = index_3.default.getAPIurl("promptImage");
-        const { data } = index_3.default;
+        const apiUrl = index_2.default.getAPIurl("promptImage");
+        const { data } = index_2.default;
         const { united } = data;
         let fileExtension = "";
         let targetPrompt = united.find(item => item.id.toLowerCase() === prompt.toLowerCase());
@@ -97,7 +51,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             collectionId = filterCollection;
         //checking target model previews
         if (model !== false && targetPrompt.knownModelPreviews) {
-            const modelPreviewPath = getModelPreview({
+            const modelPreviewPath = (0, getModelPreview_1.default)({
                 targetPrompt,
                 desiredCollection: collectionId,
                 targetModelOnly: true,
@@ -121,7 +75,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         }
         if (!collectionId || !fileExtension) {
             if (model !== false) {
-                const anyModelPreviewPath = getModelPreview({
+                const anyModelPreviewPath = (0, getModelPreview_1.default)({
                     targetPrompt,
                     desiredCollection: collectionId,
                     targetModelOnly: false,
@@ -433,14 +387,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/managers/ActivePrompts */ "./client/managers/ActivePrompts/index.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! client/components/PreviewSave/store */ "./client/components/PreviewSave/store.ts"), __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! ./index */ "./client/Database/index.ts"), __webpack_require__(/*! ./utils/getGeneratedImageSrc */ "./client/Database/utils/getGeneratedImageSrc.ts"), __webpack_require__(/*! ./utils/updateInCollections */ "./client/Database/utils/updateInCollections.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, ActivePrompts_1, index_1, store_1, store_2, index_2, getGeneratedImageSrc_1, updateInCollections_1) {
+!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/managers/ActivePrompts */ "./client/managers/ActivePrompts/index.ts"), __webpack_require__(/*! client/utils/getCheckpoint */ "./client/utils/getCheckpoint.ts"), __webpack_require__(/*! client/components/PreviewSave/store */ "./client/components/PreviewSave/store.ts"), __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! ./index */ "./client/Database/index.ts"), __webpack_require__(/*! ./utils/getGeneratedImageSrc */ "./client/Database/utils/getGeneratedImageSrc.ts"), __webpack_require__(/*! ./utils/updateInCollections */ "./client/Database/utils/updateInCollections.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, ActivePrompts_1, getCheckpoint_1, store_1, store_2, index_1, getGeneratedImageSrc_1, updateInCollections_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     function savePromptPreview(callUpdate = true) {
-        const { data } = index_2.default;
+        const { data } = index_1.default;
         const { selectedPrompt } = store_2.default.getState();
         const { previewCollection } = store_1.default.getState();
-        const url = index_2.default.getAPIurl("savePreview");
+        const url = index_1.default.getAPIurl("savePreview");
         let isExternalNetwork = false;
         if (!data.original[previewCollection])
             return;
@@ -455,7 +409,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
         const saveData = { src, prompt: selectedPrompt, collection: previewCollection };
         if (isExternalNetwork)
             saveData.isExternalNetwork = true;
-        const checkpoint = (0, index_1.getCheckpoint)();
+        const checkpoint = (0, getCheckpoint_1.default)();
         if (checkpoint)
             saveData.model = checkpoint;
         (0, updateInCollections_1.default)(isExternalNetwork, extension, checkpoint || "");
@@ -470,7 +424,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __awaiter = 
             });
             const answer = yield rawResponse.json();
             if (answer === "ok" && callUpdate) {
-                index_2.default.updateMixedList();
+                index_1.default.updateMixedList();
                 (0, store_2.setSelectedPrompt)(undefined);
                 (0, store_2.updateFilesIteration)();
             }
@@ -668,6 +622,68 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         return { src, extension };
     }
     exports["default"] = getGeneratedImageSrc;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/Database/utils/getModelPreview.ts":
+/*!**************************************************!*\
+  !*** ./client/Database/utils/getModelPreview.ts ***!
+  \**************************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! client/utils/getCheckpoint */ "./client/utils/getCheckpoint.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, getCheckpoint_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function getModelPreview({ targetPrompt, desiredCollection, desiredModel, targetModelOnly = false }) {
+        if (!targetPrompt.knownModelPreviews)
+            return false;
+        if (!desiredModel)
+            desiredModel = (0, getCheckpoint_1.default)();
+        if (desiredModel)
+            desiredModel = (0, index_1.makeFileNameSafe)(desiredModel);
+        let foundDesiredModel = false;
+        let targetCollection = "";
+        let targetModel = "";
+        let targetFile = "";
+        for (const colId in targetPrompt.knownModelPreviews) {
+            const models = targetPrompt.knownModelPreviews[colId];
+            if (!models)
+                continue;
+            //checking all models if no preview for desired model found yet
+            if (!foundDesiredModel) {
+                for (const modelId in models) {
+                    const fileItem = models[modelId];
+                    if (fileItem) {
+                        targetFile = fileItem;
+                        targetModel = modelId;
+                        targetCollection = colId;
+                        if (modelId === desiredModel) {
+                            foundDesiredModel = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            else if (desiredModel && models[desiredModel]) { //checking only preview for desired model if found it in any other collection
+                targetFile = models[desiredModel];
+                targetModel = desiredModel;
+                targetCollection = colId;
+            }
+            if (foundDesiredModel && colId === desiredCollection)
+                break;
+        }
+        if (targetModelOnly && !foundDesiredModel)
+            return false;
+        if (targetCollection && targetModel && targetFile) {
+            const safeFileName = (0, index_1.makeFileNameSafe)(targetPrompt.id);
+            return `${targetCollection}/${targetModel}/${safeFileName}.${targetFile}`;
+        }
+        return false;
+    }
+    exports["default"] = getModelPreview;
 }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
 		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
@@ -2169,6 +2185,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     function CurrentPrompts({ tabName }) {
         const filesIteration = (0, store_1.default)(state => state.filesIteration);
+        const modelIteration = (0, store_1.default)(state => state.modelIteration);
         const currentIteration = (0, store_1.default)(state => state.currentIteration);
         const showViews = (0, store_1.default)(state => state.showViews);
         const currentContainer = (0, store_1.default)(state => state.currentContainer);
@@ -2180,7 +2197,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         if (!render)
             return React.createElement("div", { style: { display: "none" } });
         const activePrompts = ActivePrompts_1.default.getCurrentPrompts();
-        return (React.createElement(PromptsList_1.default, { iteration: currentIteration + filesIteration, prompts: activePrompts, allowMove: true, onClick: onClick_1.default, onWheel: onWheel_1.default, onDblClick: onDoubleClick_1.default }));
+        return (React.createElement(PromptsList_1.default, { iteration: currentIteration + filesIteration + modelIteration, prompts: activePrompts, allowMove: true, onClick: onClick_1.default, onWheel: onWheel_1.default, onDblClick: onDoubleClick_1.default }));
     }
     exports["default"] = CurrentPrompts;
 }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
@@ -2228,9 +2245,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         const sortKnownPrompts = (0, store_1.default)(state => state.sortKnownPrompts);
         const filterName = (0, store_1.default)(state => state.filterName);
         const filterTags = (0, store_1.default)(state => state.filterTags);
+        const modelIteration = (0, store_1.default)(state => state.modelIteration);
         const cards = (0, getCards_1.default)({ filesIteration, filterCollection, filterCategory, filterName, filterTags, sortKnownPrompts });
         const { cardHeight = 100, rowsInKnownCards = 3 } = Config_1.default.getConfig();
-        return (React.createElement("div", { className: "PBE_promptsCatalogueContent PBE_Scrollbar", style: {
+        return (React.createElement("div", { "data-model": modelIteration, className: "PBE_promptsCatalogueContent PBE_Scrollbar", style: {
                 maxHeight: `${cardHeight * rowsInKnownCards}px`,
             } }, cards));
     }
@@ -4205,9 +4223,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 React.createElement("div", null, "Tags:"),
                 React.createElement("div", { className: "PBE_List PBE_Scrollbar PBE_tagsList" }, JSXTags)),
             React.createElement("div", { className: "PBE_rowBlock" },
-                React.createElement(TagTooltip_1.default, { tags: addTagArr, onUpdate: newTags => {
+                React.createElement(TagTooltip_1.default, { iteration: iterate, tags: addTagArr, onUpdate: newTags => {
                         setAddTagArr(newTags || []);
-                        setIterate(iterate + 1);
                     }, onSubmit: () => {
                         (0, onAddTags_1.default)(addTagArr);
                         setAddTagArr([]);
@@ -7595,7 +7612,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \***********************************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! ./type */ "./client/components/ui/PromptsFilter/type.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, type_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! client/utils/getCheckpoint */ "./client/utils/getCheckpoint.ts"), __webpack_require__(/*! ./type */ "./client/components/ui/PromptsFilter/type.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, index_1, getCheckpoint_1, type_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     /**
@@ -7611,7 +7628,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         let { id, comment = "", autogen = {} } = prompt;
         if (!id)
             return false; //invalid prompt
-        const checkpoint = (0, index_1.makeFileNameSafe)((0, index_1.getCheckpoint)() || "");
+        const checkpoint = (0, index_1.makeFileNameSafe)((0, getCheckpoint_1.default)() || "");
         const { tags = [], category = [], previewImage, previews = {} } = prompt;
         let fulfil = false;
         id = id.toLowerCase();
@@ -8032,7 +8049,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     function AutocompliteBox() {
         const possibleTags = (0, store_1.default)(state => state.possibleTags);
-        const selectedIndex = (0, store_1.default)(state => state.selectedIndex);
         const MAX_HINTS = 20;
         let currHints = 0;
         const JSXHints = [];
@@ -8041,9 +8057,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 break;
             const { value, wordStart, wordEnd } = tag;
             let className = "PBE_hintItem";
-            if (currHints === selectedIndex)
+            if (currHints === 0)
                 className += " PBE_hintItemSelected";
-            JSXHints.push(React.createElement("div", { key: value, className: className, "data-start": wordStart + "", "data-end": wordEnd + "", onClick: onClickHint_1.default }, value));
+            JSXHints.push(React.createElement("div", { key: value, className: className, "data-index": currHints, "data-start": wordStart + "", "data-end": wordEnd + "", onClick: onClickHint_1.default }, value));
             currHints++;
         }
         return (React.createElement(React.Fragment, null, JSXHints));
@@ -8143,9 +8159,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     function onHintWindowKey(e) {
         const autoCompleteBox = store_1.default.getState().autocompliteBox;
         const inputElement = store_1.default.getState().inputElement;
-        const selectedIndex = store_1.default.getState().selectedIndex;
+        const { selectedIndex } = store_1.TagTooltipStaticStore;
         if (!autoCompleteBox || !inputElement)
-            return;
+            return false;
         if (autoCompleteBox.style.display === "none")
             return false;
         if (e.keyCode != 38 && e.keyCode != 40 && e.keyCode != 13)
@@ -8175,7 +8191,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             newSelectedIndex = hintElements.length - 1;
         else if (newSelectedIndex > hintElements.length - 1)
             newSelectedIndex = 0;
-        (0, store_1.setSelectedIndex)(newSelectedIndex);
+        store_1.TagTooltipStaticStore.selectedIndex = newSelectedIndex;
+        const hints = document.querySelectorAll("#PBE_autocompliteTags .PBE_hintItem");
+        hints.forEach(nodeItem => {
+            if (nodeItem.dataset.index === newSelectedIndex + "")
+                nodeItem.classList.add("PBE_hintItemSelected");
+            else
+                nodeItem.classList.remove("PBE_hintItemSelected");
+        });
         return true;
     }
     exports["default"] = onHintWindowKey;
@@ -8191,23 +8214,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \*************************************************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./onHintWindowKey */ "./client/components/ui/TagTooltip/events/onHintWindowKey.ts"), __webpack_require__(/*! ../store */ "./client/components/ui/TagTooltip/store.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, onHintWindowKey_1, store_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ../store */ "./client/components/ui/TagTooltip/store.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, store_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     function processCarretPosition(e) {
         const target = e.currentTarget;
-        const { selectedIndex = 0, knownTags = [] } = store_1.default.getState();
-        if (e.keyCode) {
-            const keyEvent = e;
-            if (keyEvent.keyCode === 38 || keyEvent.keyCode === 40 || keyEvent.keyCode === 13) {
-                const block = (0, onHintWindowKey_1.default)(keyEvent);
-                if (block) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    return false;
-                }
-            }
-        }
+        const { knownTags = [] } = store_1.default.getState();
         const MAX_HINTS = 20;
         let currHints = 0;
         const value = target.value;
@@ -8267,7 +8279,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \***************************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! ./utils/setBoxPosition */ "./client/components/ui/TagTooltip/utils/setBoxPosition.ts"), __webpack_require__(/*! ./store */ "./client/components/ui/TagTooltip/store.ts"), __webpack_require__(/*! ./events/processCarretPosition */ "./client/components/ui/TagTooltip/events/processCarretPosition.ts"), __webpack_require__(/*! ./utils/updateTagsList */ "./client/components/ui/TagTooltip/utils/updateTagsList.ts"), __webpack_require__(/*! ./events/onChange */ "./client/components/ui/TagTooltip/events/onChange.ts"), __webpack_require__(/*! ./events/onBlur */ "./client/components/ui/TagTooltip/events/onBlur.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, React, react_1, setBoxPosition_1, store_1, processCarretPosition_1, updateTagsList_1, onChange_1, onBlur_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! react */ "./node_modules/react/index.js"), __webpack_require__(/*! ./utils/setBoxPosition */ "./client/components/ui/TagTooltip/utils/setBoxPosition.ts"), __webpack_require__(/*! ./store */ "./client/components/ui/TagTooltip/store.ts"), __webpack_require__(/*! ./events/processCarretPosition */ "./client/components/ui/TagTooltip/events/processCarretPosition.ts"), __webpack_require__(/*! ./utils/updateTagsList */ "./client/components/ui/TagTooltip/utils/updateTagsList.ts"), __webpack_require__(/*! ./events/onChange */ "./client/components/ui/TagTooltip/events/onChange.ts"), __webpack_require__(/*! ./events/onBlur */ "./client/components/ui/TagTooltip/events/onBlur.ts"), __webpack_require__(/*! ./events/onHintWindowKey */ "./client/components/ui/TagTooltip/events/onHintWindowKey.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, React, react_1, setBoxPosition_1, store_1, processCarretPosition_1, updateTagsList_1, onChange_1, onBlur_1, onHintWindowKey_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     function TagTooltip({ tags, iteration = 0, onUpdate, onSubmit }) {
@@ -8287,16 +8299,22 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 const value = e.currentTarget.value;
                 (0, onChange_1.default)(value);
             }, onKeyDown: e => {
+                if (e.keyCode === 38 || e.keyCode === 40 || e.keyCode === 13) {
+                    const block = (0, onHintWindowKey_1.default)(e);
+                    if (block) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        return false;
+                    }
+                }
                 if (!onSubmit)
                     return;
-                const { autocompliteBox } = store_1.default.getState();
-                if (autocompliteBox.style.display !== "none")
+                const { autocompliteBox, possibleTags } = store_1.default.getState();
+                if (possibleTags.length && autocompliteBox.style.display !== "none")
                     return;
                 if (e.key === 'Enter')
                     onSubmit();
-            }, onKeyUp: processCarretPosition_1.default, 
-            //onClick={processCarretPosition}
-            onFocus: e => {
+            }, onKeyUp: processCarretPosition_1.default, onFocus: e => {
                 store_1.TagTooltipStaticStore.onUpdate = onUpdate;
                 (0, store_1.setInputElement)(e.currentTarget);
                 (0, processCarretPosition_1.default)(e);
@@ -8323,6 +8341,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     function mount({ wrapper }) {
         const autocompliteBox = document.createElement("div");
         autocompliteBox.className = "PBE_autocompliteBox PBE_autocompliteTags";
+        autocompliteBox.id = "PBE_autocompliteTags";
         autocompliteBox.style.position = "fixed";
         autocompliteBox.style.display = "none";
         wrapper.appendChild(autocompliteBox);
@@ -8346,13 +8365,13 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! zustand */ "./node_modules/zustand/index.js")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, zustand_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
-    exports.setPossibleTags = exports.setInputElement = exports.setAutocompliteBox = exports.setKnownTags = exports.setSelectedIndex = exports.iterateStore = exports.TagTooltipStaticStore = void 0;
+    exports.setPossibleTags = exports.setInputElement = exports.setAutocompliteBox = exports.setKnownTags = exports.iterateStore = exports.TagTooltipStaticStore = void 0;
     exports.TagTooltipStaticStore = {
         onUpdate: undefined,
+        selectedIndex: 0,
     };
     const tagTooltipStore = (0, zustand_1.create)((set) => ({
         iterate: 0,
-        selectedIndex: 0,
         knownTags: [],
         possibleTags: [],
         autocompliteBox: undefined,
@@ -8360,8 +8379,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     }));
     const iterateStore = () => tagTooltipStore.setState({ iterate: tagTooltipStore.getState().iterate + 1 });
     exports.iterateStore = iterateStore;
-    const setSelectedIndex = (selectedIndex) => tagTooltipStore.setState({ selectedIndex });
-    exports.setSelectedIndex = setSelectedIndex;
     const setKnownTags = (knownTags) => tagTooltipStore.setState({ knownTags });
     exports.setKnownTags = setKnownTags;
     const setAutocompliteBox = (autocompliteBox) => tagTooltipStore.setState({ autocompliteBox });
@@ -8402,7 +8419,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         if (postfix)
             newValue += postfix;
         inputElement.value = newValue;
-        (0, store_1.setSelectedIndex)(0);
+        store_1.TagTooltipStaticStore.selectedIndex = 0;
         (0, onChange_1.default)(inputElement.value);
     }
     exports["default"] = applyHint;
@@ -8446,6 +8463,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/Database */ "./client/Database/index.ts"), __webpack_require__(/*! ../store */ "./client/components/ui/TagTooltip/store.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, Database_1, store_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
+    /**
+     * Creates a list of known tags used in the database
+     * @returns
+     */
     function updateTagsList() {
         const { data } = Database_1.default;
         if (!data || !data.united)
@@ -8527,7 +8548,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 /***/ ((module, exports, __webpack_require__) => {
 
 var __webpack_unused_export__;
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/supportedContainers */ "./client/supportedContainers.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! client/utils/gradioApp */ "./client/utils/gradioApp.ts"), __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! ./DOMCache */ "./client/DOMCache.ts"), __webpack_require__(/*! ./Database */ "./client/Database/index.ts"), __webpack_require__(/*! ./main/mountContainer */ "./client/main/mountContainer.ts"), __webpack_require__(/*! ./main/mountGlobal */ "./client/main/mountGlobal.ts"), __webpack_require__(/*! ./main/events/onChangeTab */ "./client/main/events/onChangeTab.ts"), __webpack_require__(/*! ./main/events/onDocumentKey */ "./client/main/events/onDocumentKey.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, supportedContainers_1, index_1, gradioApp_1, store_1, DOMCache_1, Database_1, mountContainer_1, mountGlobal_1, onChangeTab_1, onDocumentKey_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/supportedContainers */ "./client/supportedContainers.ts"), __webpack_require__(/*! client/utils/index */ "./client/utils/index.ts"), __webpack_require__(/*! client/utils/gradioApp */ "./client/utils/gradioApp.ts"), __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! ./DOMCache */ "./client/DOMCache.ts"), __webpack_require__(/*! ./Database */ "./client/Database/index.ts"), __webpack_require__(/*! ./main/mountContainer */ "./client/main/mountContainer.ts"), __webpack_require__(/*! ./main/mountGlobal */ "./client/main/mountGlobal.ts"), __webpack_require__(/*! ./main/events/onChangeTab */ "./client/main/events/onChangeTab.ts"), __webpack_require__(/*! ./main/events/onDocumentKey */ "./client/main/events/onDocumentKey.ts"), __webpack_require__(/*! client/store */ "./client/store.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, supportedContainers_1, index_1, gradioApp_1, store_1, DOMCache_1, Database_1, mountContainer_1, mountGlobal_1, onChangeTab_1, onDocumentKey_1, store_2) {
     "use strict";
     __webpack_unused_export__ = ({ value: true });
     let timeoutPBUpdatePrompt = 0;
@@ -8552,6 +8573,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 modelCheckpoint = forgeModelCheckpoint;
         }
         DOMCache_1.default.modelCheckpoint = modelCheckpoint;
+        if (DOMCache_1.default.modelCheckpoint) {
+            const inputElement = DOMCache_1.default.modelCheckpoint.querySelector("input");
+            inputElement === null || inputElement === void 0 ? void 0 : inputElement.addEventListener("blur", store_2.iterateModel);
+        }
         const tabsContainer = mainContainer.querySelector("#tabs > div:first-child");
         tabsContainer.removeEventListener("click", onChangeTab_1.default);
         tabsContainer.addEventListener("click", onChangeTab_1.default);
@@ -9593,7 +9618,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! zustand */ "./node_modules/zustand/index.js"), __webpack_require__(/*! ./DOMCache */ "./client/DOMCache.ts"), __webpack_require__(/*! ./const */ "./client/const.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, zustand_1, DOMCache_1, const_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
-    exports.loadUIConfig = exports.setShowPromptTools = exports.setShowCollectionTools = exports.setShowPromptScribe = exports.setShowSaveStyle = exports.setShowLoadStyle = exports.setShowSetupWindowe = exports.setEditTargetCollection = exports.setSelectedPrompt = exports.setEditPromptGroup = exports.setEditPromptIndex = exports.setEditPrompt = exports.setEditStyle = exports.updateCollectionsIteration = exports.updateCurrentIteration = exports.updateFilesIteration = exports.setFilterTags = exports.setFilterName = exports.setSortKnownPrompts = exports.setFilterCategory = exports.setFilterCollection = exports.toggleView = exports.setShowViews = exports.setShowControlPanel = exports.setCurrentContainer = exports.appStore = exports.ViewType = void 0;
+    exports.loadUIConfig = exports.setShowPromptTools = exports.setShowCollectionTools = exports.setShowPromptScribe = exports.setShowSaveStyle = exports.setShowLoadStyle = exports.setShowSetupWindowe = exports.setEditTargetCollection = exports.setSelectedPrompt = exports.setEditPromptGroup = exports.setEditPromptIndex = exports.setEditPrompt = exports.setEditStyle = exports.updateCollectionsIteration = exports.updateCurrentIteration = exports.updateFilesIteration = exports.setFilterTags = exports.setFilterName = exports.setSortKnownPrompts = exports.setFilterCategory = exports.setFilterCollection = exports.iterateModel = exports.toggleView = exports.setShowViews = exports.setShowControlPanel = exports.setCurrentContainer = exports.appStore = exports.ViewType = void 0;
     var ViewType;
     (function (ViewType) {
         ViewType["KNOWN"] = "known";
@@ -9602,6 +9627,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         ViewType["NEGATIVE"] = "negative";
     })(ViewType = exports.ViewType || (exports.ViewType = {}));
     exports.appStore = (0, zustand_1.create)((set) => ({
+        modelIteration: 0,
         currentContainer: const_1.DEFAULT_CONTAINER_NAME,
         showControlPanel: true,
         showViews: [ViewType.KNOWN, ViewType.CURRENT, ViewType.POSITIVE, ViewType.NEGATIVE],
@@ -9656,6 +9682,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         return { showViews: newShowViews };
     });
     exports.toggleView = toggleView;
+    const iterateModel = () => exports.appStore.setState(store => ({ modelIteration: store.modelIteration + 1 }));
+    exports.iterateModel = iterateModel;
     const setFilterCollection = (filterCollection) => exports.appStore.setState(store => ({ filterCollection, filesIteration: store.filesIteration + 1 }));
     exports.setFilterCollection = setFilterCollection;
     const setFilterCategory = (filterCategory) => exports.appStore.setState({ filterCategory });
@@ -10088,6 +10116,60 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 
 /***/ }),
 
+/***/ "./client/utils/formModelId.ts":
+/*!*************************************!*\
+  !*** ./client/utils/formModelId.ts ***!
+  \*************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function formModelId(checkpoint) {
+        //removing the cache marker.
+        const arr = checkpoint.split(" ");
+        const lastPart = arr[arr.length - 1];
+        if (lastPart && lastPart[0] === "[")
+            arr.pop();
+        checkpoint = arr.join(" ");
+        //removing file extension
+        checkpoint = checkpoint.replace(".safetensors", "");
+        checkpoint = checkpoint.trim();
+        return checkpoint;
+    }
+    exports["default"] = formModelId;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
+/***/ "./client/utils/getCheckpoint.ts":
+/*!***************************************!*\
+  !*** ./client/utils/getCheckpoint.ts ***!
+  \***************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/DOMCache */ "./client/DOMCache.ts"), __webpack_require__(/*! ./formModelId */ "./client/utils/formModelId.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, DOMCache_1, formModelId_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", ({ value: true }));
+    function getCheckpoint() {
+        const checkpointSelector = DOMCache_1.default.modelCheckpoint;
+        if (!checkpointSelector)
+            return false;
+        const input = checkpointSelector.querySelector("input");
+        if (!input || !input.value)
+            return false;
+        const checkpoint = input.value;
+        return (0, formModelId_1.default)(checkpoint);
+    }
+    exports["default"] = getCheckpoint;
+}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }),
+
 /***/ "./client/utils/getStyle.ts":
 /*!**********************************!*\
   !*** ./client/utils/getStyle.ts ***!
@@ -10217,10 +10299,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   \*******************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./promptStringToObject */ "./client/utils/promptStringToObject.ts"), __webpack_require__(/*! ./parseGroups */ "./client/utils/parseGroups.ts"), __webpack_require__(/*! client/DOMCache */ "./client/DOMCache.ts"), __webpack_require__(/*! client/managers/Config */ "./client/managers/Config/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, promptStringToObject_1, parseGroups_1, DOMCache_1, Config_1) {
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! ./promptStringToObject */ "./client/utils/promptStringToObject.ts"), __webpack_require__(/*! ./parseGroups */ "./client/utils/parseGroups.ts"), __webpack_require__(/*! client/managers/Config */ "./client/managers/Config/index.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, promptStringToObject_1, parseGroups_1, Config_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
-    exports.log = exports.getCheckpoint = exports.randomIntFromInterval = exports.stringToPromptsArray = exports.promptStringToObject = exports.parseGroups = exports.normalizePrompt = exports.makeFileNameSafe = exports.replaceAllRegex = exports.clone = void 0;
+    exports.log = exports.randomIntFromInterval = exports.stringToPromptsArray = exports.promptStringToObject = exports.parseGroups = exports.normalizePrompt = exports.makeFileNameSafe = exports.replaceAllRegex = exports.clone = void 0;
     exports.promptStringToObject = promptStringToObject_1.default;
     exports.parseGroups = parseGroups_1.default;
     const regex = {
@@ -10315,26 +10397,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         return Math.floor(Math.random() * (max - min + 1) + min);
     }
     exports.randomIntFromInterval = randomIntFromInterval;
-    function getCheckpoint() {
-        const checkpointSelector = DOMCache_1.default.modelCheckpoint;
-        if (!checkpointSelector)
-            return false;
-        const input = checkpointSelector.querySelector("input");
-        if (!input || !input.value)
-            return false;
-        let checkpoint = input.value;
-        //removing the cache marker.
-        const arr = checkpoint.split(" ");
-        const lastPart = arr[arr.length - 1];
-        if (lastPart && lastPart[0] === "[")
-            arr.pop();
-        checkpoint = arr.join(" ");
-        //remove file extension
-        checkpoint = checkpoint.replace(".safetensors", "");
-        checkpoint = checkpoint.trim();
-        return checkpoint;
-    }
-    exports.getCheckpoint = getCheckpoint;
 }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
 		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 

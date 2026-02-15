@@ -103,28 +103,6 @@ function randomIntFromInterval(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-function getCheckpoint(): string | false {
-    const checkpointSelector = DOMCache.modelCheckpoint;
-    if(!checkpointSelector) return false;
-    const input = checkpointSelector.querySelector("input");
-    if(!input || !input.value) return false;
-    let checkpoint = input.value;
-
-    //removing the cache marker.
-    const arr = checkpoint.split(" ");
-    const lastPart = arr[arr.length - 1];
-    if(lastPart && lastPart[0] === "[") arr.pop();
-    checkpoint = arr.join(" ");
-
-    //remove file extension
-    checkpoint = checkpoint.replace(".safetensors", "");
-    
-    checkpoint = checkpoint.trim();
-
-    return checkpoint;
-}
-
-
 
 export {
     clone,
@@ -135,6 +113,5 @@ export {
     promptStringToObject,
     stringToPromptsArray,
     randomIntFromInterval,
-    getCheckpoint,
     log,
 }

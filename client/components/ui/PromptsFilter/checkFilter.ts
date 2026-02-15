@@ -1,7 +1,8 @@
-import Prompt from "clientTypes/prompt";
-import Filter from "clientTypes/filter";
-import { getCheckpoint, makeFileNameSafe } from "client/utils/index";
-import { FilterMeta, FilterAction, FilterType } from "./type";
+import Prompt from "clientTypes/prompt"
+import Filter from "clientTypes/filter"
+import { makeFileNameSafe } from "client/utils/index"
+import getCheckpoint from "client/utils/getCheckpoint"
+import { FilterMeta, FilterAction, FilterType } from "./type"
 
 
 /**

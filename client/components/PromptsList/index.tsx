@@ -16,7 +16,7 @@ export default function PromptsList(props: {
 
     onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
     onDblClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
-    onWheel?: (e: React.MouseEvent<HTMLDivElement>) => void;
+    onWheel?: (e: React.WheelEvent<HTMLDivElement>) => void;
 }) {
     const filesIteration = appStore(state => state.filesIteration);
     const filterCollection = appStore(state => state.filterCollection);

@@ -11,12 +11,14 @@ export default function ShowContent() {
     const sortKnownPrompts = appStore(state => state.sortKnownPrompts);
     const filterName = appStore(state => state.filterName);
     const filterTags = appStore(state => state.filterTags);
+    const modelIteration = appStore(state => state.modelIteration);
 
     const cards = getCards({filesIteration, filterCollection, filterCategory, filterName, filterTags, sortKnownPrompts});
     const {cardHeight = 100, rowsInKnownCards = 3} = ConfigManager.getConfig();
 
     return (
         <div
+            data-model={modelIteration}
             className="PBE_promptsCatalogueContent PBE_Scrollbar"
             style={{
                 maxHeight: `${cardHeight * rowsInKnownCards}px`,

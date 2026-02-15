@@ -1,11 +1,11 @@
-import ActivePrompts from "client/managers/ActivePrompts";
-import { getCheckpoint } from "client/utils/index";
-import previewStore from "client/components/PreviewSave/store";
-import appStore, {setSelectedPrompt, updateFilesIteration} from "client/store";
-import Database from "./index";
-import { SavePrompt } from "./type";
-import getGeneratedImageSrc from "./utils/getGeneratedImageSrc";
-import updateInCollections from "./utils/updateInCollections";
+import ActivePrompts from "client/managers/ActivePrompts"
+import getCheckpoint from "client/utils/getCheckpoint"
+import previewStore from "client/components/PreviewSave/store"
+import appStore, {setSelectedPrompt, updateFilesIteration} from "client/store"
+import Database from "./index"
+import { SavePrompt } from "./type"
+import getGeneratedImageSrc from "./utils/getGeneratedImageSrc"
+import updateInCollections from "./utils/updateInCollections"
 
 
 export default function savePromptPreview(callUpdate: boolean = true) {

@@ -9,10 +9,11 @@ import mountContainer from './main/mountContainer'
 import mountGlobal from './main/mountGlobal'
 import onChangeTab from './main/events/onChangeTab'
 import onDocumentKey from './main/events/onDocumentKey'
+import formModelId from './utils/formModelId'
+import { iterateModel } from 'client/store'
 
 
 let timeoutPBUpdatePrompt: any = 0;
-
 
 function tryToHook(tries = 0) {
     const mainContainer = gradioApp() as HTMLElement;
@@ -37,9 +38,14 @@ function tryToHook(tries = 0) {
     if(!modelCheckpoint) {
         const forgeModelCheckpoint = mainContainer.querySelector("#quicksettings .model_selection");
         if(forgeModelCheckpoint) modelCheckpoint = forgeModelCheckpoint;
-    } 
+    }
     
     DOMCache.modelCheckpoint = modelCheckpoint as HTMLElement;
+
+    if(DOMCache.modelCheckpoint) {
+        const inputElement = DOMCache.modelCheckpoint.querySelector("input");
+        inputElement?.addEventListener("blur", iterateModel)
+    }
 
     const tabsContainer = mainContainer.querySelector("#tabs > div:first-child");
     tabsContainer.removeEventListener("click", onChangeTab);
