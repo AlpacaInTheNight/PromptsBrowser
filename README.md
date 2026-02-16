@@ -1,4 +1,4 @@
-# Prompts Browser Extension 1.3.0
+# Prompts Browser Extension 1.4.0
 Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui).
 
 ## Table of Contents
@@ -41,9 +41,9 @@ When switching models, the plugin now loads the corresponding preview (or falls 
 - Unified prompt editor window access. The prompt editor can now be opened from any prompt list, regardless of its origin, making editing faster and more convenient.
 
 - Changes to hotkeys in the styles window:
-	1. Shift + click - opens the style editing window.
-	1. Ctrl + click - adds a style to the end of the prompts.
-	1. Ctrl + Shift + click - adds a style to the beginning of the prompts.
+	* Shift + click - opens the style editing window.
+	* Ctrl + click - adds a style to the end of the prompts.
+	* Ctrl + Shift + click - adds a style to the beginning of the prompts.
 
 ### Changes in 1.3.0
 
