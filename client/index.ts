@@ -47,7 +47,7 @@ function tryToHook(tries = 0) {
         inputElement?.addEventListener("blur", iterateModel)
     }
 
-    const tabsContainer = mainContainer.querySelector("#tabs > div:first-child");
+    const tabsContainer = mainContainer.querySelector("#tabs > div:first-child") as HTMLElement;
     tabsContainer.removeEventListener("click", onChangeTab);
     tabsContainer.addEventListener("click", onChangeTab);
 

@@ -8606,6 +8606,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/synchroniseCurrentPrompts */ "./client/synchroniseCurrentPrompts/index.ts"), __webpack_require__(/*! client/components/PromptTooltip/store */ "./client/components/PromptTooltip/store.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, synchroniseCurrentPrompts_1, store_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
+    let inputUpdateTimeout = 0;
+    const UPDATE_TICK = 500;
     /**
      * Adds listeners to the main prompt container.
      * @param textArea - HTML text area prompt container
@@ -8616,7 +8618,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
             return false;
         textArea.dataset.pbelistenerready = "true";
         textArea.removeEventListener("input", () => (0, synchroniseCurrentPrompts_1.default)(true, false)); //TODO: does this line really needed?
-        textArea.addEventListener("input", () => (0, synchroniseCurrentPrompts_1.default)(true, false));
+        textArea.addEventListener("input", () => {
+            clearTimeout(inputUpdateTimeout);
+            inputUpdateTimeout = setTimeout(() => {
+                const { isActive } = store_1.default.getState();
+                if (!isActive)
+                    (0, store_1.setIsActive)(true);
+                (0, synchroniseCurrentPrompts_1.default)(true, false);
+            }, UPDATE_TICK);
+        });
         textArea.addEventListener("focus", () => (0, store_1.setIsActive)(true));
         textArea.addEventListener("blur", () => setTimeout(() => (0, store_1.setIsActive)(false), 200));
         return true;
