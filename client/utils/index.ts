@@ -1,10 +1,9 @@
-import State from "clientTypes/state";
 import Data from "clientTypes/data";
-import ActivePrompts from "client/ActivePrompts/index";
-import Database from "client/Database/index";
-import PromptsBrowser from "client/index";
 import promptStringToObject from "./promptStringToObject";
 import parseGroups from "./parseGroups";
+import DOMCache from 'client/DOMCache'
+import ConfigManager from 'client/managers/Config'
+
 
 const regex = {
     REGX_SINGLE_UNDERSCORE: /(?<!_)_(?!_)/g,
@@ -53,13 +52,12 @@ function makeFileNameSafe(fileName: string) {
  * @param {*} prompt 
  * @returns 
  */
-function normalizePrompt({prompt, state, data}: {
+function normalizePrompt({prompt, data}: {
     prompt: string;
-    state: State;
     data: Data;
 }) {
     const {unitedList} = data;
-    const {config} = state;
+    const config = ConfigManager.getConfig();
     const {REGX_SINGLE_UNDERSCORE} = regex;
 
     if(!prompt) return prompt;
@@ -97,19 +95,6 @@ function stringToPromptsArray(str: string, supportExtendedSyntax: boolean) {
     return promptsArray;
 }
 
-function addStrToActive(str: string, atStart = false, supportExtendedSyntax: boolean = false) {
-    const arr = stringToPromptsArray(str, supportExtendedSyntax);
-    if(!arr || !arr.length) return;
-    const activePrompts = ActivePrompts.getCurrentPrompts();
-    const uniquePrompots = ActivePrompts.getUnique();
-
-    for(let prompt of arr) {
-        if(uniquePrompots.some(item => item.id === prompt.id)) continue;
-        
-        atStart ? activePrompts.unshift(prompt) : activePrompts.push(prompt);
-    }
-}
-
 function log(message: string) {
     console.log(message);
 }
@@ -118,21 +103,6 @@ function randomIntFromInterval(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-function isInSameCollection(promptA: string, promptB: string): any {
-    let targetCollection = undefined;
-    
-    for(const id in Database.data.original) {
-        const collection = Database.data.original[id];
-        const containsA = collection.some(item => item.id === promptA);
-        const containsB = collection.some(item => item.id === promptB);
-        if(containsA && containsB) {
-            targetCollection = id;
-            break;
-        }
-    }
-    
-    return targetCollection
-}
 
 export {
     clone,
@@ -142,8 +112,6 @@ export {
     parseGroups,
     promptStringToObject,
     stringToPromptsArray,
-    addStrToActive,
     randomIntFromInterval,
-    isInSameCollection,
     log,
 }

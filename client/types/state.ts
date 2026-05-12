@@ -2,6 +2,7 @@ import Prompt, { PromptEntity } from "clientTypes/prompt";
 import Filter from "clientTypes/filter";
 import { AddStyleType } from "clientTypes/style";
 
+
 type Config = {
     belowOneWeight: number;
     aboveOneWeight: number;
@@ -22,6 +23,8 @@ type Config = {
     resizeThumbnailsMaxWidth: number;
     resizeThumbnailsMaxHeight: number;
     resizeThumbnailsFormat: "JPG" | "PNG";
+
+    savePreviewForModel: boolean;
 
     /**
      * If true, will enable extended syntax element support for prompts used by some addons.

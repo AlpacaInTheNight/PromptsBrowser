@@ -4,6 +4,8 @@
 		"target": "es6",
 		"noImplicitAny": true,
 		"strictNullChecks": false,
+        "moduleResolution": "node",
+        "jsx": "react",
 
 		"lib": ["es5", "es6", "es2021", "dom"],
 

@@ -1,4 +1,5 @@
-import Prompt, { PromptEntity } from "clientTypes/prompt";
+import { PromptEntity } from "clientTypes/prompt";
+
 
 type Style = {
     name: string;
@@ -19,11 +20,11 @@ type Style = {
 
     sampling?: string;
 
-    previewImage?: "png" | "jpg";
-
     seed?: number;
 
     addType?: AddStyleType;
+
+    previewImage?: "png" | "jpg";
 }
 
 enum AddStyleType {

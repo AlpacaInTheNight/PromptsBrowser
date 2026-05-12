@@ -20,6 +20,9 @@ def resize_image(imgSrc):
 
     img = Image.open(imgSrc)
 
+    if extension == "jpg" and img.mode in ("RGBA", "LA", "P"):
+        img = img.convert("RGB")
+
     img_width = img.size[0]
     img_height = img.size[1]
 

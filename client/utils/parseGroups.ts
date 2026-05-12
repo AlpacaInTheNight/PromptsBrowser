@@ -1,4 +1,4 @@
-import Prompt, { PromptEntity, PromptGroup } from "clientTypes/prompt";
+
 
 let assignGroupId = 0;
 

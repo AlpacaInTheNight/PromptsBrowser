@@ -1,4 +1,4 @@
-# Prompts Browser Extension 1.3.0
+# Prompts Browser Extension 1.4.0
 Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui).
 
 ## Table of Contents
@@ -23,7 +23,30 @@ Prompts Browser Extension for the [AUTOMATIC1111/stable-diffusion-webui](https:/
 
 ![](img/preview.jpg)
 
+### Changes in 1.4.0
+
+#### Full React Rewrite.
+
+The entire codebase has been migrated from vanilla JavaScript to React. Over time the project grew significantly, and maintaining an increasingly complex UI in plain JS became too time-consuming and error-prone. This was the main reason updates were delayed: the old architecture made even small changes require disproportionate effort.
+
+The new React-based structure provides a clear component model, predictable state management, and better separation of concerns. As a result, the plugin is now much easier to extend and maintain. Going forward, new features can be added faster, with fewer regressions and far less overhead. This rewrite lays the groundwork for more rapid development and long-term scalability of the project.
+
+#### Some other changes:
+
+- Model-specific prompt previews. Added an optional feature that allows prompt previews to be stored separately for each model.
+When switching models, the plugin now loads the corresponding preview (or falls back to any available one if none exists for the selected model). This feature can be enabled by checking the `Save unique previews for models` checkbox in the plugin settings.
+
+- Forge support. Implemented compatibility with Forge, a popular fork of the Automatic1111 WebUI, including proper prompt handling and UI integration.
+
+- Unified prompt editor window access. The prompt editor can now be opened from any prompt list, regardless of its origin, making editing faster and more convenient.
+
+- Changes to hotkeys in the styles window:
+	* Shift + click - opens the style editing window.
+	* Ctrl + click - adds a style to the end of the prompts.
+	* Ctrl + Shift + click - adds a style to the beginning of the prompts.
+
 ### Changes in 1.3.0
+
 ⚠️ The client side was rewritten from javascript to typescript. In addition, the code has been refactored and redesigned to support prompt groups. This leaves a wide margin for possible bugs, so be prepared. ⚠️
 
 - Group Support. Previously, the extension did not understand the prompt grouping syntax correctly, trying to transfer the detected weight of groups to each prompt individually. This did not allow to use the convenience of grouping prompts and caused various bugs. Now groups are understood as such and the interface of active prompts displays them as they are. In addition, the functionality of working with groups using the active prompts interface has been added. Usage info: [Active prompts groups](#active-prompts-groups).
@@ -307,6 +330,8 @@ This extension modifies the DOM directly, without working through any API for su
 1. `Resize thumbnails: max height` - maximum height of the resized image.
 
 1. `Resize thumbnails: file format` - resized image format.
+
+1. `Save unique previews for models` - If this option is enabled, previews of prompts will be saved separately for each model. When the model is changed, the previews will also change. If there is no saved preview for the selected model, the available previews will be used.
 
 ### Collections database
 

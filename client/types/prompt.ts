@@ -1,10 +1,13 @@
 
+
 /**
  * Prompt base.
- * This properties are stored in collection.
+ * This properties are stored in the collection.
  */
 type PromptBase = {
     id: string;
+
+    meta?: Partial<PromptMeta>;
 
     category?: string[];
 
@@ -26,12 +29,20 @@ type PromptBase = {
 
     comment?: string;
 
-    previewImage?: "png" | "jpg";
-
     autogen?: {
         collection?: string;
         style?: string;
     }
+
+    //old
+    previewImage?: "png" | "jpg";
+    
+    //new
+    previews?: {[key: string]: PromptPreview};
+}
+
+type PromptMeta = {
+    url: string;
 }
 
 /**
@@ -44,6 +55,12 @@ type PromptClient = {
      */
     knownPreviews?: {
         [key: string]: "png" | "jpg";
+    }
+
+    knownModelPreviews?: {
+        [key: string]: {
+            [key: string]: "png" | "jpg";
+        }
     }
 
     /**
@@ -82,6 +99,12 @@ type PromptListItem = {
 
 type Prompt = PromptBase & PromptClient & PromptListItem;
 
+type PromptPreview = {
+    file: "png" | "jpg";
+    haveThumbnail?: boolean;
+    //model?: string;
+}
+
 type PromptGroup = {
     groupId: number;
     parentGroup?: number | false;
@@ -96,6 +119,7 @@ type PromptEntity = PromptGroup | Prompt;
 export {
     PromptEntity,
     PromptGroup,
+    PromptMeta,
 }
 
 export default Prompt;

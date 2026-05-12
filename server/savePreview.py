@@ -3,6 +3,7 @@ import os
 import shutil
 from urllib.parse import unquote
 from os.path import join, isdir, isfile
+from modules.shared import opts
 
 from . import constant
 
@@ -15,6 +16,7 @@ def savePreview(postJSON):
     src = unquote(postJSON.src)
     prompt = postJSON.prompt
     collection = postJSON.collection
+    model = makeFileNameSafe(postJSON.model)
     isExternalNetwork = False
 
     if "isExternalNetwork" in postJSON and postJSON["isExternalNetwork"]: isExternalNetwork = True
@@ -34,15 +36,25 @@ def savePreview(postJSON):
     collDir = getCollectionsDir()
 
     pathPromptsCatalogue    = join(collDir, constant.PROMPTS_DIR)
-    pathCollection          = join(pathPromptsCatalogue, collection, "preview")
-    savePath                = join(pathCollection, safeFileName + fileExtension)
+    pathPreviewsCatalogue   = join(pathPromptsCatalogue, collection, "preview")
+    savePath                = join(pathPreviewsCatalogue, safeFileName + fileExtension)
+
+    possiblePrevJPG         = join(pathPreviewsCatalogue, safeFileName + ".jpg")
+    possiblePrevPNG         = join(pathPreviewsCatalogue, safeFileName + ".png")
+
+    if model and hasattr(opts, "pbe_preview_for_model") and opts.pbe_preview_for_model == True:
+        #making dir for the target model if needed
+        modelDir = join(pathPreviewsCatalogue, model)
+        if not isdir(modelDir): os.makedirs(modelDir)
+
+        #changing savePath to model dir one
+        savePath = join(modelDir, safeFileName + fileExtension)
+        possiblePrevJPG = join(modelDir, safeFileName + ".jpg")
+        possiblePrevPNG = join(modelDir, safeFileName + ".png")
 
     #removing any previous previews
-    if isfile(join(pathCollection, safeFileName + ".jpg")):
-        os.remove(join(pathCollection, safeFileName + ".jpg"))
-
-    if isfile(join(pathCollection, safeFileName + ".png")):
-        os.remove(join(pathCollection, safeFileName + ".png"))
+    if isfile(possiblePrevJPG): os.remove(possiblePrevJPG)
+    if isfile(possiblePrevPNG): os.remove(possiblePrevPNG)
     
     #copying image
     shutil.copy(src, savePath)

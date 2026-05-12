@@ -1,0 +1,39 @@
+/* Textarea buttons */
+
+.PBE_textarea_buttons_wrapper {
+    position: absolute;
+    top: -10px;
+    left: 18px;
+    z-index: 2;
+    display: flex;
+    flex-direction: row;
+}
+
+.PBE_actionButton {
+    width: 110px;
+    height: 20px;
+    min-width: auto !important;
+    top: -0.75em;
+    background: var(--button-primary-background-fill) !important;
+    color: var(--button-primary-text-color) !important;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer !important;
+    margin-right: 5px !important;
+
+    font-weight: var(--button-small-text-weight) !important;
+    border-radius: var(--button-small-radius);
+    border-color: var(--button-primary-border-color);
+    border-style: solid;
+    border-width: var(--button-border-width);
+}
+
+.PBE_actionButton:hover {
+    background: var(--button-primary-background-fill-hover) !important;
+    border-color: var(--button-primary-border-color-hover);
+    color: var(--button-primary-text-color-hover) !important;
+}
+
+/* Textarea buttons end */

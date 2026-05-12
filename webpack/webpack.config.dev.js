@@ -13,7 +13,8 @@ module.exports = {
 	},
 
 	output: {
-		filename: 'promptBrowser.js',
+		filename: '[name].js',
+		chunkFilename: '[name].chunk.js',
 		path: path.join(__dirname, '../javascript'),
 		publicPath: "/"
 	},

@@ -1,6 +1,7 @@
 import Prompt from "clientTypes/prompt";
 import Style from "clientTypes/style";
 
+
 type Data = {
 
     categories: string[];
