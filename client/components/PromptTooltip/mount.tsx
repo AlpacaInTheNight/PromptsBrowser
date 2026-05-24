@@ -2,6 +2,7 @@ import * as React from 'react'
 import { createRoot } from 'react-dom/client'
 import PromptTooltip from "./index"
 
+
 export default function mount({wrapper, tabName}: {
     tabName: string;
     wrapper: HTMLElement;

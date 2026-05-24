@@ -34,7 +34,7 @@ export default function onApplyHint(start: number, end: number, newPrompt: strin
 
     if(targetItem && targetItem.addAtStart) {
         const oldValue = textArea.value.substring(0, start) + textArea.value.substring(end);
-        if(targetItem.isExternalNetwork) newPrompt = `<${newPrompt}>`;
+        if(targetItem.isExternalNetwork) newPrompt = `<${newPrompt}:1>`;
         if(addAfter) newPrompt += ", " + addAfter + ", ";
 
         newValue += newPrompt;
@@ -53,7 +53,7 @@ export default function onApplyHint(start: number, end: number, newPrompt: strin
         if(prefix) newValue += prefix + " ";
     
         if(targetItem) {
-            if(targetItem.isExternalNetwork) newPrompt = `<${newPrompt}>`;
+            if(targetItem.isExternalNetwork) newPrompt = `<${newPrompt}:1>`;
             if(addAfter) newPrompt += ", " + addAfter;
     
             newValue += newPrompt;

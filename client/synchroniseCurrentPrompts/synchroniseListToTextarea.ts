@@ -4,6 +4,10 @@ import appStore from 'client/store'
 import syncListToTextareaBranch from "./syncListToTextareaBranch";
 
 
+/**
+ * Synchronizes the lists of prompts as an array of objects for internal expansion operations
+ * and prompts located in the webpage Textarea element.
+ */
 export default function synchroniseListToTextarea(activePrompts: PromptEntity[]) {
     const {currentContainer} = appStore.getState();
     const textArea = DOMCache.containers[currentContainer].textArea;

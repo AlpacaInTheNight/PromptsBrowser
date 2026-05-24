@@ -5860,6 +5860,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         const uniquePrompts = ActivePrompts_1.default.getUnique();
         const newArr = str.split(",");
         for (let prompt of newArr) {
+            prompt = prompt.trim();
             const newPrompt = (0, utils_1.promptStringToObject)({ prompt });
             if (uniquePrompts.some(item => item.id === newPrompt.id))
                 continue;
@@ -5909,7 +5910,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
         if (targetItem && targetItem.addAtStart) {
             const oldValue = textArea.value.substring(0, start) + textArea.value.substring(end);
             if (targetItem.isExternalNetwork)
-                newPrompt = `<${newPrompt}>`;
+                newPrompt = `<${newPrompt}:1>`;
             if (addAfter)
                 newPrompt += ", " + addAfter + ", ";
             newValue += newPrompt;
@@ -5928,7 +5929,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 newValue += prefix + " ";
             if (targetItem) {
                 if (targetItem.isExternalNetwork)
-                    newPrompt = `<${newPrompt}>`;
+                    newPrompt = `<${newPrompt}:1>`;
                 if (addAfter)
                     newPrompt += ", " + addAfter;
                 newValue += newPrompt;
@@ -6370,6 +6371,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
     let initedEvents = false;
+    /**
+     * A tooltip window that appears when typing a prompt in the current prompt textarea.
+     */
     function PromptTooltip({ tabName }) {
         const isActive = (0, store_1.default)(state => state.isActive);
         const word = (0, store_1.default)(state => state.word);
@@ -9118,6 +9122,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     exports["default"] = ActivePrompts;
     ActivePrompts.currentPromptsList = {};
     ActivePrompts.foldedGroups = [];
+    /**
+     * Returns an array of current prompts as objects.
+     */
     ActivePrompts.getCurrentPrompts = () => {
         const { currentContainer } = store_1.default.getState();
         if (!ActivePrompts.currentPromptsList[currentContainer]) {
@@ -10007,15 +10014,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
                 prompts.push({ text: ")", src: { id: ")", isSyntax: true, delimiter: "next" } });
                 continue;
             }
-            const { id, weight, isExternalNetwork } = entity;
+            const { id, weight = const_1.DEFAULT_PROMPT_WEIGHT, isExternalNetwork } = entity;
             if (isExternalNetwork) {
-                if (weight !== undefined && weight !== const_1.DEFAULT_PROMPT_WEIGHT)
-                    prompts.push({ text: `<${id}:${weight}>`, src: entity });
-                else
-                    prompts.push({ text: `<${id}>`, src: entity });
+                prompts.push({ text: `<${id}:${weight}>`, src: entity });
             }
             else {
-                if (weight !== undefined && weight !== const_1.DEFAULT_PROMPT_WEIGHT)
+                if (weight !== const_1.DEFAULT_PROMPT_WEIGHT)
                     prompts.push({ text: `(${id}: ${weight})`, src: entity });
                 else
                     prompts.push({ text: id, src: entity });
@@ -10038,6 +10042,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, exports, __webpack_require__(/*! client/DOMCache */ "./client/DOMCache.ts"), __webpack_require__(/*! client/store */ "./client/store.ts"), __webpack_require__(/*! ./syncListToTextareaBranch */ "./client/synchroniseCurrentPrompts/syncListToTextareaBranch.ts")], __WEBPACK_AMD_DEFINE_RESULT__ = (function (require, exports, DOMCache_1, store_1, syncListToTextareaBranch_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", ({ value: true }));
+    /**
+     * Synchronizes the lists of prompts as an array of objects for internal expansion operations
+     * and prompts located in the webpage Textarea element.
+     */
     function synchroniseListToTextarea(activePrompts) {
         const { currentContainer } = store_1.default.getState();
         const textArea = DOMCache_1.default.containers[currentContainer].textArea;
