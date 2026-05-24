@@ -10,6 +10,9 @@ import initEvents from './utils/initEvents';
 
 let initedEvents: boolean = false;
 
+/**
+ * A tooltip window that appears when typing a prompt in the current prompt textarea.
+ */
 export default function PromptTooltip({tabName}: {
     tabName: string;
 }): React.JSX.Element | React.JSX.Element[] {

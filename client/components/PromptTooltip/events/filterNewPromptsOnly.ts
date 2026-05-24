@@ -10,6 +10,8 @@ export default function filterNewPromptsOnly(str: string) {
     const newArr = str.split(",");
 
     for(let prompt of newArr) {
+        prompt = prompt.trim();
+
         const newPrompt = promptStringToObject({prompt});
         if(uniquePrompts.some(item => item.id === newPrompt.id)) continue;
         

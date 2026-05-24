@@ -19,6 +19,9 @@ export default class ActivePrompts {
 
     public static foldedGroups: string[] = [];
 
+    /**
+     * Returns an array of current prompts as objects.
+     */
     public static getCurrentPrompts = () => {
         const {currentContainer} = appStore.getState();
 

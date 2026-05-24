@@ -14,16 +14,13 @@ export default function syncListToTextareaBranch(activePrompts: PromptEntity[], 
             continue;
         }
 
-        const {id, weight, isExternalNetwork} = entity;
+        const {id, weight = DEFAULT_PROMPT_WEIGHT, isExternalNetwork} = entity;
 
         if(isExternalNetwork) {
-            if(weight !== undefined && weight !== DEFAULT_PROMPT_WEIGHT)
-                prompts.push({text: `<${id}:${weight}>`, src: entity});
-            else
-                prompts.push({text: `<${id}>`, src: entity});
+            prompts.push({text: `<${id}:${weight}>`, src: entity});
 
         } else {
-            if(weight !== undefined && weight !== DEFAULT_PROMPT_WEIGHT)
+            if(weight !== DEFAULT_PROMPT_WEIGHT)
                 prompts.push({text: `(${id}: ${weight})`, src: entity});
             else
                 prompts.push({text: id, src: entity});
